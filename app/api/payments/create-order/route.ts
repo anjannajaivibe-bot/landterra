@@ -75,19 +75,20 @@ export async function POST(
         ? err.message
         : 'Failed to create payment order';
 
-    /*
-     * Business/authorization errors should not appear as
-     * generic server errors.
-     */
-    const status =
-      message.includes(
-        'Unauthorized',
-      ) ||
-        message.includes(
-          'not found',
-        )
-        ? 403
-        : 500;
+    let status = 500;
+    if (message.includes('not found') || message.includes('Not found')) {
+      status = 404;
+    } else if (
+      message.includes('Unauthorized') ||
+      message.includes('own listings')
+    ) {
+      status = 403;
+    } else if (
+      message.includes('cannot be paid for') ||
+      message.includes('Invalid')
+    ) {
+      status = 400;
+    }
 
     return NextResponse.json(
       {

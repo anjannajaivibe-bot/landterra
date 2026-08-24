@@ -28,7 +28,7 @@ import {
 } from '@/services/property.service';
 
 import {
-  notifyListingSubmitted,
+  enqueueAndDispatchPaymentEmail,
 } from '@/services/email.service';
 
 import {
@@ -49,9 +49,10 @@ import {
 
 const DEFAULT_LISTING_FEE = 10;
 const DEFAULT_DURATION_DAYS = 30;
+const ORDER_REUSE_WINDOW_MS = 30 * 60 * 1000; // 30 minutes
 
 /* ================================================================
-   CREATE PUBLISHING / RENEWAL ORDER (AUTHORITATIVE SERVER FEE)
+   CREATE PUBLISHING / RENEWAL ORDER (IDEMPOTENT AUTHORITATIVE FEE)
 ================================================================ */
 
 export async function createPublishingOrder(
@@ -102,9 +103,11 @@ export async function createPublishingOrder(
       ? settings.listingFeeDurationDays
       : DEFAULT_DURATION_DAYS;
 
+  const thirtyMinutesAgo = new Date(Date.now() - ORDER_REUSE_WINDOW_MS);
+
   /*
-   * Check for an existing CREATED/PENDING order for this property and purpose.
-   * If found and matching the current authoritative price, reuse it.
+   * Check for an existing CREATED/PENDING order created recently for this property & purpose.
+   * If found and matching the current authoritative price, reuse it to prevent order spam.
    */
   const existingOrder = await PaymentModel.findOne({
     propertyId,
@@ -113,7 +116,8 @@ export async function createPublishingOrder(
     paymentStatus: {
       $in: ['CREATED', 'PENDING'],
     },
-    amount: amountInRupees, // Only reuse if the price snapshot matches
+    amount: amountInRupees,
+    createdAt: { $gte: thirtyMinutesAgo },
   })
     .sort({ createdAt: -1 })
     .lean();
@@ -150,89 +154,90 @@ export async function createPublishingOrder(
     );
   }
 
-  const landAreaYards = Math.max(
-    0,
-    Math.round(property.landAreaYards),
+  /*
+   * Amount in paise (1 INR = 100 paise).
+   */
+  const amountInPaise = Math.round(
+    amountInRupees * 100,
   );
 
-  const amountInPaise = amountInRupees * 100;
+  const cleanPropertyId = propertyId
+    .replace(/[^a-zA-Z0-9]/g, '')
+    .slice(-14);
 
-  if (amountInPaise <= 0) {
-    throw new Error('Invalid payment amount.');
-  }
+  const timestampSuffix = Date.now().toString().slice(-6);
 
-  const receiptNumber = `RCPT_${propertyId.substring(0, 8)}_${Date.now()}`;
+  const receipt = `rcpt_${cleanPropertyId}_${timestampSuffix}`;
 
-  /*
-   * Create Razorpay order.
-   */
-  const order = await razorpay.orders.create({
+  const isRenewal = purpose === 'SUBSCRIPTION_RENEWAL';
+
+  const orderPayload = {
     amount: amountInPaise,
     currency: 'INR',
-    receipt: receiptNumber,
+    receipt,
     notes: {
       propertyId,
       sellerId,
+      sellerName: property.sellerName || '',
+      sellerEmail: property.sellerEmail || '',
       purpose,
-      landAreaYards: landAreaYards.toString(),
-      listingFee: amountInRupees.toString(),
-      durationDays: durationDays.toString(),
-      title: property.title.substring(0, 40),
+      landAreaYards: String(property.landAreaYards),
+      listingFeeDurationDays: String(durationDays),
+      isRenewal: String(isRenewal),
     },
-  });
+  };
 
-  const conn = await connectToDatabase();
+  const razorpayOrder =
+    await razorpay.orders.create(
+      orderPayload,
+    );
 
-  if (!conn) {
+  if (!razorpayOrder || !razorpayOrder.id) {
     throw new Error(
-      'Database is not connected. Unable to save payment order.',
+      'Payment gateway failed to generate an order ID.',
     );
   }
 
   /*
-   * Save our own authoritative financial snapshot.
+   * Store the authoritative Payment document in MongoDB.
+   * State starts as CREATED.
    */
+  await connectToDatabase();
+
   await PaymentModel.create({
-    sellerId,
     propertyId,
     propertyTitle: property.title,
+    sellerId,
+    razorpayOrderId: razorpayOrder.id,
+    receiptNumber: receipt,
     amount: amountInRupees,
     currency: 'INR',
-    listingFeeDurationDays: durationDays,
-    landAreaYards,
-    razorpayOrderId: order.id,
     paymentStatus: 'CREATED',
     paymentPurpose: purpose,
-    receiptNumber,
+    landAreaYards: property.landAreaYards,
+    listingFeeDurationDays: durationDays,
+    metadata: orderPayload.notes,
   });
 
-  /*
-   * Keep property payment state as PENDING (never destroy property data).
-   */
-  await PropertyModel.findByIdAndUpdate(property._id, {
-    $set: {
-      paymentStatus: 'PENDING',
-      updatedAt: new Date(),
-    },
-  });
+  const keyId =
+    process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID ||
+    process.env.RAZORPAY_KEY_ID ||
+    '';
 
   return {
-    orderId: order.id,
+    orderId: razorpayOrder.id,
     amount: amountInPaise,
     amountInRupees,
     currency: 'INR',
-    keyId:
-      process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID ||
-      process.env.RAZORPAY_KEY_ID ||
-      '',
+    keyId,
     propertyId,
-    landAreaYards,
+    landAreaYards: property.landAreaYards,
     durationDays,
   };
 }
 
 /* ================================================================
-   RECORD PAYMENT FAILURE (PRESERVE PROPERTY DRAFT)
+   RECORD PAYMENT FAILURE / CANCELLATION (DRAFT PRESERVATION)
 ================================================================ */
 
 export async function recordPaymentFailure(
@@ -254,7 +259,7 @@ export async function recordPaymentFailure(
             metadata: { failureReason: reason || 'Checkout dismissed or payment failed' },
             updatedAt: new Date(),
           },
-        }
+        },
       );
     }
 
@@ -353,24 +358,20 @@ async function executePaymentSettlementPipeline({
   }
 
   /*
-   * 4. RENEWAL & EXPIRY DATE LOGIC (Requirement 11)
+   * 4. RENEWAL & EXPIRY DATE LOGIC (CONCURRENCY-HARDENED)
    *
-   * If renewing an active unexpired subscription, append onto existing periodEnd.
+   * If renewing an active unexpired subscription, append onto existing property subscriptionExpiresAt.
    * If renewing an expired subscription or fresh listing, start from payment time.
    */
   const now = paymentDoc.paidAt ? new Date(paymentDoc.paidAt) : new Date();
   const durationDays = paymentDoc.listingFeeDurationDays || DEFAULT_DURATION_DAYS;
 
-  const latestActiveSub = await ListingSubscriptionModel.findOne({
-    propertyId: paymentDoc.propertyId,
-    status: 'ACTIVE',
-    periodEnd: { $gt: now },
-    razorpayOrderId: { $ne: razorpayOrderId },
-  }).sort({ periodEnd: -1 });
-
   let newPeriodStart: Date;
-  if (latestActiveSub && latestActiveSub.periodEnd) {
-    newPeriodStart = new Date(latestActiveSub.periodEnd);
+  if (
+    property.subscriptionExpiresAt &&
+    new Date(property.subscriptionExpiresAt).getTime() > now.getTime()
+  ) {
+    newPeriodStart = new Date(property.subscriptionExpiresAt);
   } else {
     newPeriodStart = now;
   }
@@ -380,7 +381,7 @@ async function executePaymentSettlementPipeline({
   );
 
   /*
-   * 5. ATOMIC IDEMPOTENT SUBSCRIPTION CREATION (Requirement 13)
+   * 5. ATOMIC IDEMPOTENT SUBSCRIPTION CREATION
    */
   const subscription = await ListingSubscriptionModel.findOneAndUpdate(
     { razorpayOrderId },
@@ -408,7 +409,7 @@ async function executePaymentSettlementPipeline({
   }
 
   /*
-   * 6. PROPERTY LIFECYCLE TRANSITION (Requirement 17)
+   * 6. PROPERTY LIFECYCLE TRANSITION
    *
    * If property is already VERIFIED (e.g. renewal of active listing): PUBLISHED.
    * If property is NOT VERIFIED (e.g. new draft): PENDING_VERIFICATION.
@@ -420,6 +421,8 @@ async function executePaymentSettlementPipeline({
     nextListingStatus = 'PENDING_VERIFICATION';
   }
 
+  const activePeriodEnd = subscription ? subscription.periodEnd : newPeriodEnd;
+
   const updatedProperty = await PropertyModel.findByIdAndUpdate(
     property._id,
     {
@@ -427,42 +430,36 @@ async function executePaymentSettlementPipeline({
         paymentStatus: 'PAID',
         listingStatus: nextListingStatus,
         subscriptionStartedAt: property.subscriptionStartedAt || newPeriodStart,
-        subscriptionExpiresAt: subscription ? subscription.periodEnd : newPeriodEnd,
+        subscriptionExpiresAt: activePeriodEnd,
         updatedAt: new Date(),
       },
     },
-    { new: true }
+    { new: true },
   );
 
   /*
-   * 7. ATOMIC EMAIL DISPATCH (Requirement 15)
+   * 7. RELIABLE OUTBOX EMAIL DISPATCH
    */
-  const emailClaim = await PaymentModel.findOneAndUpdate(
-    { _id: paymentDoc._id, confirmationEmailSentAt: { $exists: false } },
-    { $set: { confirmationEmailSentAt: new Date() } }
-  );
+  const isRenewal = paymentDoc.paymentPurpose === 'SUBSCRIPTION_RENEWAL';
+  const targetEmail = actor.email || property.sellerEmail;
+  const recipientName = actor.name || property.sellerName || 'LandTerra Seller';
 
-  if (emailClaim) {
-    try {
-      const emailRecipient = actor.email || property.sellerEmail;
-      const recipientName = actor.name || property.sellerName || 'LandTerra Seller';
-      if (emailRecipient) {
-        await notifyListingSubmitted(
-          emailRecipient,
-          recipientName,
-          property.title,
-          paymentDoc.amount,
-        );
-      }
-    } catch (emailError) {
-      console.error('Failed to dispatch payment confirmation email:', emailError);
-    }
+  if (targetEmail) {
+    enqueueAndDispatchPaymentEmail({
+      eventKey: `LISTING_CONFIRMATION:${razorpayOrderId}`,
+      recipientEmail: targetEmail,
+      recipientName,
+      propertyTitle: property.title,
+      publishingFee: paymentDoc.amount,
+      isRenewal,
+    }).catch((emailErr) => {
+      console.error('Email dispatch error in payment pipeline:', emailErr);
+    });
   }
 
   /*
-   * 8. ATOMIC AUDIT LOGGING WITH DETERMINISTIC EVENT KEY (Requirement 14)
+   * 8. ATOMIC AUDIT LOGGING WITH DETERMINISTIC EVENT KEY
    */
-  const isRenewal = paymentDoc.paymentPurpose === 'SUBSCRIPTION_RENEWAL';
   const eventKey = `PAYMENT_AUDIT:${razorpayOrderId}`;
 
   await createAuditLog({
@@ -636,7 +633,7 @@ export async function processRazorpayWebhook(payload: any): Promise<void> {
   const orderEntity = payload?.payload?.order?.entity;
 
   const razorpayOrderId = paymentEntity?.order_id || orderEntity?.id;
-  const razorpayPaymentId = paymentEntity?.id;
+  let razorpayPaymentId = paymentEntity?.id;
 
   if (!razorpayOrderId) {
     console.warn('Razorpay webhook missing order ID.');
@@ -661,9 +658,36 @@ export async function processRazorpayWebhook(payload: any): Promise<void> {
     }
   }
 
+  // If order.paid event came without paymentEntity, fetch from Razorpay API
+  if (!razorpayPaymentId && isRazorpayConfigured()) {
+    try {
+      const razorpay = getRazorpayClient();
+      if (razorpay) {
+        const orderPayments = await razorpay.orders.fetchPayments(razorpayOrderId);
+        const captured = orderPayments?.items?.find((p: any) => p.status === 'captured');
+        if (captured?.id) {
+          razorpayPaymentId = captured.id;
+        }
+      }
+    } catch (fetchErr) {
+      console.warn('Could not fetch payments for order in webhook:', fetchErr);
+    }
+  }
+
+  if (!razorpayPaymentId && paymentDoc.razorpayPaymentId) {
+    razorpayPaymentId = paymentDoc.razorpayPaymentId;
+  }
+
+  if (!razorpayPaymentId) {
+    console.warn(
+      `Razorpay webhook ${event} received for ${razorpayOrderId}, but no captured payment ID is available. Skipping settlement until captured.`,
+    );
+    return;
+  }
+
   await executePaymentSettlementPipeline({
     razorpayOrderId,
-    razorpayPaymentId: razorpayPaymentId || paymentDoc.razorpayPaymentId || 'WEBHOOK_CAPTURED',
+    razorpayPaymentId,
     actor: {
       id: 'RAZORPAY_WEBHOOK',
       name: 'Razorpay Gateway Webhook',

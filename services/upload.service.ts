@@ -65,7 +65,8 @@ export async function uploadFileToStorage(
 export async function generateUploadTicket(
   fileName: string,
   mimeType: string,
-  isPrivate = false
+  isPrivate = false,
+  options?: { maxBytes?: number }
 ) {
   if (!isR2Configured()) {
     throw new Error('Cloudflare R2 storage is not configured. Please set R2 credentials.');
@@ -83,6 +84,7 @@ export async function generateUploadTicket(
 
   return {
     ...ticket,
+    maxBytes: options?.maxBytes,
     isR2: true,
   };
 }

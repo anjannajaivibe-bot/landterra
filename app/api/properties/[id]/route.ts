@@ -401,31 +401,32 @@ export async function PATCH(
      * they are discarded.
      */
 
-    const safeUpdate = {
+    const safeUpdate: Record<string, unknown> = {
       ...validated,
     };
 
-    delete (safeUpdate as Record<string, unknown>).sellerName;
-    delete (safeUpdate as Record<string, unknown>).sellerEmail;
-    delete (safeUpdate as Record<string, unknown>).sellerPhone;
-    delete (safeUpdate as Record<string, unknown>).sellerType;
-    delete (safeUpdate as Record<string, unknown>).sellerId;
+    delete safeUpdate.sellerName;
+    delete safeUpdate.sellerEmail;
+    delete safeUpdate.sellerPhone;
+    delete safeUpdate.sellerType;
+    delete safeUpdate.sellerId;
 
-    /* Server-owned lifecycle, verification, and financial fields */
-    delete (safeUpdate as Record<string, unknown>).paymentStatus;
-    delete (safeUpdate as Record<string, unknown>).listingStatus;
-    delete (safeUpdate as Record<string, unknown>).verificationStatus;
-    delete (safeUpdate as Record<string, unknown>).publishingFee;
-    delete (safeUpdate as Record<string, unknown>).monthlyListingFee;
-    delete (safeUpdate as Record<string, unknown>).totalPrice;
-    delete (safeUpdate as Record<string, unknown>).subscriptionStartedAt;
-    delete (safeUpdate as Record<string, unknown>).subscriptionExpiresAt;
-    delete (safeUpdate as Record<string, unknown>).publishedAt;
-    delete (safeUpdate as Record<string, unknown>).viewsCount;
-    delete (safeUpdate as Record<string, unknown>).inquiriesCount;
-    delete (safeUpdate as Record<string, unknown>).rejectionReason;
-    delete (safeUpdate as Record<string, unknown>).verificationReviewedAt;
-    delete (safeUpdate as Record<string, unknown>).verificationReviewedBy;
+    delete safeUpdate.paymentStatus;
+    if (safeUpdate.listingStatus !== 'PAUSED' && safeUpdate.listingStatus !== 'PUBLISHED') {
+      delete safeUpdate.listingStatus;
+    }
+    delete safeUpdate.verificationStatus;
+    delete safeUpdate.publishingFee;
+    delete safeUpdate.monthlyListingFee;
+    delete safeUpdate.totalPrice;
+    delete safeUpdate.subscriptionStartedAt;
+    delete safeUpdate.subscriptionExpiresAt;
+    delete safeUpdate.publishedAt;
+    delete safeUpdate.viewsCount;
+    delete safeUpdate.inquiriesCount;
+    delete safeUpdate.rejectionReason;
+    delete safeUpdate.verificationReviewedAt;
+    delete safeUpdate.verificationReviewedBy;
 
     const updated =
       await updateProperty(

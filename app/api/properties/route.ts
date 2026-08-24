@@ -117,6 +117,19 @@ export async function GET(
      * listings.
      */
 
+    const isSellerOnly = searchParams.get('sellerOnly') === 'true';
+    let sellerUserId: string | undefined = undefined;
+
+    if (isSellerOnly) {
+      const authUser = await requireAuth(req);
+      if (authUser instanceof NextResponse) {
+        return authUser;
+      }
+      sellerUserId = authUser.id;
+    }
+
+    const requestedStatus = searchParams.get('listingStatus');
+
     const filters: PropertyFilterParams = {
       query:
         searchParams.get('query') ||
@@ -195,20 +208,11 @@ export async function GET(
           50,
         ),
 
-      /*
-       * These are deliberately NOT accepted from public
-       * marketplace requests:
-       *
-       * sellerId
-       * listingStatus
-       * verificationStatus
-       *
-       * Those filters belong to authenticated/admin
-       * management endpoints.
-       */
+      sellerId: sellerUserId,
 
-      listingStatus:
-        'PUBLISHED',
+      listingStatus: isSellerOnly
+        ? ((requestedStatus as any) || 'ALL')
+        : 'PUBLISHED',
 
       verificationStatus:
         undefined,

@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { AuthModal } from '@/components/auth/AuthModal';
+import { VerificationBadge } from '@/components/properties/VerificationBadge';
 import {
   User,
   Phone,
@@ -23,13 +24,24 @@ import {
   Search,
   FileCheck2,
   CreditCard,
+  Edit3,
+  ExternalLink,
+  Trash2,
+  MapPin,
+  Building2,
+  Calendar,
 } from 'lucide-react';
 import { IUser } from '@/types/user';
+import { IProperty } from '@/types/property';
 
 export default function ProfilePage() {
   const [user, setUser] = useState<Partial<IUser> | null>(null);
   const [loading, setLoading] = useState(true);
   const [authModalOpen, setAuthModalOpen] = useState(false);
+
+  // User properties state
+  const [myProperties, setMyProperties] = useState<IProperty[]>([]);
+  const [loadingProperties, setLoadingProperties] = useState(true);
 
   // Phone verification state
   const [phoneInput, setPhoneInput] = useState('');
@@ -38,6 +50,23 @@ export default function ProfilePage() {
   const [otpLoading, setOtpLoading] = useState(false);
   const [otpMessage, setOtpMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [testOtpNotice, setTestOtpNotice] = useState<string | null>(null);
+
+  const loadProperties = async () => {
+    try {
+      setLoadingProperties(true);
+      const res = await fetch('/api/properties?sellerOnly=true&listingStatus=ALL');
+      if (res.ok) {
+        const data = await res.json();
+        if (data?.data) {
+          setMyProperties(data.data);
+        }
+      }
+    } catch (err) {
+      console.error('Error fetching user properties:', err);
+    } finally {
+      setLoadingProperties(false);
+    }
+  };
 
   useEffect(() => {
     fetch('/api/auth/session')
@@ -48,10 +77,27 @@ export default function ProfilePage() {
           if (data.session.user.phone) {
             setPhoneInput(data.session.user.phone);
           }
+          loadProperties();
         }
       })
       .finally(() => setLoading(false));
   }, []);
+
+  const handleDeleteProperty = async (propertyId: string) => {
+    if (!confirm('Are you sure you want to remove this land listing?')) return;
+    try {
+      const res = await fetch(`/api/properties/${propertyId}`, {
+        method: 'DELETE',
+      });
+      if (res.ok) {
+        loadProperties();
+      } else {
+        alert('Failed to delete property. Please try again.');
+      }
+    } catch (err) {
+      console.error('Delete property error:', err);
+    }
+  };
 
   const handleSendOtp = async () => {
     if (!phoneInput || phoneInput.length < 10) {
@@ -146,7 +192,7 @@ export default function ProfilePage() {
           </p>
           <button
             onClick={() => setAuthModalOpen(true)}
-            className="w-full py-3 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs transition-colors shadow-xs"
+            className="w-full py-3 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs transition-colors shadow-xs cursor-pointer"
           >
             Sign in with Google
           </button>
@@ -164,7 +210,7 @@ export default function ProfilePage() {
     <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900">
       <Navbar />
 
-      <main className="max-w-4xl mx-auto py-10 px-4 sm:px-6 lg:px-8 w-full flex-1 space-y-8">
+      <main className="max-w-5xl mx-auto py-10 px-4 sm:px-6 lg:px-8 w-full flex-1 space-y-8">
         {/* 1. Header Profile Card */}
         <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-xs">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
@@ -191,7 +237,7 @@ export default function ProfilePage() {
                   <Mail className="w-3.5 h-3.5 text-slate-400" />
                   <span>{user.email}</span>
                 </p>
-                <div className="flex items-center gap-2 pt-1">
+                <div className="flex items-center gap-2 pt-1 flex-wrap">
                   {user.phone ? (
                     <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 flex items-center gap-1">
                       <CheckCircle2 className="w-3 h-3 text-emerald-600" />
@@ -211,7 +257,7 @@ export default function ProfilePage() {
 
             <Link
               href="/sell"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold shadow-sm transition-colors shrink-0"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold shadow-sm transition-colors shrink-0 cursor-pointer"
             >
               <PlusCircle className="w-4 h-4" />
               <span>List New Land</span>
@@ -219,7 +265,158 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* 2. Find Land & Sell Land Unified Hubs */}
+        {/* 2. My Land Listings & Direct Management */}
+        <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-xs space-y-5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-700">
+                <Building2 className="w-5 h-5" />
+              </div>
+              <div>
+                <h2 className="text-base font-bold text-slate-900">My Properties & Land Listings</h2>
+                <p className="text-xs text-slate-500">
+                  Manage, edit details, upload photos, and update your published land parcels.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Link
+                href="/dashboard/seller"
+                className="inline-flex items-center gap-1 text-xs font-bold text-emerald-700 hover:text-emerald-800"
+              >
+                <span>Seller Dashboard</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+          </div>
+
+          {loadingProperties ? (
+            <div className="py-8 text-center text-xs text-slate-400">Loading your listings...</div>
+          ) : myProperties.length === 0 ? (
+            <div className="p-6 rounded-2xl bg-slate-50 border border-dashed border-slate-200 text-center space-y-3">
+              <p className="text-xs font-semibold text-slate-600">
+                You haven&apos;t listed any properties yet.
+              </p>
+              <Link
+                href="/sell"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold shadow-xs transition-colors"
+              >
+                <PlusCircle className="w-4 h-4" />
+                <span>List Your First Land Parcel</span>
+              </Link>
+            </div>
+          ) : (
+            <div className="divide-y divide-slate-100">
+              {myProperties.map((prop) => {
+                const isUnpaid =
+                  (prop.listingStatus === 'PAYMENT_PENDING' || prop.listingStatus === 'DRAFT') &&
+                  prop.paymentStatus !== 'PAID';
+                const isPublished = prop.listingStatus === 'PUBLISHED';
+                const isUnderReview =
+                  prop.listingStatus === 'PENDING_VERIFICATION' ||
+                  (prop.verificationStatus === 'PENDING' && prop.paymentStatus === 'PAID');
+                const isExpired = prop.listingStatus === 'EXPIRED';
+                const isPaused = prop.listingStatus === 'PAUSED';
+
+                return (
+                  <div
+                    key={prop._id}
+                    className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                  >
+                    <div className="flex items-start gap-3.5 min-w-0">
+                      <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-slate-100 shrink-0 border border-slate-200">
+                        <Image
+                          src={
+                            prop.images?.[0]?.secureUrl ||
+                            'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=400'
+                          }
+                          alt={prop.title}
+                          fill
+                          className="object-cover"
+                          referrerPolicy="no-referrer"
+                        />
+                      </div>
+
+                      <div className="space-y-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          {isPublished ? (
+                            <span className="px-2 py-0.5 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-800 text-[10px] font-bold">
+                              Published & Active
+                            </span>
+                          ) : isUnderReview ? (
+                            <span className="px-2 py-0.5 rounded-md bg-blue-50 border border-blue-200 text-blue-800 text-[10px] font-bold">
+                              Under Review
+                            </span>
+                          ) : isUnpaid ? (
+                            <span className="px-2 py-0.5 rounded-md bg-amber-50 border border-amber-200 text-amber-800 text-[10px] font-bold">
+                              Payment Pending
+                            </span>
+                          ) : isExpired ? (
+                            <span className="px-2 py-0.5 rounded-md bg-rose-50 border border-rose-200 text-rose-800 text-[10px] font-bold">
+                              Expired
+                            </span>
+                          ) : isPaused ? (
+                            <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[10px] font-bold">
+                              Paused
+                            </span>
+                          ) : (
+                            <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[10px] font-semibold">
+                              {prop.listingStatus}
+                            </span>
+                          )}
+
+                          <VerificationBadge status={prop.verificationStatus} />
+                        </div>
+
+                        <h3 className="text-xs font-bold text-slate-900 truncate">
+                          <Link href={`/properties/${prop._id}`} className="hover:underline">
+                            {prop.title}
+                          </Link>
+                        </h3>
+
+                        <p className="text-[11px] text-slate-500 truncate">
+                          {prop.location.city}, {prop.location.state} • {prop.landAreaYards} sq.yds • ₹
+                          {Number(prop.totalPrice || 0).toLocaleString('en-IN')}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
+                      <Link
+                        href={`/sell?propertyId=${prop._id}`}
+                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-xs font-bold transition-colors cursor-pointer"
+                        title="Edit title, photos, price, description, etc."
+                      >
+                        <Edit3 className="w-3.5 h-3.5" />
+                        <span>Edit Property</span>
+                      </Link>
+
+                      <Link
+                        href={`/properties/${prop._id}`}
+                        className="p-2 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-600 cursor-pointer"
+                        title="View public page"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </Link>
+
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteProperty(prop._id)}
+                        className="p-2 rounded-lg border border-slate-200 hover:bg-rose-50 hover:text-rose-600 text-slate-400 transition-colors cursor-pointer"
+                        title="Delete listing"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* 3. Find Land & Sell Land Unified Hubs */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Find Land Hub */}
           <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs flex flex-col justify-between space-y-4">
@@ -322,7 +519,7 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* 3. Mobile Number Verification Section */}
+        {/* 4. Mobile Number Verification Section */}
         <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-xs space-y-4">
           <div className="flex items-center gap-3">
             <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-700">
@@ -362,7 +559,7 @@ export default function ProfilePage() {
               <button
                 type="button"
                 onClick={() => setOtpCode(testOtpNotice)}
-                className="px-2.5 py-1 bg-amber-200 hover:bg-amber-300 text-amber-950 rounded-lg text-xs font-bold transition-colors"
+                className="px-2.5 py-1 bg-amber-200 hover:bg-amber-300 text-amber-950 rounded-lg text-xs font-bold transition-colors cursor-pointer"
               >
                 Auto-fill Code
               </button>
@@ -391,7 +588,7 @@ export default function ProfilePage() {
                   type="button"
                   onClick={handleSendOtp}
                   disabled={otpLoading || phoneInput.length < 10}
-                  className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold disabled:opacity-50 transition-colors"
+                  className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold disabled:opacity-50 transition-colors cursor-pointer"
                 >
                   {otpLoading ? 'Sending...' : otpSent ? 'Resend OTP' : 'Send OTP'}
                 </button>
@@ -414,7 +611,7 @@ export default function ProfilePage() {
                     type="button"
                     onClick={handleVerifyOtp}
                     disabled={otpLoading || otpCode.length !== 6}
-                    className="px-5 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs disabled:opacity-50 transition-colors"
+                    className="px-5 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs disabled:opacity-50 transition-colors cursor-pointer"
                   >
                     {otpLoading ? 'Verifying...' : 'Verify OTP'}
                   </button>
@@ -424,7 +621,7 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* 4. Platform Notifications Center */}
+        {/* 5. Platform Notifications Center */}
         <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-xs space-y-4">
           <div className="flex items-center gap-3">
             <div className="p-2.5 rounded-xl bg-slate-100 text-slate-700">

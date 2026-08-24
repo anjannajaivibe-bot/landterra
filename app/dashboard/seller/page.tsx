@@ -499,17 +499,48 @@ export default function SellerDashboardPage() {
                                   <PauseCircle className="w-3.5 h-3.5" />
                                   <span>Pause</span>
                                 </button>
+
+                                <Link
+                                  href={`/sell?propertyId=${prop._id}`}
+                                  className="inline-flex items-center gap-1 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition-colors"
+                                  title="Edit listing details and images"
+                                >
+                                  <Edit3 className="w-3.5 h-3.5" />
+                                  <span>Edit</span>
+                                </Link>
                               </>
                             )}
 
-                            {isPaused && (
-                              <button
-                                onClick={() => handleToggleListingStatus(prop._id, prop.listingStatus)}
-                                className="inline-flex items-center gap-1 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-lg text-xs font-semibold cursor-pointer"
+                            {/* Under Review Actions */}
+                            {isUnderReview && (
+                              <Link
+                                href={`/sell?propertyId=${prop._id}`}
+                                className="inline-flex items-center gap-1 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition-colors"
+                                title="Edit listing details and images"
                               >
-                                <PlayCircle className="w-3.5 h-3.5" />
-                                <span>Resume</span>
-                              </button>
+                                <Edit3 className="w-3.5 h-3.5" />
+                                <span>Edit</span>
+                              </Link>
+                            )}
+
+                            {isPaused && (
+                              <>
+                                <button
+                                  onClick={() => handleToggleListingStatus(prop._id, prop.listingStatus)}
+                                  className="inline-flex items-center gap-1 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-lg text-xs font-semibold cursor-pointer"
+                                >
+                                  <PlayCircle className="w-3.5 h-3.5" />
+                                  <span>Resume</span>
+                                </button>
+
+                                <Link
+                                  href={`/sell?propertyId=${prop._id}`}
+                                  className="inline-flex items-center gap-1 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition-colors"
+                                >
+                                  <Edit3 className="w-3.5 h-3.5" />
+                                  <span>Edit</span>
+                                </Link>
+                              </>
                             )}
 
                             {isRejected && (

@@ -73,12 +73,29 @@ export async function POST(
         ? err.message
         : 'Payment verification failed';
 
+    let status = 500;
+    if (message.includes('not found') || message.includes('Not found')) {
+      status = 404;
+    } else if (
+      message.includes('not authorized') ||
+      message.includes('Unauthorized')
+    ) {
+      status = 403;
+    } else if (
+      message.includes('Missing') ||
+      message.includes('mismatch') ||
+      message.includes('Invalid') ||
+      message.includes('not captured')
+    ) {
+      status = 400;
+    }
+
     return NextResponse.json(
       {
         error: message,
       },
       {
-        status: 400,
+        status,
       },
     );
   }

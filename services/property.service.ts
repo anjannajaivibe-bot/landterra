@@ -91,7 +91,9 @@ function sanitizePropertyUpdates(
    * verification / admin workflows rather than generic client PATCH.
    */
   delete safe.paymentStatus;
-  delete safe.listingStatus;
+  if (safe.listingStatus !== 'PAUSED' && safe.listingStatus !== 'PUBLISHED') {
+    delete safe.listingStatus;
+  }
   delete safe.verificationStatus;
   delete safe.verificationReviewedAt;
   delete safe.verificationReviewedBy;
@@ -218,6 +220,8 @@ export async function getProperties(
       ) {
         query.listingStatus =
           params.listingStatus;
+      } else {
+        query.listingStatus = { $ne: 'DELETED' };
       }
     } else {
       /*
@@ -1099,29 +1103,9 @@ export async function deleteProperty(
   }
 
   const result =
-    await PropertyModel.updateOne(
-      {
-        _id: id,
+    await PropertyModel.deleteOne({ _id: id });
 
-        /*
-         * Prevent repeatedly deleting an already-deleted record.
-         */
-        listingStatus: {
-          $ne: 'DELETED',
-        },
-      },
-      {
-        $set: {
-          listingStatus:
-            'DELETED',
-
-          updatedAt:
-            new Date(),
-        },
-      },
-    );
-
-  return result.modifiedCount > 0;
+  return (result.deletedCount || 0) > 0;
 }
 
 /* ================================================================
