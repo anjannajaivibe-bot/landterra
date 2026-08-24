@@ -24,8 +24,8 @@ export function AuthModal({
   isOpen,
   onClose,
   redirectUrl,
-  title = 'Sign in to LandTerra',
-  description = 'Continue with your Google account to access your LandTerra account.',
+  title = 'Sign in to BhoomiMitra',
+  description = 'Continue with your Google account to access your BhoomiMitra account.',
 }: AuthModalProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -175,7 +175,7 @@ export function AuthModal({
 
           <div className="space-y-3">
             <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-              One LandTerra account
+              One BhoomiMitra account
             </p>
 
             <AuthBenefit
@@ -205,14 +205,14 @@ export function AuthModal({
 
                 <p className="mt-1 text-[10px] leading-5 text-emerald-900/75">
                   We use Google to securely identify your account.
-                  LandTerra does not ask you to create another password.
+                  BhoomiMitra does not ask you to create another password.
                 </p>
               </div>
             </div>
           </div>
 
           <p className="text-center text-[9px] leading-4 text-slate-400">
-            By continuing, you agree to use LandTerra responsibly
+            By continuing, you agree to use BhoomiMitra responsibly
             and understand that property information should be
             independently verified before making a transaction.
           </p>

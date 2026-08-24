@@ -1,7 +1,8 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Admin Console | LandTerra',
+  title: 'Admin Console | BhoomiMitra',
+  description: 'BhoomiMitra platform administration and property verification console.',
   robots: {
     index: false,
     follow: false,

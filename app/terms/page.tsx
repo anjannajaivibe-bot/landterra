@@ -23,14 +23,14 @@ export default function TermsPage() {
         <section className="space-y-2">
           <h2 className="text-base font-bold text-slate-900">1. Acceptance of Terms</h2>
           <p>
-            By accessing or using LandTerra Marketplace (&quot;Platform&quot;), you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use the Platform.
+            By accessing or using BhoomiMitra Marketplace (&quot;Platform&quot;), you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use the Platform.
           </p>
         </section>
 
         <section className="space-y-2">
           <h2 className="text-base font-bold text-slate-900">2. Marketplace Role and Verification Scope</h2>
           <p>
-            LandTerra functions strictly as a technology marketplace connecting property owners and prospective buyers. The platform facilitates property listings and communication between users. It does not itself guarantee ownership, title, legality, or authenticity of a property unless the platform explicitly completes and records an applicable verification process.
+            BhoomiMitra functions strictly as a technology marketplace connecting property owners and prospective buyers. The platform facilitates property listings and communication between users. It does not itself guarantee ownership, title, legality, or authenticity of a property unless the platform explicitly completes and records an applicable verification process.
           </p>
         </section>
 

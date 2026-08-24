@@ -23,7 +23,7 @@ export const LISTING_SUBSCRIPTION_DURATION_DAYS = 30;
 ================================================================ */
 
 export const SITE_CONFIG = {
-  name: 'LandTerra',
+  name: 'BhoomiMitra',
 
   tagline: 'Find Land With More Confidence',
 
@@ -32,7 +32,7 @@ export const SITE_CONFIG = {
 
   url:
     process.env.NEXT_PUBLIC_APP_URL ||
-    'https://landterra.com',
+    'https://bhoomimitra.com',
 
   currencySymbol: '₹',
 
@@ -73,7 +73,7 @@ export const SITE_CONFIG = {
 
   supportEmail:
     process.env.NEXT_PUBLIC_SUPPORT_EMAIL ||
-    'support@landterra.com',
+    'support@bhoomimitra.com',
 
   contactPhone:
     process.env.NEXT_PUBLIC_CONTACT_PHONE ||
@@ -384,21 +384,21 @@ export const GOOGLE_MAPS_URL_PATTERN =
 ================================================================ */
 
 export const LEGAL_DISCLAIMER =
-  'LandTerra facilitates property discovery, listing management, confidential document review and direct communication between sellers and prospective buyers. A LandTerra verification status does not constitute a guarantee of title, ownership, legality, valuation or suitability. Buyers should conduct independent legal, title, registration and physical due diligence before entering into any transaction.';
+  'BhoomiMitra facilitates property discovery, listing management, confidential document review and direct communication between sellers and prospective buyers. A BhoomiMitra verification status does not constitute a guarantee of title, ownership, legality, valuation or suitability. Buyers should conduct independent legal, title, registration and physical due diligence before entering into any transaction.';
 
 /* ================================================================
    BUYER SAFETY MESSAGE
 ================================================================ */
 
 export const BUYER_SAFETY_MESSAGE =
-  'Never send money, OTPs, passwords or sensitive account information directly to another user. Use the LandTerra platform for property inquiries and verify the property independently before making any payment or commitment.';
+  'Never send money, OTPs, passwords or sensitive account information directly to another user. Use the BhoomiMitra platform for property inquiries and verify the property independently before making any payment or commitment.';
 
 /* ================================================================
    SELLER FEE EXPLANATION
 ================================================================ */
 
 export const SELLER_LISTING_FEE_DESCRIPTION =
-  'LandTerra charges sellers ₹10 per square yard for each 30-day listing period. This platform listing fee is separate from the seller’s property asking price.';
+  'BhoomiMitra charges sellers a flat publishing fee for each 30-day listing period. This platform listing fee is separate from the seller’s property asking price.';
 
 /* ================================================================
    VERIFICATION EXPLANATION
@@ -406,7 +406,7 @@ export const SELLER_LISTING_FEE_DESCRIPTION =
 
 export const VERIFICATION_EXPLANATION = {
   VERIFIED:
-    'This listing has completed LandTerra’s internal document review process.',
+    'This listing has completed BhoomiMitra’s internal document review process.',
 
   PENDING:
     'This listing has been submitted and is currently under review.',

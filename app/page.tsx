@@ -296,13 +296,13 @@ export default function HomePage() {
       </section>
 
       {/* =========================================================
-          WHY LANDTERRA
+          WHY BHOOMIMITRA
       ========================================================= */}
       <section className="border-y border-slate-200 bg-slate-50">
         <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-2xl text-center">
             <span className="text-xs font-bold uppercase tracking-wider text-emerald-700">
-              Why use LandTerra?
+              Why use BhoomiMitra?
             </span>
 
             <h2 className="mt-2 text-3xl font-black tracking-tight text-slate-950">
@@ -332,7 +332,7 @@ export default function HomePage() {
             <FeatureCard
               icon={<WalletCards className="h-5 w-5" />}
               title="Direct seller connection"
-              description="Send an inquiry through LandTerra instead of going through a traditional brokerage process."
+              description="Send an inquiry through BhoomiMitra instead of going through a traditional brokerage process."
             />
           </div>
         </div>
@@ -468,7 +468,7 @@ export default function HomePage() {
                 <Step
                   number="01"
                   title="Sign in"
-                  description="Create or access your LandTerra account with Google."
+                  description="Create or access your BhoomiMitra account with Google."
                 />
 
                 <Step
@@ -486,7 +486,7 @@ export default function HomePage() {
                 <Step
                   number="04"
                   title="Pay and submit"
-                  description="Pay the ₹10 per sq. yard monthly listing fee and submit for the platform's verification workflow."
+                  description="Pay the flat listing publishing fee and submit for the platform's verification workflow."
                 />
               </div>
 
@@ -522,7 +522,7 @@ export default function HomePage() {
             </h2>
 
             <p className="mt-5 max-w-xl text-sm leading-7 text-slate-300">
-              LandTerra charges ₹10 per square yard for a 30-day listing
+              BhoomiMitra charges a flat listing publishing fee for a 30-day listing
               subscription. Your land&apos;s asking price is completely
               separate and remains under your control.
             </p>
@@ -607,7 +607,7 @@ export default function HomePage() {
                 </h2>
 
                 <p className="mt-4 text-sm leading-7 text-slate-600">
-                  LandTerra separates listing payment from property
+                  BhoomiMitra separates listing payment from property
                   verification. A paid listing does not automatically mean
                   the property is verified.
                 </p>

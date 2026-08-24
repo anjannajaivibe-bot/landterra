@@ -56,7 +56,7 @@ export function Footer() {
               <Compass className="w-4 h-4" />
             </div>
             <span className="text-lg font-bold text-white tracking-tight">
-              Land<span className="text-emerald-400">Terra</span>
+              Bhoomi<span className="text-emerald-400">Mitra</span>
             </span>
           </Link>
           <p className="text-xs text-slate-400 leading-relaxed max-w-sm mb-4">
@@ -105,7 +105,7 @@ export function Footer() {
             <li><Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link></li>
             <li><Link href="/privacy" className="hover:text-white transition-colors">Privacy & Documents</Link></li>
             <li><Link href="/listing-rules" className="hover:text-white transition-colors">Listing Rules & Escrow</Link></li>
-            <li><Link href="/about" className="hover:text-white transition-colors">About LandTerra</Link></li>
+            <li><Link href="/about" className="hover:text-white transition-colors">About BhoomiMitra</Link></li>
             <li><Link href="/contact" className="hover:text-white transition-colors">Contact Compliance</Link></li>
           </ul>
         </div>
@@ -114,7 +114,7 @@ export function Footer() {
       {/* Copyright Bar */}
       <div className="bg-black/80 border-t border-slate-900 py-6 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500">
-          <p>© {new Date().getFullYear()} LandTerra Marketplace Technologies Inc. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} BhoomiMitra Marketplace Technologies Inc. All rights reserved.</p>
           <div className="flex gap-6 mt-3 sm:mt-0 text-xs">
             <Link href="/terms" className="hover:text-slate-400 transition-colors">Terms</Link>
             <Link href="/privacy" className="hover:text-slate-400 transition-colors">Privacy</Link>

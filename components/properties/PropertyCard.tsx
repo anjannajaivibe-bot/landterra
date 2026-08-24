@@ -437,7 +437,7 @@ export function PropertyCard({
             <BadgeCheck className="h-4 w-4 shrink-0 text-emerald-600" />
 
             <p className="text-[10px] font-bold leading-4 text-emerald-800">
-              LandTerra verified listing
+              BhoomiMitra verified listing
             </p>
           </div>
         )}

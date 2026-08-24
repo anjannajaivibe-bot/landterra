@@ -107,7 +107,7 @@ export function InquiryModal({ property, isOpen, onClose }: InquiryModalProps) {
               <div className="p-3 rounded-lg bg-emerald-50/70 border border-emerald-200/80 flex items-start gap-2.5 text-xs text-emerald-900">
                 <ShieldCheck className="w-4 h-4 text-emerald-700 shrink-0 mt-0.5" />
                 <div className="text-[11px] leading-relaxed">
-                  <strong>Anti-Scraping Shield:</strong> Seller contacts are protected. Inquiries are routed through LandTerra&apos;s verified communication gateway.
+                  <strong>Anti-Scraping Shield:</strong> Seller contacts are protected. Inquiries are routed through BhoomiMitra&apos;s verified communication gateway.
                 </div>
               </div>
 

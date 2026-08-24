@@ -639,7 +639,7 @@ export default function ProfilePage() {
             <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 flex items-start gap-3 text-xs">
               <Sparkles className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
               <div>
-                <span className="font-bold text-slate-900 block">Welcome to LandTerra</span>
+                <span className="font-bold text-slate-900 block">Welcome to BhoomiMitra</span>
                 <span className="text-slate-600">
                   Your direct customer profile is active. You can browse verified plots or list your own land.
                 </span>

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
-import { Compass, ShieldCheck, TrendingUp, Users } from 'lucide-react';
+import { Compass } from 'lucide-react';
 
 export default function AboutPage() {
   return (
@@ -13,7 +13,7 @@ export default function AboutPage() {
             <Compass className="w-4 h-4" />
             <span>Our Mission</span>
           </div>
-          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">About LandTerra</h1>
+          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">About BhoomiMitra</h1>
           <p className="text-slate-300 text-sm mt-2">
             Building India&apos;s most trusted, verified, and transparent land trading network.
           </p>
@@ -29,12 +29,12 @@ export default function AboutPage() {
         </div>
 
         <div className="space-y-4">
-          <h2 className="text-lg font-bold text-slate-900">The LandTerra Solution</h2>
+          <h2 className="text-lg font-bold text-slate-900">The BhoomiMitra Solution</h2>
           <p>
-            LandTerra introduces a modern digital standard:
+            BhoomiMitra introduces a modern digital standard:
           </p>
           <ul className="list-disc pl-5 space-y-2">
-            <li><strong>Upfront ₹10/sq.yard Publishing Fee:</strong> Deters frivolous brokers and guarantees serious listings.</li>
+            <li><strong>Upfront Flat Publishing Fee:</strong> Deters frivolous brokers and guarantees serious listings.</li>
             <li><strong>Mandatory Human Title Verification:</strong> Sale deeds and survey IDs are audited before release.</li>
             <li><strong>Zero Brokerage:</strong> Direct buyer-to-seller interactions with zero commission cut.</li>
             <li><strong>Google Maps & Privacy Radius:</strong> Precise geographic validation with seller privacy controls.</li>

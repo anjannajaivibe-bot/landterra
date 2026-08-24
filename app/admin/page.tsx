@@ -519,7 +519,7 @@ export default function AdminControlPage() {
         if (response.status === 403) {
           setPasscodeError(
             data?.error ||
-              'This Google account is not authorized for LandTerra administration.',
+              'This Google account is not authorized for BhoomiMitra administration.',
           );
         } else {
           setPasscodeError(
@@ -644,7 +644,7 @@ export default function AdminControlPage() {
           </h1>
 
           <p className="mt-2 text-xs text-slate-500">
-            Checking your LandTerra Google session and administrative
+            Checking your BhoomiMitra Google session and administrative
             privileges.
           </p>
 
@@ -686,7 +686,7 @@ export default function AdminControlPage() {
                 </h1>
 
                 <p className="mt-2 text-xs leading-relaxed text-slate-400 max-w-sm mx-auto">
-                  The LandTerra administrative console requires an
+                  The BhoomiMitra administrative console requires an
                   authorized Google account and the SuperAdmin
                   passcode.
                 </p>
@@ -734,7 +734,7 @@ export default function AdminControlPage() {
                       </p>
 
                       <p className="mt-1 text-[11px] leading-relaxed text-slate-400">
-                        Sign in to LandTerra with an authorized
+                        Sign in to BhoomiMitra with an authorized
                         Google account before attempting to unlock
                         the administrative console.
                       </p>
@@ -2483,7 +2483,7 @@ export default function AdminControlPage() {
                   </h3>
 
                   <p className="mt-1 text-[10px] text-slate-500">
-                    Environment-backed services used by LandTerra.
+                    Environment-backed services used by BhoomiMitra.
                   </p>
                 </div>
               </div>

@@ -1046,7 +1046,7 @@ function SellPageForm() {
                 Sign in to List Your Land
               </h1>
               <p className="text-xs text-slate-600 leading-relaxed max-w-md mx-auto">
-                LandTerra connects land owners directly with verified buyers across India with zero broker commissions. Sign in with Google to begin your listing.
+                BhoomiMitra connects land owners directly with verified buyers across India with zero broker commissions. Sign in with Google to begin your listing.
               </p>
             </div>
 
@@ -1397,7 +1397,7 @@ function SellPageForm() {
                         Land Area
                       </h3>
                       <p className="text-[11px] text-slate-600 mt-0.5">
-                        Enter the measurement in the unit you normally use. LandTerra automatically converts it into square yards.
+                        Enter the measurement in the unit you normally use. BhoomiMitra automatically converts it into square yards.
                       </p>
                     </div>
                   </div>
@@ -1502,7 +1502,7 @@ function SellPageForm() {
                     <CheckCircle2 className="w-3.5 h-3.5 shrink-0 mt-0.5" />
                     <p>
                       Your entered measurement is automatically converted to{' '}
-                      <strong>{formatArea(landAreaYards, 2)} square yards</strong> for LandTerra&apos;s property records.
+                      <strong>{formatArea(landAreaYards, 2)} square yards</strong> for BhoomiMitra&apos;s property records.
                     </p>
                   </div>
                 </div>
@@ -1893,7 +1893,7 @@ function SellPageForm() {
                         Human Document Verification
                       </h3>
                       <p className="text-xs text-emerald-900/80 mt-1 leading-relaxed">
-                        Submitted survey identifiers and title deeds are reviewed by the LandTerra verification team before the property is badged as verified.
+                        Submitted survey identifiers and title deeds are reviewed by the BhoomiMitra verification team before the property is badged as verified.
                       </p>
                     </div>
                   </div>

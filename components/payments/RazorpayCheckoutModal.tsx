@@ -159,7 +159,7 @@ export function RazorpayCheckoutModal({
         key: order.keyId,
         amount: order.amount,
         currency: order.currency || 'INR',
-        name: 'LandTerra Marketplace',
+        name: 'BhoomiMitra Marketplace',
         description: isRenewal
           ? `Listing renewal (${activeOrderDuration} days) for ${property.title.substring(
               0,
@@ -174,7 +174,7 @@ export function RazorpayCheckoutModal({
         config: {
           display: {
             blocks: {
-              landterra_payment_methods: {
+              bhoomimitra_payment_methods: {
                 name: 'Payment Options',
                 instruments: [
                   { method: 'upi' },
@@ -183,7 +183,7 @@ export function RazorpayCheckoutModal({
                 ],
               },
             },
-            sequence: ['block.landterra_payment_methods'],
+            sequence: ['block.bhoomimitra_payment_methods'],
             preferences: {
               show_default_blocks: false,
             },

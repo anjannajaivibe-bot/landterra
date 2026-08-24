@@ -736,7 +736,7 @@ function BuyPageContent() {
 
                       <p className="mt-1 text-[11px] leading-5 text-emerald-800">
                         These listings have been marked as verified
-                        through LandTerra&apos;s internal review process.
+                        through BhoomiMitra&apos;s internal review process.
                       </p>
                     </div>
                   </div>
@@ -962,7 +962,7 @@ function FilterPanel({
             </div>
 
             <p className="mt-1 text-[10px] leading-4 text-emerald-800">
-              Only show listings marked as verified by LandTerra.
+              Only show listings marked as verified by BhoomiMitra.
             </p>
           </div>
         </div>

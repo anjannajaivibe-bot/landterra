@@ -5,7 +5,7 @@ import { connectToDatabase } from '@/lib/db/mongodb';
 const FROM_EMAIL =
   process.env.RESEND_FROM_EMAIL ||
   process.env.EMAIL_FROM ||
-  'LandTerra <onboarding@resend.dev>';
+  'BhoomiMitra <onboarding@resend.dev>';
 
 export async function sendEmail({
   to,
@@ -56,7 +56,7 @@ export async function notifyListingSubmitted(
 ) {
   return sendEmail({
     to: sellerEmail,
-    subject: `Listing Received: ${propertyTitle} - LandTerra`,
+    subject: `Listing Received: ${propertyTitle} - BhoomiMitra`,
     html: `
       <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #1e293b;">
         <h2 style="color: #047857;">Listing Payment Received</h2>
@@ -70,7 +70,7 @@ export async function notifyListingSubmitted(
             <strong>Verification Policy:</strong> Payment covers listing processing and administrative review. Listings are approved only after document and registration validity confirmation.
           </p>
         </div>
-        <p>Best regards,<br/>The LandTerra Verification Team</p>
+        <p>Best regards,<br/>The BhoomiMitra Verification Team</p>
       </div>
     `,
   });
@@ -111,7 +111,7 @@ export async function notifyVerificationResult(
         <p>You can check and manage your property from your <a href="${
           process.env.NEXT_PUBLIC_APP_URL || ''
         }/dashboard/seller">Seller Dashboard</a>.</p>
-        <p>Best regards,<br/>LandTerra Compliance Team</p>
+        <p>Best regards,<br/>BhoomiMitra Compliance Team</p>
       </div>
     `,
   });

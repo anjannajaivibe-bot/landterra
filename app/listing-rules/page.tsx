@@ -19,7 +19,7 @@ export default function ListingRulesPage() {
             Listing Rules & Verification Guidelines
           </h1>
           <p className="text-slate-300 text-sm mt-2">
-            Understanding LandTerra&apos;s publishing fee model, mandatory title inspection, and prohibited listings.
+            Understanding BhoomiMitra&apos;s publishing fee model, mandatory title inspection, and prohibited listings.
           </p>
         </div>
       </div>
@@ -29,10 +29,10 @@ export default function ListingRulesPage() {
         <div className="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-xs space-y-4">
           <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
             <FileText className="w-5 h-5 text-emerald-700" />
-            <span>1. Authoritative Publishing Fee: ₹10 / sq. yard</span>
+            <span>1. Authoritative Publishing Fee</span>
           </h2>
           <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
-            To prevent spam, ghost listings, and unauthorized broker hoarding, LandTerra charges an upfront publishing fee strictly calculated on the land area:
+            To prevent spam, ghost listings, and unauthorized broker hoarding, BhoomiMitra charges a flat upfront publishing fee for listing verification and active marketplace hosting:
           </p>
           <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs font-mono font-bold text-emerald-950">
             Total Publishing Fee = Total Land Area (in Sq. Yards) × ₹10

@@ -394,7 +394,7 @@ function PropertyDetailsContent() {
       ) {
         await navigator.share({
           title: property.title,
-          text: `Take a look at this land listing on LandTerra.`,
+          text: `Take a look at this land listing on BhoomiMitra.`,
           url,
         });
 
@@ -1170,10 +1170,10 @@ function PropertyDetailsContent() {
                 <p className="mt-2 max-w-3xl text-xs leading-6 text-emerald-900/75">
                   {property.verificationStatus ===
                     'VERIFIED'
-                    ? 'This listing has passed LandTerra’s internal verification workflow based on the information and documents submitted by the seller.'
+                    ? 'This listing has passed BhoomiMitra’s internal verification workflow based on the information and documents submitted by the seller.'
                     : property.verificationStatus ===
                       'PENDING'
-                      ? 'The seller has submitted this listing and it is currently undergoing LandTerra’s internal review process.'
+                      ? 'The seller has submitted this listing and it is currently undergoing BhoomiMitra’s internal review process.'
                       : property.verificationStatus ===
                         'VERIFICATION_REQUIRED'
                         ? 'Additional information or documentation may be required before this listing can be marked verified.'
@@ -1184,7 +1184,7 @@ function PropertyDetailsContent() {
                   <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
 
                   <span>
-                    LandTerra verification does not replace independent
+                    BhoomiMitra verification does not replace independent
                     legal due diligence, title search, physical
                     inspection, or professional advice.
                   </span>
@@ -1213,7 +1213,7 @@ function PropertyDetailsContent() {
                     </p>
 
                     <p className="mt-1 text-xs text-slate-500">
-                      Send the seller an inquiry through LandTerra.
+                      Send the seller an inquiry through BhoomiMitra.
                     </p>
                   </div>
                 </div>
@@ -1246,7 +1246,7 @@ function PropertyDetailsContent() {
                 </h3>
 
                 <p className="mt-1 text-[10px] leading-5 text-slate-500">
-                  LandTerra facilitates property discovery, listing
+                  BhoomiMitra facilitates property discovery, listing
                   management, document review workflows and direct
                   communication between sellers and prospective buyers.
                   A listing or verification status does not constitute
@@ -1339,7 +1339,7 @@ function PropertyDetailsContent() {
 
                   <p className="mt-2 text-xs leading-5 text-slate-500">
                     Your inquiry has been submitted. The seller can
-                    respond through the LandTerra platform.
+                    respond through the BhoomiMitra platform.
                   </p>
 
                   <button

@@ -49,7 +49,7 @@ export default function PrivacyPage() {
         <section className="space-y-2">
           <h2 className="text-base font-bold text-slate-900">2. Who Has Access to Uploaded Title Documents</h2>
           <p>
-            Private documents (such as sale deeds, 7/12 extracts, and Khata certificates) are restricted exclusively to authorized LandTerra compliance administrators. They are never published on the public marketplace.
+            Private documents (such as sale deeds, 7/12 extracts, and Khata certificates) are restricted exclusively to authorized BhoomiMitra compliance administrators. They are never published on the public marketplace.
           </p>
         </section>
       </main>

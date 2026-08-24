@@ -52,7 +52,7 @@ export default function ContactPage() {
                 <MapPin className="w-5 h-5 text-emerald-700 shrink-0 mt-0.5" />
                 <div>
                   <span className="font-bold text-slate-900 block">Compliance Office</span>
-                  <span>LandTerra Technologies Ltd, Financial District, Nanakramguda, Hyderabad, Telangana 500032</span>
+                  <span>BhoomiMitra Technologies Ltd, Financial District, Nanakramguda, Hyderabad, Telangana 500032</span>
                 </div>
               </div>
             </div>

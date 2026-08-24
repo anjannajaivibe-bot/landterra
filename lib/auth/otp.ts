@@ -86,7 +86,7 @@ export async function sendOtpToPhone(rawPhone: string): Promise<SendOtpResult> {
       const params = new URLSearchParams();
       params.append('To', phone);
       params.append('From', process.env.TWILIO_PHONE_NUMBER || '');
-      params.append('Body', `Your LandTerra verification code is ${otp}. Valid for 5 minutes. Do not share.`);
+      params.append('Body', `Your BhoomiMitra verification code is ${otp}. Valid for 5 minutes. Do not share.`);
 
       const res = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${process.env.TWILIO_ACCOUNT_SID}/Messages.json`, {
         method: 'POST',

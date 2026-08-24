@@ -19,11 +19,11 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_APP_URL || 'https://landterra.vercel.app'
+    process.env.NEXT_PUBLIC_APP_URL || 'https://bhoomimitra.com'
   ),
   title: {
-    default: 'LandTerra | Verified Land & Plot Marketplace',
-    template: '%s | LandTerra',
+    default: 'BhoomiMitra | Verified Land & Plot Marketplace',
+    template: '%s | BhoomiMitra',
   },
   description:
     'Discover land and plots across India, review government survey records and verified title extracts, and connect directly with genuine sellers with zero brokerage.',
@@ -36,11 +36,12 @@ export const metadata: Metadata = {
     'agricultural land',
     'farmland for sale',
     'land marketplace',
-    'landterra',
+    'bhoomimitra',
+    'bhoomi mitra',
   ],
-  authors: [{ name: 'LandTerra Marketplace' }],
-  creator: 'LandTerra Marketplace Technologies',
-  publisher: 'LandTerra',
+  authors: [{ name: 'BhoomiMitra Marketplace' }],
+  creator: 'BhoomiMitra Marketplace Technologies',
+  publisher: 'BhoomiMitra',
   robots: {
     index: true,
     follow: true,
@@ -55,9 +56,9 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_IN',
-    url: process.env.NEXT_PUBLIC_APP_URL || 'https://landterra.vercel.app',
-    siteName: 'LandTerra',
-    title: 'LandTerra | Verified Land & Plot Marketplace',
+    url: process.env.NEXT_PUBLIC_APP_URL || 'https://bhoomimitra.com',
+    siteName: 'BhoomiMitra',
+    title: 'BhoomiMitra | Verified Land & Plot Marketplace',
     description:
       'Discover land and plots across India. Human-verified records, direct seller contact, and zero hidden commissions.',
     images: [
@@ -65,13 +66,13 @@ export const metadata: Metadata = {
         url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'LandTerra - India Verified Land Marketplace',
+        alt: 'BhoomiMitra - India Verified Land Marketplace',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'LandTerra | Verified Land & Plot Marketplace',
+    title: 'BhoomiMitra | Verified Land & Plot Marketplace',
     description:
       'Discover land and plots across India. Human-verified records, direct seller contact, and zero hidden commissions.',
     images: ['/og-image.png'],

@@ -186,7 +186,7 @@ export function Navbar() {
             href="/"
             onClick={closeAllMenus}
             className="group flex shrink-0 items-center gap-2.5"
-            aria-label="LandTerra home"
+            aria-label="BhoomiMitra home"
           >
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-600 text-white shadow-sm transition-colors group-hover:bg-emerald-700">
               <Compass className="h-5 w-5" />
@@ -194,8 +194,8 @@ export function Navbar() {
 
             <div className="leading-none">
               <span className="flex items-center text-xl font-black tracking-tight text-slate-950">
-                Land
-                <span className="text-emerald-700">Terra</span>
+                Bhoomi
+                <span className="text-emerald-700">Mitra</span>
               </span>
 
               <span className="mt-1 block text-[9px] font-bold uppercase tracking-[0.16em] text-slate-400">

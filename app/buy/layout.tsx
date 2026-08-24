@@ -1,13 +1,13 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Find Land & Verified Plots in India | LandTerra',
+  title: 'Find Land & Verified Plots in India | BhoomiMitra',
   description:
-    'Browse verified residential plots, commercial land, and farmlands with registered sale deeds and survey records. Zero broker commission.',
+    'Search verified residential plots, commercial land, farmlands, and industrial plots across India. Complete document transparency with zero brokerage.',
   openGraph: {
-    title: 'Find Land & Verified Plots in India | LandTerra',
+    title: 'Find Land & Verified Plots in India | BhoomiMitra',
     description:
-      'Browse verified residential plots, commercial land, and farmlands with registered sale deeds and survey records. Zero broker commission.',
+      'Search verified residential plots, commercial land, farmlands, and industrial plots across India. Complete document transparency with zero brokerage.',
   },
 };
 
