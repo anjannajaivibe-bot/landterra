@@ -167,9 +167,9 @@ export function Navbar() {
             </div>
 
             <div className="hidden shrink-0 items-center gap-2 text-[10px] text-slate-400 sm:flex">
-              <span>Listing fee</span>
+              <span>Publishing fee</span>
               <span className="font-bold text-emerald-400">
-                ₹10 / sq.yd / month
+                Starting at ₹10 for 30 days
               </span>
             </div>
           </div>

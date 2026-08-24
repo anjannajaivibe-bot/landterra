@@ -131,6 +131,8 @@ const ADMIN_TABS: {
 const EMPTY_SETTINGS: IPlatformSettings = {
   requireGoogleLogin: true,
   requirePhoneOtp: true,
+  listingFeeAmount: 10,
+  listingFeeDurationDays: 30,
   updatedBy: 'SYSTEM',
   updatedAt: new Date(),
 };
@@ -590,6 +592,8 @@ export default function AdminControlPage() {
         body: JSON.stringify({
           requireGoogleLogin: settings.requireGoogleLogin,
           requirePhoneOtp: settings.requirePhoneOtp,
+          listingFeeAmount: Number(settings.listingFeeAmount) || 10,
+          listingFeeDurationDays: Number(settings.listingFeeDurationDays) || 30,
         }),
       });
 
@@ -2346,7 +2350,70 @@ export default function AdminControlPage() {
                   </div>
                 )}
 
-                <div className="mt-7 grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Fee & Commercial Rules */}
+                <div className="mt-7 rounded-2xl border border-slate-800 bg-slate-950/60 p-5">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-slate-800">
+                    <div>
+                      <h3 className="text-sm font-black text-white">
+                        Listing Publishing Fee & Duration
+                      </h3>
+                      <p className="mt-0.5 text-[10px] text-slate-500">
+                        Universal publishing charge required from sellers to submit a property for verification.
+                      </p>
+                    </div>
+                    <div className="px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs font-bold text-emerald-400">
+                      Active: ₹{settings.listingFeeAmount || 10} for {settings.listingFeeDurationDays || 30} days
+                    </div>
+                  </div>
+
+                  <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label htmlFor="admin-listing-fee" className="block text-xs font-bold text-slate-300 mb-1.5">
+                        Listing Fee Amount (₹ INR)
+                      </label>
+                      <input
+                        id="admin-listing-fee"
+                        type="number"
+                        min={1}
+                        max={100000}
+                        step={1}
+                        value={settings.listingFeeAmount || 10}
+                        onChange={(e) => {
+                          const val = Math.max(1, Math.min(100000, Number(e.target.value) || 10));
+                          setSettings((prev) => ({ ...prev, listingFeeAmount: val }));
+                        }}
+                        className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-sm font-black text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
+                      />
+                      <p className="mt-1.5 text-[10px] text-slate-500">
+                        Flat fee charged via Razorpay for all new listings.
+                      </p>
+                    </div>
+
+                    <div>
+                      <label htmlFor="admin-duration-days" className="block text-xs font-bold text-slate-300 mb-1.5">
+                        Validity Duration (Days)
+                      </label>
+                      <input
+                        id="admin-duration-days"
+                        type="number"
+                        min={1}
+                        max={365}
+                        step={1}
+                        value={settings.listingFeeDurationDays || 30}
+                        onChange={(e) => {
+                          const val = Math.max(1, Math.min(365, Number(e.target.value) || 30));
+                          setSettings((prev) => ({ ...prev, listingFeeDurationDays: val }));
+                        }}
+                        className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-sm font-black text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
+                      />
+                      <p className="mt-1.5 text-[10px] text-slate-500">
+                        Active publishing cycle before renewal is requested.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
 
                   <AdminToggle
                     title="Google Login Required"

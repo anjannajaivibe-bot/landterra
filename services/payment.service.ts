@@ -38,36 +38,17 @@ import {
   PropertyModel,
 } from '@/models/Property';
 
+import {
+  getPlatformSettings,
+} from '@/services/settings.service';
+
 /* ================================================================
    CONSTANTS
 ================================================================ */
 
-const LISTING_RATE_PER_YARD = 10;
+const DEFAULT_LISTING_FEE = 10;
 
 const SUBSCRIPTION_DAYS = 30;
-
-/* ================================================================
-   HELPERS
-================================================================ */
-
-function calculateListingFee(
-  landAreaYards: number,
-): number {
-  const area =
-    Math.max(
-      0,
-      Math.round(
-        Number(
-          landAreaYards,
-        ),
-      ),
-    );
-
-  return (
-    area *
-    LISTING_RATE_PER_YARD
-  );
-}
 
 /* ================================================================
    CREATE PUBLISHING ORDER
@@ -188,31 +169,24 @@ export async function createPublishingOrder(
   }
 
   /*
-   * SINGLE AUTHORITATIVE FEE RULE
+   * AUTHORITATIVE PLATFORM SETTING
    *
-   * ₹10 × actual property area.
-   *
-   * No arbitrary Math.max(50) here.
+   * Flat listing fee determined by admin settings (e.g. ₹10 for 30 days).
    */
+  const settings =
+    await getPlatformSettings();
+
+  const amountInRupees =
+    typeof settings.listingFeeAmount === 'number' && settings.listingFeeAmount > 0
+      ? settings.listingFeeAmount
+      : DEFAULT_LISTING_FEE;
+
   const landAreaYards =
     Math.max(
       0,
       Math.round(
         property.landAreaYards,
       ),
-    );
-
-  if (
-    landAreaYards <= 0
-  ) {
-    throw new Error(
-      'Property has an invalid land area.',
-    );
-  }
-
-  const amountInRupees =
-    calculateListingFee(
-      landAreaYards,
     );
 
   const amountInPaise =
@@ -254,8 +228,8 @@ export async function createPublishingOrder(
           landAreaYards:
             landAreaYards.toString(),
 
-          ratePerYard:
-            LISTING_RATE_PER_YARD.toString(),
+          listingFee:
+            amountInRupees.toString(),
 
           title:
             property.title.substring(
@@ -295,7 +269,7 @@ export async function createPublishingOrder(
     landAreaYards,
 
     ratePerYard:
-      LISTING_RATE_PER_YARD,
+      amountInRupees,
 
     razorpayOrderId:
       order.id,
@@ -626,7 +600,7 @@ export async function verifyAndProcessPayment(
               paymentDoc.amount,
 
             ratePerSquareYard:
-              LISTING_RATE_PER_YARD,
+              paymentDoc.ratePerYard || paymentDoc.amount,
 
             landAreaYards:
               property.landAreaYards,
@@ -954,7 +928,7 @@ export async function processRazorpayWebhook(
             paymentDoc.amount,
 
           ratePerSquareYard:
-            LISTING_RATE_PER_YARD,
+            paymentDoc.ratePerYard || paymentDoc.amount,
 
           landAreaYards:
             property.landAreaYards,

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { IProperty } from '@/types/property';
 import { CreditCard, ShieldCheck, CheckCircle2, AlertCircle, X, Lock, IndianRupee } from 'lucide-react';
 
@@ -9,6 +9,7 @@ interface RazorpayCheckoutModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  feeAmount?: number;
 }
 
 export function RazorpayCheckoutModal({
@@ -16,22 +17,54 @@ export function RazorpayCheckoutModal({
   isOpen,
   onClose,
   onSuccess,
+  feeAmount: initialFeeAmount,
 }: RazorpayCheckoutModalProps) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [listingFeeAmount, setListingFeeAmount] = useState<number>(initialFeeAmount || 10);
+  const [listingDurationDays, setListingDurationDays] = useState<number>(30);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    let mounted = true;
+    async function fetchPlatformSettings() {
+      try {
+        const res = await fetch('/api/settings/public', { cache: 'no-store' });
+        if (res.ok) {
+          const data = await res.json();
+          if (mounted) {
+            if (typeof data.listingFeeAmount === 'number') {
+              setListingFeeAmount(data.listingFeeAmount);
+            }
+            if (typeof data.listingFeeDurationDays === 'number') {
+              setListingDurationDays(data.listingFeeDurationDays);
+            }
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load public settings:', err);
+      }
+    }
+
+    fetchPlatformSettings();
+    return () => {
+      mounted = false;
+    };
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
   const landAreaYards = Math.round(property.landAreaYards);
-  const calculatedFee = landAreaYards * 10;
+  const activeFee = listingFeeAmount || 10;
 
   const handleInitiatePayment = async () => {
     setIsProcessing(true);
     setError('');
 
     try {
-      // 1. Create order on server (authoritative calculation)
+      // 1. Create order on server (authoritative server-side calculation)
       const orderRes = await fetch('/api/payments/create-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -47,13 +80,16 @@ export function RazorpayCheckoutModal({
       }
 
       const { order } = orderData;
+      if (order?.amountInRupees) {
+        setListingFeeAmount(order.amountInRupees);
+      }
 
       // 2. Client verification step via real Razorpay gateway
       if (typeof window !== 'undefined' && (window as any).Razorpay && order?.keyId) {
         const options = {
           key: order.keyId,
           amount: order.amount,
-          currency: 'INR',
+          currency: order.currency || 'INR',
           name: 'LandTerra Marketplace',
           description: `Publishing fee for ${property.title.substring(0, 30)}...`,
           order_id: order.orderId,
@@ -116,7 +152,7 @@ export function RazorpayCheckoutModal({
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-200"
+            className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-200 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -130,7 +166,7 @@ export function RazorpayCheckoutModal({
               </div>
               <h4 className="text-lg font-bold text-slate-900 mb-1">Payment Successful!</h4>
               <p className="text-xs text-slate-600 mb-2 leading-relaxed">
-                ₹{calculatedFee.toLocaleString('en-IN')} received. Listing moved to <strong>Pending Verification</strong>.
+                ₹{activeFee.toLocaleString('en-IN')} received. Listing moved to <strong>Pending Verification</strong>.
               </p>
               <p className="text-[11px] text-slate-400">Redirecting to your seller dashboard...</p>
             </div>
@@ -149,29 +185,25 @@ export function RazorpayCheckoutModal({
                 <p className="text-slate-500">{property.location.city}, {property.location.state}</p>
               </div>
 
-              {/* Strict Transparent Fee Calculation Table */}
+              {/* Transparent Universal Fee Table */}
               <div className="rounded-xl border border-slate-200 bg-white p-4 space-y-2.5 text-xs">
                 <div className="flex justify-between text-slate-600">
                   <span>Total Land Area</span>
                   <span className="font-semibold text-slate-900">{landAreaYards.toLocaleString('en-IN')} sq. yards</span>
                 </div>
                 <div className="flex justify-between text-slate-600">
-                  <span>Listing Subscription Rate</span>
-                  <span className="font-semibold text-slate-900">₹10 / sq. yard / month</span>
-                </div>
-                <div className="flex justify-between text-slate-600">
                   <span>Subscription Validity</span>
-                  <span className="font-semibold text-emerald-800">30 Days</span>
+                  <span className="font-semibold text-emerald-800">{listingDurationDays} Days</span>
                 </div>
                 <div className="flex justify-between text-slate-600">
                   <span>Total Property Price</span>
                   <span className="font-medium text-slate-700">₹{property.totalPrice.toLocaleString('en-IN')}</span>
                 </div>
                 <div className="pt-2 border-t border-slate-200 flex justify-between items-baseline text-sm">
-                  <span className="font-bold text-slate-900">30-Day Listing Subscription Fee</span>
+                  <span className="font-bold text-slate-900">{listingDurationDays}-Day Listing Fee</span>
                   <span className="text-lg font-extrabold text-emerald-800 flex items-center">
                     <IndianRupee className="w-4 h-4 inline" />
-                    {calculatedFee.toLocaleString('en-IN')}
+                    {activeFee.toLocaleString('en-IN')}
                   </span>
                 </div>
               </div>
@@ -203,10 +235,10 @@ export function RazorpayCheckoutModal({
                     type="button"
                     onClick={handleInitiatePayment}
                     disabled={isProcessing}
-                    className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg bg-emerald-700 text-white text-xs font-bold hover:bg-emerald-800 transition-colors shadow-xs"
+                    className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg bg-emerald-700 text-white text-xs font-bold hover:bg-emerald-800 transition-colors shadow-xs cursor-pointer disabled:opacity-50"
                   >
                     <CreditCard className="w-3.5 h-3.5" />
-                    <span>{isProcessing ? 'Processing...' : `Pay ₹${calculatedFee.toLocaleString('en-IN')}`}</span>
+                    <span>{isProcessing ? 'Processing...' : `Pay ₹${activeFee.toLocaleString('en-IN')}`}</span>
                   </button>
                 </div>
               </div>

@@ -69,16 +69,15 @@ export const CreatePropertySchema = z.object({
 
 export const UpdatePropertySchema = CreatePropertySchema.partial();
 
-/**
- * STRICT BUSINESS LOGIC CALCULATION:
- * Returns authoritative server-calculated totalPrice and monthly listing subscription fee
- * Business Rule: Monthly Listing Fee = Land Area (sq. yards) × ₹10 / month
- */
-export function calculateAuthoritativeFees(landAreaYards: number, pricePerYard: number) {
+export function calculateAuthoritativeFees(
+  landAreaYards: number,
+  pricePerYard: number,
+  flatListingFee: number = 10,
+) {
   const sanitizedArea = Math.max(0, Math.round(landAreaYards));
   const sanitizedPricePerYard = Math.max(0, Math.round(pricePerYard));
   const totalPrice = sanitizedArea * sanitizedPricePerYard;
-  const monthlyListingFee = sanitizedArea * 10; // ₹10 per sq. yard per month
+  const monthlyListingFee = flatListingFee;
   const publishingFee = monthlyListingFee;
 
   return {

@@ -21,9 +21,14 @@ export async function PATCH(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { requireGoogleLogin, requirePhoneOtp } = body;
+    const { requireGoogleLogin, requirePhoneOtp, listingFeeAmount, listingFeeDurationDays } = body;
 
-    const updates: { requireGoogleLogin?: boolean; requirePhoneOtp?: boolean } = {};
+    const updates: {
+      requireGoogleLogin?: boolean;
+      requirePhoneOtp?: boolean;
+      listingFeeAmount?: number;
+      listingFeeDurationDays?: number;
+    } = {};
 
     if (typeof requireGoogleLogin === 'boolean') {
       updates.requireGoogleLogin = requireGoogleLogin;
@@ -31,16 +36,22 @@ export async function PATCH(req: NextRequest) {
     if (typeof requirePhoneOtp === 'boolean') {
       updates.requirePhoneOtp = requirePhoneOtp;
     }
+    if (typeof listingFeeAmount === 'number') {
+      updates.listingFeeAmount = listingFeeAmount;
+    }
+    if (typeof listingFeeDurationDays === 'number') {
+      updates.listingFeeDurationDays = listingFeeDurationDays;
+    }
 
     const updatedSettings = await updatePlatformSettings(updates, adminUser);
 
     return NextResponse.json({
       success: true,
-      message: 'Platform authentication settings updated successfully',
+      message: 'Platform settings updated successfully',
       settings: updatedSettings,
     });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Failed to update platform settings';
-    return NextResponse.json({ error: msg }, { status: 500 });
+    return NextResponse.json({ error: msg }, { status: 400 });
   }
 }

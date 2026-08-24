@@ -52,8 +52,11 @@ interface UploadedDocPreview {
 export default function SellPage() {
   const router = useRouter();
   const [currentUser, setCurrentUser] = useState<Partial<IUser> | null>(null);
+  // Settings & Fee State
   const [requireGoogleLogin, setRequireGoogleLogin] = useState<boolean>(true);
   const [requirePhoneOtp, setRequirePhoneOtp] = useState<boolean>(true);
+  const [listingFeeAmount, setListingFeeAmount] = useState<number>(10);
+  const [listingDurationDays, setListingDurationDays] = useState<number>(30);
   const [pageLoading, setPageLoading] = useState<boolean>(true);
 
   // Auth & Phone Verification State
@@ -127,6 +130,8 @@ export default function SellPage() {
           const s = await settingsRes.json();
           if (typeof s.requireGoogleLogin === 'boolean') setRequireGoogleLogin(s.requireGoogleLogin);
           if (typeof s.requirePhoneOtp === 'boolean') setRequirePhoneOtp(s.requirePhoneOtp);
+          if (typeof s.listingFeeAmount === 'number') setListingFeeAmount(s.listingFeeAmount);
+          if (typeof s.listingFeeDurationDays === 'number') setListingDurationDays(s.listingFeeDurationDays);
         }
 
         if (sessionRes?.ok) {
@@ -223,7 +228,7 @@ export default function SellPage() {
 
   // Authoritative calculations
   const totalValuation = landAreaYards * pricePerYard;
-  const monthlyListingFee = landAreaYards * 10; // ₹10 / sq.yard per month
+  const monthlyListingFee = listingFeeAmount;
 
   // Step validation
   const validateStep = (step: number): boolean => {
@@ -805,9 +810,9 @@ export default function SellPage() {
                     </span>
                   </div>
                   <div className="flex justify-between text-emerald-900 font-semibold pt-1 border-t border-emerald-200/60">
-                    <span>Authoritative 30-Day Listing Fee (₹10/sq.yd):</span>
+                    <span>{listingDurationDays}-Day Listing Fee:</span>
                     <span className="font-extrabold text-emerald-800 text-sm">
-                      ₹{monthlyListingFee.toLocaleString('en-IN')}
+                      ₹{listingFeeAmount.toLocaleString('en-IN')}
                     </span>
                   </div>
                 </div>
@@ -1195,9 +1200,9 @@ export default function SellPage() {
                   <span className="font-bold text-slate-900">₹{totalValuation.toLocaleString('en-IN')}</span>
                 </div>
                 <div className="pt-2 border-t border-slate-200 flex justify-between items-baseline">
-                  <span className="font-bold text-slate-900">Authoritative Listing Fee (₹10/sq.yd):</span>
+                  <span className="font-bold text-slate-900">{listingDurationDays}-Day Listing Fee:</span>
                   <span className="text-base font-extrabold text-emerald-800">
-                    ₹{monthlyListingFee.toLocaleString('en-IN')}
+                    ₹{listingFeeAmount.toLocaleString('en-IN')}
                   </span>
                 </div>
               </div>
@@ -1253,10 +1258,10 @@ export default function SellPage() {
                 type="button"
                 onClick={handleFinalSubmit}
                 disabled={isSubmitting || !termsAccepted}
-                className="px-6 py-3 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs flex items-center gap-2 transition-colors shadow-md disabled:opacity-50"
+                className="px-6 py-3 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs flex items-center gap-2 transition-colors shadow-md disabled:opacity-50 cursor-pointer"
               >
                 <CreditCard className="w-4 h-4" />
-                <span>{isSubmitting ? 'Creating Draft...' : `Proceed to Pay ₹${monthlyListingFee.toLocaleString('en-IN')}`}</span>
+                <span>{isSubmitting ? 'Creating Draft...' : `Proceed to Pay ₹${listingFeeAmount.toLocaleString('en-IN')}`}</span>
               </button>
             )}
           </div>
@@ -1268,6 +1273,7 @@ export default function SellPage() {
         <RazorpayCheckoutModal
           property={createdProperty}
           isOpen={paymentModalOpen}
+          feeAmount={listingFeeAmount}
           onClose={() => {
             setPaymentModalOpen(false);
             router.push('/dashboard/seller');

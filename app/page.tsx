@@ -29,31 +29,37 @@ export default function HomePage() {
   const [searchLocation, setSearchLocation] = useState('');
   const [selectedLandType, setSelectedLandType] = useState('ALL');
 
-  const [calcArea, setCalcArea] = useState(300);
-
-  const listingFee = calcArea * 10;
+  const [publicListingFee, setPublicListingFee] = useState(10);
+  const [listingDurationDays, setListingDurationDays] = useState(30);
 
   useEffect(() => {
     let cancelled = false;
 
-    async function loadProperties() {
+    async function loadData() {
       try {
-        const response = await fetch('/api/properties?limit=8', {
-          cache: 'no-store',
-        });
+        const [propsRes, settingsRes] = await Promise.all([
+          fetch('/api/properties?limit=8', { cache: 'no-store' }),
+          fetch('/api/settings/public', { cache: 'no-store' }).catch(() => null),
+        ]);
 
-        if (!response.ok) {
-          throw new Error('Failed to load properties');
+        if (settingsRes?.ok) {
+          const s = await settingsRes.json();
+          if (!cancelled && typeof s.listingFeeAmount === 'number') {
+            setPublicListingFee(s.listingFeeAmount);
+          }
+          if (!cancelled && typeof s.listingFeeDurationDays === 'number') {
+            setListingDurationDays(s.listingFeeDurationDays);
+          }
         }
 
-        const result = await response.json();
-
-        if (!cancelled && Array.isArray(result?.data)) {
-          setProperties(result.data);
+        if (propsRes.ok) {
+          const result = await propsRes.json();
+          if (!cancelled && Array.isArray(result?.data)) {
+            setProperties(result.data);
+          }
         }
       } catch (error) {
-        console.error('Failed to load homepage properties:', error);
-
+        console.error('Failed to load homepage data:', error);
         if (!cancelled) {
           setProperties([]);
         }
@@ -64,7 +70,7 @@ export default function HomePage() {
       }
     }
 
-    loadProperties();
+    loadData();
 
     return () => {
       cancelled = true;
@@ -524,8 +530,8 @@ export default function HomePage() {
             <div className="mt-7 space-y-3">
               <Bullet text="You set your own asking price." />
               <Bullet text="You can mark the price as negotiable." />
-              <Bullet text="The listing fee is calculated from land area." />
-              <Bullet text="Renew your listing when the 30-day period ends." />
+              <Bullet text={`Transparent flat listing fee: ₹${publicListingFee} for ${listingDurationDays} days.`} />
+              <Bullet text="Renew your listing when the publishing period ends." />
             </div>
           </div>
 
@@ -533,68 +539,42 @@ export default function HomePage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                  Listing fee estimator
+                  Universal Pricing
                 </p>
 
                 <h3 className="mt-1 text-lg font-bold text-white">
-                  How much will you pay?
+                  Flat Publishing Fee
                 </h3>
               </div>
 
               <span className="rounded-lg bg-emerald-400/10 px-3 py-1.5 text-xs font-bold text-emerald-300">
-                ₹10 / sq.yd
+                ₹{publicListingFee} / {listingDurationDays} Days
               </span>
             </div>
 
-            <div className="mt-8">
-              <div className="mb-3 flex items-center justify-between">
-                <label
-                  htmlFor="fee-area"
-                  className="text-sm font-medium text-slate-300"
-                >
-                  Land area
-                </label>
-
-                <span className="text-lg font-black text-emerald-400">
-                  {calcArea.toLocaleString('en-IN')} sq.yd
+            <div className="mt-6 rounded-2xl border border-white/10 bg-black/20 p-6 space-y-4">
+              <div className="flex items-baseline justify-between">
+                <span className="text-sm font-semibold text-slate-300">
+                  {listingDurationDays}-Day Listing Pass
+                </span>
+                <span className="text-3xl font-black text-emerald-400">
+                  ₹{publicListingFee.toLocaleString('en-IN')}
                 </span>
               </div>
 
-              <input
-                id="fee-area"
-                type="range"
-                min={50}
-                max={5000}
-                step={10}
-                value={calcArea}
-                onChange={(event) =>
-                  setCalcArea(Number(event.target.value))
-                }
-                className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-slate-700 accent-emerald-500"
-              />
-
-              <div className="mt-2 flex justify-between text-[11px] text-slate-500">
-                <span>50</span>
-                <span>2,500</span>
-                <span>5,000 sq.yd</span>
-              </div>
-            </div>
-
-            <div className="mt-8 rounded-2xl border border-white/10 bg-black/20 p-5">
-              <div className="flex items-end justify-between gap-4">
-                <div>
-                  <p className="text-xs text-slate-400">
-                    30-day listing subscription
-                  </p>
-
-                  <p className="mt-1 text-3xl font-black text-white">
-                    ₹{listingFee.toLocaleString('en-IN')}
-                  </p>
+              <div className="pt-3 border-t border-white/10 space-y-2 text-xs text-slate-400">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                  <span>Unlimited plot size & any price tier</span>
                 </div>
-
-                <p className="text-right text-xs text-slate-500">
-                  {calcArea.toLocaleString('en-IN')} × ₹10
-                </p>
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                  <span>Direct phone & message inquiries from verified buyers</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                  <span>Human-verified title & government survey badge</span>
+                </div>
               </div>
             </div>
 
