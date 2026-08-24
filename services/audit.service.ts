@@ -26,6 +26,7 @@ export async function createAuditLog({
   entityId,
   metadata,
   ipAddress,
+  eventKey,
 }: {
   actorId: string;
   actorName: string;
@@ -36,10 +37,32 @@ export async function createAuditLog({
   entityId: string;
   metadata?: Record<string, unknown>;
   ipAddress?: string;
+  eventKey?: string;
 }) {
   try {
     const conn = await connectToDatabase();
     if (conn) {
+      if (eventKey) {
+        return await AuditLogModel.findOneAndUpdate(
+          { eventKey },
+          {
+            $setOnInsert: {
+              actorId,
+              eventKey,
+              actorName,
+              actorEmail,
+              actorRole,
+              action,
+              entityType,
+              entityId,
+              metadata,
+              ipAddress,
+            },
+          },
+          { new: true, upsert: true, returnDocument: 'after' }
+        );
+      }
+
       return await AuditLogModel.create({
         actorId,
         actorName,

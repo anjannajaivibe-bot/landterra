@@ -15,7 +15,8 @@ export interface IListingSubscription {
   propertyTitle?: string;
   sellerId: string;
   amount: number; // in INR
-  ratePerSquareYard: number; // ₹10
+  listingFeeDurationDays?: number; // Snapshot of duration purchased (e.g. 30 days)
+  ratePerSquareYard?: number; // Legacy compatibility
   landAreaYards: number;
   periodStart: string | Date;
   periodEnd: string | Date;
@@ -35,14 +36,17 @@ export interface IPayment {
   subscriptionId?: string;
   amount: number; // in INR
   currency: string;
+  listingFeeDurationDays?: number; // Snapshot of duration purchased (e.g. 30 days)
   landAreaYards: number;
-  ratePerYard: number; // ₹10
+  ratePerYard?: number; // Legacy compatibility
   razorpayOrderId: string;
   razorpayPaymentId?: string;
   razorpaySignature?: string;
   paymentStatus: PaymentStatus;
   paymentPurpose: PaymentPurpose;
   paidAt?: string | Date;
+  confirmationEmailSentAt?: string | Date;
+  auditLoggedAt?: string | Date;
   receiptNumber: string;
   metadata?: Record<string, unknown>;
   createdAt: string | Date;
@@ -51,7 +55,7 @@ export interface IPayment {
 
 export interface CreateOrderRequest {
   propertyId: string;
-  landAreaYards: number;
+  landAreaYards?: number;
 }
 
 export interface CreateOrderResponse {
@@ -62,6 +66,7 @@ export interface CreateOrderResponse {
   keyId: string;
   propertyId: string;
   landAreaYards: number;
+  durationDays?: number;
 }
 
 export interface VerifyPaymentRequest {

@@ -40,6 +40,7 @@ export async function POST(
       await createPublishingOrder(
         validated.propertyId,
         authUser.id,
+        validated.purpose,
       );
 
     return NextResponse.json(

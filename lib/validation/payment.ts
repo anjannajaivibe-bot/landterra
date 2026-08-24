@@ -3,6 +3,10 @@ import { z } from 'zod';
 export const CreateOrderSchema = z.object({
   propertyId: z.string().min(1, 'Property ID is required'),
   landAreaYards: z.number().optional(),
+  purpose: z
+    .enum(['LISTING_SUBSCRIPTION', 'SUBSCRIPTION_RENEWAL'])
+    .optional()
+    .default('LISTING_SUBSCRIPTION'),
 });
 
 export const VerifyPaymentSchema = z.object({

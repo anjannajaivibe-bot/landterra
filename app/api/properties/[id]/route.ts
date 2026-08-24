@@ -118,7 +118,14 @@ function toOwnerProperty(
 ): IAuthenticatedProperty {
   return {
     ...toPublicProperty(property),
-
+    documents: property.documents,
+    governmentRegistrationId: property.governmentRegistrationId,
+    publishingFee: property.publishingFee,
+    monthlyListingFee: property.monthlyListingFee,
+    paymentStatus: property.paymentStatus,
+    subscriptionStartedAt: property.subscriptionStartedAt,
+    subscriptionExpiresAt: property.subscriptionExpiresAt,
+    rejectionReason: property.rejectionReason,
     sellerName:
       property.sellerName,
 
@@ -398,45 +405,27 @@ export async function PATCH(
       ...validated,
     };
 
-    delete (
-      safeUpdate as Record<
-        string,
-        unknown
-      >
-    ).sellerName;
+    delete (safeUpdate as Record<string, unknown>).sellerName;
+    delete (safeUpdate as Record<string, unknown>).sellerEmail;
+    delete (safeUpdate as Record<string, unknown>).sellerPhone;
+    delete (safeUpdate as Record<string, unknown>).sellerType;
+    delete (safeUpdate as Record<string, unknown>).sellerId;
 
-    delete (
-      safeUpdate as Record<
-        string,
-        unknown
-      >
-    ).sellerEmail;
-
-    delete (
-      safeUpdate as Record<
-        string,
-        unknown
-      >
-    ).sellerPhone;
-
-    delete (
-      safeUpdate as Record<
-        string,
-        unknown
-      >
-    ).sellerType;
-
-    /*
-     * sellerId is not part of the Zod schema, but we
-     * explicitly remove it anyway as defense in depth.
-     */
-
-    delete (
-      safeUpdate as Record<
-        string,
-        unknown
-      >
-    ).sellerId;
+    /* Server-owned lifecycle, verification, and financial fields */
+    delete (safeUpdate as Record<string, unknown>).paymentStatus;
+    delete (safeUpdate as Record<string, unknown>).listingStatus;
+    delete (safeUpdate as Record<string, unknown>).verificationStatus;
+    delete (safeUpdate as Record<string, unknown>).publishingFee;
+    delete (safeUpdate as Record<string, unknown>).monthlyListingFee;
+    delete (safeUpdate as Record<string, unknown>).totalPrice;
+    delete (safeUpdate as Record<string, unknown>).subscriptionStartedAt;
+    delete (safeUpdate as Record<string, unknown>).subscriptionExpiresAt;
+    delete (safeUpdate as Record<string, unknown>).publishedAt;
+    delete (safeUpdate as Record<string, unknown>).viewsCount;
+    delete (safeUpdate as Record<string, unknown>).inquiriesCount;
+    delete (safeUpdate as Record<string, unknown>).rejectionReason;
+    delete (safeUpdate as Record<string, unknown>).verificationReviewedAt;
+    delete (safeUpdate as Record<string, unknown>).verificationReviewedBy;
 
     const updated =
       await updateProperty(

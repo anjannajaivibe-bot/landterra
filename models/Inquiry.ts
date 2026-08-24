@@ -84,6 +84,7 @@ export const ReportModel: Model<IReport> =
 const AuditLogSchema = new Schema<IAuditLog>(
   {
     actorId: { type: String, required: true, index: true },
+    eventKey: { type: String, unique: true, sparse: true, index: true },
     actorName: { type: String, required: true },
     actorEmail: { type: String, required: true },
     actorRole: { type: String, required: true },
@@ -102,6 +103,7 @@ const AuditLogSchema = new Schema<IAuditLog>(
 );
 
 AuditLogSchema.index({ createdAt: -1 });
+AuditLogSchema.index({ eventKey: 1 }, { unique: true, sparse: true });
 
 export const AuditLogModel: Model<IAuditLog> =
   mongoose.models.AuditLog || mongoose.model<IAuditLog>('AuditLog', AuditLogSchema);

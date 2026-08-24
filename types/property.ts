@@ -25,6 +25,7 @@ export type ListingStatus =
   | 'DELETED';
 
 export type PaymentStatus =
+  | 'UNPAID'
   | 'PENDING'
   | 'PAID'
   | 'FAILED';
@@ -358,6 +359,14 @@ export interface IAuthenticatedProperty
   sellerEmail?: string;
 
   inquiriesCount?: number;
+  documents?: IPropertyDocument[];
+  governmentRegistrationId?: string;
+  publishingFee?: number;
+  monthlyListingFee?: number;
+  paymentStatus?: PaymentStatus;
+  subscriptionStartedAt?: string | Date;
+  subscriptionExpiresAt?: string | Date;
+  rejectionReason?: string;
 }
 
 /* ================================================================

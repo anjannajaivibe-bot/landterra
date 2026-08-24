@@ -55,6 +55,7 @@ export interface IReport {
 
 export interface IAuditLog {
   _id: string;
+  eventKey?: string;
   actorId: string;
   actorName: string;
   actorEmail: string;

@@ -86,14 +86,21 @@ function sanitizePropertyUpdates(
   delete safe.updatedAt;
 
   /*
-   * These are server-controlled lifecycle fields.
-   *
-   * They should be changed through dedicated payment /
-   * verification / admin workflows rather than arbitrary
-   * PATCH requests.
+   * These are server-controlled lifecycle and verification fields.
+   * They should only be changed through dedicated payment /
+   * verification / admin workflows rather than generic client PATCH.
    */
+  delete safe.paymentStatus;
   delete safe.listingStatus;
   delete safe.verificationStatus;
+  delete safe.verificationReviewedAt;
+  delete safe.verificationReviewedBy;
+  delete safe.publishedAt;
+  delete safe.viewsCount;
+  delete safe.inquiriesCount;
+  delete safe.rejectionReason;
+  delete safe.subscriptionStartedAt;
+  delete safe.subscriptionExpiresAt;
 
   /*
    * Fees are authoritative server values.
@@ -497,9 +504,20 @@ export async function getProperties(
 
     /*
      * ------------------------------------------------------------
-     * DATABASE
+     * DATABASE & LAZY SUBSCRIPTION EXPIRY SYNC
      * ------------------------------------------------------------
      */
+
+    // Lazily sync properties whose subscriptions have passed expiry
+    await PropertyModel.updateMany(
+      {
+        listingStatus: 'PUBLISHED',
+        subscriptionExpiresAt: { $lte: new Date() },
+      },
+      {
+        $set: { listingStatus: 'EXPIRED', updatedAt: new Date() },
+      }
+    );
 
     const [
       docs,
@@ -577,6 +595,25 @@ export async function getPropertyById(
 
     if (!doc) {
       return null;
+    }
+
+    /*
+     * Lazy subscription expiration handling.
+     * When a published property has passed its subscription expiry date,
+     * safely transition its state to EXPIRED.
+     */
+    if (
+      doc.listingStatus === 'PUBLISHED' &&
+      doc.subscriptionExpiresAt &&
+      new Date(doc.subscriptionExpiresAt).getTime() <= Date.now()
+    ) {
+      await PropertyModel.findByIdAndUpdate(id, {
+        $set: {
+          listingStatus: 'EXPIRED',
+          updatedAt: new Date(),
+        },
+      });
+      (doc as any).listingStatus = 'EXPIRED';
     }
 
     return doc as unknown as IProperty;

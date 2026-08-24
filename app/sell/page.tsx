@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { GoogleMapPicker } from '@/components/maps/GoogleMapPicker';
@@ -49,9 +49,14 @@ interface UploadedDocPreview {
   size: number;
 }
 
-export default function SellPage() {
+function SellPageForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const propertyIdParam = searchParams.get('propertyId') || searchParams.get('edit');
+
   const [currentUser, setCurrentUser] = useState<Partial<IUser> | null>(null);
+  const [existingPropertyId, setExistingPropertyId] = useState<string | null>(null);
+
   // Settings & Fee State
   const [requireGoogleLogin, setRequireGoogleLogin] = useState<boolean>(true);
   const [requirePhoneOtp, setRequirePhoneOtp] = useState<boolean>(true);
@@ -117,7 +122,7 @@ export default function SellPage() {
   const [createdProperty, setCreatedProperty] = useState<IProperty | null>(null);
   const [paymentModalOpen, setPaymentModalOpen] = useState<boolean>(false);
 
-  // Load session and platform settings
+  // Load session, platform settings, and existing draft if propertyIdParam exists
   useEffect(() => {
     async function init() {
       try {
@@ -147,6 +152,58 @@ export default function SellPage() {
             }
           }
         }
+
+        // If resume/edit mode is requested via query param
+        if (propertyIdParam) {
+          const propRes = await fetch(`/api/properties/${propertyIdParam}`).catch(() => null);
+          if (propRes?.ok) {
+            const pData = await propRes.json();
+            if (pData?.property && (pData?.isOwner || pData?.isAdmin)) {
+              const p = pData.property;
+              setExistingPropertyId(p._id);
+              if (p.title) setTitle(p.title);
+              if (p.description) setDescription(p.description);
+              if (p.landAreaYards) setLandAreaYards(p.landAreaYards);
+              if (p.pricePerYard) setPricePerYard(p.pricePerYard);
+              if (typeof p.priceNegotiable === 'boolean') setPriceNegotiable(p.priceNegotiable);
+              if (p.landType) setLandType(p.landType);
+              if (p.roadAccess) setRoadAccess(p.roadAccess);
+              if (Array.isArray(p.nearbyLandmarks)) setLandmarks(p.nearbyLandmarks.join(', '));
+              if (p.location) {
+                if (p.location.address) setAddress(p.location.address);
+                if (p.location.city) setCity(p.location.city);
+                if (p.location.state) setState(p.location.state);
+                if (p.location.pincode) setPincode(p.location.pincode);
+              }
+              if (p.googleMapsShareLink) setGoogleMapsShareLink(p.googleMapsShareLink);
+              if (typeof p.latitude === 'number') setLatitude(p.latitude);
+              if (typeof p.longitude === 'number') setLongitude(p.longitude);
+              if (typeof p.approximateLocation === 'boolean') setApproximateLocation(p.approximateLocation);
+              if (p.governmentRegistrationId) setGovernmentRegistrationId(p.governmentRegistrationId);
+              if (p.sellerType) setSellerType(p.sellerType);
+              if (Array.isArray(p.images) && p.images.length > 0) {
+                setImages(
+                  p.images.map((img: any) => ({
+                    secureUrl: img.secureUrl,
+                    isPrimary: img.isPrimary,
+                    objectKey: img.objectKey,
+                    fileName: img.fileName || 'image.jpg',
+                  }))
+                );
+              }
+              if (Array.isArray(p.documents) && p.documents.length > 0) {
+                setDocuments(
+                  p.documents.map((doc: any) => ({
+                    documentType: doc.documentType,
+                    fileName: doc.fileName || 'document.pdf',
+                    objectKey: doc.objectKey,
+                    size: doc.size || 0,
+                  }))
+                );
+              }
+            }
+          }
+        }
       } catch (err) {
         console.error('Init error on sell page:', err);
       } finally {
@@ -154,7 +211,7 @@ export default function SellPage() {
       }
     }
     init();
-  }, []);
+  }, [propertyIdParam]);
 
   // Handle Send OTP
   const handleSendOtp = async () => {
@@ -421,11 +478,20 @@ export default function SellPage() {
         })),
       };
 
-      const res = await fetch('/api/properties', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
+      let res: Response;
+      if (existingPropertyId) {
+        res = await fetch(`/api/properties/${existingPropertyId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+      } else {
+        res = await fetch('/api/properties', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+      }
 
       const data = await res.json();
       if (!res.ok) {
@@ -438,7 +504,8 @@ export default function SellPage() {
         return;
       }
 
-      setCreatedProperty(data.property);
+      const savedProp = data.property || (existingPropertyId ? { ...payload, _id: existingPropertyId } : null);
+      setCreatedProperty(savedProp);
       setPaymentModalOpen(true);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Error submitting listing';
@@ -1287,5 +1354,23 @@ export default function SellPage() {
 
       <Footer />
     </div>
+  );
+}
+
+export default function SellPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex flex-col bg-slate-50">
+          <Navbar />
+          <div className="max-w-4xl mx-auto py-20 px-4 text-center flex-1 flex justify-center items-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-700" />
+          </div>
+          <Footer />
+        </div>
+      }
+    >
+      <SellPageForm />
+    </Suspense>
   );
 }

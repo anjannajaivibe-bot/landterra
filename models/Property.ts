@@ -103,6 +103,12 @@ const PropertySchema = new Schema<IProperty>(
     },
     verificationReviewedAt: { type: Date },
     verificationReviewedBy: { type: String },
+    paymentStatus: {
+      type: String,
+      enum: ['UNPAID', 'PENDING', 'PAID', 'FAILED'],
+      default: 'PENDING',
+      index: true,
+    },
     listingStatus: {
       type: String,
       enum: [
