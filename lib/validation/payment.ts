@@ -1,0 +1,40 @@
+import { z } from 'zod';
+
+export const CreateOrderSchema = z.object({
+  propertyId: z.string().min(1, 'Property ID is required'),
+  landAreaYards: z.number().min(50, 'Invalid land area for calculation'),
+});
+
+export const VerifyPaymentSchema = z.object({
+  propertyId: z.string().min(1, 'Property ID is required'),
+  razorpayOrderId: z.string().min(1, 'Razorpay order ID is required'),
+  razorpayPaymentId: z.string().min(1, 'Razorpay payment ID is required'),
+  razorpaySignature: z.string().min(1, 'Razorpay signature is required'),
+});
+
+export const CreateInquirySchema = z.object({
+  propertyId: z.string().min(1, 'Property ID is required'),
+  message: z.string().min(10, 'Inquiry message must be at least 10 characters').max(1000),
+  phoneShared: z.boolean().default(false),
+  buyerPhone: z.string().regex(/^[6-9]\d{9}$/, 'Invalid Indian 10-digit mobile number').optional().or(z.literal('')),
+});
+
+export const CreateReportSchema = z.object({
+  propertyId: z.string().min(1, 'Property ID is required'),
+  reason: z.enum([
+    'SUSPICIOUS_LISTING',
+    'INCORRECT_INFORMATION',
+    'POSSIBLE_FRAUD',
+    'WRONG_LOCATION',
+    'DUPLICATE_LISTING',
+    'INAPPROPRIATE_CONTENT',
+    'OTHER',
+  ]),
+  description: z.string().min(10, 'Please provide details about your report').max(2000),
+});
+
+export const VerifyPropertyActionSchema = z.object({
+  action: z.enum(['APPROVE', 'REJECT', 'REQUEST_INFO', 'SUSPEND']),
+  rejectionReason: z.string().optional(),
+  adminNotes: z.string().optional(),
+});
