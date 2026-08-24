@@ -329,7 +329,7 @@ async function executePaymentSettlementPipeline({
   }
 
   /*
-   * 1. Retrieve the authoritative LandTerra payment snapshot.
+   * 1. Retrieve the authoritative BhoomiMitra payment snapshot.
    */
   const paymentDoc = await PaymentModel.findOne({ razorpayOrderId });
   if (!paymentDoc) {
@@ -442,7 +442,7 @@ async function executePaymentSettlementPipeline({
    */
   const isRenewal = paymentDoc.paymentPurpose === 'SUBSCRIPTION_RENEWAL';
   const targetEmail = actor.email || property.sellerEmail;
-  const recipientName = actor.name || property.sellerName || 'LandTerra Seller';
+  const recipientName = actor.name || property.sellerName || 'BhoomiMitra Seller';
 
   if (targetEmail) {
     enqueueAndDispatchPaymentEmail({
@@ -647,14 +647,14 @@ export async function processRazorpayWebhook(payload: any): Promise<void> {
 
   const paymentDoc = await PaymentModel.findOne({ razorpayOrderId });
   if (!paymentDoc) {
-    console.warn('Razorpay webhook order not found in LandTerra:', razorpayOrderId);
+    console.warn('Razorpay webhook order not found in BhoomiMitra:', razorpayOrderId);
     return;
   }
 
   if (paymentEntity?.amount) {
     const expectedPaise = Math.round(paymentDoc.amount * 100);
     if (Number(paymentEntity.amount) !== expectedPaise) {
-      throw new Error('Webhook payment amount does not match LandTerra order.');
+      throw new Error('Webhook payment amount does not match BhoomiMitra order.');
     }
   }
 

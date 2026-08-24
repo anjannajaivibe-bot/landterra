@@ -183,7 +183,7 @@ const UserSchema =
 
       /*
        * This means the seller identity/property process has
-       * been verified by LandTerra.
+       * been verified by BhoomiMitra.
        *
        * It is NOT the same as phone verification.
        */

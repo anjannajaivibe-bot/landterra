@@ -21,7 +21,7 @@ export async function POST(
   try {
     /*
      * Phone verification belongs to an authenticated
-     * LandTerra customer account.
+     * BhoomiMitra customer account.
      */
 
     const authUser =

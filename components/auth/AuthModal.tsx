@@ -98,7 +98,7 @@ export function AuthModal({
       className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
-      aria-labelledby="landterra-auth-title"
+      aria-labelledby="bhoomimitra-auth-title"
     >
       <div className="w-full max-w-md overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl">
         <div className="relative overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950 p-6 text-white">
@@ -120,15 +120,15 @@ export function AuthModal({
             </div>
 
             <span className="text-lg font-black tracking-tight">
-              Land
+              Bhoomi
               <span className="text-emerald-400">
-                Terra
+                Mitra
               </span>
             </span>
           </div>
 
           <h2
-            id="landterra-auth-title"
+            id="bhoomimitra-auth-title"
             className="relative mt-5 text-xl font-black tracking-tight"
           >
             {title}

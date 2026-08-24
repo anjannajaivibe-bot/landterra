@@ -36,7 +36,7 @@ export async function uploadFileToStorage(
   }
 
   const command = new PutObjectCommand({
-    Bucket: process.env.R2_BUCKET_NAME || 'landterra-assets',
+    Bucket: process.env.R2_BUCKET_NAME || 'bhoomimitra-assets',
     Key: objectKey,
     Body: fileBuffer,
     ContentType: mimeType,

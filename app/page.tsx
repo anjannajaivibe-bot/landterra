@@ -434,7 +434,7 @@ export default function HomePage() {
                 <Step
                   number="04"
                   title="Contact the seller"
-                  description="Send an inquiry directly through LandTerra."
+                  description="Send an inquiry directly through BhoomiMitra."
                 />
               </div>
 

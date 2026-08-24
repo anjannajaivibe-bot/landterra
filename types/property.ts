@@ -152,7 +152,7 @@ export interface IProperty {
 
   /**
    * Seller's asking price per sq. yard.
-   * This is NOT the LandTerra listing subscription price.
+   * This is NOT the BhoomiMitra listing subscription price.
    */
   pricePerYard: number;
 
@@ -167,7 +167,7 @@ export interface IProperty {
   priceNegotiable?: boolean;
 
   /* --------------------------------------------------------------
-     LANDTERRA SELLER LISTING FEE
+     BHOOMIMITRA SELLER LISTING FEE
   -------------------------------------------------------------- */
 
   /**

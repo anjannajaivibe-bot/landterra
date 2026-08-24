@@ -305,7 +305,7 @@ async function findOrCreateUser(
      * Search by Google ID first.
      *
      * Email is also checked to safely link an existing
-     * LandTerra account to its Google identity.
+     * BhoomiMitra account to its Google identity.
      */
 
     let user =
@@ -381,7 +381,7 @@ async function findOrCreateUser(
         user.isActive === false
     ) {
         throw new Error(
-            'Your LandTerra account has been disabled. Please contact support.',
+            'Your BhoomiMitra account has been disabled. Please contact support.',
         );
     }
 

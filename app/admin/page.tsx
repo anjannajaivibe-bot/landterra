@@ -947,7 +947,7 @@ export default function AdminControlPage() {
                 </div>
 
                 <h1 className="mt-1 text-lg sm:text-xl font-black tracking-tight text-white truncate">
-                  LandTerra Platform Control
+                  BhoomiMitra Platform Control
                 </h1>
               </div>
             </div>
@@ -1444,7 +1444,7 @@ export default function AdminControlPage() {
             <AdminSectionHeader
               eyebrow="Customer accounts"
               title="Registered Users"
-              description="All customer accounts registered on the LandTerra marketplace."
+              description="All customer accounts registered on the BhoomiMitra marketplace."
               count={`${users.length} accounts`}
             />
 

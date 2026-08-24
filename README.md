@@ -35,7 +35,7 @@ Your actual product is now clear
 
 The architecture should revolve around this:
 
-                 LANDTERRA
+                 BHOOMIMITRA
                      |
         ┌────────────┴────────────┐
         |                         |

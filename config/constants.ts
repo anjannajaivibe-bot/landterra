@@ -1,5 +1,5 @@
 /* ================================================================
-   LANDTERRA CONFIGURATION
+   BHOOMIMITRA CONFIGURATION
 ================================================================ */
 
 /* ================================================================
@@ -7,9 +7,9 @@
 ================================================================ */
 
 /**
- * LandTerra seller listing subscription:
+ * BhoomiMitra seller listing subscription:
  *
- * ₹10 per square yard for 30 days.
+ * Flat listing publishing fee for 30 days.
  *
  * IMPORTANT:
  * This is NOT the seller's property asking price.
@@ -190,7 +190,7 @@ export const VERIFICATION_BADGES = {
       'bg-emerald-50 text-emerald-700 border-emerald-200',
 
     description:
-      'The listing has completed LandTerra’s internal document review process.',
+      'The listing has completed BhoomiMitra’s internal document review process.',
   },
 
   PENDING: {
@@ -202,7 +202,7 @@ export const VERIFICATION_BADGES = {
       'bg-amber-50 text-amber-700 border-amber-200',
 
     description:
-      'The listing is currently undergoing LandTerra’s internal review.',
+      'The listing is currently undergoing BhoomiMitra’s internal review.',
   },
 
   VERIFICATION_REQUIRED: {

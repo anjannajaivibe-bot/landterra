@@ -980,7 +980,7 @@ function PropertyDetailsContent() {
 
               <p className="text-[10px] leading-5 text-slate-500">
                 The price shown is the seller&apos;s asking price.
-                LandTerra&apos;s listing subscription fee is charged
+                BhoomiMitra&apos;s listing subscription fee is charged
                 to sellers and is separate from the property price.
               </p>
             </div>

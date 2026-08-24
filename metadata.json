@@ -1,5 +1,5 @@
 {
-  "name": "LandTerra - Real Estate Land Marketplace",
+  "name": "BhoomiMitra - Real Estate Land Marketplace",
   "description": "Production-ready real estate land marketplace with verified listings, seller workflows, Razorpay publishing fees, Cloudflare R2 secure document storage, and admin verification.",
   "requestFramePermissions": ["geolocation"],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
