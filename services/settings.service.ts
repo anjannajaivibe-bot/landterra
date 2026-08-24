@@ -107,74 +107,51 @@ export async function updatePlatformSettings(
   }
 
   try {
-    const conn = await connectToDatabase();
-    if (conn) {
-      const doc = await PlatformSettingsModel.findOneAndUpdate(
-        {},
-        { $set: updatePayload },
-        { returnDocument: 'after', upsert: true }
-      ).lean();
+    await connectToDatabase();
 
-      if (doc) {
-        cachedSettings = {
-          requireGoogleLogin: Boolean(doc.requireGoogleLogin),
-          requirePhoneOtp: Boolean(doc.requirePhoneOtp),
-          listingFeeAmount: typeof doc.listingFeeAmount === 'number' ? doc.listingFeeAmount : 10,
-          listingFeeDurationDays: typeof doc.listingFeeDurationDays === 'number' ? doc.listingFeeDurationDays : 30,
-          updatedBy: doc.updatedBy || adminUser.email,
-          updatedAt: new Date(),
-        };
+    const doc = await PlatformSettingsModel.findOneAndUpdate(
+      {},
+      { $set: updatePayload },
+      { returnDocument: 'after', upsert: true }
+    ).lean();
 
-        // Record audit log
-        await createAuditLog({
-          actorId: adminUser.id,
-          actorName: adminUser.name,
-          actorEmail: adminUser.email,
-          actorRole: adminUser.role,
-          action: 'PLATFORM_SETTINGS_UPDATED',
-          entityType: 'SYSTEM',
-          entityId: 'platform_settings',
-          metadata: {
-            requireGoogleLogin: doc.requireGoogleLogin,
-            requirePhoneOtp: doc.requirePhoneOtp,
-            listingFeeAmount: doc.listingFeeAmount,
-            listingFeeDurationDays: doc.listingFeeDurationDays,
-            updatedBy: updatePayload.updatedBy,
-          },
-        });
-
-        return doc as unknown as IPlatformSettings;
-      }
+    if (!doc) {
+      throw new Error('Failed to persist platform settings to database.');
     }
+
+    cachedSettings = {
+      requireGoogleLogin: Boolean(doc.requireGoogleLogin),
+      requirePhoneOtp: Boolean(doc.requirePhoneOtp),
+      listingFeeAmount: typeof doc.listingFeeAmount === 'number' ? doc.listingFeeAmount : 10,
+      listingFeeDurationDays: typeof doc.listingFeeDurationDays === 'number' ? doc.listingFeeDurationDays : 30,
+      updatedBy: doc.updatedBy || adminUser.email,
+      updatedAt: new Date(),
+    };
+
+    // Record audit log in MongoDB
+    await createAuditLog({
+      actorId: adminUser.id,
+      actorName: adminUser.name,
+      actorEmail: adminUser.email,
+      actorRole: adminUser.role,
+      action: 'PLATFORM_SETTINGS_UPDATED',
+      entityType: 'SYSTEM',
+      entityId: 'platform_settings',
+      metadata: {
+        requireGoogleLogin: doc.requireGoogleLogin,
+        requirePhoneOtp: doc.requirePhoneOtp,
+        listingFeeAmount: doc.listingFeeAmount,
+        listingFeeDurationDays: doc.listingFeeDurationDays,
+        updatedBy: updatePayload.updatedBy,
+      },
+    }).catch((err) => {
+      console.error('Audit log error for settings update:', err);
+    });
+
+    return doc as unknown as IPlatformSettings;
   } catch (error) {
     console.error('Error updating platform settings in MongoDB:', error);
-    if (error instanceof Error && error.message.includes('Listing fee')) {
-      throw error;
-    }
+    const msg = error instanceof Error ? error.message : 'Database error updating platform settings';
+    throw new Error(msg);
   }
-
-  // Update cached state if DB temporarily unavailable
-  if (typeof updates.requireGoogleLogin === 'boolean') {
-    cachedSettings.requireGoogleLogin = updates.requireGoogleLogin;
-  }
-  if (typeof updates.requirePhoneOtp === 'boolean') {
-    cachedSettings.requirePhoneOtp = updates.requirePhoneOtp;
-  }
-  if (typeof updatePayload.listingFeeAmount === 'number') {
-    cachedSettings.listingFeeAmount = updatePayload.listingFeeAmount;
-  }
-  if (typeof updatePayload.listingFeeDurationDays === 'number') {
-    cachedSettings.listingFeeDurationDays = updatePayload.listingFeeDurationDays;
-  }
-  cachedSettings.updatedBy = updatePayload.updatedBy || adminUser.email;
-  cachedSettings.updatedAt = new Date();
-
-  return {
-    requireGoogleLogin: cachedSettings.requireGoogleLogin,
-    requirePhoneOtp: cachedSettings.requirePhoneOtp,
-    listingFeeAmount: cachedSettings.listingFeeAmount,
-    listingFeeDurationDays: cachedSettings.listingFeeDurationDays,
-    updatedBy: cachedSettings.updatedBy,
-    updatedAt: cachedSettings.updatedAt,
-  };
 }

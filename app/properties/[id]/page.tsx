@@ -18,6 +18,7 @@ import {
   ChevronLeft,
   ChevronRight,
   ExternalLink,
+  Flag,
   Heart,
   Info,
   LandPlot,
@@ -36,6 +37,7 @@ import {
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { AuthModal } from '@/components/auth/AuthModal';
+import { ReportModal } from '@/components/properties/ReportModal';
 
 import { IProperty } from '@/types/property';
 
@@ -161,6 +163,7 @@ function PropertyDetailsContent() {
   const [inquirySending, setInquirySending] = useState(false);
   const [inquirySuccess, setInquirySuccess] = useState(false);
   const [inquiryError, setInquiryError] = useState('');
+  const [reportModalOpen, setReportModalOpen] = useState(false);
   const [reloadCount, setReloadCount] = useState(0);
 
   /* ================================================================
@@ -282,6 +285,28 @@ function PropertyDetailsContent() {
   }, [propertyId, reloadCount]);
 
   /* ================================================================
+     FAVORITE STATUS SYNC
+  ================================================================= */
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!user || !propertyId) return;
+
+    fetch('/api/favorites')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!cancelled && data?.favorites && Array.isArray(data.favorites)) {
+          setFavorite(data.favorites.includes(propertyId));
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user, propertyId]);
+
+  /* ================================================================
      PROPERTY DERIVED DATA
   ================================================================= */
 
@@ -370,7 +395,12 @@ function PropertyDetailsContent() {
         throw new Error('Favorite action failed.');
       }
 
-      setFavorite((current) => !current);
+      const data = await response.json().catch(() => null);
+      if (typeof data?.isFavorite === 'boolean') {
+        setFavorite(data.isFavorite);
+      } else {
+        setFavorite((current) => !current);
+      }
     } catch (err) {
       console.error('Favorite error:', err);
     } finally {
@@ -411,6 +441,18 @@ function PropertyDetailsContent() {
     } catch {
       // User cancelled native share.
     }
+  };
+
+  /* ================================================================
+     REPORT LISTING
+  ================================================================= */
+
+  const openReportModal = () => {
+    if (!user) {
+      setAuthModalOpen(true);
+      return;
+    }
+    setReportModalOpen(true);
   };
 
   /* ================================================================
@@ -705,6 +747,17 @@ function PropertyDetailsContent() {
                 <span className="hidden sm:inline">
                   {favorite ? 'Saved' : 'Save'}
                 </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={openReportModal}
+                className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs font-bold text-slate-700 shadow-sm transition-colors hover:border-rose-200 hover:bg-rose-50 hover:text-rose-700"
+                title="Report suspicious or incorrect listing"
+                aria-label="Report listing"
+              >
+                <Flag className="h-4 w-4" />
+                <span className="hidden sm:inline">Report</span>
               </button>
             </div>
           </div>
@@ -1255,6 +1308,18 @@ function PropertyDetailsContent() {
                   registration and physical due diligence before
                   entering into any transaction.
                 </p>
+
+                <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between">
+                  <span className="text-[10px] text-slate-400">Notice fraudulent or misleading information?</span>
+                  <button
+                    type="button"
+                    onClick={openReportModal}
+                    className="inline-flex items-center gap-1.5 text-xs font-bold text-rose-700 hover:underline cursor-pointer"
+                  >
+                    <Flag className="h-3.5 w-3.5" />
+                    <span>Report Listing</span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -1422,6 +1487,18 @@ function PropertyDetailsContent() {
         isOpen={authModalOpen}
         onClose={() => setAuthModalOpen(false)}
       />
+
+      {/* ============================================================
+          REPORT MODAL
+      ============================================================ */}
+
+      {property && (
+        <ReportModal
+          property={property}
+          isOpen={reportModalOpen}
+          onClose={() => setReportModalOpen(false)}
+        />
+      )}
 
       <Footer />
     </div>

@@ -1,15 +1,16 @@
 import { IInquiry, IFavorite, IReport } from '@/types/inquiry';
+import { IProperty } from '@/types/property';
 import { InquiryModel, FavoriteModel, ReportModel } from '@/models/Inquiry';
+import { PropertyModel } from '@/models/Property';
 import { connectToDatabase } from '@/lib/db/mongodb';
 import { getPropertyById, updateProperty } from '@/services/property.service';
 import { notifySellerInquiry } from '@/services/email.service';
 import { createAuditLog } from '@/services/audit.service';
 
-const memoryInquiries: IInquiry[] = [];
-const memoryFavorites: IFavorite[] = [];
-const memoryReports: IReport[] = [];
+// ============================================================================
+// INQUIRY METHODS (Strict MongoDB Persistence)
+// ============================================================================
 
-// INQUIRY METHODS
 export async function createInquiry(data: {
   propertyId: string;
   buyerId: string;
@@ -23,6 +24,8 @@ export async function createInquiry(data: {
   if (!property) {
     throw new Error('Property not found');
   }
+
+  await connectToDatabase();
 
   const newInquiry: IInquiry = {
     _id: 'inq_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
@@ -42,113 +45,126 @@ export async function createInquiry(data: {
     updatedAt: new Date(),
   };
 
-  try {
-    const conn = await connectToDatabase();
-    if (conn) {
-      await InquiryModel.create(newInquiry);
-    }
-  } catch (e) {
-    console.error('Mongo inquiry error:', e);
-  }
+  const createdDoc = await InquiryModel.create(newInquiry);
 
-  memoryInquiries.unshift(newInquiry);
-
-  // Increment property inquiriesCount
+  // Increment property inquiriesCount in database
   await updateProperty(data.propertyId, {
     inquiriesCount: (property.inquiriesCount || 0) + 1,
+  }).catch((e) => {
+    console.error('Failed to increment property inquiry count:', e);
   });
 
-  // Notify seller via Resend email
+  // Notify seller via Resend email in background
   if (property.sellerEmail) {
-    await notifySellerInquiry(
+    notifySellerInquiry(
       property.sellerEmail,
       property.sellerName || 'Seller',
       data.buyerName,
       property.title,
       data.message,
       data.phoneShared ? data.buyerPhone : undefined
-    );
+    ).catch((err) => {
+      console.error('Failed to notify seller of inquiry:', err);
+    });
   }
 
-  return newInquiry;
+  const docObj = createdDoc.toObject ? createdDoc.toObject() : createdDoc;
+  return {
+    ...docObj,
+    _id: String(docObj._id),
+  } as unknown as IInquiry;
 }
 
 export async function getInquiriesForSeller(sellerId: string): Promise<IInquiry[]> {
-  try {
-    const conn = await connectToDatabase();
-    if (conn) {
-      const docs = await InquiryModel.find({ sellerId }).sort({ createdAt: -1 }).lean();
-      return docs as unknown as IInquiry[];
-    }
-  } catch {
-    // fallback
-  }
-
-  return memoryInquiries.filter((i) => i.sellerId === sellerId);
+  await connectToDatabase();
+  const docs = await InquiryModel.find({ sellerId }).sort({ createdAt: -1 }).lean();
+  return (docs || []).map((d) => ({
+    ...d,
+    _id: String(d._id),
+  })) as unknown as IInquiry[];
 }
 
 export async function getInquiriesForBuyer(buyerId: string): Promise<IInquiry[]> {
-  try {
-    const conn = await connectToDatabase();
-    if (conn) {
-      const docs = await InquiryModel.find({ buyerId }).sort({ createdAt: -1 }).lean();
-      return docs as unknown as IInquiry[];
-    }
-  } catch {
-    // fallback
-  }
-
-  return memoryInquiries.filter((i) => i.buyerId === buyerId);
+  await connectToDatabase();
+  const docs = await InquiryModel.find({ buyerId }).sort({ createdAt: -1 }).lean();
+  return (docs || []).map((d) => ({
+    ...d,
+    _id: String(d._id),
+  })) as unknown as IInquiry[];
 }
 
-// FAVORITES METHODS
-export async function toggleFavorite(userId: string, propertyId: string): Promise<{ isFavorite: boolean }> {
-  try {
-    const conn = await connectToDatabase();
-    if (conn) {
-      const existing = await FavoriteModel.findOne({ userId, propertyId });
-      if (existing) {
-        await FavoriteModel.findByIdAndDelete(existing._id);
-        return { isFavorite: false };
-      } else {
-        await FavoriteModel.create({ userId, propertyId });
-        return { isFavorite: true };
-      }
-    }
-  } catch {
-    // fallback
-  }
+// ============================================================================
+// FAVORITES METHODS (Strict MongoDB Persistence)
+// ============================================================================
 
-  const idx = memoryFavorites.findIndex((f) => f.userId === userId && f.propertyId === propertyId);
-  if (idx !== -1) {
-    memoryFavorites.splice(idx, 1);
+export async function toggleFavorite(
+  userId: string,
+  propertyId: string
+): Promise<{ isFavorite: boolean }> {
+  await connectToDatabase();
+
+  const existing = await FavoriteModel.findOne({ userId, propertyId });
+  if (existing) {
+    await FavoriteModel.findByIdAndDelete(existing._id);
     return { isFavorite: false };
   } else {
-    memoryFavorites.push({
-      _id: 'fav_' + Date.now(),
-      userId,
-      propertyId,
-      createdAt: new Date(),
-    });
+    await FavoriteModel.create({ userId, propertyId });
     return { isFavorite: true };
   }
 }
 
-export async function getFavoritesForUser(userId: string): Promise<string[]> {
-  try {
-    const conn = await connectToDatabase();
-    if (conn) {
-      const docs = await FavoriteModel.find({ userId }).select('propertyId').lean();
-      return docs.map((d) => d.propertyId);
-    }
-  } catch {
-    // fallback
-  }
-
-  return memoryFavorites.filter((f) => f.userId === userId).map((f) => f.propertyId);
+export async function removeFavorite(
+  userId: string,
+  propertyId: string
+): Promise<{ isFavorite: boolean }> {
+  await connectToDatabase();
+  await FavoriteModel.findOneAndDelete({ userId, propertyId });
+  return { isFavorite: false };
 }
 
-// REPORT METHODS
+export async function getFavoritesForUser(userId: string): Promise<string[]> {
+  await connectToDatabase();
+  const docs = await FavoriteModel.find({ userId }).select('propertyId').lean();
+  return (docs || []).map((d) => String(d.propertyId)).filter(Boolean);
+}
+
+export async function getFavoritePropertiesForUser(userId: string): Promise<{
+  favoriteIds: string[];
+  properties: IProperty[];
+}> {
+  await connectToDatabase();
+
+  const favDocs = await FavoriteModel.find({ userId }).select('propertyId').lean();
+  const favIds = (favDocs || []).map((d) => String(d.propertyId)).filter(Boolean);
+
+  if (favIds.length === 0) {
+    return { favoriteIds: [], properties: [] };
+  }
+
+  // Fetch actual valid properties from MongoDB, excluding deleted or missing records
+  const propertyDocs = await PropertyModel.find({
+    _id: { $in: favIds },
+    listingStatus: { $ne: 'DELETED' },
+  })
+    .sort({ createdAt: -1 })
+    .lean();
+
+  const validProperties = (propertyDocs || []).map((p) => {
+    const doc = { ...p } as any;
+    doc._id = String(doc._id);
+    return doc as IProperty;
+  });
+
+  return {
+    favoriteIds: favIds,
+    properties: validProperties,
+  };
+}
+
+// ============================================================================
+// REPORT METHODS (Strict MongoDB Persistence)
+// ============================================================================
+
 export async function createReport(data: {
   propertyId: string;
   reporterId: string;
@@ -159,7 +175,9 @@ export async function createReport(data: {
 }): Promise<IReport> {
   const property = await getPropertyById(data.propertyId);
 
-  const report: IReport = {
+  await connectToDatabase();
+
+  const reportData = {
     _id: 'rep_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
     propertyId: data.propertyId,
     propertyTitle: property?.title || 'Reported Property',
@@ -168,21 +186,13 @@ export async function createReport(data: {
     reporterEmail: data.reporterEmail,
     reason: data.reason,
     description: data.description,
-    status: 'PENDING',
+    status: 'PENDING' as const,
     createdAt: new Date(),
   };
 
-  try {
-    const conn = await connectToDatabase();
-    if (conn) {
-      await ReportModel.create(report);
-    }
-  } catch {
-    // fallback
-  }
+  const createdDoc = await ReportModel.create(reportData);
 
-  memoryReports.unshift(report);
-
+  // Record audit log in MongoDB
   await createAuditLog({
     actorId: data.reporterId,
     actorName: data.reporterName || 'Buyer',
@@ -190,27 +200,28 @@ export async function createReport(data: {
     actorRole: 'BUYER',
     action: 'PROPERTY_REPORTED',
     entityType: 'REPORT',
-    entityId: report._id,
+    entityId: reportData._id,
     metadata: {
       propertyId: data.propertyId,
       reason: data.reason,
       description: data.description,
     },
+  }).catch((err) => {
+    console.error('Audit log for report error:', err);
   });
 
-  return report;
+  const docObj = createdDoc.toObject ? createdDoc.toObject() : createdDoc;
+  return {
+    ...docObj,
+    _id: String(docObj._id),
+  } as unknown as IReport;
 }
 
 export async function getAllReports(): Promise<IReport[]> {
-  try {
-    const conn = await connectToDatabase();
-    if (conn) {
-      const docs = await ReportModel.find({}).sort({ createdAt: -1 }).lean();
-      return docs as unknown as IReport[];
-    }
-  } catch {
-    // fallback
-  }
-
-  return memoryReports;
+  await connectToDatabase();
+  const docs = await ReportModel.find({}).sort({ createdAt: -1 }).lean();
+  return (docs || []).map((d) => ({
+    ...d,
+    _id: String(d._id),
+  })) as unknown as IReport[];
 }

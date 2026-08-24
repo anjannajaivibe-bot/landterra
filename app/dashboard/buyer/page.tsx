@@ -7,7 +7,7 @@ import { Footer } from '@/components/layout/Footer';
 import { PropertyCard } from '@/components/properties/PropertyCard';
 import { IProperty } from '@/types/property';
 import { IInquiry } from '@/types/inquiry';
-import { Heart, Mail, UserCheck, Search, ShieldCheck, ArrowRight } from 'lucide-react';
+import { Heart, Mail, UserCheck, Search, ArrowRight } from 'lucide-react';
 
 export default function BuyerDashboardPage() {
   const [activeTab, setActiveTab] = useState<'SAVED' | 'INQUIRIES'>('SAVED');
@@ -16,30 +16,64 @@ export default function BuyerDashboardPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+
     async function loadBuyerData() {
       try {
         // Load favorites
-        const favRes = await fetch('/api/favorites');
-        const favData = await favRes.json();
-        if (favData?.favorites) {
-          // If populated with property objects or IDs
-          setFavorites(favData.favorites.map((f: any) => f.propertyId).filter(Boolean));
+        const favRes = await fetch('/api/favorites').catch(() => null);
+        if (favRes && favRes.ok) {
+          const favData = await favRes.json().catch(() => null);
+          if (isMounted) {
+            if (Array.isArray(favData?.properties)) {
+              // Valid populated property documents
+              setFavorites(
+                favData.properties.filter(
+                  (p: any) => p && typeof p === 'object' && p._id && p.title
+                )
+              );
+            } else if (Array.isArray(favData?.favorites)) {
+              // Backward-compatible if favorites was populated
+              setFavorites(
+                favData.favorites.filter(
+                  (p: any) => p && typeof p === 'object' && p._id && p.title
+                )
+              );
+            } else {
+              setFavorites([]);
+            }
+          }
         }
 
         // Load inquiries
-        const inqRes = await fetch('/api/inquiries');
-        const inqData = await inqRes.json();
-        if (inqData?.inquiries) {
-          setInquiries(inqData.inquiries);
+        const inqRes = await fetch('/api/inquiries').catch(() => null);
+        if (inqRes && inqRes.ok) {
+          const inqData = await inqRes.json().catch(() => null);
+          if (isMounted && Array.isArray(inqData?.inquiries)) {
+            setInquiries(inqData.inquiries.filter((inq: any) => inq && inq._id));
+          }
         }
       } catch (err) {
-        console.error(err);
+        console.error('Buyer dashboard load error:', err);
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     }
+
     loadBuyerData();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
+
+  const handleFavoriteToggle = (propertyId: string, isFav: boolean) => {
+    if (!isFav) {
+      setFavorites((prev) => prev.filter((p) => p._id !== propertyId));
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900">
@@ -78,7 +112,7 @@ export default function BuyerDashboardPage() {
             <div className="flex gap-6 text-xs font-bold text-slate-600">
               <button
                 onClick={() => setActiveTab('SAVED')}
-                className={`py-4 border-b-2 transition-colors flex items-center gap-1.5 ${
+                className={`py-4 border-b-2 transition-colors flex items-center gap-1.5 cursor-pointer ${
                   activeTab === 'SAVED'
                     ? 'border-emerald-600 text-emerald-800'
                     : 'border-transparent hover:text-slate-900'
@@ -90,7 +124,7 @@ export default function BuyerDashboardPage() {
 
               <button
                 onClick={() => setActiveTab('INQUIRIES')}
-                className={`py-4 border-b-2 transition-colors flex items-center gap-1.5 ${
+                className={`py-4 border-b-2 transition-colors flex items-center gap-1.5 cursor-pointer ${
                   activeTab === 'INQUIRIES'
                     ? 'border-emerald-600 text-emerald-800'
                     : 'border-transparent hover:text-slate-900'
@@ -127,9 +161,16 @@ export default function BuyerDashboardPage() {
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {favorites.map((prop) => (
-                      <PropertyCard key={prop._id} property={prop} initialFavorite={true} />
-                    ))}
+                    {favorites.map((prop) =>
+                      prop?._id ? (
+                        <PropertyCard
+                          key={prop._id}
+                          property={prop}
+                          initialFavorite={true}
+                          onFavoriteToggle={handleFavoriteToggle}
+                        />
+                      ) : null
+                    )}
                   </div>
                 )}
               </div>

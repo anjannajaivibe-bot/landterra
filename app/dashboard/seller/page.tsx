@@ -27,6 +27,7 @@ import {
   RotateCcw,
   Edit3,
   Calendar,
+  LandPlot,
 } from 'lucide-react';
 
 export default function SellerDashboardPage() {
@@ -339,17 +340,18 @@ export default function SellerDashboardPage() {
                           className="py-4 flex flex-col md:flex-row md:items-center justify-between gap-4"
                         >
                           <div className="flex items-start gap-4">
-                            <div className="relative w-20 h-20 rounded-xl overflow-hidden bg-slate-100 shrink-0">
-                              <Image
-                                src={
-                                  prop.images?.[0]?.secureUrl ||
-                                  'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=400'
-                                }
-                                alt={prop.title}
-                                fill
-                                className="object-cover"
-                                referrerPolicy="no-referrer"
-                              />
+                            <div className="relative w-20 h-20 rounded-xl overflow-hidden bg-slate-100 shrink-0 border border-slate-200 flex items-center justify-center">
+                              {prop.images?.[0]?.secureUrl ? (
+                                <Image
+                                  src={prop.images[0].secureUrl}
+                                  alt={prop.title}
+                                  fill
+                                  className="object-cover"
+                                  referrerPolicy="no-referrer"
+                                />
+                              ) : (
+                                <LandPlot className="w-8 h-8 text-slate-300" />
+                              )}
                             </div>
 
                             <div className="space-y-1">

@@ -224,3 +224,65 @@ export async function enqueueAndDispatchPaymentEmail({
     return false;
   }
 }
+
+export async function notifySupportContactMessage({
+  name,
+  email,
+  phone,
+  subject,
+  message,
+}: {
+  name: string;
+  email: string;
+  phone?: string;
+  subject?: string;
+  message: string;
+}) {
+  const supportEmail = process.env.SUPPORT_EMAIL || 'support@bhoomimitra.com';
+  return sendEmail({
+    to: supportEmail,
+    subject: `Support Query: ${subject || 'New Contact Request'} - from ${name}`,
+    html: `
+      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #1e293b;">
+        <h2 style="color: #047857;">New Support & Compliance Inquiry</h2>
+        <p>A user submitted a message via the BhoomiMitra contact form.</p>
+        
+        <table style="width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 14px;">
+          <tr style="border-bottom: 1px solid #e2e8f0;">
+            <td style="padding: 8px 0; font-weight: bold; width: 120px; color: #475569;">Name:</td>
+            <td style="padding: 8px 0; color: #0f172a;">${name}</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #e2e8f0;">
+            <td style="padding: 8px 0; font-weight: bold; color: #475569;">Email:</td>
+            <td style="padding: 8px 0; color: #0f172a;"><a href="mailto:${email}">${email}</a></td>
+          </tr>
+          ${
+            phone
+              ? `<tr style="border-bottom: 1px solid #e2e8f0;">
+            <td style="padding: 8px 0; font-weight: bold; color: #475569;">Phone:</td>
+            <td style="padding: 8px 0; color: #0f172a;">${phone}</td>
+          </tr>`
+              : ''
+          }
+          ${
+            subject
+              ? `<tr style="border-bottom: 1px solid #e2e8f0;">
+            <td style="padding: 8px 0; font-weight: bold; color: #475569;">Subject:</td>
+            <td style="padding: 8px 0; color: #0f172a;">${subject}</td>
+          </tr>`
+              : ''
+          }
+        </table>
+
+        <div style="background: #f8fafc; border-left: 4px solid #047857; padding: 16px; margin: 20px 0; border-radius: 4px;">
+          <p style="margin: 0 0 8px 0; font-weight: bold; color: #334155; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">Message Content:</p>
+          <p style="margin: 0; font-size: 14px; line-height: 1.6; color: #1e293b; white-space: pre-wrap;">${message}</p>
+        </div>
+
+        <p style="font-size: 12px; color: #64748b; margin-top: 30px;">
+          Sent from BhoomiMitra Platform Contact Desk.
+        </p>
+      </div>
+    `,
+  });
+}

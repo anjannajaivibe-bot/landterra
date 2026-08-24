@@ -23,7 +23,7 @@ export async function GET() {
       name: 'Razorpay Payments',
       configured: isRazorpayConfigured(),
       envVar: 'RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET',
-      description: 'Server-verified publishing fee processing (₹10 / sq.yard)',
+      description: 'Server-verified digital classifieds publishing fee processing (Flat listing fee for 30-day advertisement)',
     },
     googleMaps: {
       name: 'Google Maps Platform',

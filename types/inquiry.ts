@@ -53,6 +53,26 @@ export interface IReport {
   createdAt: string | Date;
 }
 
+export type ContactMessageStatus =
+  | 'NEW'
+  | 'READ'
+  | 'IN_PROGRESS'
+  | 'RESOLVED'
+  | 'ARCHIVED';
+
+export interface IContactMessage {
+  _id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  subject?: string;
+  message: string;
+  status: ContactMessageStatus;
+  ipAddress?: string;
+  createdAt: string | Date;
+  updatedAt: string | Date;
+}
+
 export interface IAuditLog {
   _id: string;
   eventKey?: string;

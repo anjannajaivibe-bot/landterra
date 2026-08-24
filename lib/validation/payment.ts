@@ -42,3 +42,28 @@ export const VerifyPropertyActionSchema = z.object({
   rejectionReason: z.string().optional(),
   adminNotes: z.string().optional(),
 });
+
+export const CreateContactSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(2, 'Name must be at least 2 characters')
+    .max(100, 'Name cannot exceed 100 characters'),
+  email: z
+    .string()
+    .trim()
+    .email('Please enter a valid email address')
+    .max(200),
+  phone: z
+    .string()
+    .trim()
+    .regex(/^[6-9]\d{9}$/, 'Invalid 10-digit mobile number')
+    .optional()
+    .or(z.literal('')),
+  subject: z.string().trim().max(200).optional(),
+  message: z
+    .string()
+    .trim()
+    .min(10, 'Message must be at least 10 characters')
+    .max(3000, 'Message cannot exceed 3000 characters'),
+});
