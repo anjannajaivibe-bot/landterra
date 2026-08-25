@@ -12,8 +12,8 @@ const PaymentSchema = new Schema<IPayment>(
     listingFeeDurationDays: { type: Number, default: 30 },
     landAreaYards: { type: Number, required: true },
     ratePerYard: { type: Number },
-    razorpayOrderId: { type: String, required: true, unique: true, index: true },
-    razorpayPaymentId: { type: String, sparse: true },
+    razorpayOrderId: { type: String, required: true, unique: true },
+    razorpayPaymentId: { type: String },
     razorpaySignature: { type: String },
     paymentStatus: {
       type: String,

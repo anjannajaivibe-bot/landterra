@@ -84,7 +84,7 @@ export const ReportModel: Model<IReport> =
 const AuditLogSchema = new Schema<IAuditLog>(
   {
     actorId: { type: String, required: true, index: true },
-    eventKey: { type: String, unique: true, sparse: true, index: true },
+    eventKey: { type: String },
     actorName: { type: String, required: true },
     actorEmail: { type: String, required: true },
     actorRole: { type: String, required: true },

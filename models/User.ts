@@ -19,7 +19,6 @@ const UserSchema =
        */
       googleId: {
         type: String,
-        sparse: true,
       },
 
       name: {

@@ -18,6 +18,7 @@ import {
   LogIn,
   Search,
   MessageSquare,
+  Sparkles,
 } from 'lucide-react';
 
 import { IUser } from '@/types/user';
@@ -150,45 +151,42 @@ export function Navbar() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 w-full border-b border-slate-200 bg-white/95 backdrop-blur-md">
+      <header className="sticky top-0 z-50 w-full border-b border-slate-200 bg-white/95 backdrop-blur-md shadow-xs">
         {/* ======================================================
-            TRUST / INFORMATION BAR
+            TOP TRUST & ANNOUNCEMENT BAR (Clean White / Slate-50)
         ====================================================== */}
 
-        <div className="bg-slate-950">
+        <div className="border-b border-slate-100 bg-slate-50/90 text-slate-800">
           <div className="mx-auto flex h-8 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-            <div className="flex min-w-0 items-center gap-2 text-[10px] font-medium text-slate-300 sm:text-[11px]">
-              <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-emerald-400" />
-
+            <div className="flex min-w-0 items-center gap-2 text-[11px] font-semibold text-slate-800">
+              <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-emerald-700" />
               <span className="truncate">
-                Land marketplace for direct property discovery and seller
-                connections
+                Direct-to-owner land marketplace • 0% Broker Commission • Verified Revenue Records
               </span>
             </div>
 
-            <div className="hidden shrink-0 items-center gap-2 text-[10px] text-slate-400 sm:flex">
-              <span>Publishing fee</span>
-              <span className="font-bold text-emerald-400">
-                Starting at ₹10 for 30 days
+            <div className="hidden shrink-0 items-center gap-3 text-[11px] text-slate-600 sm:flex">
+              <span>Classifieds Publishing:</span>
+              <span className="font-bold text-emerald-800">
+                Flat ₹10 for 30 Days
               </span>
             </div>
           </div>
         </div>
 
         {/* ======================================================
-            MAIN NAVIGATION
+            MAIN NAVIGATION BAR (Crisp White Background)
         ====================================================== */}
 
         <div className="mx-auto flex h-[68px] max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           {/* LOGO */}
-
           <Link
             href="/"
             onClick={closeAllMenus}
             className="group flex shrink-0 items-center gap-2.5"
             aria-label="BhoomiMitra home"
           >
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-600 text-white shadow-sm transition-colors group-hover:bg-emerald-700">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-600 text-white shadow-sm transition-all group-hover:bg-emerald-700 group-hover:shadow-md">
               <Compass className="h-5 w-5" />
             </div>
 
@@ -198,24 +196,24 @@ export function Navbar() {
                 <span className="text-emerald-700">Mitra</span>
               </span>
 
-              <span className="mt-1 block text-[9px] font-bold uppercase tracking-[0.16em] text-slate-400">
+              <span className="mt-1 block text-[9px] font-extrabold uppercase tracking-[0.18em] text-slate-500">
                 Land Marketplace
               </span>
             </div>
           </Link>
 
           {/* ====================================================
-              DESKTOP NAVIGATION
+              DESKTOP NAVIGATION LINKS (Solid Black / Bold)
           ==================================================== */}
 
           <nav
-            className="hidden items-center gap-1 md:flex"
+            className="hidden items-center gap-1.5 md:flex"
             aria-label="Primary navigation"
           >
             <NavLink
               href="/buy"
               active={isActive('/buy')}
-              icon={<Search className="h-3.5 w-3.5" />}
+              icon={<Search className="h-4 w-4" />}
             >
               Find Land
             </NavLink>
@@ -223,9 +221,16 @@ export function Navbar() {
             <NavLink
               href="/sell"
               active={isActive('/sell')}
-              icon={<Plus className="h-3.5 w-3.5" />}
+              icon={<Plus className="h-4 w-4" />}
             >
               Sell Your Land
+            </NavLink>
+
+            <NavLink
+              href="/listing-rules"
+              active={isActive('/listing-rules')}
+            >
+              Listing Rules
             </NavLink>
 
             <NavLink
@@ -238,7 +243,7 @@ export function Navbar() {
             <NavLink
               href="/contact"
               active={isActive('/contact')}
-              icon={<MessageSquare className="h-3.5 w-3.5" />}
+              icon={<MessageSquare className="h-4 w-4" />}
             >
               Contact
             </NavLink>
@@ -248,7 +253,7 @@ export function Navbar() {
               DESKTOP ACCOUNT / ACTIONS
           ==================================================== */}
 
-          <div className="hidden items-center gap-2 lg:flex">
+          <div className="hidden items-center gap-3 lg:flex">
             {user ? (
               <div
                 ref={accountDropdownRef}
@@ -261,60 +266,56 @@ export function Navbar() {
                   }
                   aria-expanded={accountDropdownOpen}
                   aria-haspopup="menu"
-                  className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-2.5 py-2 transition-colors hover:border-slate-300 hover:bg-slate-50"
+                  className="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-white px-3 py-2 transition-all hover:border-slate-300 hover:bg-slate-50 shadow-2xs"
                 >
                   {/* Avatar */}
-
-                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-100 text-[11px] font-black text-emerald-800">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-100 text-xs font-black text-emerald-900 border border-emerald-200">
                     {userInitial}
                   </div>
 
                   {/* User name */}
-
                   <div className="max-w-[130px] text-left">
-                    <span className="block truncate text-xs font-bold text-slate-900">
+                    <span className="block truncate text-xs font-bold text-slate-950">
                       {user.name || 'My Account'}
                     </span>
 
-                    <span className="block text-[10px] font-medium text-slate-500">
-                      Customer account
+                    <span className="block text-[10px] font-semibold text-slate-500">
+                      Customer Account
                     </span>
                   </div>
 
                   <ChevronDown
-                    className={`h-3.5 w-3.5 text-slate-400 transition-transform ${accountDropdownOpen ? 'rotate-180' : ''
+                    className={`h-4 w-4 text-slate-500 transition-transform ${accountDropdownOpen ? 'rotate-180' : ''
                       }`}
                   />
                 </button>
 
                 {/* ACCOUNT DROPDOWN */}
-
                 {accountDropdownOpen && (
                   <div
                     role="menu"
-                    className="absolute right-0 top-[calc(100%+8px)] w-72 overflow-hidden rounded-2xl border border-slate-200 bg-white p-2 shadow-2xl"
+                    className="absolute right-0 top-[calc(100%+8px)] w-72 overflow-hidden rounded-2xl border border-slate-200 bg-white p-2 shadow-xl animate-in fade-in slide-in-from-top-2 duration-150"
                   >
                     {/* Account header */}
-
                     <div className="border-b border-slate-100 px-3 pb-3 pt-2">
                       <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-sm font-black text-emerald-800">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-sm font-black text-emerald-900 border border-emerald-200">
                           {userInitial}
                         </div>
 
                         <div className="min-w-0">
-                          <div className="truncate text-sm font-bold text-slate-900">
+                          <div className="truncate text-sm font-bold text-slate-950">
                             {user.name || 'Customer Account'}
                           </div>
 
-                          <div className="truncate text-[11px] text-slate-500">
+                          <div className="truncate text-[11px] font-medium text-slate-500">
                             {user.email || 'Signed in'}
                           </div>
 
                           {user.phone && (
-                            <div className="mt-1 flex items-center gap-1 text-[10px] font-semibold text-emerald-700">
+                            <div className="mt-1 flex items-center gap-1 text-[10px] font-bold text-emerald-800">
                               <CheckCircle2 className="h-3 w-3" />
-                              <span>Phone verified</span>
+                              <span>Phone Verified</span>
                             </div>
                           )}
                         </div>
@@ -322,7 +323,6 @@ export function Navbar() {
                     </div>
 
                     {/* Account links */}
-
                     <div className="space-y-1 pt-2">
                       <AccountMenuLink
                         href="/dashboard/buyer"
@@ -330,27 +330,27 @@ export function Navbar() {
                           <Heart className="h-4 w-4 text-rose-500" />
                         }
                         title="Saved Lands & Inquiries"
-                        description="Your saved properties and seller conversations"
+                        description="Your watchlist and seller inquiries"
                         onClick={closeAllMenus}
                       />
 
                       <AccountMenuLink
                         href="/dashboard/seller"
                         icon={
-                          <LayoutDashboard className="h-4 w-4 text-emerald-600" />
+                          <LayoutDashboard className="h-4 w-4 text-emerald-700" />
                         }
                         title="My Land Listings"
-                        description="Manage your properties and subscriptions"
+                        description="Manage listings and subscriptions"
                         onClick={closeAllMenus}
                       />
 
                       <AccountMenuLink
                         href="/profile"
                         icon={
-                          <User className="h-4 w-4 text-slate-500" />
+                          <User className="h-4 w-4 text-slate-700" />
                         }
                         title="My Profile"
-                        description="Account and phone verification"
+                        description="Account and mobile verification"
                         onClick={closeAllMenus}
                       />
 
@@ -361,15 +361,15 @@ export function Navbar() {
                           onClick={handleSignOut}
                           className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors hover:bg-rose-50"
                         >
-                          <LogOut className="h-4 w-4 text-rose-500" />
+                          <LogOut className="h-4 w-4 text-rose-600" />
 
                           <div>
-                            <div className="text-xs font-bold text-rose-600">
+                            <div className="text-xs font-bold text-rose-700">
                               Sign Out
                             </div>
 
                             <div className="text-[10px] text-slate-500">
-                              Sign out of this account
+                              End your session securely
                             </div>
                           </div>
                         </button>
@@ -382,18 +382,17 @@ export function Navbar() {
               <button
                 type="button"
                 onClick={openAuthModal}
-                className="inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-700 transition-colors hover:bg-slate-100 hover:text-emerald-700"
+                className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-bold text-slate-900 shadow-2xs transition-all hover:border-slate-300 hover:bg-slate-50 hover:text-emerald-800"
               >
-                <LogIn className="h-4 w-4" />
+                <LogIn className="h-4 w-4 text-slate-700" />
                 <span>Sign In</span>
               </button>
             )}
 
             {/* PRIMARY SELL CTA */}
-
             <Link
               href="/sell"
-              className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-2.5 text-xs font-bold text-white shadow-sm transition-all hover:bg-emerald-700 hover:shadow-md"
+              className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-xs font-bold text-white shadow-sm transition-all hover:bg-emerald-700 hover:shadow-md"
             >
               <Plus className="h-4 w-4" />
               <span>List Your Land</span>
@@ -409,19 +408,20 @@ export function Navbar() {
               <button
                 type="button"
                 onClick={openAuthModal}
-                className="inline-flex items-center gap-1 px-2 py-2 text-xs font-bold text-emerald-700"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-900"
               >
-                <LogIn className="h-3.5 w-3.5" />
+                <LogIn className="h-3.5 w-3.5 text-emerald-700" />
                 <span>Sign In</span>
               </button>
             )}
 
             <Link
-              href="/buy"
+              href="/sell"
               onClick={closeAllMenus}
-              className="hidden rounded-lg bg-slate-900 px-3 py-2 text-xs font-bold text-white sm:inline-flex"
+              className="inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-3 py-2 text-xs font-bold text-white"
             >
-              Find Land
+              <Plus className="h-3.5 w-3.5" />
+              <span>List Land</span>
             </Link>
 
             <button
@@ -433,7 +433,7 @@ export function Navbar() {
                 mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'
               }
               aria-expanded={mobileMenuOpen}
-              className="rounded-xl p-2 text-slate-700 transition-colors hover:bg-slate-100"
+              className="rounded-xl border border-slate-200 bg-white p-2 text-slate-900 transition-colors hover:bg-slate-50"
             >
               {mobileMenuOpen ? (
                 <X className="h-5 w-5" />
@@ -445,28 +445,26 @@ export function Navbar() {
         </div>
 
         {/* ======================================================
-            MOBILE MENU
+            MOBILE DRAWER (White Background & Black Headers)
         ====================================================== */}
 
         {mobileMenuOpen && (
-          <div className="border-t border-slate-200 bg-white md:hidden">
-            <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6">
-              {/* Mobile primary CTA */}
-
-              <div className="mb-4 rounded-2xl bg-slate-950 p-4">
+          <div className="border-t border-slate-200 bg-white md:hidden animate-in fade-in slide-in-from-top-2 duration-150">
+            <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 space-y-4">
+              {/* Mobile primary discovery card */}
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 shadow-2xs">
                 <div className="flex items-start gap-3">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-500 text-white">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-600 text-white">
                     <Search className="h-4 w-4" />
                   </div>
 
                   <div>
-                    <p className="text-sm font-bold text-white">
-                      Looking for land?
+                    <p className="text-sm font-bold text-slate-950">
+                      Explore Verified Land
                     </p>
 
-                    <p className="mt-1 text-[11px] leading-5 text-slate-400">
-                      Search available properties by location, land type and
-                      budget.
+                    <p className="mt-0.5 text-xs text-slate-600">
+                      Browse agricultural land, residential plots, and commercial corridors directly from owners.
                     </p>
                   </div>
                 </div>
@@ -474,15 +472,14 @@ export function Navbar() {
                 <Link
                   href="/buy"
                   onClick={closeAllMenus}
-                  className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-3 text-xs font-bold text-white transition-colors hover:bg-emerald-500"
+                  className="mt-3.5 flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-xs font-bold text-white transition-colors hover:bg-emerald-700 shadow-xs"
                 >
                   <Search className="h-4 w-4" />
-                  Find Land
+                  <span>Browse All Properties</span>
                 </Link>
               </div>
 
               {/* Mobile navigation */}
-
               <nav
                 className="space-y-1"
                 aria-label="Mobile navigation"
@@ -506,6 +503,14 @@ export function Navbar() {
                 </MobileNavLink>
 
                 <MobileNavLink
+                  href="/listing-rules"
+                  active={isActive('/listing-rules')}
+                  onClick={closeAllMenus}
+                >
+                  Listing Rules
+                </MobileNavLink>
+
+                <MobileNavLink
                   href="/about"
                   active={isActive('/about')}
                   onClick={closeAllMenus}
@@ -519,15 +524,14 @@ export function Navbar() {
                   icon={<MessageSquare className="h-4 w-4" />}
                   onClick={closeAllMenus}
                 >
-                  Contact
+                  Contact Support
                 </MobileNavLink>
               </nav>
 
               {/* Logged-in customer section */}
-
               {user ? (
-                <div className="mt-4 border-t border-slate-200 pt-4">
-                  <div className="mb-2 px-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                <div className="border-t border-slate-200 pt-4">
+                  <div className="mb-2 px-2 text-[11px] font-extrabold uppercase tracking-wider text-slate-900">
                     My Account
                   </div>
 
@@ -545,7 +549,7 @@ export function Navbar() {
                     <MobileAccountLink
                       href="/dashboard/seller"
                       icon={
-                        <LayoutDashboard className="h-4 w-4 text-emerald-600" />
+                        <LayoutDashboard className="h-4 w-4 text-emerald-700" />
                       }
                       onClick={closeAllMenus}
                     >
@@ -555,50 +559,40 @@ export function Navbar() {
                     <MobileAccountLink
                       href="/profile"
                       icon={
-                        <User className="h-4 w-4 text-slate-500" />
+                        <User className="h-4 w-4 text-slate-700" />
                       }
                       onClick={closeAllMenus}
                     >
-                      My Profile
+                      My Profile & Mobile Verification
                     </MobileAccountLink>
 
                     <button
                       type="button"
                       onClick={handleSignOut}
-                      className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-xs font-bold text-rose-600 transition-colors hover:bg-rose-50"
+                      className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-xs font-bold text-rose-700 transition-colors hover:bg-rose-50"
                     >
-                      <LogOut className="h-4 w-4" />
-                      Sign Out
+                      <LogOut className="h-4 w-4 text-rose-600" />
+                      <span>Sign Out</span>
                     </button>
                   </div>
                 </div>
               ) : (
-                <div className="mt-4 border-t border-slate-200 pt-4">
+                <div className="border-t border-slate-200 pt-4">
                   <button
                     type="button"
                     onClick={openAuthModal}
-                    className="flex w-full items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs font-bold text-emerald-800 transition-colors hover:bg-emerald-100"
+                    className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-xs font-bold text-slate-900 shadow-2xs transition-colors hover:bg-slate-50"
                   >
-                    <LogIn className="h-4 w-4" />
-                    Sign In with Google
+                    <LogIn className="h-4 w-4 text-emerald-700" />
+                    <span>Sign In to Your Account</span>
                   </button>
                 </div>
               )}
 
-              {/* Mobile sell CTA */}
-
-              <Link
-                href="/sell"
-                onClick={closeAllMenus}
-                className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-3.5 text-xs font-bold text-white transition-colors hover:bg-emerald-700"
-              >
-                <Plus className="h-4 w-4" />
-                List Your Land
-              </Link>
-
-              <p className="mt-3 text-center text-[10px] leading-5 text-slate-400">
-                Listing fee: ₹10 per sq. yard for 30 days
-              </p>
+              {/* Mobile bottom pricing note */}
+              <div className="pt-2 text-center text-[11px] font-semibold text-slate-500">
+                Direct Landowner Classifieds • Flat ₹10 for 30 Days
+              </div>
             </div>
           </div>
         )}
@@ -617,7 +611,7 @@ export function Navbar() {
 }
 
 /* ==============================================================
-   DESKTOP NAV LINK
+   DESKTOP NAV LINK (Crisp Black & Emerald Active)
 ================================================================ */
 
 function NavLink({
@@ -634,13 +628,13 @@ function NavLink({
   return (
     <Link
       href={href}
-      className={`inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2.5 text-sm transition-colors ${active
-        ? 'bg-emerald-50 font-bold text-emerald-700'
-        : 'font-semibold text-slate-600 hover:bg-slate-50 hover:text-emerald-700'
+      className={`inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-bold transition-all ${active
+          ? 'bg-emerald-50 text-emerald-900 border border-emerald-200/80 shadow-2xs'
+          : 'text-slate-900 hover:bg-slate-100/80 hover:text-emerald-800'
         }`}
     >
       {icon}
-      {children}
+      <span>{children}</span>
     </Link>
   );
 }
@@ -669,16 +663,16 @@ function AccountMenuLink({
       onClick={onClick}
       className="flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-slate-50"
     >
-      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-50">
+      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 border border-slate-200">
         {icon}
       </div>
 
       <div className="min-w-0">
-        <div className="text-xs font-bold text-slate-800">
+        <div className="text-xs font-bold text-slate-950">
           {title}
         </div>
 
-        <div className="mt-0.5 truncate text-[10px] text-slate-500">
+        <div className="mt-0.5 truncate text-[11px] text-slate-500 font-medium">
           {description}
         </div>
       </div>
@@ -707,13 +701,13 @@ function MobileNavLink({
     <Link
       href={href}
       onClick={onClick}
-      className={`flex items-center gap-3 rounded-xl px-3 py-3 text-sm transition-colors ${active
-        ? 'bg-emerald-50 font-bold text-emerald-700'
-        : 'font-semibold text-slate-700 hover:bg-slate-50'
+      className={`flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-xs transition-colors ${active
+          ? 'bg-emerald-50 font-bold text-emerald-900 border border-emerald-200/80'
+          : 'font-bold text-slate-900 hover:bg-slate-100'
         }`}
     >
       {icon && (
-        <span className={active ? 'text-emerald-600' : 'text-slate-400'}>
+        <span className={active ? 'text-emerald-700' : 'text-slate-500'}>
           {icon}
         </span>
       )}
@@ -742,10 +736,10 @@ function MobileAccountLink({
     <Link
       href={href}
       onClick={onClick}
-      className="flex items-center gap-3 rounded-xl px-3 py-3 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-50"
+      className="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-900 transition-colors hover:bg-slate-100"
     >
       {icon}
-      {children}
+      <span>{children}</span>
     </Link>
   );
 }
