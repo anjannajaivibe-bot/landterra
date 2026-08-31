@@ -179,7 +179,7 @@ export default function PrivacyPage() {
             <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-1">
               <p><strong>Grievance & Privacy Officer:</strong> Compliance Team, BhoomiMitra</p>
               <p><strong>Email:</strong> <span className="font-mono text-emerald-800">privacy@bhoomimitra.com</span></p>
-              <p><strong>Address:</strong> BhoomiMitra Technologies, Hyderabad, Telangana, India</p>
+              <p><strong>Address:</strong> BhoomiMitra, Hyderabad, Telangana, India</p>
             </div>
           </section>
         </div>

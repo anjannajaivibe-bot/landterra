@@ -398,7 +398,7 @@ export const BUYER_SAFETY_MESSAGE =
 ================================================================ */
 
 export const SELLER_LISTING_FEE_DESCRIPTION =
-  'BhoomiMitra charges sellers a flat publishing fee for each 30-day listing period. This platform listing fee is separate from the seller’s property asking price.';
+  `BhoomiMitra charges sellers only a flat digital advertising and publishing fee for each 30-day property listing period. This fee is solely for publishing and maintaining the advertisement on BhoomiMitra. BhoomiMitra does not collect property purchase payments, booking amounts, token amounts, registration charges or sale consideration. The listing fee is completely separate from the seller's property asking price.`;
 
 /* ================================================================
    VERIFICATION EXPLANATION

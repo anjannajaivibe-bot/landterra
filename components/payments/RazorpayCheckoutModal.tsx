@@ -161,11 +161,11 @@ export function RazorpayCheckoutModal({
         currency: order.currency || 'INR',
         name: 'BhoomiMitra Marketplace',
         description: isRenewal
-          ? `Listing renewal (${activeOrderDuration} days) for ${property.title.substring(
+          ? `Digital listing advertisement renewal (${activeOrderDuration} days) for ${property.title.substring(
               0,
               25,
             )}...`
-          : `Publishing fee (${activeOrderDuration} days) for ${property.title.substring(
+          : `Digital property advertisement publishing fee (${activeOrderDuration} days) for ${property.title.substring(
               0,
               25,
             )}...`,

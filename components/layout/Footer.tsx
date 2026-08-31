@@ -192,6 +192,16 @@ export function Footer() {
               </Link>
             </li>
             <li>
+              <Link href="/pricing" className="hover:text-emerald-800 transition-colors">
+                Seller Listing Pricing
+              </Link>
+            </li>
+            <li>
+              <Link href="/refund-policy" className="hover:text-emerald-800 transition-colors">
+                Cancellation & Refund Policy
+              </Link>
+            </li>
+            <li>
               <Link href="/contact" className="hover:text-emerald-800 transition-colors">
                 Grievance Officer
               </Link>
@@ -204,7 +214,7 @@ export function Footer() {
       <div className="bg-slate-50 border-t border-slate-200 py-6 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-600">
           <p className="font-medium text-center sm:text-left">
-            © {new Date().getFullYear()} BhoomiMitra Technologies Inc. Direct Land Classifieds. All rights reserved.
+            © {new Date().getFullYear()} BhoomiMitra Direct Land Classifieds. All rights reserved.
           </p>
 
           <div className="flex items-center gap-6 font-bold text-slate-700">
@@ -213,6 +223,9 @@ export function Footer() {
             </Link>
             <Link href="/privacy" className="hover:text-emerald-800 transition-colors">
               Privacy
+            </Link>
+            <Link href="/refund-policy" className="hover:text-emerald-800 transition-colors">
+              Refunds
             </Link>
             <Link href="/listing-rules" className="hover:text-emerald-800 transition-colors">
               Rules
