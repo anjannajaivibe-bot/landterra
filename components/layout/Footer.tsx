@@ -214,7 +214,7 @@ export function Footer() {
       <div className="bg-slate-50 border-t border-slate-200 py-6 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-600">
           <p className="font-medium text-center sm:text-left">
-            © {new Date().getFullYear()} BhoomiMitra Direct Land Classifieds. All rights reserved.
+            © 2026 BhoomiMitra Direct Land Classifieds. All rights reserved.
           </p>
 
           <div className="flex items-center gap-6 font-bold text-slate-700">
