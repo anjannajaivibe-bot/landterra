@@ -77,8 +77,15 @@ export const metadata: Metadata = {
       'Discover land and plots across India. Human-verified records, direct seller contact, and zero hidden commissions.',
     images: ['/og-image.png'],
   },
+  manifest: '/manifest.webmanifest',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'BhoomiMitra',
+  },
   icons: {
     icon: '/favicon.ico',
+    apple: '/icon-192.png',
   },
 };
 
@@ -98,6 +105,15 @@ export default function RootLayout({
           src="https://checkout.razorpay.com/v1/checkout.js"
           strategy="lazyOnload"
         />
+        <Script id="register-sw" strategy="afterInteractive">
+          {`
+            if ('serviceWorker' in navigator && window.location.protocol === 'https:' || window.location.hostname === 'localhost') {
+              window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/sw.js').catch(function() {});
+              });
+            }
+          `}
+        </Script>
       </body>
     </html>
   );
