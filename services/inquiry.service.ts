@@ -93,6 +93,26 @@ export async function getInquiriesForBuyer(buyerId: string): Promise<IInquiry[]>
   })) as unknown as IInquiry[];
 }
 
+export async function updateInquiryStatus(
+  inquiryId: string,
+  sellerId: string,
+  status: 'PENDING' | 'RESPONDED' | 'CLOSED'
+): Promise<IInquiry | null> {
+  await connectToDatabase();
+  const updated = await InquiryModel.findOneAndUpdate(
+    { _id: inquiryId, sellerId },
+    { $set: { status, updatedAt: new Date() } },
+    { new: true }
+  ).lean();
+
+  if (!updated) return null;
+
+  return {
+    ...updated,
+    _id: String(updated._id),
+  } as unknown as IInquiry;
+}
+
 // ============================================================================
 // FAVORITES METHODS (Strict MongoDB Persistence)
 // ============================================================================
@@ -224,4 +244,93 @@ export async function getAllReports(): Promise<IReport[]> {
     ...d,
     _id: String(d._id),
   })) as unknown as IReport[];
+}
+
+// ============================================================================
+// BUYER CALL SELLER ACTION (Database Tracking & Audit Logging)
+// ============================================================================
+
+export async function recordBuyerCallAction(data: {
+  propertyId: string;
+  buyerId: string;
+  buyerName: string;
+  buyerEmail: string;
+  buyerPhone?: string;
+  ipAddress?: string;
+}): Promise<{
+  success: boolean;
+  sellerName: string;
+  sellerPhone: string;
+  sellerEmail?: string;
+  propertyTitle: string;
+}> {
+  const property = await getPropertyById(data.propertyId);
+  if (!property) {
+    throw new Error('Property not found');
+  }
+
+  await connectToDatabase();
+
+  // 1. Record call lead in InquiryModel so seller sees the phone inquiry in dashboard
+  const callInquiry = {
+    propertyId: data.propertyId,
+    propertyTitle: property.title,
+    propertyLocation: `${property.location?.city || ''}, ${property.location?.state || ''}`,
+    propertyImage: property.images?.[0]?.secureUrl,
+    buyerId: data.buyerId,
+    buyerName: data.buyerName,
+    buyerEmail: data.buyerEmail,
+    buyerPhone: data.buyerPhone,
+    sellerId: property.sellerId,
+    message: `[Phone Call Lead] Buyer initiated direct phone contact regarding "${property.title}".`,
+    phoneShared: Boolean(data.buyerPhone),
+    status: 'PENDING' as const,
+  };
+
+  await InquiryModel.create(callInquiry).catch((err) => {
+    console.error('Failed to log call inquiry record:', err);
+  });
+
+  // 2. Increment property inquiries counter
+  await updateProperty(data.propertyId, {
+    inquiriesCount: (property.inquiriesCount || 0) + 1,
+  }).catch(() => {});
+
+  // 3. Record full audit log for safety, compliance, and dispute resolution
+  await createAuditLog({
+    actorId: data.buyerId,
+    actorName: data.buyerName,
+    actorEmail: data.buyerEmail,
+    actorRole: 'BUYER',
+    action: 'BUYER_CALL_SELLER',
+    entityType: 'PROPERTY',
+    entityId: data.propertyId,
+    ipAddress: data.ipAddress,
+    metadata: {
+      buyerId: data.buyerId,
+      buyerEmail: data.buyerEmail,
+      buyerName: data.buyerName,
+      buyerPhone: data.buyerPhone,
+      sellerId: property.sellerId,
+      sellerName: property.sellerName,
+      sellerPhone: property.sellerPhone,
+      sellerEmail: property.sellerEmail,
+      propertyId: data.propertyId,
+      propertyTitle: property.title,
+      propertyLocation: `${property.location?.city || ''}, ${property.location?.state || ''}`,
+      timestamp: new Date().toISOString(),
+    },
+  }).catch((err) => {
+    console.error('Failed to create audit log for buyer call:', err);
+  });
+
+  const sellerPhone = property.sellerPhone || '+919876543210';
+
+  return {
+    success: true,
+    sellerName: property.sellerName || 'Verified Landowner',
+    sellerPhone,
+    sellerEmail: property.sellerEmail,
+    propertyTitle: property.title,
+  };
 }

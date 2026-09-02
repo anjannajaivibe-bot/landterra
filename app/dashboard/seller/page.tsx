@@ -28,6 +28,8 @@ import {
   Edit3,
   Calendar,
   LandPlot,
+  Phone,
+  MessageCircle,
 } from 'lucide-react';
 
 export default function SellerDashboardPage() {
@@ -136,6 +138,23 @@ export default function SellerDashboardPage() {
       }
     } catch (e) {
       console.error(e);
+    }
+  };
+
+  const handleUpdateInquiryStatus = async (inquiryId: string, status: 'PENDING' | 'RESPONDED' | 'CLOSED') => {
+    try {
+      const res = await fetch('/api/inquiries', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ inquiryId, status }),
+      });
+      if (res.ok) {
+        setInquiries((prev) =>
+          prev.map((inq) => (inq._id === inquiryId ? { ...inq, status } : inq))
+        );
+      }
+    } catch (e) {
+      console.error('Error updating inquiry status:', e);
     }
   };
 
@@ -588,28 +607,108 @@ export default function SellerDashboardPage() {
                   </div>
                 ) : (
                   <div className="space-y-3">
-                    {inquiries.map((inq) => (
-                      <div
-                        key={inq._id}
-                        className="p-4 rounded-xl border border-slate-200 bg-white space-y-2 shadow-xs"
-                      >
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="font-bold text-slate-900">From: {inq.buyerName}</span>
-                          <span className="text-slate-400">
-                            {new Date(inq.createdAt).toLocaleDateString('en-IN')}
-                          </span>
+                    {inquiries.map((inq) => {
+                      const isResponded = inq.status === 'RESPONDED';
+                      const isClosed = inq.status === 'CLOSED';
+
+                      return (
+                        <div
+                          key={inq._id}
+                          className="p-5 rounded-2xl border border-slate-200 bg-white space-y-3 shadow-xs hover:border-slate-300 transition-colors"
+                        >
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="font-bold text-slate-900 text-sm">{inq.buyerName}</span>
+                              {inq.propertyTitle && (
+                                <span className="text-xs text-slate-500">
+                                  for <strong className="text-slate-700">{inq.propertyTitle}</strong>
+                                </span>
+                              )}
+                              {isResponded ? (
+                                <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-[10px] font-bold flex items-center gap-1">
+                                  <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                                  Responded
+                                </span>
+                              ) : isClosed ? (
+                                <span className="px-2.5 py-0.5 rounded-full bg-slate-100 border border-slate-200 text-slate-600 text-[10px] font-bold">
+                                  Closed
+                                </span>
+                              ) : (
+                                <span className="px-2.5 py-0.5 rounded-full bg-amber-50 border border-amber-200 text-amber-800 text-[10px] font-bold">
+                                  New Inquiry
+                                </span>
+                              )}
+                            </div>
+
+                            <span className="text-[11px] text-slate-400">
+                              {new Date(inq.createdAt).toLocaleDateString('en-IN', {
+                                day: 'numeric',
+                                month: 'short',
+                                year: 'numeric',
+                              })}
+                            </span>
+                          </div>
+
+                          <p className="text-xs text-slate-700 bg-slate-50 p-3.5 rounded-xl border border-slate-100 leading-relaxed font-normal">
+                            &ldquo;{inq.message}&rdquo;
+                          </p>
+
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1 text-xs">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              {inq.buyerPhone && (
+                                <a
+                                  href={`tel:${inq.buyerPhone}`}
+                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-xs transition-colors"
+                                >
+                                  <Phone className="w-3.5 h-3.5" />
+                                  <span>Call {inq.buyerPhone}</span>
+                                </a>
+                              )}
+
+                              {inq.buyerEmail && (
+                                <a
+                                  href={`mailto:${inq.buyerEmail}?subject=Re: Inquiry regarding ${encodeURIComponent(inq.propertyTitle || 'Land on BhoomiMitra')}`}
+                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs transition-colors"
+                                >
+                                  <Mail className="w-3.5 h-3.5" />
+                                  <span>Email Buyer</span>
+                                </a>
+                              )}
+                            </div>
+
+                            <div className="flex items-center gap-1.5 self-end sm:self-center">
+                              <span className="text-[11px] text-slate-400 font-medium">Status:</span>
+                              {!isResponded && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleUpdateInquiryStatus(inq._id, 'RESPONDED')}
+                                  className="px-2.5 py-1 rounded-md bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-[11px] font-bold transition-colors cursor-pointer"
+                                >
+                                  Mark Responded
+                                </button>
+                              )}
+                              {!isClosed ? (
+                                <button
+                                  type="button"
+                                  onClick={() => handleUpdateInquiryStatus(inq._id, 'CLOSED')}
+                                  className="px-2.5 py-1 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-600 text-[11px] font-semibold transition-colors cursor-pointer"
+                                >
+                                  Close
+                                </button>
+                              ) : (
+                                <button
+                                  type="button"
+                                  onClick={() => handleUpdateInquiryStatus(inq._id, 'PENDING')}
+                                  className="px-2.5 py-1 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-600 text-[11px] font-semibold transition-colors cursor-pointer"
+                                >
+                                  Reopen
+                                </button>
+                              )}
+                            </div>
+                          </div>
                         </div>
-                        <p className="text-xs text-slate-700 bg-slate-50 p-3 rounded-lg border border-slate-100">
-                          {inq.message}
-                        </p>
-                        <div className="flex items-center justify-between text-[11px] text-slate-500 pt-1">
-                          <span>
-                            Contact: {inq.buyerEmail} {inq.buyerPhone ? `• Phone: ${inq.buyerPhone}` : ''}
-                          </span>
-                          <span className="text-emerald-700 font-semibold">Inquiry Ticket Open</span>
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </div>
