@@ -4,6 +4,7 @@ import {
 } from 'next/server';
 
 import crypto from 'crypto';
+import mongoose from 'mongoose';
 
 import {
   UserSession,
@@ -143,87 +144,77 @@ export function verifySessionToken(
   token: string,
 ): SessionPayload | null {
   try {
-    const parts =
-      token.split('.');
+    if (!token || typeof token !== 'string') {
+      return null;
+    }
+
+    const parts = token.split('.');
 
     if (parts.length !== 2) {
       return null;
     }
 
-    const [
-      encodedPayload,
-      providedSignature,
-    ] = parts;
+    const [encodedPayload, providedSignature] = parts;
 
-    const expectedSignature =
-      crypto
-        .createHmac(
-          'sha256',
-          getAuthSecret(),
-        )
-        .update(encodedPayload)
-        .digest('base64')
-        .replace(/\+/g, '-')
-        .replace(/\//g, '_')
-        .replace(/=+$/g, '');
+    if (!encodedPayload || !providedSignature) {
+      return null;
+    }
 
-    const providedBuffer =
-      Buffer.from(
-        providedSignature,
-      );
+    const expectedSignature = crypto
+      .createHmac('sha256', getAuthSecret())
+      .update(encodedPayload)
+      .digest('base64')
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/g, '');
 
-    const expectedBuffer =
-      Buffer.from(
-        expectedSignature,
-      );
+    const providedBuffer = Buffer.from(providedSignature);
+    const expectedBuffer = Buffer.from(expectedSignature);
 
-    if (
-      providedBuffer.length !==
-      expectedBuffer.length
-    ) {
+    if (providedBuffer.length !== expectedBuffer.length) {
+      return null;
+    }
+
+    if (!crypto.timingSafeEqual(providedBuffer, expectedBuffer)) {
+      return null;
+    }
+
+    const decoded = base64UrlDecode(encodedPayload);
+    const payload = JSON.parse(decoded) as SessionPayload;
+
+    if (!payload || typeof payload !== 'object') {
       return null;
     }
 
     if (
-      !crypto.timingSafeEqual(
-        providedBuffer,
-        expectedBuffer,
-      )
+      typeof payload.userId !== 'string' ||
+      !payload.userId.trim() ||
+      typeof payload.email !== 'string' ||
+      !payload.email.trim() ||
+      typeof payload.role !== 'string' ||
+      !['BUYER', 'SELLER', 'ADMIN'].includes(payload.role) ||
+      typeof payload.iat !== 'number' ||
+      !Number.isFinite(payload.iat) ||
+      typeof payload.exp !== 'number' ||
+      !Number.isFinite(payload.exp)
     ) {
       return null;
     }
 
-    const payload =
-      JSON.parse(
-        base64UrlDecode(
-          encodedPayload,
-        ),
-      ) as SessionPayload;
+    const now = Math.floor(Date.now() / 1000);
 
+    // exp validation: must not be expired, must be > iat, and not impossibly far in the future
     if (
-      !payload.userId ||
-      !payload.email ||
-      !payload.exp
-    ) {
-      return null;
-    }
-
-    if (
-      payload.exp <=
-      Math.floor(
-        Date.now() / 1000,
-      )
+      payload.exp <= now ||
+      payload.iat > now + 60 ||
+      payload.exp <= payload.iat ||
+      payload.exp > now + SESSION_DURATION_SECONDS + 86400
     ) {
       return null;
     }
 
     return payload;
-  } catch (error) {
-    console.error(
-      'Session verification error:',
-      error,
-    );
-
+  } catch {
     return null;
   }
 }
@@ -240,10 +231,7 @@ export async function getSession(
   }
 
   try {
-    const token =
-      req.cookies.get(
-        SESSION_COOKIE,
-      )?.value;
+    const token = req.cookies.get(SESSION_COOKIE)?.value;
 
     if (!token) {
       return null;
@@ -251,19 +239,15 @@ export async function getSession(
 
     /*
      * NEVER trust the browser's raw identity.
-     *
-     * First verify the cryptographic signature.
+     * First verify the cryptographic HMAC signature and payload.
      */
-
-    const payload =
-      verifySessionToken(token);
+    const payload = verifySessionToken(token);
 
     if (!payload) {
       return null;
     }
 
-    const connection =
-      await connectToDatabase();
+    const connection = await connectToDatabase();
 
     if (!connection) {
       return null;
@@ -273,59 +257,42 @@ export async function getSession(
      * Retrieve the authoritative user from MongoDB.
      *
      * This means:
-     *
      * - disabled user -> denied
      * - changed role -> immediately reflected
      * - phone verification -> immediately reflected
      */
+    let dbUser = null;
 
-    const dbUser =
-      await UserModel.findById(
-        payload.userId,
-      ).lean();
+    if (mongoose.Types.ObjectId.isValid(payload.userId)) {
+      dbUser = await UserModel.findById(payload.userId).lean();
+    }
 
-    if (
-      !dbUser ||
-      dbUser.isActive === false
-    ) {
+    if (!dbUser && (payload.userId || payload.email)) {
+      dbUser = await UserModel.findOne({
+        $or: [
+          { googleId: payload.userId },
+          { email: payload.email.toLowerCase() },
+        ],
+      }).lean();
+    }
+
+    if (!dbUser || dbUser.isActive === false) {
       return null;
     }
 
     return {
       user: {
-        id:
-          dbUser._id.toString(),
-
-        name:
-          dbUser.name,
-
-        email:
-          dbUser.email,
-
-        role:
-          dbUser.role as UserRole,
-
-        image:
-          dbUser.profileImage,
-
-        phone:
-          dbUser.phone,
-
-        isPhoneVerified:
-          Boolean(
-            dbUser.isPhoneVerified,
-          ),
-
-        sellerType:
-          dbUser.sellerType,
+        id: dbUser._id.toString(),
+        name: dbUser.name,
+        email: dbUser.email,
+        role: dbUser.role as UserRole,
+        image: dbUser.profileImage,
+        phone: dbUser.phone,
+        isPhoneVerified: Boolean(dbUser.isPhoneVerified),
+        sellerType: dbUser.sellerType,
       },
     };
-  } catch (error) {
-    console.error(
-      'Session retrieval error:',
-      error,
-    );
-
+  } catch {
     return null;
   }
 }

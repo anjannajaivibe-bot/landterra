@@ -45,7 +45,7 @@ export async function POST(
     }
 
     const body =
-      await req.json();
+      await req.json().catch(() => null);
 
     const phone =
       typeof body?.phone ===

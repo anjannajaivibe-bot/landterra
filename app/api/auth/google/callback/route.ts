@@ -6,8 +6,8 @@ import {
 import crypto from 'crypto';
 
 import { UserModel } from '@/models/User';
-
 import { connectToDatabase } from '@/lib/db/mongodb';
+import { setSessionCookie } from '@/lib/security/auth';
 
 /* ================================================================
    CONSTANTS
@@ -19,78 +19,15 @@ const GOOGLE_TOKEN_ENDPOINT =
 const GOOGLE_USERINFO_ENDPOINT =
     'https://www.googleapis.com/oauth2/v3/userinfo';
 
-const SESSION_COOKIE =
-    'landterra_session';
-
 const OAUTH_STATE_COOKIE =
     'landterra_google_oauth_state';
 
 const OAUTH_REDIRECT_COOKIE =
     'landterra_google_redirect';
 
-const SESSION_DURATION_SECONDS =
-    60 * 60 * 24 * 30;
-
 /* ================================================================
    HELPERS
 ================================================================ */
-
-function base64UrlEncode(
-    value: string,
-): string {
-    return Buffer.from(value)
-        .toString('base64')
-        .replace(/\+/g, '-')
-        .replace(/\//g, '_')
-        .replace(/=+$/g, '');
-}
-
-function createSignedSession(
-    payload: {
-        userId: string;
-        email: string;
-        name: string;
-        role: string;
-    },
-): string {
-    const secret =
-        process.env.AUTH_SECRET;
-
-    if (!secret || secret.length < 32) {
-        throw new Error(
-            'AUTH_SECRET must be configured and contain at least 32 characters.',
-        );
-    }
-
-    const encodedPayload =
-        base64UrlEncode(
-            JSON.stringify({
-                ...payload,
-                iat: Math.floor(
-                    Date.now() / 1000,
-                ),
-                exp:
-                    Math.floor(
-                        Date.now() / 1000,
-                    ) +
-                    SESSION_DURATION_SECONDS,
-            }),
-        );
-
-    const signature =
-        crypto
-            .createHmac(
-                'sha256',
-                secret,
-            )
-            .update(encodedPayload)
-            .digest('base64')
-            .replace(/\+/g, '-')
-            .replace(/\//g, '_')
-            .replace(/=+$/g, '');
-
-    return `${encodedPayload}.${signature}`;
-}
 
 function safeRedirect(
     value: string | undefined,
@@ -585,26 +522,7 @@ export async function GET(
             );
 
         /* ------------------------------------------------------------
-           CREATE SIGNED SESSION
-        ------------------------------------------------------------- */
-
-        const session =
-            createSignedSession({
-                userId:
-                    user._id.toString(),
-
-                email:
-                    user.email,
-
-                name:
-                    user.name,
-
-                role:
-                    user.role,
-            });
-
-        /* ------------------------------------------------------------
-           REDIRECT TO ORIGINAL PAGE
+           REDIRECT TO ORIGINAL PAGE & SET SESSION COOKIE
         ------------------------------------------------------------- */
 
         const response =
@@ -615,28 +533,12 @@ export async function GET(
                 ),
             );
 
-        /* ------------------------------------------------------------
-           SECURE SESSION COOKIE
-        ------------------------------------------------------------- */
-
-        response.cookies.set(
-            SESSION_COOKIE,
-            session,
-            {
-                httpOnly: true,
-
-                secure:
-                    process.env.NODE_ENV ===
-                    'production',
-
-                sameSite: 'lax',
-
-                maxAge:
-                    SESSION_DURATION_SECONDS,
-
-                path: '/',
-            },
-        );
+        setSessionCookie(response, {
+            id: user._id.toString(),
+            name: user.name,
+            email: user.email,
+            role: user.role,
+        });
 
         /* ------------------------------------------------------------
            CLEAN OAUTH COOKIES
