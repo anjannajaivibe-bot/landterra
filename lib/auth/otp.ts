@@ -65,19 +65,12 @@ export function normalizePhoneNumber(phone: string): string {
 
   const cleaned = phone.replace(/\D/g, '');
 
-  // 10 digits starting with Indian mobile prefix [6-9]
-  if (cleaned.length === 10 && /^[6-9]\d{9}$/.test(cleaned)) {
-    return `+91${cleaned}`;
-  }
-
-  // 11 digits starting with 0
-  if (cleaned.length === 11 && /^0[6-9]\d{9}$/.test(cleaned)) {
-    return `+91${cleaned.slice(1)}`;
-  }
-
-  // 12 digits starting with 91
-  if (cleaned.length === 12 && /^91[6-9]\d{9}$/.test(cleaned)) {
-    return `+${cleaned}`;
+  // Extract the standard 10-digit Indian mobile number (starts with 6, 7, 8, 9)
+  if (cleaned.length >= 10) {
+    const last10 = cleaned.slice(-10);
+    if (/^[6-9]\d{9}$/.test(last10)) {
+      return `+91${last10}`;
+    }
   }
 
   return '';
