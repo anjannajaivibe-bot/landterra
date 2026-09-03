@@ -22,20 +22,22 @@ export const metadata: Metadata = {
     process.env.NEXT_PUBLIC_APP_URL || 'https://bhoomimitra.com'
   ),
   title: {
-    default: "BhoomiMitra | India's Direct Land & Plot Marketplace",
+    default: "BhoomiMitra | India's Direct Real Estate & Property Marketplace",
     template: '%s | BhoomiMitra',
   },
   description:
-    'Discover land and plots across India, review government survey records and title extracts, and connect directly with genuine sellers with zero brokerage.',
+    'Discover verified properties across India — residential plots, flats, luxury villas, commercial spaces, and agricultural land. Connect directly with genuine owners with zero broker commissions.',
   keywords: [
-    'land for sale in india',
-    'buy land',
+    'properties for sale in india',
+    'real estate india',
+    'buy flats',
+    'buy villas',
     'direct plots',
     'residential plots',
-    'commercial land',
+    'commercial property',
     'agricultural land',
     'farmland for sale',
-    'land marketplace',
+    'property marketplace',
     'bhoomimitra',
     'bhoomi mitra',
   ],
@@ -58,21 +60,21 @@ export const metadata: Metadata = {
     locale: 'en_IN',
     url: process.env.NEXT_PUBLIC_APP_URL || 'https://bhoomimitra.com',
     siteName: 'BhoomiMitra',
-    title: 'BhoomiMitra | Direct Land & Plot Marketplace',
+    title: 'BhoomiMitra | Direct Real Estate & Property Marketplace',
     description:
-      'Discover land and plots across India. Direct peer-to-peer listings, direct seller contact, and zero hidden commissions.',
+      'Discover verified properties, homes, plots, and commercial spaces across India. Direct peer-to-peer listings, direct owner contact, and zero hidden commissions.',
     images: [
       {
         url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'BhoomiMitra - India Direct Land Marketplace',
+        alt: 'BhoomiMitra - India Direct Property Marketplace',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'BhoomiMitra | Direct Land & Plot Marketplace',
+    title: 'BhoomiMitra | Direct Real Estate & Property Marketplace',
     description:
       'Discover land and plots across India. Direct peer-to-peer listings, direct seller contact, and zero hidden commissions.',
     images: ['/og-image.png'],

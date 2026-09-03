@@ -60,6 +60,63 @@ function toPublicProperty(
     landType:
       property.landType,
 
+    propertyType:
+      property.propertyType,
+
+    bhk:
+      property.bhk,
+
+    facing:
+      property.facing,
+
+    floorNumber:
+      property.floorNumber,
+
+    totalFloors:
+      property.totalFloors,
+
+    furnishingStatus:
+      property.furnishingStatus,
+
+    bathrooms:
+      property.bathrooms,
+
+    balconies:
+      property.balconies,
+
+    carpetAreaSqFt:
+      property.carpetAreaSqFt,
+
+    superBuiltUpAreaSqFt:
+      property.superBuiltUpAreaSqFt,
+
+    boundaryWall:
+      property.boundaryWall,
+
+    cornerPlot:
+      property.cornerPlot,
+
+    gatedCommunity:
+      property.gatedCommunity,
+
+    amenities:
+      property.amenities,
+
+    approvals:
+      property.approvals,
+
+    waterSource:
+      property.waterSource,
+
+    electricityPhase:
+      property.electricityPhase,
+
+    soilType:
+      property.soilType,
+
+    propertyAttributes:
+      property.propertyAttributes,
+
     roadAccess:
       property.roadAccess,
 
@@ -474,14 +531,15 @@ export async function PATCH(
       typeof error === 'object' &&
       'issues' in error
     ) {
+      const zodIssues = (error as { issues: Array<{ path: (string | number)[]; message: string }> }).issues;
+      const formattedMessage = zodIssues
+        .map((issue) => `${issue.path.join('.') || 'field'}: ${issue.message}`)
+        .join('; ');
+
       return NextResponse.json(
         {
-          error:
-            'Validation failed.',
-          details:
-            (error as {
-              issues: unknown;
-            }).issues,
+          error: formattedMessage || 'Validation failed.',
+          details: zodIssues,
         },
         {
           status: 400,

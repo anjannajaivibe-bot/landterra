@@ -1,10 +1,46 @@
 export type LandType =
+   // Land & Plots
+   | 'OPEN_PLOT'
+   | 'FARMLAND_PLOT'
+   | 'GATED_COMMUNITY_PLOT'
+   | 'AGRICULTURAL_LAND'
    | 'RESIDENTIAL_PLOT'
    | 'COMMERCIAL_LAND'
-   | 'AGRICULTURAL_LAND'
    | 'INDUSTRIAL_PLOT'
+
+   // Residential Units
+   | 'FLAT'
+   | 'INDEPENDENT_HOUSE'
+   | 'VILLA'
+   | 'HOUSE_VILLA'
+   | 'TOWNHOUSE'
+   | 'DUPLEX'
+   | 'PENTHOUSE'
+
+   // Commercial & Retail
+   | 'RETAIL_SHOP'
+   | 'SHOWROOM'
+   | 'OFFICE_SPACE'
+   | 'COWORKING_SPACE'
+   | 'SHOPPING_MALL'
+   | 'WAREHOUSE_LAND'
+   | 'SHOP_SHOWROOM'
+   | 'INDUSTRIAL_BUILDING'
+   | 'INDUSTRIAL_SHED'
+   | 'INSTITUTIONAL'
+
+   // Hospitality & Leisure
+   | 'RESORT'
+   | 'HOTEL'
+   | 'SERVICE_APARTMENT'
+   | 'GUEST_HOUSE'
    | 'FARM_HOUSE_LAND'
-   | 'INSTITUTIONAL';
+
+   // Income-Generating & Rental Formats
+   | 'RESIDENTIAL_RENTAL'
+   | 'COMMERCIAL_LEASE'
+   | 'COLIVING_PG'
+   | 'VACATION_RENTAL_AIRBNB';
 
 export type VerificationStatus =
    | 'PENDING'
@@ -193,6 +229,44 @@ export interface IProperty {
 
    landType: LandType;
 
+   propertyType?: string;
+
+   bhk?: string;
+
+   facing?: string;
+
+   floorNumber?: string;
+
+   totalFloors?: number;
+
+   furnishingStatus?: string;
+
+   bathrooms?: number;
+
+   balconies?: number;
+
+   carpetAreaSqFt?: number;
+
+   superBuiltUpAreaSqFt?: number;
+
+   boundaryWall?: string;
+
+   cornerPlot?: boolean;
+
+   gatedCommunity?: boolean;
+
+   amenities?: string[];
+
+   approvals?: string[];
+
+   waterSource?: string[];
+
+   electricityPhase?: string;
+
+   soilType?: string;
+
+   propertyAttributes?: Record<string, any>;
+
    roadAccess: string;
 
    nearbyLandmarks: string[];
@@ -316,6 +390,44 @@ export interface IPublicProperty {
 
    landType: LandType;
 
+   propertyType?: string;
+
+   bhk?: string;
+
+   facing?: string;
+
+   floorNumber?: string;
+
+   totalFloors?: number;
+
+   furnishingStatus?: string;
+
+   bathrooms?: number;
+
+   balconies?: number;
+
+   carpetAreaSqFt?: number;
+
+   superBuiltUpAreaSqFt?: number;
+
+   boundaryWall?: string;
+
+   cornerPlot?: boolean;
+
+   gatedCommunity?: boolean;
+
+   amenities?: string[];
+
+   approvals?: string[];
+
+   waterSource?: string[];
+
+   electricityPhase?: string;
+
+   soilType?: string;
+
+   propertyAttributes?: Record<string, any>;
+
    roadAccess: string;
 
    nearbyLandmarks: string[];
@@ -391,7 +503,11 @@ export interface PropertyFilterParams {
    minPricePerYard?: number;
    maxPricePerYard?: number;
 
-   landType?: LandType | 'ALL';
+   landType?: LandType | 'ALL' | string;
+
+   propertyType?: string;
+
+   bhk?: string;
 
    verifiedOnly?: boolean;
 

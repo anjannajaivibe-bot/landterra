@@ -78,13 +78,13 @@ export function Footer() {
                 Bhoomi<span className="text-[#FF9933]">Mitra</span>
               </span>
               <span className="mt-1 block text-[9px] font-extrabold uppercase tracking-[0.18em] text-slate-400">
-                Land Marketplace
+                Property Marketplace
               </span>
             </div>
           </Link>
 
           <p className="text-xs text-slate-600 leading-relaxed max-w-sm">
-            India&apos;s direct-to-owner land and agricultural plot classifieds platform. Connecting genuine landowners with serious buyers through transparent disclosures, direct contact, and satellite mapping.
+            India&apos;s direct-to-owner real estate and property classifieds platform. Connecting genuine property owners with serious buyers and tenants across plots, homes, commercial spaces, and rentals.
           </p>
 
           <div className="space-y-2.5 pt-2 text-xs">
@@ -106,32 +106,32 @@ export function Footer() {
         {/* Col 2: For Buyers */}
         <div className="space-y-3">
           <h4 className="text-xs font-black text-slate-950 uppercase tracking-wider">
-            For Land Buyers
+            For Buyers &amp; Tenants
           </h4>
           <ul className="space-y-2.5 text-xs font-semibold text-slate-600">
             <li>
               <Link href="/buy" className="hover:text-[#FF9933] transition-colors">
-                Explore Land Listings
+                Explore All Properties
               </Link>
             </li>
             <li>
-              <Link href="/buy?landType=RESIDENTIAL_PLOT" className="hover:text-[#FF9933] transition-colors">
-                Residential Layout Plots
+              <Link href="/buy?landType=RESIDENTIAL_PLOT,FLAT" className="hover:text-[#FF9933] transition-colors">
+                Residential Plots &amp; Flats
               </Link>
             </li>
             <li>
               <Link href="/buy?landType=AGRICULTURAL_LAND" className="hover:text-[#FF9933] transition-colors">
-                Fertile Farmlands
+                Fertile Farmlands &amp; Estates
               </Link>
             </li>
             <li>
-              <Link href="/buy?landType=COMMERCIAL_LAND" className="hover:text-[#FF9933] transition-colors">
-                Commercial Land Parcels
+              <Link href="/buy?landType=COMMERCIAL_LAND,OFFICE_SPACE,RETAIL_SHOP" className="hover:text-[#FF9933] transition-colors">
+                Commercial &amp; Retail Spaces
               </Link>
             </li>
             <li>
-              <Link href="/buy?landType=FARM_HOUSE_LAND" className="hover:text-[#FF9933] transition-colors">
-                Weekend Farmhouses
+              <Link href="/buy?landType=VILLA,FARM_HOUSE_LAND" className="hover:text-[#FF9933] transition-colors">
+                Villas &amp; Weekend Farmhouses
               </Link>
             </li>
             <li>
@@ -142,10 +142,10 @@ export function Footer() {
           </ul>
         </div>
 
-        {/* Col 3: For Landowners */}
+        {/* Col 3: For Property Owners */}
         <div className="space-y-3">
           <h4 className="text-xs font-black text-slate-950 uppercase tracking-wider">
-            For Landowners
+            For Property Owners
           </h4>
           <ul className="space-y-2.5 text-xs font-semibold text-slate-600">
             <li>
@@ -153,7 +153,7 @@ export function Footer() {
                 href="/sell"
                 className="inline-flex items-center gap-1.5 text-[#c75e0a] font-black hover:text-[#FF9933] transition-colors"
               >
-                <span>+ List Your Land Parcel</span>
+                <span>+ List Your Property</span>
                 <span className="px-1.5 py-0.5 rounded-md bg-[#FF9933] text-white text-[9px] font-black">
                   ₹10
                 </span>

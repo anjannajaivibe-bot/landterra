@@ -183,6 +183,14 @@ export async function GET(
         ) as PropertyFilterParams['landType']) ||
         undefined,
 
+      propertyType:
+        searchParams.get('propertyType') ||
+        undefined,
+
+      bhk:
+        searchParams.get('bhk') ||
+        undefined,
+
       verifiedOnly:
         searchParams.get(
           'verifiedOnly',
@@ -381,14 +389,15 @@ export async function POST(
       typeof error === 'object' &&
       'issues' in error
     ) {
+      const zodIssues = (error as { issues: Array<{ path: (string | number)[]; message: string }> }).issues;
+      const formattedMessage = zodIssues
+        .map((issue) => `${issue.path.join('.') || 'field'}: ${issue.message}`)
+        .join('; ');
+
       return NextResponse.json(
         {
-          error:
-            'Validation failed.',
-          details:
-            (error as {
-              issues: unknown;
-            }).issues,
+          error: formattedMessage || 'Validation failed.',
+          details: zodIssues,
         },
         {
           status: 400,

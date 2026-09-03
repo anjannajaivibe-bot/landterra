@@ -44,26 +44,52 @@ import { IUser } from '@/types/user';
 interface LandTypeOption {
   id: string;
   label: string;
-  category: 'Residential' | 'Commercial' | 'Other Property Types';
+  category:
+    | 'Land & Plots'
+    | 'Residential Units'
+    | 'Commercial & Retail'
+    | 'Hospitality & Leisure'
+    | 'Income-Generating & Rentals';
 }
 
 const HERO_LAND_TYPES: LandTypeOption[] = [
-  // Residential (Matching Screenshot 1 & 2)
-  { id: 'FLAT', label: 'Flat', category: 'Residential' },
-  { id: 'HOUSE_VILLA', label: 'House/Villa', category: 'Residential' },
-  { id: 'RESIDENTIAL_PLOT', label: 'Plot', category: 'Residential' },
+  // 1. Land & Plots
+  { id: 'OPEN_PLOT', label: 'Open Plots', category: 'Land & Plots' },
+  { id: 'FARMLAND_PLOT', label: 'Farmland Plots', category: 'Land & Plots' },
+  { id: 'GATED_COMMUNITY_PLOT', label: 'Gated Community Plots', category: 'Land & Plots' },
+  { id: 'AGRICULTURAL_LAND', label: 'Agricultural Land', category: 'Land & Plots' },
+  { id: 'RESIDENTIAL_PLOT', label: 'Residential Plots', category: 'Land & Plots' },
 
-  // Commercial (Matching Screenshot 1 & 2)
-  { id: 'OFFICE_SPACE', label: 'Office Space', category: 'Commercial' },
-  { id: 'SHOP_SHOWROOM', label: 'Shop/Showroom', category: 'Commercial' },
-  { id: 'COMMERCIAL_LAND', label: 'Commercial Land', category: 'Commercial' },
-  { id: 'WAREHOUSE_LAND', label: 'Warehouse/Godown', category: 'Commercial' },
-  { id: 'INDUSTRIAL_BUILDING', label: 'Industrial Building', category: 'Commercial' },
-  { id: 'INDUSTRIAL_SHED', label: 'Industrial Shed', category: 'Commercial' },
+  // 2. Residential Units
+  { id: 'FLAT', label: 'Flats / Apartments', category: 'Residential Units' },
+  { id: 'INDEPENDENT_HOUSE', label: 'Independent Houses', category: 'Residential Units' },
+  { id: 'VILLA', label: 'Villas', category: 'Residential Units' },
+  { id: 'HOUSE_VILLA', label: 'House / Villa', category: 'Residential Units' },
+  { id: 'TOWNHOUSE', label: 'Townhouses', category: 'Residential Units' },
+  { id: 'DUPLEX', label: 'Duplexes', category: 'Residential Units' },
+  { id: 'PENTHOUSE', label: 'Penthouses', category: 'Residential Units' },
 
-  // Other Property Types (Matching Screenshot 1 & 2)
-  { id: 'AGRICULTURAL_LAND', label: 'Agricultural Land', category: 'Other Property Types' },
-  { id: 'FARM_HOUSE_LAND', label: 'Farm House', category: 'Other Property Types' },
+  // 3. Commercial & Retail
+  { id: 'RETAIL_SHOP', label: 'Retail Shops', category: 'Commercial & Retail' },
+  { id: 'SHOWROOM', label: 'Showrooms', category: 'Commercial & Retail' },
+  { id: 'OFFICE_SPACE', label: 'Office Spaces', category: 'Commercial & Retail' },
+  { id: 'COWORKING_SPACE', label: 'Co-working Spaces', category: 'Commercial & Retail' },
+  { id: 'SHOPPING_MALL', label: 'Shopping Malls', category: 'Commercial & Retail' },
+  { id: 'WAREHOUSE_LAND', label: 'Warehouses / Godowns', category: 'Commercial & Retail' },
+  { id: 'COMMERCIAL_LAND', label: 'Commercial Land', category: 'Commercial & Retail' },
+
+  // 4. Hospitality & Leisure
+  { id: 'RESORT', label: 'Resorts', category: 'Hospitality & Leisure' },
+  { id: 'HOTEL', label: 'Hotels', category: 'Hospitality & Leisure' },
+  { id: 'SERVICE_APARTMENT', label: 'Service Apartments', category: 'Hospitality & Leisure' },
+  { id: 'GUEST_HOUSE', label: 'Guest Houses', category: 'Hospitality & Leisure' },
+  { id: 'FARM_HOUSE_LAND', label: 'Farmhouses', category: 'Hospitality & Leisure' },
+
+  // 5. Income-Generating & Rentals
+  { id: 'RESIDENTIAL_RENTAL', label: 'Residential Rentals', category: 'Income-Generating & Rentals' },
+  { id: 'COMMERCIAL_LEASE', label: 'Commercial Leases', category: 'Income-Generating & Rentals' },
+  { id: 'COLIVING_PG', label: 'Co-living Spaces / PGs', category: 'Income-Generating & Rentals' },
+  { id: 'VACATION_RENTAL_AIRBNB', label: 'Vacation Rentals / Airbnbs', category: 'Income-Generating & Rentals' },
 ];
 
 const BHK_OPTIONS = ['1 Bhk', '2 Bhk', '3 Bhk', '4 Bhk', '5 Bhk', '5+ Bhk'];
@@ -107,18 +133,24 @@ export default function HomePage() {
   const [landTypePopoverOpen, setLandTypePopoverOpen] = useState(false);
   const [budgetPopoverOpen, setBudgetPopoverOpen] = useState(false);
 
-  /* Category accordion in Land Type Popover (Commercial & Other collapsed by default) */
+  /* Category accordion in Land Type Popover (Land & Plots + Residential expanded by default) */
   const [expandedCategories, setExpandedCategories] = useState<{
+    landPlots: boolean;
     residential: boolean;
     commercial: boolean;
-    other: boolean;
+    hospitality: boolean;
+    rentals: boolean;
   }>({
+    landPlots: true,
     residential: true,
     commercial: false,
-    other: false,
+    hospitality: false,
+    rentals: false,
   });
 
-  const toggleCategory = (cat: 'residential' | 'commercial' | 'other') => {
+  const toggleCategory = (
+    cat: 'landPlots' | 'residential' | 'commercial' | 'hospitality' | 'rentals',
+  ) => {
     setExpandedCategories((prev) => ({
       ...prev,
       [cat]: !prev[cat],
@@ -216,13 +248,27 @@ export default function HomePage() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  const residentialTypesSupportingBhk = [
+    'FLAT',
+    'INDEPENDENT_HOUSE',
+    'VILLA',
+    'HOUSE_VILLA',
+    'TOWNHOUSE',
+    'DUPLEX',
+    'PENTHOUSE',
+    'SERVICE_APARTMENT',
+    'RESIDENTIAL_RENTAL',
+    'COLIVING_PG',
+    'VACATION_RENTAL_AIRBNB',
+  ];
+
   const handleToggleLandType = (id: string) => {
     setSelectedLandTypes((prev) => {
       const next = prev.includes(id)
         ? prev.filter((t) => t !== id)
         : [...prev, id];
-      // If neither FLAT nor HOUSE_VILLA is selected anymore, clear BHKs
-      if (!next.includes('FLAT') && !next.includes('HOUSE_VILLA')) {
+      // If no residential unit is selected anymore, clear BHKs
+      if (!next.some((t) => residentialTypesSupportingBhk.includes(t))) {
         setSelectedBhks([]);
       }
       return next;
@@ -239,32 +285,10 @@ export default function HomePage() {
     const params = new URLSearchParams();
     if (searchLocation.trim()) {
       params.set('query', searchLocation.trim());
-      params.set('city', searchLocation.trim());
     }
 
     if (selectedLandTypes.length > 0) {
-      const typeId = selectedLandTypes[0];
-      if (typeId === 'FLAT' || typeId === 'HOUSE_VILLA' || typeId === 'RESIDENTIAL_PLOT') {
-        params.set('landType', 'RESIDENTIAL_PLOT');
-      } else if (
-        typeId === 'OFFICE_SPACE' ||
-        typeId === 'SHOP_SHOWROOM' ||
-        typeId === 'COMMERCIAL_LAND'
-      ) {
-        params.set('landType', 'COMMERCIAL_LAND');
-      } else if (
-        typeId === 'WAREHOUSE_LAND' ||
-        typeId === 'INDUSTRIAL_BUILDING' ||
-        typeId === 'INDUSTRIAL_SHED'
-      ) {
-        params.set('landType', 'INDUSTRIAL_PLOT');
-      } else if (typeId === 'FARM_HOUSE_LAND') {
-        params.set('landType', 'FARM_HOUSE_LAND');
-      } else if (typeId === 'AGRICULTURAL_LAND') {
-        params.set('landType', 'AGRICULTURAL_LAND');
-      } else {
-        params.set('landType', typeId);
-      }
+      params.set('landType', selectedLandTypes.join(','));
     }
 
     if (selectedBhks.length > 0) {
@@ -358,15 +382,15 @@ export default function HomePage() {
             <div className="text-center max-w-3xl mx-auto space-y-4">
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-[#FF9933]/30 text-[#c75e0a] text-xs font-black shadow-xs">
                 <ShieldCheck className="w-4 h-4 text-[#FF9933]" />
-                <span>India&apos;s Direct Land &amp; Plot Portal • 0% Broker Commission</span>
+                <span>India&apos;s Direct Real Estate &amp; Property Portal • 0% Broker Commission</span>
               </div>
 
               <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-slate-950 tracking-tight leading-[1.15]">
-                Direct Land &amp; Agricultural Plots Across India
+                Direct Properties, Homes &amp; Plots Across India
               </h1>
 
               <p className="text-sm sm:text-base text-slate-600 font-medium max-w-2xl mx-auto leading-relaxed">
-                India&apos;s direct peer-to-peer land marketplace. Connect directly with genuine landowners with zero broker commissions and transparent document disclosure.
+                India&apos;s direct peer-to-peer property marketplace. Buy, sell, or rent plots, apartments, villas, commercial spaces, and farmlands directly with genuine owners — 0% broker commissions and transparent document disclosure.
               </p>
             </div>
 
@@ -414,126 +438,48 @@ export default function HomePage() {
                     {/* Land Type Popover (Directly matching Screenshot 2) */}
                     {landTypePopoverOpen && (
                       <div className="absolute left-0 sm:left-auto sm:right-0 top-[calc(100%+14px)] z-50 w-[320px] sm:w-[390px] p-4 sm:p-5 rounded-3xl bg-white border border-slate-200 shadow-[0_20px_50px_rgba(0,0,0,0.15)] animate-in fade-in slide-in-from-top-2 duration-150 space-y-3">
-                        {/* 1. Residential (Expanded by default) */}
+                        {/* 1. Land & Plots */}
                         <div className="space-y-2">
                           <button
                             type="button"
-                            onClick={() => toggleCategory('residential')}
-                            className="w-full flex items-center justify-between py-1 text-[11px] font-black uppercase tracking-wider text-slate-600 hover:text-slate-900 cursor-pointer select-none"
+                            onClick={() => toggleCategory('landPlots')}
+                            className="w-full flex items-center justify-between py-1 text-[11px] font-black uppercase tracking-wider text-slate-700 hover:text-slate-900 cursor-pointer select-none"
                           >
                             <div className="flex items-center gap-2">
-                              <span>Residential</span>
+                              <span>Land &amp; Plots</span>
                               {HERO_LAND_TYPES.filter(
-                                (t) => t.category === 'Residential' && selectedLandTypes.includes(t.id)
+                                (t) => t.category === 'Land & Plots' && selectedLandTypes.includes(t.id)
                               ).length > 0 && (
-                                  <span className="px-1.5 py-0.5 rounded-full bg-[#fff1dc] text-[#c75e0a] text-[10px] font-bold">
-                                    {
-                                      HERO_LAND_TYPES.filter(
-                                        (t) => t.category === 'Residential' && selectedLandTypes.includes(t.id)
-                                      ).length
-                                    }
-                                  </span>
-                                )}
+                                <span className="px-1.5 py-0.5 rounded-full bg-[#fff1dc] text-[#c75e0a] text-[10px] font-bold">
+                                  {
+                                    HERO_LAND_TYPES.filter(
+                                      (t) => t.category === 'Land & Plots' && selectedLandTypes.includes(t.id)
+                                    ).length
+                                  }
+                                </span>
+                              )}
                             </div>
                             <ChevronDown
-                              className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${expandedCategories.residential ? 'rotate-180 text-[#FF9933]' : ''
-                                }`}
+                              className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${
+                                expandedCategories.landPlots ? 'rotate-180 text-[#FF9933]' : ''
+                              }`}
                             />
                           </button>
 
-                          {expandedCategories.residential && (
-                            <div className="space-y-2.5 pt-1 animate-in fade-in duration-150">
-                              <div className="flex flex-wrap gap-1.5">
-                                {HERO_LAND_TYPES.filter(
-                                  (t) => t.category === 'Residential'
-                                ).map((t) => {
-                                  const isSelected = selectedLandTypes.includes(t.id);
-                                  return (
-                                    <button
-                                      key={t.id}
-                                      type="button"
-                                      onClick={() => handleToggleLandType(t.id)}
-                                      className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer border ${isSelected
-                                          ? 'bg-[#fff1dc] text-[#c75e0a] border-[#FF9933] shadow-2xs ring-1 ring-[#FF9933]/30'
-                                          : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
-                                        }`}
-                                    >
-                                      {t.label}
-                                    </button>
-                                  );
-                                })}
-                              </div>
-
-                              {/* BHK Selection Row when Flat or House/Villa is selected (Directly matching Screenshot 2) */}
-                              {(selectedLandTypes.includes('FLAT') ||
-                                selectedLandTypes.includes('HOUSE_VILLA')) && (
-                                  <div className="pt-2 border-t border-dashed border-slate-100 animate-in fade-in slide-in-from-top-1 duration-150">
-                                    <div className="flex flex-wrap gap-1.5">
-                                      {BHK_OPTIONS.map((bhk) => {
-                                        const isBhkSelected = selectedBhks.includes(bhk);
-                                        return (
-                                          <button
-                                            key={bhk}
-                                            type="button"
-                                            onClick={() => handleToggleBhk(bhk)}
-                                            className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer border ${isBhkSelected
-                                                ? 'bg-[#fff1dc] text-[#c75e0a] border-[#FF9933] shadow-2xs ring-1 ring-[#FF9933]/30'
-                                                : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
-                                              }`}
-                                          >
-                                            {bhk}
-                                          </button>
-                                        );
-                                      })}
-                                    </div>
-                                  </div>
-                                )}
-                            </div>
-                          )}
-                        </div>
-
-                        {/* 2. Commercial (Collapsed by default) */}
-                        <div className="space-y-2 pt-2 border-t border-slate-100">
-                          <button
-                            type="button"
-                            onClick={() => toggleCategory('commercial')}
-                            className="w-full flex items-center justify-between py-1 text-[11px] font-black uppercase tracking-wider text-slate-600 hover:text-slate-900 cursor-pointer select-none"
-                          >
-                            <div className="flex items-center gap-2">
-                              <span>Commercial</span>
-                              {HERO_LAND_TYPES.filter(
-                                (t) => t.category === 'Commercial' && selectedLandTypes.includes(t.id)
-                              ).length > 0 && (
-                                  <span className="px-1.5 py-0.5 rounded-full bg-[#fff1dc] text-[#c75e0a] text-[10px] font-bold">
-                                    {
-                                      HERO_LAND_TYPES.filter(
-                                        (t) => t.category === 'Commercial' && selectedLandTypes.includes(t.id)
-                                      ).length
-                                    }
-                                  </span>
-                                )}
-                            </div>
-                            <ChevronDown
-                              className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${expandedCategories.commercial ? 'rotate-180 text-[#FF9933]' : ''
-                                }`}
-                            />
-                          </button>
-
-                          {expandedCategories.commercial && (
+                          {expandedCategories.landPlots && (
                             <div className="flex flex-wrap gap-1.5 pt-1 animate-in fade-in duration-150">
-                              {HERO_LAND_TYPES.filter(
-                                (t) => t.category === 'Commercial'
-                              ).map((t) => {
+                              {HERO_LAND_TYPES.filter((t) => t.category === 'Land & Plots').map((t) => {
                                 const isSelected = selectedLandTypes.includes(t.id);
                                 return (
                                   <button
                                     key={t.id}
                                     type="button"
                                     onClick={() => handleToggleLandType(t.id)}
-                                    className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer border ${isSelected
+                                    className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer border ${
+                                      isSelected
                                         ? 'bg-[#fff1dc] text-[#c75e0a] border-[#FF9933] shadow-2xs ring-1 ring-[#FF9933]/30'
                                         : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
-                                      }`}
+                                    }`}
                                   >
                                     {t.label}
                                   </button>
@@ -543,48 +489,228 @@ export default function HomePage() {
                           )}
                         </div>
 
-                        {/* 3. Other Property Types (Collapsed by default) */}
+                        {/* 2. Residential Units */}
                         <div className="space-y-2 pt-2 border-t border-slate-100">
                           <button
                             type="button"
-                            onClick={() => toggleCategory('other')}
-                            className="w-full flex items-center justify-between py-1 text-[11px] font-black uppercase tracking-wider text-slate-600 hover:text-slate-900 cursor-pointer select-none"
+                            onClick={() => toggleCategory('residential')}
+                            className="w-full flex items-center justify-between py-1 text-[11px] font-black uppercase tracking-wider text-slate-700 hover:text-slate-900 cursor-pointer select-none"
                           >
                             <div className="flex items-center gap-2">
-                              <span>Other Property Types</span>
+                              <span>Residential Units</span>
                               {HERO_LAND_TYPES.filter(
-                                (t) => t.category === 'Other Property Types' && selectedLandTypes.includes(t.id)
+                                (t) => t.category === 'Residential Units' && selectedLandTypes.includes(t.id)
                               ).length > 0 && (
-                                  <span className="px-1.5 py-0.5 rounded-full bg-[#fff1dc] text-[#c75e0a] text-[10px] font-bold">
-                                    {
-                                      HERO_LAND_TYPES.filter(
-                                        (t) => t.category === 'Other Property Types' && selectedLandTypes.includes(t.id)
-                                      ).length
-                                    }
-                                  </span>
-                                )}
+                                <span className="px-1.5 py-0.5 rounded-full bg-[#fff1dc] text-[#c75e0a] text-[10px] font-bold">
+                                  {
+                                    HERO_LAND_TYPES.filter(
+                                      (t) => t.category === 'Residential Units' && selectedLandTypes.includes(t.id)
+                                    ).length
+                                  }
+                                </span>
+                              )}
                             </div>
                             <ChevronDown
-                              className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${expandedCategories.other ? 'rotate-180 text-[#FF9933]' : ''
-                                }`}
+                              className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${
+                                expandedCategories.residential ? 'rotate-180 text-[#FF9933]' : ''
+                              }`}
                             />
                           </button>
 
-                          {expandedCategories.other && (
-                            <div className="flex flex-wrap gap-1.5 pt-1 animate-in fade-in duration-150">
+                          {expandedCategories.residential && (
+                            <div className="space-y-2.5 pt-1 animate-in fade-in duration-150">
+                              <div className="flex flex-wrap gap-1.5">
+                                {HERO_LAND_TYPES.filter((t) => t.category === 'Residential Units').map((t) => {
+                                  const isSelected = selectedLandTypes.includes(t.id);
+                                  return (
+                                    <button
+                                      key={t.id}
+                                      type="button"
+                                      onClick={() => handleToggleLandType(t.id)}
+                                      className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer border ${
+                                        isSelected
+                                          ? 'bg-[#fff1dc] text-[#c75e0a] border-[#FF9933] shadow-2xs ring-1 ring-[#FF9933]/30'
+                                          : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                                      }`}
+                                    >
+                                      {t.label}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+
+                              {/* BHK Selection Row when any residential unit is selected */}
+                              {selectedLandTypes.some((t) => residentialTypesSupportingBhk.includes(t)) && (
+                                <div className="pt-2 border-t border-dashed border-slate-100 animate-in fade-in slide-in-from-top-1 duration-150">
+                                  <div className="flex flex-wrap gap-1.5">
+                                    {BHK_OPTIONS.map((bhk) => {
+                                      const isBhkSelected = selectedBhks.includes(bhk);
+                                      return (
+                                        <button
+                                          key={bhk}
+                                          type="button"
+                                          onClick={() => handleToggleBhk(bhk)}
+                                          className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer border ${
+                                            isBhkSelected
+                                              ? 'bg-[#FF9933] text-white border-[#FF9933] shadow-2xs'
+                                              : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                                          }`}
+                                        >
+                                          {bhk}
+                                        </button>
+                                      );
+                                    })}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* 3. Commercial & Retail */}
+                        <div className="space-y-2 pt-2 border-t border-slate-100">
+                          <button
+                            type="button"
+                            onClick={() => toggleCategory('commercial')}
+                            className="w-full flex items-center justify-between py-1 text-[11px] font-black uppercase tracking-wider text-slate-700 hover:text-slate-900 cursor-pointer select-none"
+                          >
+                            <div className="flex items-center gap-2">
+                              <span>Commercial &amp; Retail</span>
                               {HERO_LAND_TYPES.filter(
-                                (t) => t.category === 'Other Property Types'
-                              ).map((t) => {
+                                (t) => t.category === 'Commercial & Retail' && selectedLandTypes.includes(t.id)
+                              ).length > 0 && (
+                                <span className="px-1.5 py-0.5 rounded-full bg-[#fff1dc] text-[#c75e0a] text-[10px] font-bold">
+                                  {
+                                    HERO_LAND_TYPES.filter(
+                                      (t) => t.category === 'Commercial & Retail' && selectedLandTypes.includes(t.id)
+                                    ).length
+                                  }
+                                </span>
+                              )}
+                            </div>
+                            <ChevronDown
+                              className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${
+                                expandedCategories.commercial ? 'rotate-180 text-[#FF9933]' : ''
+                              }`}
+                            />
+                          </button>
+
+                          {expandedCategories.commercial && (
+                            <div className="flex flex-wrap gap-1.5 pt-1 animate-in fade-in duration-150">
+                              {HERO_LAND_TYPES.filter((t) => t.category === 'Commercial & Retail').map((t) => {
                                 const isSelected = selectedLandTypes.includes(t.id);
                                 return (
                                   <button
                                     key={t.id}
                                     type="button"
                                     onClick={() => handleToggleLandType(t.id)}
-                                    className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer border ${isSelected
+                                    className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer border ${
+                                      isSelected
                                         ? 'bg-[#fff1dc] text-[#c75e0a] border-[#FF9933] shadow-2xs ring-1 ring-[#FF9933]/30'
                                         : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
-                                      }`}
+                                    }`}
+                                  >
+                                    {t.label}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* 4. Hospitality & Leisure */}
+                        <div className="space-y-2 pt-2 border-t border-slate-100">
+                          <button
+                            type="button"
+                            onClick={() => toggleCategory('hospitality')}
+                            className="w-full flex items-center justify-between py-1 text-[11px] font-black uppercase tracking-wider text-slate-700 hover:text-slate-900 cursor-pointer select-none"
+                          >
+                            <div className="flex items-center gap-2">
+                              <span>Hospitality &amp; Leisure</span>
+                              {HERO_LAND_TYPES.filter(
+                                (t) => t.category === 'Hospitality & Leisure' && selectedLandTypes.includes(t.id)
+                              ).length > 0 && (
+                                <span className="px-1.5 py-0.5 rounded-full bg-[#fff1dc] text-[#c75e0a] text-[10px] font-bold">
+                                  {
+                                    HERO_LAND_TYPES.filter(
+                                      (t) => t.category === 'Hospitality & Leisure' && selectedLandTypes.includes(t.id)
+                                    ).length
+                                  }
+                                </span>
+                              )}
+                            </div>
+                            <ChevronDown
+                              className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${
+                                expandedCategories.hospitality ? 'rotate-180 text-[#FF9933]' : ''
+                              }`}
+                            />
+                          </button>
+
+                          {expandedCategories.hospitality && (
+                            <div className="flex flex-wrap gap-1.5 pt-1 animate-in fade-in duration-150">
+                              {HERO_LAND_TYPES.filter((t) => t.category === 'Hospitality & Leisure').map((t) => {
+                                const isSelected = selectedLandTypes.includes(t.id);
+                                return (
+                                  <button
+                                    key={t.id}
+                                    type="button"
+                                    onClick={() => handleToggleLandType(t.id)}
+                                    className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer border ${
+                                      isSelected
+                                        ? 'bg-[#fff1dc] text-[#c75e0a] border-[#FF9933] shadow-2xs ring-1 ring-[#FF9933]/30'
+                                        : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                                    }`}
+                                  >
+                                    {t.label}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* 5. Income-Generating & Rentals */}
+                        <div className="space-y-2 pt-2 border-t border-slate-100">
+                          <button
+                            type="button"
+                            onClick={() => toggleCategory('rentals')}
+                            className="w-full flex items-center justify-between py-1 text-[11px] font-black uppercase tracking-wider text-slate-700 hover:text-slate-900 cursor-pointer select-none"
+                          >
+                            <div className="flex items-center gap-2">
+                              <span>Income-Generating &amp; Rentals</span>
+                              {HERO_LAND_TYPES.filter(
+                                (t) => t.category === 'Income-Generating & Rentals' && selectedLandTypes.includes(t.id)
+                              ).length > 0 && (
+                                <span className="px-1.5 py-0.5 rounded-full bg-[#fff1dc] text-[#c75e0a] text-[10px] font-bold">
+                                  {
+                                    HERO_LAND_TYPES.filter(
+                                      (t) => t.category === 'Income-Generating & Rentals' && selectedLandTypes.includes(t.id)
+                                    ).length
+                                  }
+                                </span>
+                              )}
+                            </div>
+                            <ChevronDown
+                              className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${
+                                expandedCategories.rentals ? 'rotate-180 text-[#FF9933]' : ''
+                              }`}
+                            />
+                          </button>
+
+                          {expandedCategories.rentals && (
+                            <div className="flex flex-wrap gap-1.5 pt-1 animate-in fade-in duration-150">
+                              {HERO_LAND_TYPES.filter((t) => t.category === 'Income-Generating & Rentals').map((t) => {
+                                const isSelected = selectedLandTypes.includes(t.id);
+                                return (
+                                  <button
+                                    key={t.id}
+                                    type="button"
+                                    onClick={() => handleToggleLandType(t.id)}
+                                    className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer border ${
+                                      isSelected
+                                        ? 'bg-[#fff1dc] text-[#c75e0a] border-[#FF9933] shadow-2xs ring-1 ring-[#FF9933]/30'
+                                        : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                                    }`}
                                   >
                                     {t.label}
                                   </button>
@@ -681,7 +807,7 @@ export default function HomePage() {
                   <span className="flex items-center gap-1.5">
                     <Sparkles className="w-4 h-4 text-[#FF9933]" />
                     <span className="text-[11px] sm:text-xs font-bold text-slate-700">
-                      Direct Landowner Listings Only (0% Brokerage)
+                      Direct Owner Listings Only (0% Brokerage)
                     </span>
                   </span>
                 </label>
@@ -714,7 +840,7 @@ export default function HomePage() {
               </div>
               <h3 className="text-sm font-extrabold text-slate-950">0% Broker Commission</h3>
               <p className="text-xs text-slate-500 leading-relaxed">
-                Deal directly with genuine landowners. No middleman cuts, broker markups, or success commissions.
+                Deal directly with genuine property owners. No middleman cuts, broker markups, or success commissions.
               </p>
             </div>
 
@@ -734,7 +860,7 @@ export default function HomePage() {
               </div>
               <h3 className="text-sm font-extrabold text-slate-950">Direct &quot;Call Owner&quot;</h3>
               <p className="text-xs text-slate-500 leading-relaxed">
-                Call genuine landowners directly. Inquiries are safely logged in your dashboard for total transparency.
+                Call verified property owners directly. Inquiries are safely logged in your dashboard for total transparency.
               </p>
             </div>
 
@@ -758,7 +884,7 @@ export default function HomePage() {
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-xl sm:text-2xl font-black text-slate-950 tracking-tight">
-                  Featured Land Classifieds
+                  Featured Property Classifieds
                 </h2>
                 <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#fff1dc] text-[#c75e0a] text-[10px] font-bold">
                   <Sparkles className="w-3.5 h-3.5 text-[#FF9933]" />
@@ -766,7 +892,7 @@ export default function HomePage() {
                 </span>
               </div>
               <p className="text-xs text-slate-500 mt-0.5">
-                Real published properties from direct landowners with direct phone contact
+                Real published properties from direct owners with verified phone contact
               </p>
             </div>
 
@@ -774,7 +900,7 @@ export default function HomePage() {
               href="/buy"
               className="inline-flex items-center gap-1 text-xs font-bold text-[#c75e0a] hover:text-[#FF9933] hover:underline"
             >
-              <span>View All Lands</span>
+              <span>View All Properties</span>
               <ChevronRight className="w-4 h-4" />
             </Link>
           </div>
@@ -801,10 +927,10 @@ export default function HomePage() {
               </div>
               <div className="space-y-1.5">
                 <h3 className="text-base font-extrabold text-slate-900">
-                  No Active Land Listings Published Yet
+                  No Active Property Listings Published Yet
                 </h3>
                 <p className="text-xs text-slate-500 max-w-md mx-auto leading-relaxed">
-                  Be the first landowner to list your plot or agricultural land. Reach thousands of serious buyers across India with zero brokerage.
+                  Be the first owner to list your plot, home, or commercial space. Reach thousands of serious buyers and tenants across India with zero brokerage.
                 </p>
               </div>
               <div className="pt-2">
@@ -812,7 +938,7 @@ export default function HomePage() {
                   href="/sell"
                   className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-[#FF9933] text-white text-xs font-extrabold shadow-md hover:bg-[#f07d12] transition-colors"
                 >
-                  <span>Post Your Land Listing — Flat ₹{publicListingFee} for {listingDurationDays} Days</span>
+                  <span>Post Your Property Listing — Flat ₹{publicListingFee} for {listingDurationDays} Days</span>
                   <ArrowRight className="w-4 h-4" />
                 </Link>
               </div>
@@ -855,19 +981,19 @@ export default function HomePage() {
             <div className="relative z-10 max-w-2xl space-y-4">
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 text-[#ffe1b8] text-[11px] font-bold border border-white/20">
                 <Sparkles className="w-3.5 h-3.5 text-[#FF9933]" />
-                <span>For Direct Land Owners</span>
+                <span>For Direct Property Owners</span>
               </div>
 
               <h2 className="text-2xl sm:text-4xl font-black tracking-tight leading-tight">
-                Are You a Landowner? Sell Your Land in 3 Simple Steps
+                Are You a Property Owner? Sell or Rent in 3 Simple Steps
               </h2>
 
               <p className="text-xs sm:text-sm text-slate-200 leading-relaxed">
-                Publish your land parcel for a flat advertisement fee of just{' '}
+                Publish your plot, flat, villa, or commercial property for a flat advertisement fee of just{' '}
                 <strong className="text-[#FF9933] font-extrabold">
                   ₹{publicListingFee} for {listingDurationDays} Days
                 </strong>
-                . Zero broker commission upon sale. Reach thousands of serious land buyers across India.
+                . Zero broker commission upon sale or lease. Reach thousands of serious buyers &amp; tenants across India.
               </p>
 
               {/* 3 Step indicators */}
@@ -876,14 +1002,14 @@ export default function HomePage() {
                   <div className="w-6 h-6 rounded-full bg-[#FF9933] text-white font-black text-xs flex items-center justify-center shrink-0">
                     1
                   </div>
-                  <span className="font-semibold text-white">Enter Land Extent &amp; Price</span>
+                  <span className="font-semibold text-white">Enter Property Details &amp; Price</span>
                 </div>
 
                 <div className="flex items-center gap-2 p-3 rounded-2xl bg-white/10 border border-white/15">
                   <div className="w-6 h-6 rounded-full bg-[#FF9933] text-white font-black text-xs flex items-center justify-center shrink-0">
                     2
                   </div>
-                  <span className="font-semibold text-white">Upload Survey Proofs (Pahani / 7-12)</span>
+                  <span className="font-semibold text-white">Upload Photos &amp; Proofs</span>
                 </div>
 
                 <div className="flex items-center gap-2 p-3 rounded-2xl bg-white/10 border border-white/15">
@@ -899,7 +1025,7 @@ export default function HomePage() {
                   href="/sell"
                   className="inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-[#FF9933] hover:bg-[#f07d12] text-white text-xs font-black shadow-lg transition-all hover:shadow-[#FF9933]/30 cursor-pointer"
                 >
-                  <span>Post Your Land Listing Now</span>
+                  <span>Post Your Property Listing Now</span>
                   <ArrowRight className="w-4 h-4" />
                 </Link>
 
@@ -985,67 +1111,67 @@ export default function HomePage() {
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
           <div className="border-t border-slate-200 pt-10">
             <h3 className="text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-6">
-              Explore Land &amp; Plots by State, Land Type &amp; Legal Guides
+              Explore Properties &amp; Plots by State, Category &amp; Legal Guides
             </h3>
 
             <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-6 text-xs">
               <div className="space-y-2">
-                <div className="font-bold text-slate-900">Land by State</div>
+                <div className="font-bold text-slate-900">Properties by State</div>
                 <ul className="space-y-1.5 text-slate-500">
                   <li>
                     <Link href="/buy?state=Telangana" className="hover:text-[#FF9933]">
-                      Plots for Sale in Telangana
+                      Properties in Telangana
                     </Link>
                   </li>
                   <li>
                     <Link href="/buy?state=Andhra+Pradesh" className="hover:text-[#FF9933]">
-                      Land in Andhra Pradesh
+                      Properties in Andhra Pradesh
                     </Link>
                   </li>
                   <li>
                     <Link href="/buy?state=Karnataka" className="hover:text-[#FF9933]">
-                      Farmland in Karnataka
+                      Properties in Karnataka
                     </Link>
                   </li>
                   <li>
                     <Link href="/buy?state=Maharashtra" className="hover:text-[#FF9933]">
-                      Agricultural Plots Maharashtra
+                      Properties in Maharashtra
                     </Link>
                   </li>
                   <li>
                     <Link href="/buy?state=Tamil+Nadu" className="hover:text-[#FF9933]">
-                      Land for Sale in Tamil Nadu
+                      Properties in Tamil Nadu
                     </Link>
                   </li>
                 </ul>
               </div>
 
               <div className="space-y-2">
-                <div className="font-bold text-slate-900">Land by Category</div>
+                <div className="font-bold text-slate-900">Properties by Category</div>
                 <ul className="space-y-1.5 text-slate-500">
                   <li>
-                    <Link href="/buy?landType=AGRICULTURAL_LAND" className="hover:text-[#FF9933]">
-                      Agricultural Land for Sale
+                    <Link href="/buy?landType=FLAT,DUPLEX,PENTHOUSE" className="hover:text-[#FF9933]">
+                      Flats &amp; Apartments
                     </Link>
                   </li>
                   <li>
-                    <Link href="/buy?landType=RESIDENTIAL_PLOT" className="hover:text-[#FF9933]">
-                      Gated Residential Layouts
+                    <Link href="/buy?landType=VILLA,HOUSE_VILLA,INDEPENDENT_HOUSE" className="hover:text-[#FF9933]">
+                      Houses &amp; Luxury Villas
                     </Link>
                   </li>
                   <li>
-                    <Link href="/buy?landType=COMMERCIAL_LAND" className="hover:text-[#FF9933]">
-                      Highway Commercial Land
+                    <Link href="/buy?landType=OPEN_PLOT,FARMLAND_PLOT,GATED_COMMUNITY_PLOT,RESIDENTIAL_PLOT" className="hover:text-[#FF9933]">
+                      Open &amp; Gated Layout Plots
                     </Link>
                   </li>
                   <li>
-                    <Link href="/buy?landType=FARM_HOUSE_LAND" className="hover:text-[#FF9933]">
-                      Weekend Farmhouse Plots
+                    <Link href="/buy?landType=COMMERCIAL_LAND,OFFICE_SPACE,RETAIL_SHOP,SHOWROOM" className="hover:text-[#FF9933]">
+                      Commercial &amp; Retail Spaces
                     </Link>
                   </li>
                   <li>
-                    <Link href="/buy?landType=INDUSTRIAL_PLOT" className="hover:text-[#FF9933]">
-                      Industrial Land Parcels
+                    <Link href="/buy?landType=AGRICULTURAL_LAND,FARM_HOUSE_LAND" className="hover:text-[#FF9933]">
+                      Farmlands &amp; Farmhouses
                     </Link>
                   </li>
                 </ul>

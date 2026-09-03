@@ -78,19 +78,52 @@ function formatArea(amount: number): string {
 function formatLandType(
   landType: IProperty['landType'],
 ): string {
-  const labels: Record<
-    IProperty['landType'],
-    string
-  > = {
+  const labels: Record<string, string> = {
+    // Land & Plots
+    OPEN_PLOT: 'Open Plot',
+    FARMLAND_PLOT: 'Farmland Plot',
+    GATED_COMMUNITY_PLOT: 'Gated Community Plot',
+    AGRICULTURAL_LAND: 'Agricultural Land',
     RESIDENTIAL_PLOT: 'Residential Plot',
     COMMERCIAL_LAND: 'Commercial Land',
-    AGRICULTURAL_LAND: 'Agricultural Land',
     INDUSTRIAL_PLOT: 'Industrial Land',
-    FARM_HOUSE_LAND: 'Farm House Land',
+
+    // Residential Units
+    FLAT: 'Flat / Apartment',
+    INDEPENDENT_HOUSE: 'Independent House',
+    VILLA: 'Villa',
+    HOUSE_VILLA: 'House / Villa',
+    TOWNHOUSE: 'Townhouse',
+    DUPLEX: 'Duplex',
+    PENTHOUSE: 'Penthouse',
+
+    // Commercial & Retail
+    RETAIL_SHOP: 'Retail Shop',
+    SHOWROOM: 'Showroom',
+    OFFICE_SPACE: 'Office Space',
+    COWORKING_SPACE: 'Co-working Space',
+    SHOPPING_MALL: 'Shopping Mall',
+    WAREHOUSE_LAND: 'Warehouse / Godown',
+    SHOP_SHOWROOM: 'Shop / Showroom',
+    INDUSTRIAL_BUILDING: 'Industrial Building',
+    INDUSTRIAL_SHED: 'Industrial Shed',
     INSTITUTIONAL: 'Institutional Land',
+
+    // Hospitality & Leisure
+    RESORT: 'Resort',
+    HOTEL: 'Hotel',
+    SERVICE_APARTMENT: 'Service Apartment',
+    GUEST_HOUSE: 'Guest House',
+    FARM_HOUSE_LAND: 'Farmhouse',
+
+    // Income-Generating & Rentals
+    RESIDENTIAL_RENTAL: 'Residential Rental',
+    COMMERCIAL_LEASE: 'Commercial Lease',
+    COLIVING_PG: 'Co-living / PG',
+    VACATION_RENTAL_AIRBNB: 'Vacation Rental / Airbnb',
   };
 
-  return labels[landType] || 'Land';
+  return labels[landType] || 'Property';
 }
 
 /* ================================================================

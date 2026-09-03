@@ -70,17 +70,28 @@ const PropertySchema = new Schema<IProperty>(
     subscriptionExpiresAt: { type: Date, index: true },
     landType: {
       type: String,
-      enum: [
-        'RESIDENTIAL_PLOT',
-        'COMMERCIAL_LAND',
-        'AGRICULTURAL_LAND',
-        'INDUSTRIAL_PLOT',
-        'FARM_HOUSE_LAND',
-        'INSTITUTIONAL',
-      ],
       required: true,
       index: true,
     },
+    propertyType: { type: String, index: true },
+    bhk: { type: String, index: true },
+    facing: { type: String },
+    floorNumber: { type: String },
+    totalFloors: { type: Number },
+    furnishingStatus: { type: String },
+    bathrooms: { type: Number },
+    balconies: { type: Number },
+    carpetAreaSqFt: { type: Number },
+    superBuiltUpAreaSqFt: { type: Number },
+    boundaryWall: { type: String },
+    cornerPlot: { type: Boolean, default: false },
+    gatedCommunity: { type: Boolean, default: false },
+    amenities: [{ type: String }],
+    approvals: [{ type: String }],
+    waterSource: [{ type: String }],
+    electricityPhase: { type: String },
+    soilType: { type: String },
+    propertyAttributes: { type: Schema.Types.Mixed, default: {} },
     roadAccess: { type: String, default: 'Road access available' },
     nearbyLandmarks: [{ type: String }],
     location: {
@@ -142,6 +153,10 @@ const PropertySchema = new Schema<IProperty>(
 PropertySchema.index({ listingStatus: 1, verificationStatus: 1, 'location.city': 1 });
 PropertySchema.index({ listingStatus: 1, landAreaYards: 1, totalPrice: 1 });
 PropertySchema.index({ createdAt: -1 });
+
+if (process.env.NODE_ENV !== 'production' && mongoose.models.Property) {
+  mongoose.deleteModel('Property');
+}
 
 export const PropertyModel: Model<IProperty> =
   mongoose.models.Property || mongoose.model<IProperty>('Property', PropertySchema);

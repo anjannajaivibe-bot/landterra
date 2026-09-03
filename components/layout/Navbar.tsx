@@ -162,7 +162,7 @@ export function Navbar() {
             <div className="flex min-w-0 items-center gap-2 text-[11px] font-semibold text-slate-800">
               <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-[#FF9933]" />
               <span className="truncate">
-                Direct-to-owner land marketplace • 0% Broker Commission • Direct Peer-to-Peer Listings
+                Direct-to-owner property marketplace • 0% Broker Commission • Direct Peer-to-Peer Listings
               </span>
             </div>
 
@@ -197,8 +197,8 @@ export function Navbar() {
                   Bhoomi
                   <span className="text-[#FF9933]">Mitra</span>
                 </span>
-                <span className="mt-1 block text-[9px] font-extrabold uppercase tracking-[0.18em] text-slate-500">
-                  Land Marketplace
+                <span className="mt-1 block text-[8px] font-extrabold uppercase tracking-[0.18em] text-slate-500">
+                  Property Marketplace
                 </span>
               </div>
             </Link>
@@ -639,8 +639,8 @@ function NavLink({
     <Link
       href={href}
       className={`inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-bold transition-all ${active
-          ? 'bg-[#fff1dc] text-[#c75e0a] border border-[#FF9933]/30 shadow-2xs'
-          : 'text-slate-900 hover:bg-slate-100/80 hover:text-[#c75e0a]'
+        ? 'bg-[#fff1dc] text-[#c75e0a] border border-[#FF9933]/30 shadow-2xs'
+        : 'text-slate-900 hover:bg-slate-100/80 hover:text-[#c75e0a]'
         }`}
     >
       {icon}
@@ -712,8 +712,8 @@ function MobileNavLink({
       href={href}
       onClick={onClick}
       className={`flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-xs transition-colors ${active
-          ? 'bg-[#fff1dc] font-bold text-[#c75e0a] border border-[#FF9933]/30'
-          : 'font-bold text-slate-900 hover:bg-slate-100'
+        ? 'bg-[#fff1dc] font-bold text-[#c75e0a] border border-[#FF9933]/30'
+        : 'font-bold text-slate-900 hover:bg-slate-100'
         }`}
     >
       {icon && (

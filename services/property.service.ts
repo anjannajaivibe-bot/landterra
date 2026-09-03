@@ -247,16 +247,136 @@ export async function getProperties(
 
     /*
      * ------------------------------------------------------------
-     * LAND TYPE
+     * COMPOUND AND-CONDITIONS LIST
+     * ------------------------------------------------------------
+     */
+    const andConditions: Record<string, any>[] = [];
+
+    /*
+     * ------------------------------------------------------------
+     * LAND TYPE / PROPERTY TYPE
      * ------------------------------------------------------------
      */
 
+    const rawType = params.landType || params.propertyType;
     if (
-      params.landType &&
-      params.landType !== 'ALL'
+      rawType &&
+      rawType !== 'ALL'
     ) {
-      query.landType =
-        params.landType;
+      const types = String(rawType)
+        .split(',')
+        .map((t) => t.trim().toUpperCase())
+        .filter(Boolean);
+
+      if (types.length > 0) {
+        const typeOrConditions: Record<string, any>[] = [];
+
+        for (const t of types) {
+          typeOrConditions.push({ landType: t });
+          typeOrConditions.push({ propertyType: t });
+
+          // Also match descriptive titles so existing or custom listings match correctly
+          if (t === 'FLAT') {
+            typeOrConditions.push({ title: /\b(flat|apartment|condo)\b/i });
+          } else if (t === 'HOUSE_VILLA' || t === 'VILLA' || t === 'INDEPENDENT_HOUSE') {
+            typeOrConditions.push({
+              $and: [
+                { title: /\b(house|villa|independent house|bungalow)\b/i },
+                { title: { $not: /\bplot\b/i } },
+              ],
+            });
+          } else if (t === 'TOWNHOUSE') {
+            typeOrConditions.push({ title: /\btownhouse\b/i });
+          } else if (t === 'DUPLEX') {
+            typeOrConditions.push({ title: /\bduplex\b/i });
+          } else if (t === 'PENTHOUSE') {
+            typeOrConditions.push({ title: /\bpenthouse\b/i });
+          } else if (t === 'OPEN_PLOT' || t === 'RESIDENTIAL_PLOT') {
+            typeOrConditions.push({ title: /\b(residential\s*plot|open\s*plot)\b/i });
+          } else if (t === 'FARMLAND_PLOT') {
+            typeOrConditions.push({ title: /\bfarmland\s*plot\b/i });
+          } else if (t === 'GATED_COMMUNITY_PLOT') {
+            typeOrConditions.push({ title: /\bgated\s*(?:community\s*)?plot\b/i });
+          } else if (t === 'COMMERCIAL_LAND') {
+            typeOrConditions.push({ title: /\bcommercial\s*land\b/i });
+          } else if (t === 'OFFICE_SPACE') {
+            typeOrConditions.push({ title: /\boffice\b/i });
+          } else if (t === 'RETAIL_SHOP') {
+            typeOrConditions.push({ title: /\b(retail|shop)\b/i });
+          } else if (t === 'SHOWROOM' || t === 'SHOP_SHOWROOM') {
+            typeOrConditions.push({ title: /\b(showroom|shop)\b/i });
+          } else if (t === 'COWORKING_SPACE') {
+            typeOrConditions.push({ title: /\b(coworking|co-working)\b/i });
+          } else if (t === 'SHOPPING_MALL') {
+            typeOrConditions.push({ title: /\b(mall|shopping mall)\b/i });
+          } else if (t === 'AGRICULTURAL_LAND') {
+            typeOrConditions.push({ title: /\b(farmland|agriculture|agricultural)\b/i });
+          } else if (t === 'FARM_HOUSE_LAND') {
+            typeOrConditions.push({ title: /\bfarm\s*house\b/i });
+          } else if (t === 'RESORT') {
+            typeOrConditions.push({ title: /\bresort\b/i });
+          } else if (t === 'HOTEL') {
+            typeOrConditions.push({ title: /\bhotel\b/i });
+          } else if (t === 'SERVICE_APARTMENT') {
+            typeOrConditions.push({ title: /\bservice\s*apartment\b/i });
+          } else if (t === 'GUEST_HOUSE') {
+            typeOrConditions.push({ title: /\bguest\s*house\b/i });
+          } else if (t === 'RESIDENTIAL_RENTAL') {
+            typeOrConditions.push({ title: /\b(rent|rental)\b/i });
+          } else if (t === 'COMMERCIAL_LEASE') {
+            typeOrConditions.push({ title: /\b(lease|commercial lease)\b/i });
+          } else if (t === 'COLIVING_PG') {
+            typeOrConditions.push({ title: /\b(coliving|co-living|paying guest|pg)\b/i });
+          } else if (t === 'VACATION_RENTAL_AIRBNB') {
+            typeOrConditions.push({ title: /\b(vacation|airbnb|holiday home)\b/i });
+          } else if (t === 'WAREHOUSE_LAND') {
+            typeOrConditions.push({ title: /\b(warehouse|godown)\b/i });
+          } else if (
+            t === 'INDUSTRIAL_BUILDING' ||
+            t === 'INDUSTRIAL_SHED' ||
+            t === 'INDUSTRIAL_PLOT'
+          ) {
+            typeOrConditions.push({ title: /\bindustrial\b/i });
+          }
+        }
+
+        andConditions.push({ $or: typeOrConditions });
+      }
+    }
+
+    /*
+     * ------------------------------------------------------------
+     * BHK (BEDROOM COUNT)
+     * ------------------------------------------------------------
+     */
+
+    if (params.bhk && params.bhk.trim()) {
+      const bhkList = params.bhk
+        .split(',')
+        .map((b) => b.trim())
+        .filter(Boolean);
+
+      const bhkOrConditions: Record<string, any>[] = [];
+
+      for (const b of bhkList) {
+        const num = b.match(/\d+/)?.[0];
+        if (num) {
+          const numRegex = new RegExp(`\\b${num}\\s*(?:bhk|bedroom|bed)\\b`, 'i');
+          bhkOrConditions.push(
+            { bhk: b },
+            { bhk: `${num} BHK` },
+            { bhk: `${num} Bhk` },
+            { title: numRegex },
+            { description: numRegex },
+          );
+        } else {
+          bhkOrConditions.push({ bhk: b });
+        }
+      }
+
+      if (bhkOrConditions.length > 0) {
+        andConditions.push({ $or: bhkOrConditions });
+      }
     }
 
     /*
@@ -265,7 +385,7 @@ export async function getProperties(
      * ------------------------------------------------------------
      */
 
-    if (params.city) {
+    if (params.city && params.city.trim() && !params.query) {
       const cityRegex =
         escapeRegex(
           params.city.trim(),
@@ -279,7 +399,7 @@ export async function getProperties(
       };
     }
 
-    if (params.state) {
+    if (params.state && params.state !== 'ALL') {
       const stateRegex =
         escapeRegex(
           params.state.trim(),
@@ -317,7 +437,7 @@ export async function getProperties(
 
         if (
           Number.isFinite(min) &&
-          min >= 0
+          min > 0
         ) {
           priceQuery.$gte = min;
         }
@@ -332,7 +452,7 @@ export async function getProperties(
 
         if (
           Number.isFinite(max) &&
-          max >= 0
+          max > 0
         ) {
           priceQuery.$lte = max;
         }
@@ -371,7 +491,7 @@ export async function getProperties(
 
         if (
           Number.isFinite(min) &&
-          min >= 0
+          min > 0
         ) {
           areaQuery.$gte = min;
         }
@@ -386,7 +506,7 @@ export async function getProperties(
 
         if (
           Number.isFinite(max) &&
-          max >= 0
+          max > 0
         ) {
           areaQuery.$lte = max;
         }
@@ -403,7 +523,17 @@ export async function getProperties(
 
     /*
      * ------------------------------------------------------------
-     * TEXT SEARCH
+     * DIRECT LANDOWNER ONLY
+     * ------------------------------------------------------------
+     */
+
+    if (params.verifiedOnly) {
+      query.sellerType = 'INDIVIDUAL';
+    }
+
+    /*
+     * ------------------------------------------------------------
+     * TEXT SEARCH QUERY
      * ------------------------------------------------------------
      */
 
@@ -418,27 +548,44 @@ export async function getProperties(
           'i',
         );
 
-      query.$or = [
-        {
-          title: searchRegex,
-        },
-        {
-          description:
-            searchRegex,
-        },
-        {
-          'location.city':
-            searchRegex,
-        },
-        {
-          'location.state':
-            searchRegex,
-        },
-        {
-          'location.address':
-            searchRegex,
-        },
-      ];
+      andConditions.push({
+        $or: [
+          {
+            title: searchRegex,
+          },
+          {
+            description:
+              searchRegex,
+          },
+          {
+            'location.city':
+              searchRegex,
+          },
+          {
+            'location.state':
+              searchRegex,
+          },
+          {
+            'location.address':
+              searchRegex,
+          },
+          {
+            'location.district':
+              searchRegex,
+          },
+          {
+            nearbyLandmarks:
+              searchRegex,
+          },
+        ],
+      });
+    }
+
+    /* Combine compound AND conditions into MongoDB query */
+    if (andConditions.length === 1) {
+      Object.assign(query, andConditions[0]);
+    } else if (andConditions.length > 1) {
+      query.$and = andConditions;
     }
 
     /*
@@ -799,6 +946,30 @@ export async function createProperty(
     landType:
       data.landType ||
       'RESIDENTIAL_PLOT',
+
+    propertyType:
+      data.propertyType ||
+      data.landType ||
+      'RESIDENTIAL_PLOT',
+
+    bhk: data.bhk,
+    facing: data.facing,
+    floorNumber: data.floorNumber,
+    totalFloors: data.totalFloors,
+    furnishingStatus: data.furnishingStatus,
+    bathrooms: data.bathrooms,
+    balconies: data.balconies,
+    carpetAreaSqFt: data.carpetAreaSqFt,
+    superBuiltUpAreaSqFt: data.superBuiltUpAreaSqFt,
+    boundaryWall: data.boundaryWall,
+    cornerPlot: Boolean(data.cornerPlot),
+    gatedCommunity: Boolean(data.gatedCommunity),
+    amenities: data.amenities || [],
+    approvals: data.approvals || [],
+    waterSource: data.waterSource || [],
+    electricityPhase: data.electricityPhase,
+    soilType: data.soilType,
+    propertyAttributes: data.propertyAttributes || {},
 
     roadAccess:
       data.roadAccess ||

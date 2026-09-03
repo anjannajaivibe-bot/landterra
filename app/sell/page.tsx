@@ -29,6 +29,13 @@ import {
   ImageIcon,
   RefreshCw,
   Ruler,
+  Building2,
+  Home,
+  Maximize2,
+  Briefcase,
+  Trees,
+  Palmtree,
+  BadgeIndianRupee,
 } from 'lucide-react';
 
 interface UploadedImagePreview {
@@ -55,6 +62,7 @@ interface UploadedDocPreview {
 
 type LandAreaUnit =
   | 'SQUARE_YARDS'
+  | 'SQUARE_FEET'
   | 'GUNTAS'
   | 'CENTS'
   | 'ACRES'
@@ -62,6 +70,7 @@ type LandAreaUnit =
 
 const LAND_AREA_CONVERSIONS: Record<LandAreaUnit, number> = {
   SQUARE_YARDS: 1,
+  SQUARE_FEET: 1 / 9,
   GUNTAS: 121,
   CENTS: 48.4,
   ACRES: 4840,
@@ -70,6 +79,7 @@ const LAND_AREA_CONVERSIONS: Record<LandAreaUnit, number> = {
 
 const LAND_AREA_UNIT_LABELS: Record<LandAreaUnit, string> = {
   SQUARE_YARDS: 'Square Yards',
+  SQUARE_FEET: 'Square Feet (sq. ft)',
   GUNTAS: 'Guntas',
   CENTS: 'Cents',
   ACRES: 'Acres',
@@ -78,6 +88,7 @@ const LAND_AREA_UNIT_LABELS: Record<LandAreaUnit, string> = {
 
 const LAND_AREA_UNIT_SHORT_LABELS: Record<LandAreaUnit, string> = {
   SQUARE_YARDS: 'sq. yd',
+  SQUARE_FEET: 'sq. ft',
   GUNTAS: 'guntas',
   CENTS: 'cents',
   ACRES: 'acres',
@@ -370,6 +381,85 @@ function SellPageForm() {
   const [landType, setLandType] =
     useState<LandType>('RESIDENTIAL_PLOT');
 
+  // Context-Specific Property Attributes
+  // Residential: Flat / Apartment & Villa
+  const [bhk, setBhk] = useState<string>('3 BHK');
+  const [floorNumber, setFloorNumber] = useState<string>('');
+  const [totalFloors, setTotalFloors] = useState<string>('');
+  const [furnishingStatus, setFurnishingStatus] = useState<string>('SEMI_FURNISHED');
+  const [bathrooms, setBathrooms] = useState<number>(2);
+  const [balconies, setBalconies] = useState<number>(1);
+  const [carpetAreaSqFt, setCarpetAreaSqFt] = useState<string>('');
+  const [superBuiltUpAreaSqFt, setSuperBuiltUpAreaSqFt] = useState<string>('');
+  const [parkingSlots, setParkingSlots] = useState<string>('1_COVERED');
+
+  // Facing, Dimensions & Boundaries (Plots, Villas & Land)
+  const [facing, setFacing] = useState<string>('EAST');
+  const [plotLengthFt, setPlotLengthFt] = useState<string>('');
+  const [plotWidthFt, setPlotWidthFt] = useState<string>('');
+  const [boundaryWall, setBoundaryWall] = useState<string>('FULL_WALL');
+  const [cornerPlot, setCornerPlot] = useState<boolean>(false);
+  const [gatedCommunity, setGatedCommunity] = useState<boolean>(true);
+  const [approvals, setApprovals] = useState<string[]>(['HMDA Approved']);
+
+  // Villa Specific
+  const [villaType, setVillaType] = useState<string>('INDEPENDENT_HOUSE');
+  const [villaFloors, setVillaFloors] = useState<string>('G_PLUS_1');
+
+  // Commercial Specific
+  const [commercialFitout, setCommercialFitout] = useState<string>('WARM_SHELL');
+  const [commercialWashrooms, setCommercialWashrooms] = useState<string>('PRIVATE');
+  const [powerLoadKva, setPowerLoadKva] = useState<string>('');
+  const [suitableBusinesses, setSuitableBusinesses] = useState<string[]>([
+    'IT / Software Company',
+    'Corporate Office',
+  ]);
+
+  // Farmland Specific
+  const [soilType, setSoilType] = useState<string>('RED_SOIL');
+  const [waterSources, setWaterSources] = useState<string[]>(['Dedicated Borewell']);
+  const [electricityPhase, setElectricityPhase] = useState<string>('3_PHASE');
+  const [farmFencing, setFarmFencing] = useState<string>('CHAINLINK');
+  const [plantations, setPlantations] = useState<string>('');
+  // Hospitality & Leisure Specific
+  const [totalRooms, setTotalRooms] = useState<string>('20 Rooms');
+  const [eventLawnCapacity, setEventLawnCapacity] = useState<string>('500 Guests');
+  const [hospitalityFeatures, setHospitalityFeatures] = useState<string[]>([
+    'Swimming Pool',
+    'Restaurant / Kitchen Setup',
+    'Banquet / Event Lawn',
+    'Guest Parking',
+  ]);
+
+  // Income-Generating & Rentals Specific
+  const [monthlyRent, setMonthlyRent] = useState<string>('');
+  const [securityDepositMonths, setSecurityDepositMonths] = useState<string>('2 Months');
+  const [leaseLockInPeriod, setLeaseLockInPeriod] = useState<string>('11 Months');
+  const [maintenanceCharges, setMaintenanceCharges] = useState<string>('');
+
+  // Seller Category Tab
+  const [sellerCategoryTab, setSellerCategoryTab] = useState<string>('Land & Plots');
+
+  // Selected Amenities
+  const [selectedAmenities, setSelectedAmenities] = useState<string[]>([
+    'Lift / Elevator',
+    '24/7 Security & CCTV',
+    '100% Power Backup',
+    'Covered Car Parking',
+  ]);
+
+  const toggleItem = (
+    list: string[],
+    item: string,
+    setter: (val: string[]) => void,
+  ) => {
+    if (list.includes(item)) {
+      setter(list.filter((i) => i !== item));
+    } else {
+      setter([...list, item]);
+    }
+  };
+
   const [roadAccess, setRoadAccess] =
     useState<string>('30_FT_PLUS');
 
@@ -440,7 +530,7 @@ function SellPageForm() {
 
   // Step 7: Terms & Payment
   const [termsAccepted, setTermsAccepted] =
-    useState<boolean>(true);
+    useState<boolean>(false);
 
   const [createdProperty, setCreatedProperty] =
     useState<IProperty | null>(null);
@@ -452,6 +542,7 @@ function SellPageForm() {
   const areaConversions = useMemo(() => {
     return {
       squareYards: landAreaYards,
+      squareFeet: convertFromSquareYards(landAreaYards, 'SQUARE_FEET'),
       guntas: convertFromSquareYards(landAreaYards, 'GUNTAS'),
       cents: convertFromSquareYards(landAreaYards, 'CENTS'),
       acres: convertFromSquareYards(landAreaYards, 'ACRES'),
@@ -560,6 +651,42 @@ function SellPageForm() {
                 setPriceNegotiable(property.priceNegotiable);
               }
               if (property.landType) setLandType(property.landType);
+              if (property.bhk) setBhk(property.bhk);
+              if (property.facing) setFacing(property.facing);
+              if (property.floorNumber) setFloorNumber(property.floorNumber);
+              if (property.totalFloors) setTotalFloors(String(property.totalFloors));
+              if (property.furnishingStatus) setFurnishingStatus(property.furnishingStatus);
+              if (typeof property.bathrooms === 'number') setBathrooms(property.bathrooms);
+              if (typeof property.balconies === 'number') setBalconies(property.balconies);
+              if (property.carpetAreaSqFt) setCarpetAreaSqFt(String(property.carpetAreaSqFt));
+              if (property.superBuiltUpAreaSqFt) setSuperBuiltUpAreaSqFt(String(property.superBuiltUpAreaSqFt));
+              if (property.boundaryWall) setBoundaryWall(property.boundaryWall);
+              if (typeof property.cornerPlot === 'boolean') setCornerPlot(property.cornerPlot);
+              if (typeof property.gatedCommunity === 'boolean') setGatedCommunity(property.gatedCommunity);
+              if (Array.isArray(property.amenities) && property.amenities.length > 0) setSelectedAmenities(property.amenities);
+              if (Array.isArray(property.approvals) && property.approvals.length > 0) setApprovals(property.approvals);
+              if (Array.isArray(property.waterSource) && property.waterSource.length > 0) setWaterSources(property.waterSource);
+              if (property.electricityPhase) setElectricityPhase(property.electricityPhase);
+              if (property.soilType) setSoilType(property.soilType);
+              if (property.propertyAttributes) {
+                if (property.propertyAttributes.plotWidthFt) setPlotWidthFt(String(property.propertyAttributes.plotWidthFt));
+                if (property.propertyAttributes.plotLengthFt) setPlotLengthFt(String(property.propertyAttributes.plotLengthFt));
+                if (property.propertyAttributes.villaType) setVillaType(property.propertyAttributes.villaType);
+                if (property.propertyAttributes.villaFloors) setVillaFloors(property.propertyAttributes.villaFloors);
+                if (property.propertyAttributes.commercialFitout) setCommercialFitout(property.propertyAttributes.commercialFitout);
+                if (property.propertyAttributes.commercialWashrooms) setCommercialWashrooms(property.propertyAttributes.commercialWashrooms);
+                if (property.propertyAttributes.powerLoadKva) setPowerLoadKva(property.propertyAttributes.powerLoadKva);
+                if (Array.isArray(property.propertyAttributes.suitableBusinesses)) setSuitableBusinesses(property.propertyAttributes.suitableBusinesses);
+                if (property.propertyAttributes.farmFencing) setFarmFencing(property.propertyAttributes.farmFencing);
+                if (property.propertyAttributes.plantations) setPlantations(property.propertyAttributes.plantations);
+                if (property.propertyAttributes.totalRooms) setTotalRooms(property.propertyAttributes.totalRooms);
+                if (property.propertyAttributes.eventLawnCapacity) setEventLawnCapacity(property.propertyAttributes.eventLawnCapacity);
+                if (Array.isArray(property.propertyAttributes.hospitalityFeatures)) setHospitalityFeatures(property.propertyAttributes.hospitalityFeatures);
+                if (property.propertyAttributes.monthlyRent) setMonthlyRent(property.propertyAttributes.monthlyRent);
+                if (property.propertyAttributes.securityDepositMonths) setSecurityDepositMonths(property.propertyAttributes.securityDepositMonths);
+                if (property.propertyAttributes.leaseLockInPeriod) setLeaseLockInPeriod(property.propertyAttributes.leaseLockInPeriod);
+                if (property.propertyAttributes.maintenanceCharges) setMaintenanceCharges(property.propertyAttributes.maintenanceCharges);
+              }
               if (property.roadAccess) setRoadAccess(property.roadAccess);
               if (Array.isArray(property.nearbyLandmarks)) {
                 setLandmarks(property.nearbyLandmarks.join(', '));
@@ -727,8 +854,14 @@ function SellPageForm() {
         setErrorMessage('Property title must be at least 6 characters long.');
         return false;
       }
-      if (!Number.isFinite(landAreaYards) || landAreaYards <= 0) {
-        setErrorMessage('Land area must be greater than zero.');
+      if (!Number.isFinite(landAreaYards) || landAreaYards < 1) {
+        setErrorMessage('Land area must be at least 1 square yard.');
+        return false;
+      }
+      if (landAreaYards > 100000000) {
+        setErrorMessage(
+          'Land area exceeds maximum allowable limit (10 crore sq. yards / approx. 20,660 acres). Please check the value and unit.',
+        );
         return false;
       }
       if (!Number.isFinite(pricePerYard) || pricePerYard <= 0) {
@@ -903,8 +1036,16 @@ function SellPageForm() {
       return;
     }
 
-    if (!Number.isFinite(landAreaYards) || landAreaYards <= 0) {
-      setErrorMessage('Please enter a valid land area.');
+    if (!Number.isFinite(landAreaYards) || landAreaYards < 1) {
+      setErrorMessage('Please enter a valid land area (minimum 1 sq. yard).');
+      setCurrentStep(1);
+      return;
+    }
+
+    if (landAreaYards > 100000000) {
+      setErrorMessage(
+        'Land area exceeds maximum allowable limit (10 crore sq. yards / approx. 20,660 acres). Please verify your entered value and unit.',
+      );
       setCurrentStep(1);
       return;
     }
@@ -920,6 +1061,84 @@ function SellPageForm() {
         pricePerYard: Number(pricePerYard),
         priceNegotiable,
         landType,
+        propertyType: landType,
+        bhk: [
+          'FLAT',
+          'INDEPENDENT_HOUSE',
+          'VILLA',
+          'HOUSE_VILLA',
+          'TOWNHOUSE',
+          'DUPLEX',
+          'PENTHOUSE',
+          'SERVICE_APARTMENT',
+          'RESIDENTIAL_RENTAL',
+          'COLIVING_PG',
+          'VACATION_RENTAL_AIRBNB',
+        ].includes(landType)
+          ? bhk
+          : undefined,
+        facing,
+        floorNumber: [
+          'FLAT',
+          'PENTHOUSE',
+          'DUPLEX',
+          'OFFICE_SPACE',
+          'COWORKING_SPACE',
+          'SERVICE_APARTMENT',
+        ].includes(landType)
+          ? floorNumber
+          : undefined,
+        totalFloors: totalFloors ? Number(totalFloors) : undefined,
+        furnishingStatus,
+        bathrooms: Number(bathrooms),
+        balconies: Number(balconies),
+        carpetAreaSqFt: carpetAreaSqFt ? Number(carpetAreaSqFt) : undefined,
+        superBuiltUpAreaSqFt: superBuiltUpAreaSqFt ? Number(superBuiltUpAreaSqFt) : undefined,
+        boundaryWall,
+        cornerPlot: Boolean(cornerPlot),
+        gatedCommunity: Boolean(gatedCommunity),
+        amenities: selectedAmenities,
+        approvals,
+        waterSource: waterSources,
+        electricityPhase,
+        soilType,
+        propertyAttributes: {
+          bhk,
+          facing,
+          floorNumber,
+          totalFloors,
+          furnishingStatus,
+          bathrooms,
+          balconies,
+          carpetAreaSqFt,
+          superBuiltUpAreaSqFt,
+          parkingSlots,
+          plotLengthFt,
+          plotWidthFt,
+          boundaryWall,
+          cornerPlot,
+          gatedCommunity,
+          approvals,
+          villaType,
+          villaFloors,
+          commercialFitout,
+          commercialWashrooms,
+          powerLoadKva,
+          suitableBusinesses,
+          soilType,
+          waterSources,
+          electricityPhase,
+          farmFencing,
+          plantations,
+          totalRooms,
+          eventLawnCapacity,
+          hospitalityFeatures,
+          monthlyRent,
+          securityDepositMonths,
+          leaseLockInPeriod,
+          maintenanceCharges,
+          amenities: selectedAmenities,
+        },
         roadAccess,
         nearbyLandmarks: landmarks
           ? landmarks
@@ -988,7 +1207,10 @@ function SellPageForm() {
             'Phone verification is required before listing. Please verify your phone number.',
           );
         } else {
-          throw new Error(data.error || 'Failed to submit listing draft');
+          const detailMsg = Array.isArray(data.details)
+            ? data.details.map((d: any) => `${d.path?.join('.') || 'field'}: ${d.message || 'invalid'}`).join('; ')
+            : '';
+          throw new Error(data.error || detailMsg || 'Failed to submit listing draft');
         }
         setIsSubmitting(false);
         return;
@@ -1449,13 +1671,22 @@ function SellPageForm() {
                   </div>
 
                   {/* Conversion Multi-View Grid */}
-                  <div className="mt-4 grid grid-cols-2 sm:grid-cols-5 gap-2">
+                  <div className="mt-4 grid grid-cols-2 sm:grid-cols-6 gap-2">
                     <div className="bg-white border border-[#FF9933]/30 rounded-xl p-3">
                       <p className="text-[9px] uppercase tracking-wide font-bold text-slate-400">
                         Sq. Yards
                       </p>
                       <p className="text-sm font-extrabold text-slate-900 mt-1">
                         {formatArea(areaConversions.squareYards, 2)}
+                      </p>
+                    </div>
+
+                    <div className="bg-white border border-[#FF9933]/30 rounded-xl p-3">
+                      <p className="text-[9px] uppercase tracking-wide font-bold text-slate-400">
+                        Sq. Feet
+                      </p>
+                      <p className="text-sm font-extrabold text-slate-900 mt-1">
+                        {formatArea(areaConversions.squareFeet, 0)}
                       </p>
                     </div>
 
@@ -1503,6 +1734,12 @@ function SellPageForm() {
                       <strong>{formatArea(landAreaYards, 2)} square yards</strong> for BhoomiMitra&apos;s property records.
                     </p>
                   </div>
+
+                  {landAreaYards > 100000000 && (
+                    <div className="mt-3 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold">
+                      ⚠️ Entered area exceeds maximum allowable limit of 100,000,000 sq. yards (~20,660 acres). Please check your entered value and selected unit.
+                    </div>
+                  )}
                 </div>
 
                 {/* Price & Valuation */}
@@ -1554,31 +1791,1112 @@ function SellPageForm() {
                   </span>
                 </label>
 
-                {/* Land type */}
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-2">
-                    Land Type *
-                  </label>
+                {/* Property Type Selection with Category Tabs */}
+                <div className="space-y-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                    <label className="block text-xs font-bold text-slate-800">
+                      Property Type *
+                    </label>
+                    <span className="text-[11px] font-semibold text-[#c75e0a]">
+                      Select category &amp; subtype to customize specifications
+                    </span>
+                  </div>
+
+                  {/* Category Filter Tabs */}
+                  <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-slate-100 border border-slate-200 overflow-x-auto scrollbar-none">
+                    {[
+                      { id: 'ALL', label: 'All Categories' },
+                      { id: 'Land & Plots', label: 'Land & Plots' },
+                      { id: 'Residential Units', label: 'Residential Units' },
+                      { id: 'Commercial & Retail', label: 'Commercial & Retail' },
+                      { id: 'Hospitality & Leisure', label: 'Hospitality & Leisure' },
+                      { id: 'Income-Generating & Rentals', label: 'Income & Rentals' },
+                    ].map((tab) => (
+                      <button
+                        key={tab.id}
+                        type="button"
+                        onClick={() => setSellerCategoryTab(tab.id)}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
+                          sellerCategoryTab === tab.id
+                            ? 'bg-white text-[#c75e0a] shadow-xs border border-amber-200 ring-1 ring-[#FF9933]/30'
+                            : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+                        }`}
+                      >
+                        {tab.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Property Type Buttons */}
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                    {LAND_TYPES.map((type: any) => {
+                    {LAND_TYPES.filter(
+                      (t: any) => sellerCategoryTab === 'ALL' || t.category === sellerCategoryTab
+                    ).map((type: any) => {
                       const value = type.value || type.id || type;
                       const label = type.label || type.name || value;
+                      const isSelected = landType === value;
                       return (
                         <button
                           key={value}
                           type="button"
-                          onClick={() => setLandType(value as LandType)}
-                          className={`p-3 rounded-xl border text-left transition-colors cursor-pointer ${landType === value
-                              ? 'border-[#FF9933] bg-[#fff9f0] text-[#7a3705] font-bold'
+                          onClick={() => {
+                            setLandType(value as LandType);
+                            if (type.category) setSellerCategoryTab(type.category);
+                          }}
+                          className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                            isSelected
+                              ? 'border-[#FF9933] bg-[#fff9f0] text-[#7a3705] font-bold ring-2 ring-[#FF9933]/20 shadow-xs'
                               : 'border-slate-200 bg-white hover:border-slate-300 text-slate-700 font-medium'
-                            }`}
+                          }`}
                         >
-                          <span className="text-[11px]">{label}</span>
+                          <div className="flex items-center justify-between">
+                            <span className="text-[11px] block leading-tight">{label}</span>
+                            {isSelected && (
+                              <span className="w-2 h-2 rounded-full bg-[#FF9933] shrink-0 ml-1.5" />
+                            )}
+                          </div>
+                          {type.category && (
+                            <span className="text-[9px] text-slate-400 block mt-0.5 font-medium truncate">
+                              {type.category}
+                            </span>
+                          )}
                         </button>
                       );
                     })}
                   </div>
                 </div>
+
+                {/* 1. APARTMENT / FLAT / DUPLEX / PENTHOUSE SPECIFIC DETAILS */}
+                {(landType === 'FLAT' || landType === 'PENTHOUSE' || landType === 'DUPLEX') && (
+                  <div className="rounded-2xl border border-amber-200/80 bg-[#fffdfa] p-5 sm:p-6 space-y-6 animate-in fade-in duration-200 shadow-xs">
+                    <div className="flex items-center gap-2.5 pb-3 border-b border-amber-100">
+                      <div className="w-8 h-8 rounded-lg bg-[#fff1dc] text-[#c75e0a] flex items-center justify-center shrink-0">
+                        <Building2 className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-extrabold text-slate-900">
+                          Apartment & Tower Specifications
+                        </h3>
+                        <p className="text-[11px] text-slate-500">
+                          Configuration, floor details, areas, and society amenities for apartment buyers.
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Bedroom Configuration (BHK) */}
+                    <div>
+                      <label className="block text-xs font-bold text-slate-800 mb-2">
+                        Bedrooms Configuration (BHK) *
+                      </label>
+                      <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
+                        {['1 BHK', '2 BHK', '3 BHK', '4 BHK', '5+ BHK'].map((item) => (
+                          <button
+                            key={item}
+                            type="button"
+                            onClick={() => setBhk(item)}
+                            className={`py-2.5 px-3 rounded-xl border text-center text-xs font-bold transition-all cursor-pointer ${
+                              bhk === item
+                                ? 'border-[#FF9933] bg-[#FF9933] text-white shadow-xs'
+                                : 'border-slate-200 bg-white hover:border-slate-300 text-slate-700'
+                            }`}
+                          >
+                            {item}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Floor Details */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                          Floor Number *
+                        </label>
+                        <input
+                          type="text"
+                          value={floorNumber}
+                          onChange={(e) => setFloorNumber(e.target.value)}
+                          placeholder="e.g. 4th Floor"
+                          className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#fff1dc] focus:border-[#FF9933]"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                          Total Floors in Tower *
+                        </label>
+                        <input
+                          type="text"
+                          value={totalFloors}
+                          onChange={(e) => setTotalFloors(e.target.value)}
+                          placeholder="e.g. 14 Floors"
+                          className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#fff1dc] focus:border-[#FF9933]"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Bathrooms & Balconies */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                          Bathrooms
+                        </label>
+                        <div className="flex gap-2">
+                          {[1, 2, 3, 4, 5].map((num) => (
+                            <button
+                              key={num}
+                              type="button"
+                              onClick={() => setBathrooms(num)}
+                              className={`flex-1 py-2 rounded-xl border text-xs font-bold cursor-pointer transition-colors ${
+                                bathrooms === num
+                                  ? 'border-[#FF9933] bg-[#fff1dc] text-[#c75e0a]'
+                                  : 'border-slate-200 bg-white hover:border-slate-300 text-slate-700'
+                              }`}
+                            >
+                              {num}{num === 5 ? '+' : ''}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                          Balconies
+                        </label>
+                        <div className="flex gap-2">
+                          {[0, 1, 2, 3, 4].map((num) => (
+                            <button
+                              key={num}
+                              type="button"
+                              onClick={() => setBalconies(num)}
+                              className={`flex-1 py-2 rounded-xl border text-xs font-bold cursor-pointer transition-colors ${
+                                balconies === num
+                                  ? 'border-[#FF9933] bg-[#fff1dc] text-[#c75e0a]'
+                                  : 'border-slate-200 bg-white hover:border-slate-300 text-slate-700'
+                              }`}
+                            >
+                              {num}{num === 4 ? '+' : ''}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Furnishing Status */}
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-2">
+                        Furnishing Status
+                      </label>
+                      <div className="grid grid-cols-3 gap-2">
+                        {[
+                          { id: 'UNFURNISHED', label: 'Unfurnished' },
+                          { id: 'SEMI_FURNISHED', label: 'Semi-Furnished' },
+                          { id: 'FULLY_FURNISHED', label: 'Fully Furnished' },
+                        ].map((f) => (
+                          <button
+                            key={f.id}
+                            type="button"
+                            onClick={() => setFurnishingStatus(f.id)}
+                            className={`py-2 px-3 rounded-xl border text-xs font-semibold cursor-pointer transition-colors ${
+                              furnishingStatus === f.id
+                                ? 'border-[#FF9933] bg-[#fff1dc] text-[#c75e0a] font-bold'
+                                : 'border-slate-200 bg-white hover:border-slate-300 text-slate-700'
+                            }`}
+                          >
+                            {f.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Super Built-Up & Carpet Area */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                          Super Built-up Area (sq. ft)
+                        </label>
+                        <input
+                          type="number"
+                          min={100}
+                          value={superBuiltUpAreaSqFt}
+                          onChange={(e) => setSuperBuiltUpAreaSqFt(e.target.value)}
+                          placeholder="e.g. 1450"
+                          className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#fff1dc] focus:border-[#FF9933]"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                          Carpet Area (sq. ft)
+                        </label>
+                        <input
+                          type="number"
+                          min={100}
+                          value={carpetAreaSqFt}
+                          onChange={(e) => setCarpetAreaSqFt(e.target.value)}
+                          placeholder="e.g. 1120"
+                          className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#fff1dc] focus:border-[#FF9933]"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Facing & Reserved Parking */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                          Main Door Facing
+                        </label>
+                        <select
+                          value={facing}
+                          onChange={(e) => setFacing(e.target.value)}
+                          className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#fff1dc] focus:border-[#FF9933] cursor-pointer"
+                        >
+                          <option value="EAST">East Facing</option>
+                          <option value="WEST">West Facing</option>
+                          <option value="NORTH">North Facing</option>
+                          <option value="SOUTH">South Facing</option>
+                          <option value="NORTH_EAST">North-East Facing</option>
+                          <option value="NORTH_WEST">North-West Facing</option>
+                          <option value="SOUTH_EAST">South-East Facing</option>
+                          <option value="SOUTH_WEST">South-West Facing</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                          Reserved Car Parking
+                        </label>
+                        <select
+                          value={parkingSlots}
+                          onChange={(e) => setParkingSlots(e.target.value)}
+                          className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#fff1dc] focus:border-[#FF9933] cursor-pointer"
+                        >
+                          <option value="1_COVERED">1 Covered Car Parking</option>
+                          <option value="2_COVERED">2 Covered Car Parkings</option>
+                          <option value="OPEN">Open Car Parking</option>
+                          <option value="NONE">No Reserved Parking</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Society Amenities */}
+                    <div>
+                      <label className="block text-xs font-bold text-slate-800 mb-2">
+                        Society & Apartment Amenities
+                      </label>
+                      <div className="flex flex-wrap gap-2">
+                        {[
+                          'Lift / Elevator',
+                          '24/7 Security & CCTV',
+                          '100% Power Backup',
+                          'Clubhouse',
+                          'Swimming Pool',
+                          'Gymnasium',
+                          'Children\'s Play Area',
+                          'Gated Community',
+                          'Piped Gas Line',
+                          'Intercom',
+                          'Rainwater Harvesting',
+                          'EV Charging Station',
+                        ].map((amenity) => {
+                          const selected = selectedAmenities.includes(amenity);
+                          return (
+                            <button
+                              key={amenity}
+                              type="button"
+                              onClick={() => toggleItem(selectedAmenities, amenity, setSelectedAmenities)}
+                              className={`px-3 py-1.5 rounded-lg border text-xs font-semibold transition-colors cursor-pointer ${
+                                selected
+                                  ? 'border-[#FF9933] bg-[#fff1dc] text-[#c75e0a]'
+                                  : 'border-slate-200 bg-white hover:border-slate-300 text-slate-600'
+                              }`}
+                            >
+                              {selected ? '✓ ' : '+ '}{amenity}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* 2. PLOT SPECIFIC DETAILS (Open Plots, Farmland Plots, Gated Layouts, Residential & Commercial Plots) */}
+                {(['OPEN_PLOT', 'FARMLAND_PLOT', 'GATED_COMMUNITY_PLOT', 'RESIDENTIAL_PLOT', 'COMMERCIAL_LAND', 'INDUSTRIAL_PLOT'].includes(landType)) && (
+                  <div className="rounded-2xl border border-amber-200/80 bg-[#fffdfa] p-5 sm:p-6 space-y-6 animate-in fade-in duration-200 shadow-xs">
+                    <div className="flex items-center gap-2.5 pb-3 border-b border-amber-100">
+                      <div className="w-8 h-8 rounded-lg bg-[#fff1dc] text-[#c75e0a] flex items-center justify-center shrink-0">
+                        <Maximize2 className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-extrabold text-slate-900">
+                          Plot Measurements, Facing & Boundary Details
+                        </h3>
+                        <p className="text-[11px] text-slate-500">
+                          Specify dimensions, facing direction, boundary walls, and layout sanctions.
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Plot Facing */}
+                    <div>
+                      <label className="block text-xs font-bold text-slate-800 mb-2">
+                        Plot Facing Direction *
+                      </label>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        {[
+                          { id: 'EAST', label: 'East Facing' },
+                          { id: 'WEST', label: 'West Facing' },
+                          { id: 'NORTH', label: 'North Facing' },
+                          { id: 'SOUTH', label: 'South Facing' },
+                          { id: 'NORTH_EAST', label: 'North-East' },
+                          { id: 'NORTH_WEST', label: 'North-West' },
+                          { id: 'SOUTH_EAST', label: 'South-East' },
+                          { id: 'SOUTH_WEST', label: 'South-West' },
+                        ].map((item) => (
+                          <button
+                            key={item.id}
+                            type="button"
+                            onClick={() => setFacing(item.id)}
+                            className={`py-2 px-3 rounded-xl border text-center text-xs font-bold transition-all cursor-pointer ${
+                              facing === item.id
+                                ? 'border-[#FF9933] bg-[#FF9933] text-white shadow-xs'
+                                : 'border-slate-200 bg-white hover:border-slate-300 text-slate-700'
+                            }`}
+                          >
+                            {item.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Plot Dimensions */}
+                    <div>
+                      <label className="block text-xs font-bold text-slate-800 mb-1.5">
+                        Plot Dimensions (Frontage × Depth in Feet)
+                      </label>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <span className="text-[11px] text-slate-500 mb-1 block font-medium">Frontage / Width (ft)</span>
+                          <input
+                            type="number"
+                            min={1}
+                            value={plotWidthFt}
+                            onChange={(e) => setPlotWidthFt(e.target.value)}
+                            placeholder="e.g. 30"
+                            className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#fff1dc] focus:border-[#FF9933]"
+                          />
+                        </div>
+                        <div>
+                          <span className="text-[11px] text-slate-500 mb-1 block font-medium">Depth / Length (ft)</span>
+                          <input
+                            type="number"
+                            min={1}
+                            value={plotLengthFt}
+                            onChange={(e) => setPlotLengthFt(e.target.value)}
+                            placeholder="e.g. 50"
+                            className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#fff1dc] focus:border-[#FF9933]"
+                          />
+                        </div>
+                      </div>
+                      {plotWidthFt && plotLengthFt && (
+                        <p className="text-[11px] text-emerald-700 font-semibold mt-2">
+                          Dimensions: {plotWidthFt} ft × {plotLengthFt} ft = {(Number(plotWidthFt) * Number(plotLengthFt)).toLocaleString('en-IN')} sq. ft ({(Number(plotWidthFt) * Number(plotLengthFt) / 9).toFixed(1)} sq. yd)
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Boundary & Enclosure Details */}
+                    <div>
+                      <label className="block text-xs font-bold text-slate-800 mb-2">
+                        Boundary & Enclosure Status *
+                      </label>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        {[
+                          { id: 'FULL_WALL', label: 'Full Concrete Boundary Wall Constructed' },
+                          { id: 'FENCING', label: 'Barbed Wire / Chainlink Fencing' },
+                          { id: 'DEMARCATED_STONES', label: 'Demarcated Survey Boundary Stones' },
+                          { id: 'OPEN_PLOT', label: 'Open / Unfenced Plot' },
+                        ].map((item) => (
+                          <button
+                            key={item.id}
+                            type="button"
+                            onClick={() => setBoundaryWall(item.id)}
+                            className={`p-3 rounded-xl border text-left text-xs font-semibold cursor-pointer transition-colors ${
+                              boundaryWall === item.id
+                                ? 'border-[#FF9933] bg-[#fff1dc] text-[#c75e0a] font-bold'
+                                : 'border-slate-200 bg-white hover:border-slate-300 text-slate-700'
+                            }`}
+                          >
+                            {item.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Corner Plot & Gated Community Toggles */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <label className="flex items-start gap-3 p-3 rounded-xl border border-slate-200 bg-white cursor-pointer hover:border-slate-300">
+                        <input
+                          type="checkbox"
+                          checked={cornerPlot}
+                          onChange={(e) => setCornerPlot(e.target.checked)}
+                          className="w-4 h-4 mt-0.5 accent-[#FF9933]"
+                        />
+                        <div>
+                          <p className="text-xs font-bold text-slate-900">Corner Plot</p>
+                          <p className="text-[10px] text-slate-500">Plot has 2 or more road faces</p>
+                        </div>
+                      </label>
+
+                      <label className="flex items-start gap-3 p-3 rounded-xl border border-slate-200 bg-white cursor-pointer hover:border-slate-300">
+                        <input
+                          type="checkbox"
+                          checked={gatedCommunity}
+                          onChange={(e) => setGatedCommunity(e.target.checked)}
+                          className="w-4 h-4 mt-0.5 accent-[#FF9933]"
+                        />
+                        <div>
+                          <p className="text-xs font-bold text-slate-900">Gated Layout</p>
+                          <p className="text-[10px] text-slate-500">Located in a secured/gated development</p>
+                        </div>
+                      </label>
+                    </div>
+
+                    {/* Layout Approvals */}
+                    <div>
+                      <label className="block text-xs font-bold text-slate-800 mb-2">
+                        Layout Sanctions & Approvals
+                      </label>
+                      <div className="flex flex-wrap gap-2">
+                        {[
+                          'HMDA Approved',
+                          'GHMC Approved',
+                          'DTCP Approved',
+                          'RERA Registered',
+                          'BDA Approved',
+                          'Panchayat Approved',
+                          'Clear Title / Revenue Patta',
+                        ].map((appr) => {
+                          const selected = approvals.includes(appr);
+                          return (
+                            <button
+                              key={appr}
+                              type="button"
+                              onClick={() => toggleItem(approvals, appr, setApprovals)}
+                              className={`px-3 py-1.5 rounded-lg border text-xs font-semibold transition-colors cursor-pointer ${
+                                selected
+                                  ? 'border-[#FF9933] bg-[#fff1dc] text-[#c75e0a]'
+                                  : 'border-slate-200 bg-white hover:border-slate-300 text-slate-600'
+                              }`}
+                            >
+                              {selected ? '✓ ' : '+ '}{appr}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* 3. HOUSE / VILLA / TOWNHOUSE SPECIFIC DETAILS */}
+                {(['HOUSE_VILLA', 'VILLA', 'INDEPENDENT_HOUSE', 'TOWNHOUSE'].includes(landType)) && (
+                  <div className="rounded-2xl border border-amber-200/80 bg-[#fffdfa] p-5 sm:p-6 space-y-6 animate-in fade-in duration-200 shadow-xs">
+                    <div className="flex items-center gap-2.5 pb-3 border-b border-amber-100">
+                      <div className="w-8 h-8 rounded-lg bg-[#fff1dc] text-[#c75e0a] flex items-center justify-center shrink-0">
+                        <Home className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-extrabold text-slate-900">
+                          House / Villa Specifications
+                        </h3>
+                        <p className="text-[11px] text-slate-500">
+                          Capture configuration, villa architecture, structure floors, and exclusive amenities.
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Configuration */}
+                    <div>
+                      <label className="block text-xs font-bold text-slate-800 mb-2">
+                        Bedrooms Configuration (BHK) *
+                      </label>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        {['2 BHK', '3 BHK', '4 BHK', '5+ BHK'].map((item) => (
+                          <button
+                            key={item}
+                            type="button"
+                            onClick={() => setBhk(item)}
+                            className={`py-2 px-3 rounded-xl border text-center text-xs font-bold transition-all cursor-pointer ${
+                              bhk === item
+                                ? 'border-[#FF9933] bg-[#FF9933] text-white shadow-xs'
+                                : 'border-slate-200 bg-white hover:border-slate-300 text-slate-700'
+                            }`}
+                          >
+                            {item}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Villa Style & Floors */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                          Villa Style / Architecture
+                        </label>
+                        <select
+                          value={villaType}
+                          onChange={(e) => setVillaType(e.target.value)}
+                          className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#fff1dc] focus:border-[#FF9933] cursor-pointer"
+                        >
+                          <option value="INDEPENDENT_HOUSE">Independent House</option>
+                          <option value="GATED_VILLA">Gated Community Luxury Villa</option>
+                          <option value="DUPLEX_VILLA">Duplex Villa</option>
+                          <option value="TRIPLEX_VILLA">Triplex Villa</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                          Total Structure Floors
+                        </label>
+                        <select
+                          value={villaFloors}
+                          onChange={(e) => setVillaFloors(e.target.value)}
+                          className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#fff1dc] focus:border-[#FF9933] cursor-pointer"
+                        >
+                          <option value="G">Ground Floor Only (G)</option>
+                          <option value="G_PLUS_1">G + 1 Floor</option>
+                          <option value="G_PLUS_2">G + 2 Floors</option>
+                          <option value="G_PLUS_3">G + 3 Floors</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Built-up Area & Facing */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                          Built-up Area (sq. ft)
+                        </label>
+                        <input
+                          type="number"
+                          value={superBuiltUpAreaSqFt}
+                          onChange={(e) => setSuperBuiltUpAreaSqFt(e.target.value)}
+                          placeholder="e.g. 3200"
+                          className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#fff1dc] focus:border-[#FF9933]"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                          Main Facing Direction
+                        </label>
+                        <select
+                          value={facing}
+                          onChange={(e) => setFacing(e.target.value)}
+                          className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#fff1dc] focus:border-[#FF9933] cursor-pointer"
+                        >
+                          <option value="EAST">East Facing</option>
+                          <option value="WEST">West Facing</option>
+                          <option value="NORTH">North Facing</option>
+                          <option value="SOUTH">South Facing</option>
+                          <option value="NORTH_EAST">North-East Facing</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Furnishing */}
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-2">
+                        Furnishing Status
+                      </label>
+                      <div className="grid grid-cols-3 gap-2">
+                        {[
+                          { id: 'UNFURNISHED', label: 'Unfurnished' },
+                          { id: 'SEMI_FURNISHED', label: 'Semi-Furnished' },
+                          { id: 'FULLY_FURNISHED', label: 'Fully Furnished' },
+                        ].map((f) => (
+                          <button
+                            key={f.id}
+                            type="button"
+                            onClick={() => setFurnishingStatus(f.id)}
+                            className={`py-2 px-3 rounded-xl border text-xs font-semibold cursor-pointer transition-colors ${
+                              furnishingStatus === f.id
+                                ? 'border-[#FF9933] bg-[#fff1dc] text-[#c75e0a] font-bold'
+                                : 'border-slate-200 bg-white hover:border-slate-300 text-slate-700'
+                            }`}
+                          >
+                            {f.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Villa Amenities */}
+                    <div>
+                      <label className="block text-xs font-bold text-slate-800 mb-2">
+                        Villa Exclusive Features
+                      </label>
+                      <div className="flex flex-wrap gap-2">
+                        {[
+                          'Private Garden / Lawn',
+                          'Private Terrace',
+                          'Covered Car Parking (2+ Cars)',
+                          'Solar Water Heater',
+                          'Gated Security Guard',
+                          'Clubhouse & Swimming Pool',
+                          'Dedicated Borewell',
+                          'Servant Quarter',
+                        ].map((amenity) => {
+                          const selected = selectedAmenities.includes(amenity);
+                          return (
+                            <button
+                              key={amenity}
+                              type="button"
+                              onClick={() => toggleItem(selectedAmenities, amenity, setSelectedAmenities)}
+                              className={`px-3 py-1.5 rounded-lg border text-xs font-semibold transition-colors cursor-pointer ${
+                                selected
+                                  ? 'border-[#FF9933] bg-[#fff1dc] text-[#c75e0a]'
+                                  : 'border-slate-200 bg-white hover:border-slate-300 text-slate-600'
+                              }`}
+                            >
+                              {selected ? '✓ ' : '+ '}{amenity}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* 4. COMMERCIAL & RETAIL SPACES (Shops, Showrooms, Offices, Coworking, Malls, Warehouses) */}
+                {(['RETAIL_SHOP', 'SHOWROOM', 'SHOP_SHOWROOM', 'OFFICE_SPACE', 'COWORKING_SPACE', 'SHOPPING_MALL', 'WAREHOUSE_LAND', 'INDUSTRIAL_BUILDING', 'INDUSTRIAL_SHED', 'INSTITUTIONAL'].includes(landType)) && (
+                  <div className="rounded-2xl border border-amber-200/80 bg-[#fffdfa] p-5 sm:p-6 space-y-6 animate-in fade-in duration-200 shadow-xs">
+                    <div className="flex items-center gap-2.5 pb-3 border-b border-amber-100">
+                      <div className="w-8 h-8 rounded-lg bg-[#fff1dc] text-[#c75e0a] flex items-center justify-center shrink-0">
+                        <Briefcase className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-extrabold text-slate-900">
+                          Commercial Space Specifications
+                        </h3>
+                        <p className="text-[11px] text-slate-500">
+                          Fitout status, suitable businesses, and power/parking infrastructure.
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Fitout Condition */}
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-2">
+                        Fitout / Furnishing Condition
+                      </label>
+                      <div className="grid grid-cols-3 gap-2">
+                        {[
+                          { id: 'BARE_SHELL', label: 'Bare Shell / Core' },
+                          { id: 'WARM_SHELL', label: 'Warm Shell' },
+                          { id: 'FULLY_FURNISHED', label: 'Fully Furnished (Plug & Play)' },
+                        ].map((f) => (
+                          <button
+                            key={f.id}
+                            type="button"
+                            onClick={() => setCommercialFitout(f.id)}
+                            className={`py-2 px-3 rounded-xl border text-xs font-semibold cursor-pointer transition-colors ${
+                              commercialFitout === f.id
+                                ? 'border-[#FF9933] bg-[#fff1dc] text-[#c75e0a] font-bold'
+                                : 'border-slate-200 bg-white hover:border-slate-300 text-slate-700'
+                            }`}
+                          >
+                            {f.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Washroom & Power */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                          Washroom Facility
+                        </label>
+                        <select
+                          value={commercialWashrooms}
+                          onChange={(e) => setCommercialWashrooms(e.target.value)}
+                          className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#fff1dc] focus:border-[#FF9933] cursor-pointer"
+                        >
+                          <option value="PRIVATE">Private Attached Washroom</option>
+                          <option value="COMMON">Common Floor Washrooms</option>
+                          <option value="BOTH">Both Private & Common</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                          Power Load / Sanction
+                        </label>
+                        <input
+                          type="text"
+                          value={powerLoadKva}
+                          onChange={(e) => setPowerLoadKva(e.target.value)}
+                          placeholder="e.g. 15 KVA / Dedicated Transformer"
+                          className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#fff1dc] focus:border-[#FF9933]"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Suitable For */}
+                    <div>
+                      <label className="block text-xs font-bold text-slate-800 mb-2">
+                        Suitable Business Uses
+                      </label>
+                      <div className="flex flex-wrap gap-2">
+                        {[
+                          'IT / Software Company',
+                          'Corporate Office',
+                          'Retail Store / Showroom',
+                          'Doctor Clinic / Diagnostics',
+                          'Bank / ATM Center',
+                          'Restaurant / Cafe',
+                          'Warehouse / Logistics',
+                          'Manufacturing / Workshop',
+                        ].map((biz) => {
+                          const selected = suitableBusinesses.includes(biz);
+                          return (
+                            <button
+                              key={biz}
+                              type="button"
+                              onClick={() => toggleItem(suitableBusinesses, biz, setSuitableBusinesses)}
+                              className={`px-3 py-1.5 rounded-lg border text-xs font-semibold transition-colors cursor-pointer ${
+                                selected
+                                  ? 'border-[#FF9933] bg-[#fff1dc] text-[#c75e0a]'
+                                  : 'border-slate-200 bg-white hover:border-slate-300 text-slate-600'
+                              }`}
+                            >
+                              {selected ? '✓ ' : '+ '}{biz}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* 5. AGRICULTURAL LAND, FARMLAND PLOTS & FARM HOUSES */}
+                {(landType === 'AGRICULTURAL_LAND' || landType === 'FARMLAND_PLOT' || landType === 'FARM_HOUSE_LAND') && (
+                  <div className="rounded-2xl border border-amber-200/80 bg-[#fffdfa] p-5 sm:p-6 space-y-6 animate-in fade-in duration-200 shadow-xs">
+                    <div className="flex items-center gap-2.5 pb-3 border-b border-amber-100">
+                      <div className="w-8 h-8 rounded-lg bg-[#fff1dc] text-[#c75e0a] flex items-center justify-center shrink-0">
+                        <Trees className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-extrabold text-slate-900">
+                          Farmland, Soil &amp; Water Infrastructure
+                        </h3>
+                        <p className="text-[11px] text-slate-500">
+                          Agricultural attributes, soil quality, irrigation sources, and existing plantations.
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Soil Type */}
+                    <div>
+                      <label className="block text-xs font-bold text-slate-800 mb-2">
+                        Soil Quality / Type
+                      </label>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        {[
+                          { id: 'RED_SOIL', label: 'Red Soil (Fertile)' },
+                          { id: 'BLACK_COTTON', label: 'Black Cotton' },
+                          { id: 'ALLUVIAL', label: 'Alluvial Soil' },
+                          { id: 'LOAMY', label: 'Loamy / Sandy' },
+                        ].map((item) => (
+                          <button
+                            key={item.id}
+                            type="button"
+                            onClick={() => setSoilType(item.id)}
+                            className={`py-2 px-3 rounded-xl border text-center text-xs font-bold transition-all cursor-pointer ${
+                              soilType === item.id
+                                ? 'border-[#FF9933] bg-[#FF9933] text-white shadow-xs'
+                                : 'border-slate-200 bg-white hover:border-slate-300 text-slate-700'
+                            }`}
+                          >
+                            {item.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Water Sources */}
+                    <div>
+                      <label className="block text-xs font-bold text-slate-800 mb-2">
+                        Water &amp; Irrigation Sources
+                      </label>
+                      <div className="flex flex-wrap gap-2">
+                        {[
+                          'Dedicated Borewell',
+                          'Canal / River Irrigation',
+                          'Drip Irrigation System',
+                          'Open Agricultural Well',
+                          'Pond / Water Reservoir',
+                        ].map((src) => {
+                          const selected = waterSources.includes(src);
+                          return (
+                            <button
+                              key={src}
+                              type="button"
+                              onClick={() => toggleItem(waterSources, src, setWaterSources)}
+                              className={`px-3 py-1.5 rounded-lg border text-xs font-semibold transition-colors cursor-pointer ${
+                                selected
+                                  ? 'border-[#FF9933] bg-[#fff1dc] text-[#c75e0a]'
+                                  : 'border-slate-200 bg-white hover:border-slate-300 text-slate-600'
+                              }`}
+                            >
+                              {selected ? '✓ ' : '+ '}{src}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Electricity & Fencing */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                          Agricultural Electricity
+                        </label>
+                        <select
+                          value={electricityPhase}
+                          onChange={(e) => setElectricityPhase(e.target.value)}
+                          className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#fff1dc] focus:border-[#FF9933] cursor-pointer"
+                        >
+                          <option value="3_PHASE">3-Phase Agricultural Power</option>
+                          <option value="SINGLE_PHASE">Single Phase Power</option>
+                          <option value="SOLAR">Solar Power Installed</option>
+                          <option value="NONE">No Direct Connection</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                          Perimeter Fencing
+                        </label>
+                        <select
+                          value={farmFencing}
+                          onChange={(e) => setFarmFencing(e.target.value)}
+                          className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#fff1dc] focus:border-[#FF9933] cursor-pointer"
+                        >
+                          <option value="CHAINLINK">Fully Fenced (Chainlink / Barbed Wire)</option>
+                          <option value="PARTIAL">Partially Fenced</option>
+                          <option value="UNFENCED">Open / Unfenced</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Plantations */}
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                        Existing Plantations / Crops (Optional)
+                      </label>
+                      <input
+                        type="text"
+                        value={plantations}
+                        onChange={(e) => setPlantations(e.target.value)}
+                        placeholder="e.g. 50 Mango Trees, Teakwood, Guava, Organic Vegetables"
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#fff1dc] focus:border-[#FF9933]"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* 6. HOSPITALITY & LEISURE (Resort, Hotel, Service Apartment, Guest House) */}
+                {(['RESORT', 'HOTEL', 'SERVICE_APARTMENT', 'GUEST_HOUSE'].includes(landType)) && (
+                  <div className="rounded-2xl border border-amber-200/80 bg-[#fffdfa] p-5 sm:p-6 space-y-6 animate-in fade-in duration-200 shadow-xs">
+                    <div className="flex items-center gap-2.5 pb-3 border-b border-amber-100">
+                      <div className="w-8 h-8 rounded-lg bg-[#fff1dc] text-[#c75e0a] flex items-center justify-center shrink-0">
+                        <Palmtree className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-extrabold text-slate-900">
+                          Hospitality, Resort &amp; Retreat Infrastructure
+                        </h3>
+                        <p className="text-[11px] text-slate-500">
+                          Room capacity, event lawns, guest recreation, and hospitality amenities.
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Rooms and Event Capacity */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                          Total Rooms / Cottages / Keys *
+                        </label>
+                        <input
+                          type="text"
+                          value={totalRooms}
+                          onChange={(e) => setTotalRooms(e.target.value)}
+                          placeholder="e.g. 24 Luxury Cottages / 40 Keys"
+                          className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#fff1dc] focus:border-[#FF9933]"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                          Event Lawn / Banquet Capacity
+                        </label>
+                        <input
+                          type="text"
+                          value={eventLawnCapacity}
+                          onChange={(e) => setEventLawnCapacity(e.target.value)}
+                          placeholder="e.g. 600 Guests / 15,000 sq.ft Party Lawn"
+                          className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#fff1dc] focus:border-[#FF9933]"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Hospitality Features */}
+                    <div>
+                      <label className="block text-xs font-bold text-slate-800 mb-2">
+                        Hospitality &amp; Guest Amenities
+                      </label>
+                      <div className="flex flex-wrap gap-2">
+                        {[
+                          'Swimming Pool',
+                          'Restaurant / Kitchen Setup',
+                          'Banquet / Event Lawn',
+                          'Guest Parking (50+ Cars)',
+                          'Spa & Wellness Pavilion',
+                          'EV Charging Station',
+                          '100% Generator Backup',
+                          'Children Play Park',
+                          'Tourism / Bar License Sanctioned',
+                          'Conference / Meeting Room',
+                        ].map((feat) => {
+                          const selected = hospitalityFeatures.includes(feat);
+                          return (
+                            <button
+                              key={feat}
+                              type="button"
+                              onClick={() => toggleItem(hospitalityFeatures, feat, setHospitalityFeatures)}
+                              className={`px-3 py-1.5 rounded-lg border text-xs font-semibold transition-colors cursor-pointer ${
+                                selected
+                                  ? 'border-[#FF9933] bg-[#fff1dc] text-[#c75e0a]'
+                                  : 'border-slate-200 bg-white hover:border-slate-300 text-slate-600'
+                              }`}
+                            >
+                              {selected ? '✓ ' : '+ '}{feat}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* 7. INCOME-GENERATING & RENTAL FORMATS */}
+                {(['RESIDENTIAL_RENTAL', 'COMMERCIAL_LEASE', 'COLIVING_PG', 'VACATION_RENTAL_AIRBNB'].includes(landType)) && (
+                  <div className="rounded-2xl border border-amber-200/80 bg-[#fffdfa] p-5 sm:p-6 space-y-6 animate-in fade-in duration-200 shadow-xs">
+                    <div className="flex items-center gap-2.5 pb-3 border-b border-amber-100">
+                      <div className="w-8 h-8 rounded-lg bg-[#fff1dc] text-[#c75e0a] flex items-center justify-center shrink-0">
+                        <BadgeIndianRupee className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-extrabold text-slate-900">
+                          Rental, Lease &amp; Income Terms
+                        </h3>
+                        <p className="text-[11px] text-slate-500">
+                          Expected monthly rent, security deposit, lock-in period, and maintenance.
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Monthly Rent & Security Deposit */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                          Monthly Rent / Lease Asking (₹ / Month) *
+                        </label>
+                        <input
+                          type="text"
+                          value={monthlyRent}
+                          onChange={(e) => setMonthlyRent(e.target.value)}
+                          placeholder="e.g. 45,000 / month"
+                          className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#fff1dc] focus:border-[#FF9933]"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                          Security Deposit
+                        </label>
+                        <select
+                          value={securityDepositMonths}
+                          onChange={(e) => setSecurityDepositMonths(e.target.value)}
+                          className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#fff1dc] focus:border-[#FF9933] cursor-pointer"
+                        >
+                          <option value="1 Month">1 Month Rent</option>
+                          <option value="2 Months">2 Months Rent</option>
+                          <option value="3 Months">3 Months Rent</option>
+                          <option value="6 Months">6 Months Rent</option>
+                          <option value="10 Months">10 Months Rent</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Lock-in Period & Maintenance */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                          Lease Agreement / Lock-in Period
+                        </label>
+                        <select
+                          value={leaseLockInPeriod}
+                          onChange={(e) => setLeaseLockInPeriod(e.target.value)}
+                          className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#fff1dc] focus:border-[#FF9933] cursor-pointer"
+                        >
+                          <option value="11 Months">11 Months (Standard)</option>
+                          <option value="1 Year">1 Year</option>
+                          <option value="2 Years">2 Years</option>
+                          <option value="3 Years">3 Years</option>
+                          <option value="5 Years">5 Years (Commercial)</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                          Maintenance Charges
+                        </label>
+                        <input
+                          type="text"
+                          value={maintenanceCharges}
+                          onChange={(e) => setMaintenanceCharges(e.target.value)}
+                          placeholder="e.g. Included in rent / ₹3,000 extra"
+                          className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#fff1dc] focus:border-[#FF9933]"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Furnishing Status */}
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-2">
+                        Furnishing Status
+                      </label>
+                      <div className="grid grid-cols-3 gap-2">
+                        {[
+                          { id: 'UNFURNISHED', label: 'Unfurnished' },
+                          { id: 'SEMI_FURNISHED', label: 'Semi-Furnished' },
+                          { id: 'FULLY_FURNISHED', label: 'Fully Furnished' },
+                        ].map((f) => (
+                          <button
+                            key={f.id}
+                            type="button"
+                            onClick={() => setFurnishingStatus(f.id)}
+                            className={`py-2 px-3 rounded-xl border text-xs font-semibold cursor-pointer transition-colors ${
+                              furnishingStatus === f.id
+                                ? 'border-[#FF9933] bg-[#fff1dc] text-[#c75e0a] font-bold'
+                                : 'border-slate-200 bg-white hover:border-slate-300 text-slate-700'
+                            }`}
+                          >
+                            {f.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {/* Road Access */}
                 <div>
@@ -2178,12 +3496,55 @@ function SellPageForm() {
 
                     <div>
                       <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
+                        Property Type & Configuration
+                      </p>
+                      <p className="text-sm font-bold text-slate-900 mt-1">
+                        {LAND_TYPES.find((t) => (t.value || (t as any).id) === landType)?.label || landType}
+                        {[
+                          'FLAT',
+                          'INDEPENDENT_HOUSE',
+                          'VILLA',
+                          'HOUSE_VILLA',
+                          'TOWNHOUSE',
+                          'DUPLEX',
+                          'PENTHOUSE',
+                          'SERVICE_APARTMENT',
+                          'RESIDENTIAL_RENTAL',
+                          'COLIVING_PG',
+                          'VACATION_RENTAL_AIRBNB',
+                        ].includes(landType) && bhk ? ` • ${bhk}` : ''}
+                        {facing ? ` • ${facing} Facing` : ''}
+                        {['RESORT', 'HOTEL', 'SERVICE_APARTMENT', 'GUEST_HOUSE'].includes(landType) && totalRooms ? ` • ${totalRooms}` : ''}
+                        {['RESIDENTIAL_RENTAL', 'COMMERCIAL_LEASE', 'COLIVING_PG', 'VACATION_RENTAL_AIRBNB'].includes(landType) && monthlyRent ? ` • ₹${monthlyRent}/mo` : ''}
+                      </p>
+                    </div>
+
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
                         Total Valuation
                       </p>
                       <p className="text-sm font-bold text-slate-900 mt-1">
                         ₹{Number(totalValuation || 0).toLocaleString('en-IN')}
                       </p>
                     </div>
+
+                    {selectedAmenities.length > 0 && (
+                      <div className="sm:col-span-2 pt-2 border-t border-slate-100">
+                        <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400 mb-1.5">
+                          Key Amenities & Features ({selectedAmenities.length})
+                        </p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {selectedAmenities.map((a) => (
+                            <span
+                              key={a}
+                              className="px-2 py-0.5 rounded-md bg-white border border-slate-200 text-slate-700 text-[10px] font-semibold"
+                            >
+                              ✓ {a}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
 
