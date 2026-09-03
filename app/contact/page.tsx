@@ -15,7 +15,7 @@ import {
   Scale,
   Clock,
   Building2,
-  FileCheck2,
+  FileText,
 } from 'lucide-react';
 import { SITE_CONFIG } from '@/config/constants';
 
@@ -68,15 +68,15 @@ export default function ContactPage() {
       {/* Hero Header */}
       <div className="bg-slate-950 text-white py-14 border-b border-slate-800">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="inline-flex items-center gap-2 text-xs font-semibold px-3 py-1 rounded-full bg-emerald-950/80 text-emerald-400 border border-emerald-800/50 mb-3">
-            <Scale className="w-4 h-4" />
-            <span>Support, Compliance & Grievance Desk</span>
+          <div className="inline-flex items-center gap-2 text-xs font-semibold px-3 py-1 rounded-full bg-[#fff1dc] text-[#c75e0a] border border-[#FF9933]/30 mb-3">
+            <Scale className="w-4 h-4 text-[#FF9933]" />
+            <span>Support, Moderation &amp; Grievance Redressal</span>
           </div>
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight">
-            Contact Support & Grievance Officer
+            Contact Support &amp; Grievance Officer
           </h1>
           <p className="text-slate-300 text-sm sm:text-base mt-3 max-w-2xl leading-relaxed">
-            Reach our title verification desk, submit listing inquiries, or file statutory consumer grievances directly with our designated compliance team.
+            Reach our customer support desk, submit listing inquiries, or file statutory grievance and takedown requests directly with our compliance team.
           </p>
         </div>
       </div>
@@ -89,34 +89,34 @@ export default function ContactPage() {
             <div className="space-y-6">
               <div>
                 <h2 className="text-lg font-bold text-slate-900">Customer Support Desk</h2>
-                <p className="text-xs text-slate-500 mt-1">Available for buyer questions, listing help, and billing assistance</p>
+                <p className="text-xs text-slate-500 mt-1">Available for buyer questions, seller listing help, and billing queries</p>
               </div>
 
               <div className="space-y-4 text-xs sm:text-sm text-slate-700">
                 <div className="flex items-start gap-3.5">
-                  <div className="p-2 rounded-xl bg-emerald-50 text-emerald-800 shrink-0">
-                    <Mail className="w-5 h-5" />
+                  <div className="p-2 rounded-xl bg-[#fff1dc] text-[#c75e0a] shrink-0">
+                    <Mail className="w-5 h-5 text-[#FF9933]" />
                   </div>
                   <div>
-                    <span className="font-bold text-slate-900 block">General & Billing Support</span>
-                    <span className="font-mono text-emerald-800">{SITE_CONFIG.supportEmail}</span>
+                    <span className="font-bold text-slate-900 block">General &amp; Billing Support</span>
+                    <span className="font-mono text-[#c75e0a]">{SITE_CONFIG.supportEmail}</span>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-3.5">
-                  <div className="p-2 rounded-xl bg-emerald-50 text-emerald-800 shrink-0">
-                    <PhoneCall className="w-5 h-5" />
+                  <div className="p-2 rounded-xl bg-[#fff1dc] text-[#c75e0a] shrink-0">
+                    <PhoneCall className="w-5 h-5 text-[#FF9933]" />
                   </div>
                   <div>
-                    <span className="font-bold text-slate-900 block">Helpline & Verification Desk</span>
+                    <span className="font-bold text-slate-900 block">Helpline &amp; Support Desk</span>
                     <span className="text-slate-800 font-semibold">{SITE_CONFIG.contactPhone}</span>
                     <span className="block text-[11px] text-slate-500 mt-0.5">Monday to Saturday • 9:00 AM – 7:00 PM IST</span>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-3.5">
-                  <div className="p-2 rounded-xl bg-emerald-50 text-emerald-800 shrink-0">
-                    <MapPin className="w-5 h-5" />
+                  <div className="p-2 rounded-xl bg-[#fff1dc] text-[#c75e0a] shrink-0">
+                    <MapPin className="w-5 h-5 text-[#FF9933]" />
                   </div>
                   <div>
                     <span className="font-bold text-slate-900 block">Compliance Office</span>
@@ -128,7 +128,7 @@ export default function ContactPage() {
 
             <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-600 space-y-1">
               <div className="flex items-center gap-1.5 font-bold text-slate-900">
-                <Clock className="w-4 h-4 text-emerald-700" />
+                <Clock className="w-4 h-4 text-[#FF9933]" />
                 <span>Response Turnaround</span>
               </div>
               <p>Inquiries submitted via web form are acknowledged within 4 hours and typically resolved within 1 business day.</p>
@@ -139,17 +139,17 @@ export default function ContactPage() {
           <div className="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-xs space-y-4">
             <div>
               <h2 className="text-lg font-bold text-slate-900">Send an Inquiry</h2>
-              <p className="text-xs text-slate-500 mt-1">Submit your verification questions or platform feedback</p>
+              <p className="text-xs text-slate-500 mt-1">Submit your listing questions, billing queries, or platform feedback</p>
             </div>
 
             {submitted ? (
-              <div className="p-5 bg-emerald-50 rounded-xl border border-emerald-200 text-emerald-900 space-y-2">
-                <div className="flex items-center gap-2 font-bold text-sm">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-700" />
+              <div className="p-5 bg-[#fff9f0] rounded-xl border border-[#FF9933]/30 text-[#7a3705] space-y-2">
+                <div className="flex items-center gap-2 font-bold text-sm text-slate-950">
+                  <CheckCircle2 className="w-5 h-5 text-[#FF9933]" />
                   <span>Message Sent Successfully</span>
                 </div>
-                <p className="text-xs text-emerald-800 leading-relaxed">
-                  Thank you for reaching out, {formData.name || 'valued user'}. Our dedicated legal and compliance team has received your query and will reply to {formData.email || 'your email'} within 1 business day.
+                <p className="text-xs text-[#9c4c0b] leading-relaxed">
+                  Thank you for reaching out, {formData.name || 'valued user'}. Our support team has received your query and will reply to {formData.email || 'your email'} within 1 business day.
                 </p>
                 <button
                   type="button"
@@ -158,7 +158,7 @@ export default function ContactPage() {
                     setErrorMessage(null);
                     setFormData({ name: '', email: '', phone: '', message: '' });
                   }}
-                  className="mt-2 text-xs font-bold text-emerald-800 underline hover:text-emerald-950 cursor-pointer"
+                  className="mt-2 text-xs font-bold text-[#c75e0a] underline hover:text-[#7a3705] cursor-pointer"
                 >
                   Send another inquiry
                 </button>
@@ -181,7 +181,7 @@ export default function ContactPage() {
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     placeholder="Full legal name"
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-600 disabled:bg-slate-100 disabled:text-slate-400"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#FF9933] focus:border-[#FF9933] disabled:bg-slate-100 disabled:text-slate-400"
                   />
                 </div>
                 <div>
@@ -193,7 +193,7 @@ export default function ContactPage() {
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     placeholder="name@example.com"
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-600 disabled:bg-slate-100 disabled:text-slate-400"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#FF9933] focus:border-[#FF9933] disabled:bg-slate-100 disabled:text-slate-400"
                   />
                 </div>
                 <div>
@@ -204,7 +204,7 @@ export default function ContactPage() {
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                     placeholder="10-digit mobile number"
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-600 disabled:bg-slate-100 disabled:text-slate-400"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#FF9933] focus:border-[#FF9933] disabled:bg-slate-100 disabled:text-slate-400"
                   />
                 </div>
                 <div>
@@ -215,14 +215,14 @@ export default function ContactPage() {
                     disabled={loading}
                     value={formData.message}
                     onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                    placeholder="Describe your query, property ID, or verification question..."
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-600 disabled:bg-slate-100 disabled:text-slate-400"
+                    placeholder="Describe your query, property ID, or listing question..."
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#FF9933] focus:border-[#FF9933] disabled:bg-slate-100 disabled:text-slate-400"
                   />
                 </div>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-lg transition-colors shadow-xs flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="w-full py-2.5 bg-[#FF9933] hover:bg-[#f07d12] text-white font-bold rounded-lg transition-colors shadow-xs flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   {loading ? (
                     <>
@@ -238,11 +238,11 @@ export default function ContactPage() {
           </div>
         </div>
 
-        {/* Statutory Grievance Officer Card (IT Act 2000 & E-Commerce Rules Compliance) */}
+        {/* Statutory Grievance Officer Card (IT Rules & E-Commerce Compliance) */}
         <div className="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-xs space-y-5">
           <div className="flex items-center gap-3 pb-3 border-b border-slate-100">
             <div className="p-2 rounded-xl bg-purple-50 text-purple-800">
-              <Scale className="w-5 h-5" />
+              <Scale className="w-5 h-5 text-purple-600" />
             </div>
             <div>
               <h2 className="text-lg font-bold text-slate-900">
@@ -260,27 +260,27 @@ export default function ContactPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
             <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
-              <p className="text-slate-500 uppercase tracking-wider font-bold text-[10px]">Designation & Identity</p>
-              <p className="text-slate-900 font-extrabold text-sm">Grievance & Redressal Officer</p>
-              <p className="text-slate-600">Legal & Regulatory Compliance Department</p>
+              <p className="text-slate-500 uppercase tracking-wider font-bold text-[10px]">Designation &amp; Identity</p>
+              <p className="text-slate-900 font-extrabold text-sm">Grievance &amp; Redressal Officer</p>
+              <p className="text-slate-600">Legal &amp; Regulatory Compliance Department</p>
               <p className="text-slate-600">BhoomiMitra Marketplace Technologies</p>
             </div>
 
             <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
               <p className="text-slate-500 uppercase tracking-wider font-bold text-[10px]">Contact Coordinates</p>
-              <p className="text-slate-700"><strong>Grievance Email:</strong> <span className="font-mono text-emerald-800 font-bold">grievance@bhoomimitra.com</span></p>
-              <p className="text-slate-700"><strong>General Privacy:</strong> <span className="font-mono text-emerald-800">privacy@bhoomimitra.com</span></p>
+              <p className="text-slate-700"><strong>Grievance Email:</strong> <span className="font-mono text-[#c75e0a] font-bold">grievance@bhoomimitra.com</span></p>
+              <p className="text-slate-700"><strong>General Privacy:</strong> <span className="font-mono text-[#c75e0a]">privacy@bhoomimitra.com</span></p>
               <p className="text-slate-600"><strong>Jurisdiction:</strong> Hyderabad, Telangana, India</p>
             </div>
           </div>
 
           <div className="p-4 rounded-xl bg-blue-50/70 border border-blue-100 text-xs text-blue-950 space-y-1.5">
             <p className="font-bold flex items-center gap-1.5">
-              <FileCheck2 className="w-4 h-4 text-blue-800" />
+              <FileText className="w-4 h-4 text-blue-800" />
               <span>Grievance Redressal Timeline:</span>
             </p>
             <p className="text-blue-900/90 leading-relaxed">
-              Upon receipt of a formal complaint regarding listing infringement, copyright, impersonation, or privacy, the Grievance Officer will issue an acknowledgment ticket within <strong>24 hours</strong> and resolve the grievance within <strong>15 days</strong> of receipt.
+              Upon receipt of a formal complaint regarding listing infringement, copyright, impersonation, or prohibited content, the Grievance Officer will issue an acknowledgment ticket within <strong>24 hours</strong> and resolve the grievance within <strong>15 days</strong> of receipt.
             </p>
           </div>
         </div>

@@ -202,7 +202,7 @@ async function approveProperty(
   const updated = await PropertyModel.findByIdAndUpdate(
     property._id,
     { $set: updates },
-    { new: true, runValidators: true }
+    { returnDocument: 'after', runValidators: true }
   ).lean();
 
   if (!updated) {
@@ -313,7 +313,7 @@ async function rejectProperty(
         updatedAt: now,
       },
     },
-    { new: true, runValidators: true }
+    { returnDocument: 'after', runValidators: true }
   ).lean();
 
   if (!updated) {
@@ -399,7 +399,7 @@ async function requestPropertyInformation(
         updatedAt: now,
       },
     },
-    { new: true, runValidators: true }
+    { returnDocument: 'after', runValidators: true }
   ).lean();
 
   if (!updated) {
@@ -480,7 +480,7 @@ async function suspendProperty(
         updatedAt: now,
       },
     },
-    { new: true, runValidators: true }
+    { returnDocument: 'after', runValidators: true }
   ).lean();
 
   if (!updated) {

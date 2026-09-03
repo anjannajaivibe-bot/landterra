@@ -1,1 +1,39 @@
 @import "tailwindcss";
+
+@theme {
+  /* Indian Saffron / Deep Saffron Palette (#FF9933) */
+  --color-saffron-50: #fff9f0;
+  --color-saffron-100: #fff1dc;
+  --color-saffron-200: #ffe1b8;
+  --color-saffron-300: #ffcb88;
+  --color-saffron-400: #ffae4d;
+  --color-saffron-500: #FF9933; /* Indian Deep Saffron */
+  --color-saffron-600: #f07d12;
+  --color-saffron-700: #c75e0a;
+  --color-saffron-800: #9e490f;
+  --color-saffron-900: #7f3e10;
+  --color-saffron-950: #451d05;
+
+  /* Global Emerald Remap to Indian Deep Saffron (#FF9933) */
+  --color-emerald-50: #fff9f0;
+  --color-emerald-100: #fff1dc;
+  --color-emerald-200: #ffe1b8;
+  --color-emerald-300: #ffcb88;
+  --color-emerald-400: #ffae4d;
+  --color-emerald-500: #FF9933;
+  --color-emerald-600: #FF9933;
+  --color-emerald-700: #f07d12;
+  --color-emerald-800: #c75e0a;
+  --color-emerald-900: #7f3e10;
+  --color-emerald-950: #451d05;
+}
+
+:root {
+  --primary: #FF9933;
+  --primary-hover: #f07d12;
+}
+
+::selection {
+  background-color: #FF9933;
+  color: #ffffff;
+}

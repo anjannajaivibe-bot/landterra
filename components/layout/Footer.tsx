@@ -4,94 +4,100 @@ import {
   Compass,
   ShieldCheck,
   Lock,
-  FileText,
   PhoneCall,
   Mail,
   MapPin,
   HeartHandshake,
-  LandPlot,
   ArrowRight,
+  Sparkles,
+  ExternalLink,
+  Scale,
 } from 'lucide-react';
 import { SITE_CONFIG } from '@/config/constants';
 
 export function Footer() {
   return (
-    <footer className="bg-white text-slate-700 text-sm border-t border-slate-200">
-      {/* Top Value / Trust Highlights Section (Clean Light Cards) */}
-      <div className="border-b border-slate-200 bg-slate-50/70 py-12 px-4 sm:px-6 lg:px-8">
+    <footer className="bg-white text-slate-700 text-sm border-t-2 border-[#FF9933]/30">
+      {/* ── Top Trust Matrix (3 Elevated Saffron & White Cards) ── */}
+      <div className="border-b border-slate-100 bg-gradient-to-b from-[#fffbf5] to-white py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="flex items-start gap-4 p-5 rounded-2xl bg-white border border-slate-200 shadow-2xs">
-            <div className="w-11 h-11 rounded-xl bg-blue-50 border border-blue-100 text-blue-800 flex items-center justify-center shrink-0">
-              <ShieldCheck className="w-6 h-6" />
+          <div className="flex items-start gap-4 p-6 rounded-3xl bg-white border border-[#FF9933]/20 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-md transition-shadow">
+            <div className="w-12 h-12 rounded-2xl bg-[#fff1dc] text-[#c75e0a] flex items-center justify-center shrink-0">
+              <Sparkles className="w-6 h-6 text-[#FF9933]" />
             </div>
             <div className="space-y-1">
-              <h4 className="text-slate-950 font-extrabold text-sm">
-                Human Admin Verified Records
+              <h4 className="text-slate-950 font-black text-sm">
+                Direct Peer-to-Peer Classifieds
               </h4>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                Registered sale deeds, 7/12 extracts, and government registration survey IDs are inspected before publication.
+              <p className="text-xs text-slate-500 leading-relaxed">
+                Landowners list directly with self-declared property information and legal declarations. Zero middleman markup.
               </p>
             </div>
           </div>
 
-          <div className="flex items-start gap-4 p-5 rounded-2xl bg-white border border-slate-200 shadow-2xs">
-            <div className="w-11 h-11 rounded-xl bg-blue-50 border border-blue-100 text-blue-800 flex items-center justify-center shrink-0">
-              <Lock className="w-6 h-6" />
+          <div className="flex items-start gap-4 p-6 rounded-3xl bg-white border border-[#FF9933]/20 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-md transition-shadow">
+            <div className="w-12 h-12 rounded-2xl bg-[#fff1dc] text-[#c75e0a] flex items-center justify-center shrink-0">
+              <Lock className="w-6 h-6 text-[#FF9933]" />
             </div>
             <div className="space-y-1">
-              <h4 className="text-slate-950 font-extrabold text-sm">
+              <h4 className="text-slate-950 font-black text-sm">
                 Private Document Vault
               </h4>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                Property deeds and title extracts are securely encrypted with access strictly limited to authorized compliance reviewers.
+              <p className="text-xs text-slate-500 leading-relaxed">
+                Optional seller deeds and survey extracts are encrypted and kept confidential from public search crawlers.
               </p>
             </div>
           </div>
 
-          <div className="flex items-start gap-4 p-5 rounded-2xl bg-white border border-slate-200 shadow-2xs">
-            <div className="w-11 h-11 rounded-xl bg-purple-50 border border-purple-100 text-purple-800 flex items-center justify-center shrink-0">
-              <HeartHandshake className="w-6 h-6" />
+          <div className="flex items-start gap-4 p-6 rounded-3xl bg-white border border-[#FF9933]/20 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-md transition-shadow">
+            <div className="w-12 h-12 rounded-2xl bg-[#fff1dc] text-[#c75e0a] flex items-center justify-center shrink-0">
+              <HeartHandshake className="w-6 h-6 text-[#FF9933]" />
             </div>
             <div className="space-y-1">
-              <h4 className="text-slate-950 font-extrabold text-sm">
+              <h4 className="text-slate-950 font-black text-sm">
                 0% Deal Brokerage Commission
               </h4>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                Flat listing fee for 30-day active advertisement. Zero hidden brokerage, middleman markups, or success commissions.
+              <p className="text-xs text-slate-500 leading-relaxed">
+                Flat listing fee of just ₹10 for 30 days. Zero broker commissions, percentages, or success fees on any transaction.
               </p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Main Footer Content & Navigation Grid */}
+      {/* ── Main Multi-Column Directory ── */}
       <div className="max-w-7xl mx-auto py-14 px-4 sm:px-6 lg:px-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-10">
-        {/* Col 1: Brand & Bio (Spans 2 cols) */}
+        {/* Col 1: Brand & Bio (Spans 2 cols on mobile/tablet) */}
         <div className="sm:col-span-2 space-y-4">
           <Link href="/" className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-xs">
+            <div className="w-10 h-10 rounded-2xl bg-[#FF9933] text-white flex items-center justify-center shadow-md">
               <Compass className="w-5 h-5" />
             </div>
-            <span className="text-xl font-black text-slate-950 tracking-tight">
-              Bhoomi<span className="text-emerald-700">Mitra</span>
-            </span>
+            <div className="leading-none">
+              <span className="flex items-center text-xl font-black text-slate-950 tracking-tight">
+                Bhoomi<span className="text-[#FF9933]">Mitra</span>
+              </span>
+              <span className="mt-1 block text-[9px] font-extrabold uppercase tracking-[0.18em] text-slate-400">
+                Land Marketplace
+              </span>
+            </div>
           </Link>
 
           <p className="text-xs text-slate-600 leading-relaxed max-w-sm">
-            India&apos;s premier direct-to-owner land and agricultural plot classifieds platform. Connecting genuine landowners with serious buyers through verified document records and map intelligence.
+            India&apos;s direct-to-owner land and agricultural plot classifieds platform. Connecting genuine landowners with serious buyers through transparent disclosures, direct contact, and satellite mapping.
           </p>
 
-          <div className="space-y-2 pt-1 text-xs">
-            <div className="flex items-center gap-2.5 text-slate-800 font-semibold">
-              <Mail className="w-4 h-4 text-emerald-700 shrink-0" />
+          <div className="space-y-2.5 pt-2 text-xs">
+            <div className="flex items-center gap-2.5 text-slate-800 font-bold">
+              <Mail className="w-4 h-4 text-[#FF9933] shrink-0" />
               <span>{SITE_CONFIG.supportEmail}</span>
             </div>
-            <div className="flex items-center gap-2.5 text-slate-800 font-semibold">
-              <PhoneCall className="w-4 h-4 text-emerald-700 shrink-0" />
+            <div className="flex items-center gap-2.5 text-slate-800 font-bold">
+              <PhoneCall className="w-4 h-4 text-[#FF9933] shrink-0" />
               <span>{SITE_CONFIG.contactPhone}</span>
             </div>
-            <div className="flex items-center gap-2.5 text-slate-800 font-semibold">
-              <MapPin className="w-4 h-4 text-emerald-700 shrink-0" />
+            <div className="flex items-center gap-2.5 text-slate-800 font-bold">
+              <MapPin className="w-4 h-4 text-[#FF9933] shrink-0" />
               <span>Hyderabad, Telangana, India</span>
             </div>
           </div>
@@ -100,109 +106,110 @@ export function Footer() {
         {/* Col 2: For Buyers */}
         <div className="space-y-3">
           <h4 className="text-xs font-black text-slate-950 uppercase tracking-wider">
-            For Buyers
+            For Land Buyers
           </h4>
-          <ul className="space-y-2.5 text-xs font-medium text-slate-600">
+          <ul className="space-y-2.5 text-xs font-semibold text-slate-600">
             <li>
-              <Link href="/buy" className="hover:text-emerald-800 transition-colors">
-                Browse Verified Lands
+              <Link href="/buy" className="hover:text-[#FF9933] transition-colors">
+                Explore Land Listings
               </Link>
             </li>
             <li>
-              <Link href="/buy?landType=RESIDENTIAL_PLOT" className="hover:text-emerald-800 transition-colors">
-                Residential Plots
+              <Link href="/buy?landType=RESIDENTIAL_PLOT" className="hover:text-[#FF9933] transition-colors">
+                Residential Layout Plots
               </Link>
             </li>
             <li>
-              <Link href="/buy?landType=AGRICULTURAL_LAND" className="hover:text-emerald-800 transition-colors">
-                Farmlands & Groves
+              <Link href="/buy?landType=AGRICULTURAL_LAND" className="hover:text-[#FF9933] transition-colors">
+                Fertile Farmlands
               </Link>
             </li>
             <li>
-              <Link href="/buy?landType=COMMERCIAL_LAND" className="hover:text-emerald-800 transition-colors">
-                Commercial Plots
+              <Link href="/buy?landType=COMMERCIAL_LAND" className="hover:text-[#FF9933] transition-colors">
+                Commercial Land Parcels
               </Link>
             </li>
             <li>
-              <Link href="/dashboard/buyer" className="hover:text-emerald-800 transition-colors">
-                Saved Watchlist
+              <Link href="/buy?landType=FARM_HOUSE_LAND" className="hover:text-[#FF9933] transition-colors">
+                Weekend Farmhouses
+              </Link>
+            </li>
+            <li>
+              <Link href="/dashboard/buyer" className="hover:text-[#FF9933] transition-colors">
+                Saved Watchlist &amp; Inquiries
               </Link>
             </li>
           </ul>
         </div>
 
-        {/* Col 3: For Sellers */}
+        {/* Col 3: For Landowners */}
         <div className="space-y-3">
           <h4 className="text-xs font-black text-slate-950 uppercase tracking-wider">
-            For Sellers
+            For Landowners
           </h4>
-          <ul className="space-y-2.5 text-xs font-medium text-slate-600">
+          <ul className="space-y-2.5 text-xs font-semibold text-slate-600">
             <li>
-              <Link href="/sell" className="hover:text-emerald-800 transition-colors font-bold text-emerald-700">
-                + List Your Property
+              <Link
+                href="/sell"
+                className="inline-flex items-center gap-1.5 text-[#c75e0a] font-black hover:text-[#FF9933] transition-colors"
+              >
+                <span>+ List Your Land Parcel</span>
+                <span className="px-1.5 py-0.5 rounded-md bg-[#FF9933] text-white text-[9px] font-black">
+                  ₹10
+                </span>
               </Link>
             </li>
             <li>
-              <Link href="/dashboard/seller" className="hover:text-emerald-800 transition-colors">
+              <Link href="/dashboard/seller" className="hover:text-[#FF9933] transition-colors">
                 Seller Dashboard
               </Link>
             </li>
             <li>
-              <Link href="/listing-rules" className="hover:text-emerald-800 transition-colors">
-                Listing Rules & Fees
+              <Link href="/pricing" className="hover:text-[#FF9933] transition-colors">
+                Pricing &amp; 30-Day Ad Plans
               </Link>
             </li>
             <li>
-              <Link href="/dashboard/seller" className="hover:text-emerald-800 transition-colors">
-                Inquiries & Billing
+              <Link href="/listing-rules" className="hover:text-[#FF9933] transition-colors">
+                Classifieds Publishing Rules
               </Link>
             </li>
             <li>
-              <Link href="/contact" className="hover:text-emerald-800 transition-colors">
-                Seller Support Desk
+              <Link href="/contact" className="hover:text-[#FF9933] transition-colors">
+                Seller Grievance Desk
               </Link>
             </li>
           </ul>
         </div>
 
-        {/* Col 4: Trust & Governance */}
+        {/* Col 4: Trust & Legal Guides */}
         <div className="space-y-3">
           <h4 className="text-xs font-black text-slate-950 uppercase tracking-wider">
-            Trust & Legal
+            Trust &amp; Legal
           </h4>
-          <ul className="space-y-2.5 text-xs font-medium text-slate-600">
+          <ul className="space-y-2.5 text-xs font-semibold text-slate-600">
             <li>
-              <Link href="/about" className="hover:text-emerald-800 transition-colors">
+              <Link href="/about" className="hover:text-[#FF9933] transition-colors">
                 About BhoomiMitra
               </Link>
             </li>
             <li>
-              <Link href="/terms" className="hover:text-emerald-800 transition-colors">
+              <Link href="/terms" className="hover:text-[#FF9933] transition-colors">
                 Terms of Service
               </Link>
             </li>
             <li>
-              <Link href="/privacy" className="hover:text-emerald-800 transition-colors">
-                Privacy & Data Security
+              <Link href="/privacy" className="hover:text-[#FF9933] transition-colors">
+                Privacy Policy
               </Link>
             </li>
             <li>
-              <Link href="/listing-rules" className="hover:text-emerald-800 transition-colors">
-                Verification Guidelines
+              <Link href="/refund-policy" className="hover:text-[#FF9933] transition-colors">
+                Refund &amp; Cancellation Policy
               </Link>
             </li>
             <li>
-              <Link href="/pricing" className="hover:text-emerald-800 transition-colors">
-                Seller Listing Pricing
-              </Link>
-            </li>
-            <li>
-              <Link href="/refund-policy" className="hover:text-emerald-800 transition-colors">
-                Cancellation & Refund Policy
-              </Link>
-            </li>
-            <li>
-              <Link href="/contact" className="hover:text-emerald-800 transition-colors">
+              <Link href="/contact" className="hover:text-[#FF9933] transition-colors">
                 Grievance Officer
               </Link>
             </li>
@@ -210,28 +217,46 @@ export function Footer() {
         </div>
       </div>
 
-      {/* Bottom Copyright Bar (Clean Slate-50) */}
-      <div className="bg-slate-50 border-t border-slate-200 py-6 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-600">
-          <p className="font-medium text-center sm:text-left">
-            © 2026 BhoomiMitra Direct Land Classifieds. All rights reserved.
-          </p>
+      {/* ── Statutory Indian Land Due Diligence Advisory ── */}
+      <div className="border-t border-slate-100 bg-[#fffbf5] py-5 px-4 sm:px-6 lg:px-8 text-[11px] text-slate-500">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+          <div className="flex items-start gap-2 max-w-4xl">
+            <Scale className="w-4 h-4 text-[#FF9933] shrink-0 mt-0.5" />
+            <span>
+              <strong>Buyer Due Diligence Advisory:</strong> BhoomiMitra is an online classifieds platform connecting landowners and buyers. BhoomiMitra does not verify ownership, title, boundaries, measurements, encumbrances, approvals, land-use status, litigation status, or the authenticity of documents. Buyers should independently verify the property with independent legal counsel before entering into any transaction.
+            </span>
+          </div>
 
-          <div className="flex items-center gap-6 font-bold text-slate-700">
-            <Link href="/terms" className="hover:text-emerald-800 transition-colors">
+          <div className="flex items-center gap-4 text-slate-600 font-bold shrink-0">
+            <span>🇮🇳 Made for Indian Land</span>
+            <span>•</span>
+            <span>0% Brokerage</span>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Bottom Copyright Bar ── */}
+      <div className="border-t border-slate-200 bg-white py-6 px-4 sm:px-6 lg:px-8 text-xs text-slate-500">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div>
+            © {new Date().getFullYear()} BhoomiMitra Land Classifieds. All rights reserved.
+          </div>
+
+          <div className="flex items-center gap-6 text-xs font-semibold">
+            <Link href="/terms" className="hover:text-[#FF9933] transition-colors">
               Terms
             </Link>
-            <Link href="/privacy" className="hover:text-emerald-800 transition-colors">
+            <Link href="/privacy" className="hover:text-[#FF9933] transition-colors">
               Privacy
             </Link>
-            <Link href="/refund-policy" className="hover:text-emerald-800 transition-colors">
+            <Link href="/refund-policy" className="hover:text-[#FF9933] transition-colors">
               Refunds
             </Link>
-            <Link href="/listing-rules" className="hover:text-emerald-800 transition-colors">
-              Rules
+            <Link href="/listing-rules" className="hover:text-[#FF9933] transition-colors">
+              Listing Rules
             </Link>
-            <Link href="/contact" className="hover:text-emerald-800 transition-colors">
-              Help
+            <Link href="/sitemap.xml" className="hover:text-[#FF9933] transition-colors">
+              Sitemap
             </Link>
           </div>
         </div>

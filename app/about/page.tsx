@@ -14,7 +14,7 @@ import {
   CheckCircle2,
   HeartHandshake,
   MapPin,
-  FileCheck2,
+  FileText,
   TrendingUp,
 } from 'lucide-react';
 
@@ -26,15 +26,15 @@ export default function AboutPage() {
       {/* Hero Header */}
       <div className="bg-slate-950 text-white py-16 border-b border-slate-800">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="inline-flex items-center gap-2 text-xs font-semibold px-3 py-1 rounded-full bg-emerald-950/80 text-emerald-400 border border-emerald-800/50 mb-4">
-            <Compass className="w-4 h-4" />
-            <span>Our Mission & Vision</span>
+          <div className="inline-flex items-center gap-2 text-xs font-semibold px-3 py-1 rounded-full bg-[#fff1dc] text-[#c75e0a] border border-[#FF9933]/30 mb-4">
+            <Compass className="w-4 h-4 text-[#FF9933]" />
+            <span>Our Mission &amp; Marketplace Model</span>
           </div>
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight">
-            Building India&apos;s Most Trusted Land Trading Network
+            India&apos;s Direct Land &amp; Plot Classifieds Marketplace
           </h1>
           <p className="text-slate-300 text-sm sm:text-base mt-4 max-w-2xl leading-relaxed">
-            BhoomiMitra (भू-मित्र) is on a mission to eliminate real estate opacity, duplicate broker listings, and predatory commissions by connecting buyers directly with verified landowners.
+            BhoomiMitra (भू-मित्र) connects land sellers directly with prospective buyers across India, eliminating middleman brokerages through transparent seller disclosures, satellite mapping, and a flat advertising model.
           </p>
         </div>
       </div>
@@ -43,32 +43,32 @@ export default function AboutPage() {
         {/* Value Highlights Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
           <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-3">
-            <div className="w-12 h-12 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-800">
-              <LandPlot className="w-6 h-6" />
+            <div className="w-12 h-12 rounded-xl bg-[#fff1dc] border border-[#FF9933]/20 flex items-center justify-center text-[#c75e0a]">
+              <LandPlot className="w-6 h-6 text-[#FF9933]" />
             </div>
             <h3 className="font-bold text-slate-900 text-base">Direct to Owner</h3>
             <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-              Zero middleman markup or broker commissions. Buyers communicate directly with genuine landowners and authorized title holders.
+              Zero broker commissions. Buyers communicate directly with genuine landowners and authorized representatives.
             </p>
           </div>
 
           <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-3">
             <div className="w-12 h-12 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-800">
-              <FileCheck2 className="w-6 h-6" />
+              <FileText className="w-6 h-6 text-blue-600" />
             </div>
-            <h3 className="font-bold text-slate-900 text-base">Verified Title Audits</h3>
+            <h3 className="font-bold text-slate-900 text-base">Transparent Disclosure</h3>
             <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-              Every verified listing is cross-checked against official state revenue portals (Pahani, Passbook, 7/12 extract, EC, and Survey IDs).
+              Sellers share revenue survey numbers and document references to assist buyers during independent due diligence.
             </p>
           </div>
 
           <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-3">
             <div className="w-12 h-12 rounded-xl bg-purple-50 border border-purple-100 flex items-center justify-center text-purple-800">
-              <MapPin className="w-6 h-6" />
+              <MapPin className="w-6 h-6 text-purple-600" />
             </div>
             <h3 className="font-bold text-slate-900 text-base">Geo-Spatial Precision</h3>
             <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-              Interactive Google Maps pin drops with state-specific unit conversion and seller radius privacy protection.
+              Interactive Google Satellite views with state-specific unit conversions and seller location privacy controls.
             </p>
           </div>
         </div>
@@ -82,35 +82,35 @@ export default function AboutPage() {
             The Problem with Traditional Indian Land Markets
           </h2>
           <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
-            For decades, buying and selling land in India has been one of the most stressful, opaque, and friction-filled financial experiences:
+            For decades, buying and selling land in India has been a stressful and friction-filled financial experience:
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs sm:text-sm">
             <div className="p-4 rounded-xl bg-rose-50/60 border border-rose-100 space-y-1.5">
-              <strong className="text-rose-950 font-bold block">Ghost & Duplicate Listings</strong>
+              <strong className="text-rose-950 font-bold block">Ghost &amp; Duplicate Listings</strong>
               <p className="text-rose-900/80 leading-relaxed text-xs">
-                Unregulated portals allow brokers to copy photos, invent fake prices, and advertise plots they do not own or represent.
+                Unregulated portals allow brokers to copy photos, invent fake prices, and advertise plots they do not represent.
               </p>
             </div>
 
             <div className="p-4 rounded-xl bg-rose-50/60 border border-rose-100 space-y-1.5">
               <strong className="text-rose-950 font-bold block">Heavy Brokerage Commissions</strong>
               <p className="text-rose-900/80 leading-relaxed text-xs">
-                Traditional brokers routinely demand 2% to 4% commission from both sides, siphoning lakhs of rupees from hard-working families.
+                Traditional brokers routinely demand 2% to 4% commission from both sides, siphoning lakhs from transactions.
               </p>
             </div>
 
             <div className="p-4 rounded-xl bg-rose-50/60 border border-rose-100 space-y-1.5">
-              <strong className="text-rose-950 font-bold block">Unverified Title Claims</strong>
+              <strong className="text-rose-950 font-bold block">Lack of Pre-Inspection Diligence</strong>
               <p className="text-rose-900/80 leading-relaxed text-xs">
-                Buyers often travel hours to inspect land, only to discover government ceiling issues, court stays, or boundary litigation.
+                Buyers often travel hours to inspect land without knowing basic revenue survey details or road access realities.
               </p>
             </div>
 
             <div className="p-4 rounded-xl bg-rose-50/60 border border-rose-100 space-y-1.5">
               <strong className="text-rose-950 font-bold block">Unit Measurement Confusion</strong>
               <p className="text-rose-900/80 leading-relaxed text-xs">
-                Fragmented state measurement units (Guntas in Telangana/Karnataka, Cents in TN/Kerala, Bighas in the North) confuse non-local buyers.
+                Fragmented state measurement units (Guntas, Cents, Bighas, Acres) confuse buyers evaluating properties.
               </p>
             </div>
           </div>
@@ -118,49 +118,49 @@ export default function AboutPage() {
 
         {/* Section 2: The BhoomiMitra Solution */}
         <div className="bg-white rounded-2xl border border-slate-200 p-6 sm:p-10 shadow-xs space-y-5">
-          <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-800">
-            <span>The BhoomiMitra Standard</span>
+          <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#c75e0a]">
+            <span>The BhoomiMitra Advantage</span>
           </div>
           <h2 className="text-xl sm:text-2xl font-bold text-slate-900">
-            How We Are Transforming Land Trading
+            How We Are Transforming Land Classifieds
           </h2>
           <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
-            BhoomiMitra re-engineers the land marketplace with technology, verification, and transparency:
+            BhoomiMitra re-engineers the land marketplace with direct connectivity, technology, and transparency:
           </p>
 
           <div className="space-y-3.5">
             <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 flex items-start gap-3.5">
-              <div className="p-2 rounded-lg bg-emerald-100 text-emerald-800 shrink-0 mt-0.5">
-                <ShieldCheck className="w-5 h-5" />
+              <div className="p-2 rounded-lg bg-[#fff1dc] text-[#c75e0a] shrink-0 mt-0.5">
+                <ShieldCheck className="w-5 h-5 text-[#FF9933]" />
               </div>
               <div className="space-y-1">
-                <h4 className="font-bold text-sm text-slate-900">1. Administrative Revenue & Title Auditing</h4>
+                <h4 className="font-bold text-sm text-slate-900">1. Direct Classifieds &amp; Seller Undertakings</h4>
                 <p className="text-xs text-slate-600 leading-relaxed">
-                  We check seller ownership documents against official state land registries (e.g., Dharani, Kaveri, Bhulekh, Meebhoomi) before awarding the Verified badge.
+                  Sellers submit listings directly and accept formal legal declarations regarding ownership and accuracy. Listings publish instantly upon flat-fee payment without middleman interference.
                 </p>
               </div>
             </div>
 
             <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 flex items-start gap-3.5">
-              <div className="p-2 rounded-lg bg-emerald-100 text-emerald-800 shrink-0 mt-0.5">
-                <HeartHandshake className="w-5 h-5" />
+              <div className="p-2 rounded-lg bg-[#fff1dc] text-[#c75e0a] shrink-0 mt-0.5">
+                <HeartHandshake className="w-5 h-5 text-[#FF9933]" />
               </div>
               <div className="space-y-1">
                 <h4 className="font-bold text-sm text-slate-900">2. Flat Listing Fee • 0% Deal Commissions</h4>
                 <p className="text-xs text-slate-600 leading-relaxed">
-                  Sellers pay a nominal flat directory listing fee (₹10–₹25 for 30 days) to host their advertisement. When your land sells, you keep 100% of the sale proceeds.
+                  Sellers pay a nominal flat listing fee (₹10–₹25 for 30 days) to host their advertisement. When your land sells, you keep 100% of the sale proceeds.
                 </p>
               </div>
             </div>
 
             <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 flex items-start gap-3.5">
-              <div className="p-2 rounded-lg bg-emerald-100 text-emerald-800 shrink-0 mt-0.5">
-                <LandPlot className="w-5 h-5" />
+              <div className="p-2 rounded-lg bg-[#fff1dc] text-[#c75e0a] shrink-0 mt-0.5">
+                <LandPlot className="w-5 h-5 text-[#FF9933]" />
               </div>
               <div className="space-y-1">
                 <h4 className="font-bold text-sm text-slate-900">3. Universal Land Area Normalization</h4>
                 <p className="text-xs text-slate-600 leading-relaxed">
-                  Our system seamlessly translates between Square Yards, Guntas, Cents, Acres, and Hectares so buyers from anywhere in India can compare land accurately.
+                  Our system automatically translates between Square Yards, Guntas, Cents, Acres, and Hectares so buyers from anywhere in India can compare land accurately.
                 </p>
               </div>
             </div>
@@ -175,23 +175,23 @@ export default function AboutPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs sm:text-sm">
             <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
-              <strong className="text-slate-900 block font-bold">🌾 Agricultural Farmers & Landowners</strong>
-              <p className="text-slate-600 text-xs">Reach genuine buyers directly and avoid paying hefty middleman cuts on your ancestral lands.</p>
+              <strong className="text-slate-900 block font-bold">🌾 Agricultural Farmers &amp; Landowners</strong>
+              <p className="text-slate-600 text-xs">Reach serious buyers directly across India and avoid paying heavy middleman commissions.</p>
             </div>
 
             <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
-              <strong className="text-slate-900 block font-bold">🏡 Farmhouse & Weekend Plot Enthusiasts</strong>
-              <p className="text-slate-600 text-xs">Discover serene, verified farmland plots with clear road access, soil data, and water connectivity.</p>
+              <strong className="text-slate-900 block font-bold">🏡 Farmhouse &amp; Weekend Plot Enthusiasts</strong>
+              <p className="text-slate-600 text-xs">Discover farmland plots with road access, soil details, and direct seller contact.</p>
             </div>
 
             <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
-              <strong className="text-slate-900 block font-bold">🏘️ Long-Term Land Investors & NRIs</strong>
-              <p className="text-slate-600 text-xs">Invest in transparent, title-audited plots across emerging high-growth highway corridors.</p>
+              <strong className="text-slate-900 block font-bold">🏘️ Long-Term Land Investors &amp; NRIs</strong>
+              <p className="text-slate-600 text-xs">Explore direct landowner listings across high-growth highway corridors with full due diligence guidance.</p>
             </div>
 
             <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
-              <strong className="text-slate-900 block font-bold">🏢 Commercial & Industrial Developers</strong>
-              <p className="text-slate-600 text-xs">Acquire large-scale commercial road-facing bits, warehouse acreage, and approved layouts.</p>
+              <strong className="text-slate-900 block font-bold">🏢 Commercial &amp; Industrial Developers</strong>
+              <p className="text-slate-600 text-xs">Acquire commercial road-facing bits, warehouse acreage, and layout plots directly.</p>
             </div>
           </div>
         </div>
@@ -202,18 +202,18 @@ export default function AboutPage() {
             Ready to find or list your land?
           </h3>
           <p className="text-xs sm:text-sm text-slate-300 max-w-xl mx-auto leading-relaxed">
-            Join thousands of landowners and buyers across India experiencing a commission-free, verified, and modern land trading marketplace.
+            Join thousands of landowners and buyers across India experiencing a commission-free, transparent, and modern land marketplace.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
             <Link
               href="/buy"
               className="w-full sm:w-auto px-6 py-3 rounded-xl bg-white text-slate-950 hover:bg-slate-100 font-bold text-xs sm:text-sm transition-all"
             >
-              Explore Verified Land
+              Explore Land Listings
             </Link>
             <Link
               href="/sell"
-              className="w-full sm:w-auto px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-2"
+              className="w-full sm:w-auto px-6 py-3 rounded-xl bg-[#FF9933] hover:bg-[#f07d12] text-white font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-2"
             >
               <span>List Your Property</span>
               <ArrowRight className="w-4 h-4" />

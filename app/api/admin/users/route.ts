@@ -43,7 +43,7 @@ export async function PATCH(req: NextRequest) {
     const updatedUser = await UserModel.findByIdAndUpdate(
       userId,
       { $set: updateFields },
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     if (!updatedUser) {

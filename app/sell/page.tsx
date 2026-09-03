@@ -42,12 +42,12 @@ interface UploadedImagePreview {
 
 interface UploadedDocPreview {
   documentType:
-    | 'TITLE_DEED'
-    | 'KHATA_7_12_CERTIFICATE'
-    | 'ENCUMBRANCE_CERTIFICATE'
-    | 'TAX_RECEIPT'
-    | 'GOVT_SURVEY_RECORD'
-    | 'POA_OR_OTHER';
+  | 'TITLE_DEED'
+  | 'KHATA_7_12_CERTIFICATE'
+  | 'ENCUMBRANCE_CERTIFICATE'
+  | 'TAX_RECEIPT'
+  | 'GOVT_SURVEY_RECORD'
+  | 'POA_OR_OTHER';
   fileName: string;
   objectKey: string;
   size: number;
@@ -923,9 +923,9 @@ function SellPageForm() {
         roadAccess,
         nearbyLandmarks: landmarks
           ? landmarks
-              .split(',')
-              .map((l) => l.trim())
-              .filter(Boolean)
+            .split(',')
+            .map((l) => l.trim())
+            .filter(Boolean)
           : [],
         location: {
           address,
@@ -1023,7 +1023,7 @@ function SellPageForm() {
       <div className="min-h-screen flex flex-col bg-slate-50">
         <Navbar />
         <div className="max-w-4xl mx-auto py-20 px-4 text-center flex-1 flex justify-center items-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-700" />
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#FF9933]" />
         </div>
         <Footer />
       </div>
@@ -1037,7 +1037,7 @@ function SellPageForm() {
         <Navbar />
         <div className="max-w-xl mx-auto px-4 py-20 flex-1 flex flex-col justify-center">
           <div className="bg-white rounded-3xl border border-slate-200 p-8 shadow-xl text-center space-y-6">
-            <div className="w-16 h-16 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center mx-auto">
+            <div className="w-16 h-16 rounded-2xl bg-[#fff1dc] text-[#c75e0a] flex items-center justify-center mx-auto">
               <Compass className="w-8 h-8" />
             </div>
 
@@ -1046,7 +1046,7 @@ function SellPageForm() {
                 Sign in to List Your Land
               </h1>
               <p className="text-xs text-slate-600 leading-relaxed max-w-md mx-auto">
-                BhoomiMitra connects land owners directly with verified buyers across India with zero broker commissions. Sign in with Google to begin your listing.
+                BhoomiMitra connects land owners directly with serious buyers across India with zero broker commissions. Sign in with Google to begin your listing.
               </p>
             </div>
 
@@ -1076,7 +1076,7 @@ function SellPageForm() {
             </button>
 
             <div className="pt-4 border-t border-slate-100 flex items-center justify-center gap-2 text-[11px] text-slate-500">
-              <ShieldCheck className="w-4 h-4 text-emerald-600" />
+              <ShieldCheck className="w-4 h-4 text-[#FF9933]" />
               <span>100% Direct Seller-to-Buyer Contact</span>
             </div>
           </div>
@@ -1101,7 +1101,7 @@ function SellPageForm() {
         <Navbar />
         <div className="max-w-md mx-auto px-4 py-16 flex-1 flex flex-col justify-center">
           <div className="bg-white rounded-3xl border border-slate-200 p-8 shadow-xl space-y-6">
-            <div className="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center mx-auto">
+            <div className="w-14 h-14 rounded-2xl bg-[#fff1dc] text-[#c75e0a] flex items-center justify-center mx-auto">
               <Phone className="w-7 h-7" />
             </div>
 
@@ -1116,14 +1116,13 @@ function SellPageForm() {
 
             {otpMessage && (
               <div
-                className={`p-3 rounded-xl text-xs font-medium flex items-center gap-2 ${
-                  otpMessage.type === 'success'
-                    ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                className={`p-3 rounded-xl text-xs font-medium flex items-center gap-2 ${otpMessage.type === 'success'
+                    ? 'bg-[#fff9f0] text-[#c75e0a] border border-[#FF9933]/30'
                     : 'bg-rose-50 text-rose-700 border border-rose-200'
-                }`}
+                  }`}
               >
                 {otpMessage.type === 'success' ? (
-                  <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />
+                  <CheckCircle2 className="w-4 h-4 shrink-0 text-[#FF9933]" />
                 ) : (
                   <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
                 )}
@@ -1166,7 +1165,7 @@ function SellPageForm() {
                       setPhoneInput(event.target.value.replace(/\D/g, ''))
                     }
                     disabled={otpSent || otpLoading}
-                    className="flex-1 px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs font-semibold focus:outline-emerald-600"
+                    className="flex-1 px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs font-semibold focus:outline-[#FF9933]"
                   />
 
                   {!otpSent && (
@@ -1174,7 +1173,7 @@ function SellPageForm() {
                       type="button"
                       onClick={handleSendOtp}
                       disabled={otpLoading || phoneInput.length < 10}
-                      className="px-4 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs disabled:opacity-50 transition-colors cursor-pointer"
+                      className="px-4 py-2.5 rounded-xl bg-[#FF9933] hover:bg-[#f07d12] text-white font-bold text-xs disabled:opacity-50 transition-colors cursor-pointer"
                     >
                       {otpLoading ? 'Sending...' : 'Send OTP'}
                     </button>
@@ -1197,7 +1196,7 @@ function SellPageForm() {
                       onChange={(event) =>
                         setOtpCode(event.target.value.replace(/\D/g, ''))
                       }
-                      className="w-full text-center tracking-widest text-lg font-mono px-3 py-2.5 rounded-xl border border-slate-300 focus:outline-emerald-600"
+                      className="w-full text-center tracking-widest text-lg font-mono px-3 py-2.5 rounded-xl border border-slate-300 focus:outline-[#FF9933]"
                     />
                   </div>
 
@@ -1205,7 +1204,7 @@ function SellPageForm() {
                     type="button"
                     onClick={handleVerifyOtp}
                     disabled={otpLoading || otpCode.length !== 6}
-                    className="w-full py-3 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs flex items-center justify-center gap-2 transition-colors disabled:opacity-50 shadow-xs cursor-pointer"
+                    className="w-full py-3 rounded-xl bg-[#FF9933] hover:bg-[#f07d12] text-white font-bold text-xs flex items-center justify-center gap-2 transition-colors disabled:opacity-50 shadow-xs cursor-pointer"
                   >
                     <span>{otpLoading ? 'Verifying...' : 'Verify Phone & Continue'}</span>
                     <ArrowRight className="w-4 h-4" />
@@ -1246,7 +1245,7 @@ function SellPageForm() {
           <div className="mb-8">
             <div className="flex items-center justify-between gap-4 mb-3">
               <div>
-                <p className="text-[10px] uppercase tracking-[0.18em] font-bold text-emerald-700 mb-1">
+                <p className="text-[10px] uppercase tracking-[0.18em] font-bold text-[#FF9933] mb-1">
                   {existingPropertyId ? 'Continue Your Listing Draft' : 'Seller Listing'}
                 </p>
 
@@ -1255,12 +1254,12 @@ function SellPageForm() {
                 </h1>
 
                 <p className="mt-1 text-xs sm:text-sm text-slate-500">
-                  Add your property details, upload verified documents, and publish after flat-fee payment.
+                  Add your property details, upload supporting documents, and publish after flat-fee payment.
                 </p>
               </div>
 
               <div className="hidden sm:flex items-center gap-2 px-3 py-2 rounded-xl bg-white border border-slate-200 shadow-xs">
-                <ShieldCheck className="w-4 h-4 text-emerald-700" />
+                <ShieldCheck className="w-4 h-4 text-[#FF9933]" />
                 <span className="text-[11px] font-semibold text-slate-600">
                   Direct Seller Listing
                 </span>
@@ -1270,7 +1269,7 @@ function SellPageForm() {
             {/* Progress Bar */}
             <div className="h-1.5 bg-slate-200 rounded-full overflow-hidden">
               <div
-                className="h-full bg-emerald-700 rounded-full transition-all duration-300"
+                className="h-full bg-[#FF9933] rounded-full transition-all duration-300"
                 style={{ width: `${progressPercent}%` }}
               />
             </div>
@@ -1302,13 +1301,12 @@ function SellPageForm() {
                     }
                   }}
                   disabled={!completed && !active}
-                  className={`min-w-0 rounded-lg px-1.5 py-2 text-center transition-colors ${
-                    active
-                      ? 'bg-emerald-700 text-white shadow-sm'
+                  className={`min-w-0 rounded-lg px-1.5 py-2 text-center transition-colors ${active
+                      ? 'bg-[#FF9933] text-white shadow-sm'
                       : completed
-                      ? 'bg-emerald-50 text-emerald-800 border border-emerald-200 cursor-pointer'
-                      : 'bg-white text-slate-400 border border-slate-200'
-                  }`}
+                        ? 'bg-[#fff9f0] text-[#c75e0a] border border-[#FF9933]/30 cursor-pointer'
+                        : 'bg-white text-slate-400 border border-slate-200'
+                    }`}
                 >
                   <div className="text-[9px] sm:text-[10px] font-bold">
                     {completed ? '✓' : step}
@@ -1356,7 +1354,7 @@ function SellPageForm() {
                     value={title}
                     onChange={(event) => setTitle(event.target.value)}
                     placeholder="Example: 300 Sq. Yards Residential Plot Near Financial District"
-                    className="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-100 focus:border-emerald-600"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#fff1dc] focus:border-[#FF9933]"
                   />
                   <div className="flex justify-between mt-1">
                     <p className="text-[10px] text-slate-400">
@@ -1379,7 +1377,7 @@ function SellPageForm() {
                     rows={5}
                     maxLength={3000}
                     placeholder="Describe road access, surroundings, development status, nearby facilities, ownership details, and anything else a genuine buyer should know."
-                    className="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-emerald-100 focus:border-emerald-600"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#fff1dc] focus:border-[#FF9933]"
                   />
                   <div className="text-right text-[10px] text-slate-400 mt-1">
                     {description.length}/3000
@@ -1387,9 +1385,9 @@ function SellPageForm() {
                 </div>
 
                 {/* Multi-Unit Land Area Section */}
-                <div className="rounded-2xl border border-emerald-100 bg-emerald-50/40 p-4 sm:p-5">
+                <div className="rounded-2xl border border-[#FF9933]/30 bg-[#fff9f0] p-4 sm:p-5">
                   <div className="flex items-start gap-3 mb-5">
-                    <div className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0">
+                    <div className="w-9 h-9 rounded-xl bg-[#fff1dc] text-[#c75e0a] flex items-center justify-center shrink-0">
                       <Ruler className="w-4 h-4" />
                     </div>
                     <div>
@@ -1417,7 +1415,7 @@ function SellPageForm() {
                             handleLandAreaInputChange(event.target.value)
                           }
                           placeholder="Enter land area"
-                          className="w-full px-4 py-3 pr-20 rounded-xl border border-slate-300 bg-white text-base font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-100 focus:border-emerald-600"
+                          className="w-full px-4 py-3 pr-20 rounded-xl border border-slate-300 bg-white text-base font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#fff1dc] focus:border-[#FF9933]"
                         />
                         <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400">
                           {LAND_AREA_UNIT_SHORT_LABELS[landAreaUnit]}
@@ -1437,7 +1435,7 @@ function SellPageForm() {
                             event.target.value as LandAreaUnit,
                           )
                         }
-                        className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-100 focus:border-emerald-600 cursor-pointer"
+                        className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#fff1dc] focus:border-[#FF9933] cursor-pointer"
                       >
                         {(
                           Object.keys(LAND_AREA_UNIT_LABELS) as LandAreaUnit[]
@@ -1452,7 +1450,7 @@ function SellPageForm() {
 
                   {/* Conversion Multi-View Grid */}
                   <div className="mt-4 grid grid-cols-2 sm:grid-cols-5 gap-2">
-                    <div className="bg-white border border-emerald-100 rounded-xl p-3">
+                    <div className="bg-white border border-[#FF9933]/30 rounded-xl p-3">
                       <p className="text-[9px] uppercase tracking-wide font-bold text-slate-400">
                         Sq. Yards
                       </p>
@@ -1461,7 +1459,7 @@ function SellPageForm() {
                       </p>
                     </div>
 
-                    <div className="bg-white border border-emerald-100 rounded-xl p-3">
+                    <div className="bg-white border border-[#FF9933]/30 rounded-xl p-3">
                       <p className="text-[9px] uppercase tracking-wide font-bold text-slate-400">
                         Guntas
                       </p>
@@ -1470,7 +1468,7 @@ function SellPageForm() {
                       </p>
                     </div>
 
-                    <div className="bg-white border border-emerald-100 rounded-xl p-3">
+                    <div className="bg-white border border-[#FF9933]/30 rounded-xl p-3">
                       <p className="text-[9px] uppercase tracking-wide font-bold text-slate-400">
                         Cents
                       </p>
@@ -1479,7 +1477,7 @@ function SellPageForm() {
                       </p>
                     </div>
 
-                    <div className="bg-white border border-emerald-100 rounded-xl p-3">
+                    <div className="bg-white border border-[#FF9933]/30 rounded-xl p-3">
                       <p className="text-[9px] uppercase tracking-wide font-bold text-slate-400">
                         Acres
                       </p>
@@ -1488,7 +1486,7 @@ function SellPageForm() {
                       </p>
                     </div>
 
-                    <div className="bg-white border border-emerald-100 rounded-xl p-3">
+                    <div className="bg-white border border-[#FF9933]/30 rounded-xl p-3">
                       <p className="text-[9px] uppercase tracking-wide font-bold text-slate-400">
                         Hectares
                       </p>
@@ -1498,7 +1496,7 @@ function SellPageForm() {
                     </div>
                   </div>
 
-                  <div className="mt-3 flex items-start gap-2 text-[10px] text-emerald-800">
+                  <div className="mt-3 flex items-start gap-2 text-[10px] text-[#c75e0a]">
                     <CheckCircle2 className="w-3.5 h-3.5 shrink-0 mt-0.5" />
                     <p>
                       Your entered measurement is automatically converted to{' '}
@@ -1522,7 +1520,7 @@ function SellPageForm() {
                         onChange={(event) =>
                           setPricePerYard(Number(event.target.value))
                         }
-                        className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-300 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-100 focus:border-emerald-600"
+                        className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-300 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#fff1dc] focus:border-[#FF9933]"
                       />
                     </div>
                   </div>
@@ -1549,7 +1547,7 @@ function SellPageForm() {
                     onChange={(event) =>
                       setPriceNegotiable(event.target.checked)
                     }
-                    className="w-4 h-4 accent-emerald-700"
+                    className="w-4 h-4 accent-[#FF9933]"
                   />
                   <span className="text-xs font-semibold text-slate-700">
                     Price is negotiable with serious buyers
@@ -1570,11 +1568,10 @@ function SellPageForm() {
                           key={value}
                           type="button"
                           onClick={() => setLandType(value as LandType)}
-                          className={`p-3 rounded-xl border text-left transition-colors cursor-pointer ${
-                            landType === value
-                              ? 'border-emerald-600 bg-emerald-50 text-emerald-900 font-bold'
+                          className={`p-3 rounded-xl border text-left transition-colors cursor-pointer ${landType === value
+                              ? 'border-[#FF9933] bg-[#fff9f0] text-[#7a3705] font-bold'
                               : 'border-slate-200 bg-white hover:border-slate-300 text-slate-700 font-medium'
-                          }`}
+                            }`}
                         >
                           <span className="text-[11px]">{label}</span>
                         </button>
@@ -1591,7 +1588,7 @@ function SellPageForm() {
                   <select
                     value={roadAccess}
                     onChange={(event) => setRoadAccess(event.target.value)}
-                    className="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-100 focus:border-emerald-600 cursor-pointer"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#fff1dc] focus:border-[#FF9933] cursor-pointer"
                   >
                     <option value="30_FT_PLUS">30 ft or wider road</option>
                     <option value="20_TO_30_FT">20–30 ft road</option>
@@ -1611,7 +1608,7 @@ function SellPageForm() {
                     value={landmarks}
                     onChange={(event) => setLandmarks(event.target.value)}
                     placeholder="Example: Metro Station, ORR, School, Hospital"
-                    className="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-100 focus:border-emerald-600"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#fff1dc] focus:border-[#FF9933]"
                   />
                   <p className="text-[10px] text-slate-400 mt-1">
                     Separate multiple landmarks with commas.
@@ -1643,7 +1640,7 @@ function SellPageForm() {
                       setGoogleMapsShareLink(event.target.value)
                     }
                     placeholder="https://maps.app.goo.gl/..."
-                    className="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-100 focus:border-emerald-600"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#fff1dc] focus:border-[#FF9933]"
                   />
                   <p className="text-[10px] text-slate-400 mt-1">
                     You can paste the location link copied directly from Google Maps.
@@ -1681,7 +1678,7 @@ function SellPageForm() {
                       value={address}
                       onChange={(event) => setAddress(event.target.value)}
                       placeholder="Plot number, survey location, layout name"
-                      className="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-emerald-100 focus:border-emerald-600"
+                      className="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#fff1dc] focus:border-[#FF9933]"
                     />
                   </div>
 
@@ -1695,7 +1692,7 @@ function SellPageForm() {
                         value={city}
                         onChange={(event) => setCity(event.target.value)}
                         placeholder="City"
-                        className="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-100 focus:border-emerald-600"
+                        className="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#fff1dc] focus:border-[#FF9933]"
                       />
                     </div>
 
@@ -1707,7 +1704,7 @@ function SellPageForm() {
                         <select
                           value={state}
                           onChange={(event) => setState(event.target.value)}
-                          className="w-full px-3 py-3 rounded-xl border border-slate-300 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-100 focus:border-emerald-600 cursor-pointer"
+                          className="w-full px-3 py-3 rounded-xl border border-slate-300 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#fff1dc] focus:border-[#FF9933] cursor-pointer"
                         >
                           {INDIAN_STATES.map((item: any) => {
                             const value = item.value || item;
@@ -1733,7 +1730,7 @@ function SellPageForm() {
                             setPincode(event.target.value.replace(/\D/g, ''))
                           }
                           placeholder="500001"
-                          className="w-full px-3 py-3 rounded-xl border border-slate-300 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-100 focus:border-emerald-600"
+                          className="w-full px-3 py-3 rounded-xl border border-slate-300 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#fff1dc] focus:border-[#FF9933]"
                         />
                       </div>
                     </div>
@@ -1782,7 +1779,7 @@ function SellPageForm() {
                       type="text"
                       value={sellerName}
                       onChange={(event) => setSellerName(event.target.value)}
-                      className="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-100 focus:border-emerald-600"
+                      className="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#fff1dc] focus:border-[#FF9933]"
                     />
                   </div>
 
@@ -1794,7 +1791,7 @@ function SellPageForm() {
                       type="email"
                       value={sellerEmail}
                       onChange={(event) => setSellerEmail(event.target.value)}
-                      className="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-100 focus:border-emerald-600"
+                      className="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#fff1dc] focus:border-[#FF9933]"
                     />
                   </div>
                 </div>
@@ -1815,7 +1812,7 @@ function SellPageForm() {
                       className="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm bg-slate-50 font-semibold text-slate-800"
                     />
                     {currentUser?.isPhoneVerified && (
-                      <p className="flex items-center gap-1 text-[10px] text-emerald-700 font-semibold mt-1.5">
+                      <p className="flex items-center gap-1 text-[10px] text-[#FF9933] font-semibold mt-1.5">
                         <CheckCircle2 className="w-3 h-3" />
                         Phone verified
                       </p>
@@ -1831,7 +1828,7 @@ function SellPageForm() {
                       onChange={(event) =>
                         setSellerType(event.target.value as SellerType)
                       }
-                      className="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-100 focus:border-emerald-600 cursor-pointer"
+                      className="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#fff1dc] focus:border-[#FF9933] cursor-pointer"
                     >
                       <option value="INDIVIDUAL">Individual Owner</option>
                       <option value="COMPANY">Company / Builder</option>
@@ -1849,7 +1846,7 @@ function SellPageForm() {
                     value={sellerAddress}
                     onChange={(event) => setSellerAddress(event.target.value)}
                     placeholder="Your correspondence or office address"
-                    className="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-emerald-100 focus:border-emerald-600"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#fff1dc] focus:border-[#FF9933]"
                   />
                 </div>
               </div>
@@ -1878,22 +1875,22 @@ function SellPageForm() {
                       setGovernmentRegistrationId(event.target.value)
                     }
                     placeholder="Example: Survey No. 123/4A"
-                    className="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-100 focus:border-emerald-600"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#fff1dc] focus:border-[#FF9933]"
                   />
                   <p className="text-[10px] text-slate-400 mt-1">
                     Enter the survey number, registration number, khata number, or other official identifier.
                   </p>
                 </div>
 
-                <div className="rounded-2xl bg-emerald-50 border border-emerald-200 p-5">
+                <div className="rounded-2xl bg-[#fff9f0] border border-[#FF9933]/30 p-5">
                   <div className="flex items-start gap-3">
-                    <ShieldCheck className="w-6 h-6 text-emerald-700 shrink-0" />
+                    <ShieldCheck className="w-6 h-6 text-[#FF9933] shrink-0 mt-0.5" />
                     <div>
-                      <h3 className="text-sm font-extrabold text-emerald-950">
-                        Human Document Verification
+                      <h3 className="text-sm font-extrabold text-[#7a3705]">
+                        Instant Direct Classifieds Publishing
                       </h3>
-                      <p className="text-xs text-emerald-900/80 mt-1 leading-relaxed">
-                        Submitted survey identifiers and title deeds are reviewed by the BhoomiMitra verification team before the property is badged as verified.
+                      <p className="text-xs text-[#9c4c0b] mt-1 leading-relaxed">
+                        Your land advertisement will be published immediately upon flat-fee payment without administrative delays. You are solely responsible for ensuring the survey numbers and ownership details you provide are accurate and lawful.
                       </p>
                     </div>
                   </div>
@@ -1923,8 +1920,8 @@ function SellPageForm() {
                     disabled={isUploadingImage}
                     className="hidden"
                   />
-                  <div className="rounded-2xl border-2 border-dashed border-slate-300 hover:border-emerald-500 hover:bg-emerald-50/30 transition-colors p-8 text-center">
-                    <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center mx-auto mb-3">
+                  <div className="rounded-2xl border-2 border-dashed border-slate-300 hover:border-[#FF9933] hover:bg-[#fff9f0] transition-colors p-8 text-center">
+                    <div className="w-12 h-12 rounded-2xl bg-[#fff1dc] text-[#c75e0a] flex items-center justify-center mx-auto mb-3">
                       {isUploadingImage ? (
                         <RefreshCw className="w-6 h-6 animate-spin" />
                       ) : (
@@ -1939,7 +1936,7 @@ function SellPageForm() {
                     <p className="text-[11px] text-slate-500 mt-1">
                       JPG, PNG or WebP • Multiple images supported
                     </p>
-                    <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-100 text-[10px] text-emerald-800 font-semibold">
+                    <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#fff9f0] border border-[#FF9933]/30 text-[10px] text-[#c75e0a] font-semibold">
                       <Sparkles className="w-3 h-3" />
                       Automatically compressed below 850 KB
                     </div>
@@ -1961,7 +1958,7 @@ function SellPageForm() {
                       <h3 className="text-xs font-extrabold text-slate-900">
                         Uploaded Photos ({images.length})
                       </h3>
-                      <span className="text-[10px] text-emerald-700 font-semibold">
+                      <span className="text-[10px] text-[#FF9933] font-semibold">
                         Optimized & Ready
                       </span>
                     </div>
@@ -1980,7 +1977,7 @@ function SellPageForm() {
                             className="object-cover"
                           />
                           {image.isPrimary && (
-                            <div className="absolute left-2 top-2 px-2 py-1 rounded-md bg-emerald-700 text-white text-[9px] font-bold">
+                            <div className="absolute left-2 top-2 px-2 py-1 rounded-md bg-[#FF9933] text-white text-[9px] font-bold">
                               Primary
                             </div>
                           )}
@@ -2035,7 +2032,7 @@ function SellPageForm() {
 
                 <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
                   <div className="flex items-start gap-3">
-                    <ImageIcon className="w-4 h-4 text-emerald-700 shrink-0 mt-0.5" />
+                    <ImageIcon className="w-4 h-4 text-[#FF9933] shrink-0 mt-0.5" />
                     <div className="text-[10px] text-slate-600 leading-relaxed">
                       <p className="font-bold text-slate-800 mb-1">
                         Automatic image optimization
@@ -2057,7 +2054,7 @@ function SellPageForm() {
                     Title & Supporting Documents (Optional)
                   </h2>
                   <p className="text-xs text-slate-500 mt-1">
-                    Upload documents that assist in ownership verification (Encumbrance certificate, 7/12 khata, title deed).
+                    Upload documents to assist prospective buyers during their independent due diligence (Sale deed scan, EC Form 15, Pahani / 7-12 extract, or FMB sketch). Document upload is optional.
                   </p>
                 </div>
 
@@ -2070,7 +2067,7 @@ function SellPageForm() {
                     disabled={isUploadingDoc}
                     className="hidden"
                   />
-                  <div className="rounded-2xl border-2 border-dashed border-slate-300 hover:border-emerald-500 hover:bg-emerald-50/30 transition-colors p-8 text-center">
+                  <div className="rounded-2xl border-2 border-dashed border-slate-300 hover:border-[#FF9933] hover:bg-[#fff9f0] transition-colors p-8 text-center">
                     <div className="w-12 h-12 rounded-2xl bg-slate-100 text-slate-700 flex items-center justify-center mx-auto mb-3">
                       {isUploadingDoc ? (
                         <RefreshCw className="w-6 h-6 animate-spin" />
@@ -2192,33 +2189,33 @@ function SellPageForm() {
 
                 {/* Flat Publishing Fee Card / Active Status */}
                 {existingPropertyId && existingPaymentStatus === 'PAID' ? (
-                  <div className="rounded-2xl border border-emerald-200 bg-emerald-50/70 p-5 space-y-2">
+                  <div className="rounded-2xl border border-[#FF9933]/30 bg-[#fff9f0] p-5 space-y-2">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0">
+                      <div className="w-10 h-10 rounded-xl bg-[#fff1dc] text-[#c75e0a] flex items-center justify-center shrink-0">
                         <CheckCircle2 className="w-5 h-5" />
                       </div>
                       <div>
-                        <h3 className="text-sm font-extrabold text-emerald-950">
+                        <h3 className="text-sm font-extrabold text-slate-950">
                           Listing Publishing Fee Paid & Active
                         </h3>
-                        <p className="text-[11px] text-emerald-900/80 mt-0.5 leading-relaxed">
+                        <p className="text-[11px] text-[#7a3705] mt-0.5 leading-relaxed">
                           Your listing subscription is active. Saving your changes will update the property details immediately without requiring another publishing fee.
                         </p>
                       </div>
                     </div>
                   </div>
                 ) : (
-                  <div className="rounded-2xl border border-emerald-200 bg-emerald-50/50 overflow-hidden">
-                    <div className="p-5 border-b border-emerald-200">
+                  <div className="rounded-2xl border border-[#FF9933]/30 bg-[#fff9f0] overflow-hidden">
+                    <div className="p-5 border-b border-[#FF9933]/30">
                       <div className="flex items-start gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0">
+                        <div className="w-10 h-10 rounded-xl bg-[#fff1dc] text-[#c75e0a] flex items-center justify-center shrink-0">
                           <CreditCard className="w-5 h-5" />
                         </div>
                         <div>
-                          <h3 className="text-sm font-extrabold text-emerald-950">
+                          <h3 className="text-sm font-extrabold text-slate-950">
                             Listing Publishing Fee
                           </h3>
-                          <p className="text-[11px] text-emerald-900/70 mt-1">
+                          <p className="text-[11px] text-[#7a3705] mt-1">
                             Universal flat fee for the full {listingDurationDays}-day subscription period.
                           </p>
                         </div>
@@ -2240,11 +2237,11 @@ function SellPageForm() {
                         </span>
                       </div>
 
-                      <div className="pt-3 border-t border-emerald-200 flex justify-between items-center">
+                      <div className="pt-3 border-t border-[#FF9933]/30 flex justify-between items-center">
                         <span className="text-sm font-extrabold text-slate-950">
                           Amount Payable
                         </span>
-                        <span className="text-xl font-black text-emerald-800">
+                        <span className="text-xl font-black text-[#c75e0a]">
                           ₹{listingFeeAmount.toLocaleString('en-IN')}
                         </span>
                       </div>
@@ -2252,20 +2249,50 @@ function SellPageForm() {
                   </div>
                 )}
 
-                {/* Terms Acceptance */}
-                <label className="flex items-start gap-3 cursor-pointer p-4 rounded-xl bg-slate-50 border border-slate-200">
-                  <input
-                    type="checkbox"
-                    checked={termsAccepted}
-                    onChange={(event) =>
-                      setTermsAccepted(event.target.checked)
-                    }
-                    className="w-4 h-4 mt-0.5 accent-emerald-700"
-                  />
-                  <span className="text-[10px] leading-relaxed text-slate-600">
-                    I confirm that the information and documents submitted for this listing are accurate to the best of my knowledge. I understand that payment is a publishing fee and does not guarantee verification or sale of the property.
-                  </span>
-                </label>
+                {/* Seller Declaration & Marketplace Undertaking Card */}
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5 space-y-4">
+                  <div className="flex items-center gap-2">
+                    <ShieldCheck className="w-5 h-5 text-[#FF9933]" />
+                    <h3 className="text-sm font-extrabold text-slate-950">
+                      Seller Declaration &amp; Publishing Undertaking
+                    </h3>
+                  </div>
+
+                  <ul className="space-y-2 text-[11px] text-slate-600 leading-relaxed list-disc pl-4">
+                    <li>
+                      <strong>Authorization:</strong> I represent that I am the owner of this property or am otherwise lawfully authorized to advertise this listing.
+                    </li>
+                    <li>
+                      <strong>Accuracy:</strong> The land extent, pricing, boundaries, and descriptions submitted are accurate and my sole responsibility.
+                    </li>
+                    <li>
+                      <strong>Lawful Content:</strong> I undertake not to upload unlawful, fraudulent, misleading, or infringing content, or prohibited/disputed land parcels.
+                    </li>
+                    <li>
+                      <strong>Marketplace Role:</strong> I understand that BhoomiMitra operates as an online classifieds marketplace and does not certify ownership, inspect titles, or guarantee properties.
+                    </li>
+                    <li>
+                      <strong>Buyer Due Diligence:</strong> I acknowledge that prospective buyers must independently inspect revenue records, title deeds, and physical boundaries prior to transactions.
+                    </li>
+                    <li>
+                      <strong>Statutory Compliance:</strong> I agree to comply with applicable laws, terms of service, and platform listing rules.
+                    </li>
+                  </ul>
+
+                  <label className="flex items-start gap-3 cursor-pointer pt-3 border-t border-slate-200">
+                    <input
+                      type="checkbox"
+                      checked={termsAccepted}
+                      onChange={(event) =>
+                        setTermsAccepted(event.target.checked)
+                      }
+                      className="w-4 h-4 mt-0.5 accent-[#FF9933]"
+                    />
+                    <span className="text-xs font-semibold text-slate-900 leading-snug">
+                      I have read, understood, and accept the above Seller Declaration, Marketplace Listing Rules, and Terms of Service.
+                    </span>
+                  </label>
+                </div>
 
                 {/* Draft Preservation Notice */}
                 <div className="rounded-xl bg-blue-50 border border-blue-200 p-4">
@@ -2307,7 +2334,7 @@ function SellPageForm() {
                   disabled={
                     isSubmitting || isUploadingImage || isUploadingDoc
                   }
-                  className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold transition-colors shadow-sm disabled:opacity-50 cursor-pointer"
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-[#FF9933] hover:bg-[#f07d12] text-white text-xs font-bold transition-colors shadow-sm disabled:opacity-50 cursor-pointer"
                 >
                   <span>Continue</span>
                   <ArrowRight className="w-4 h-4" />
@@ -2322,7 +2349,7 @@ function SellPageForm() {
                     isUploadingImage ||
                     isUploadingDoc
                   }
-                  className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold transition-colors shadow-sm disabled:opacity-50 cursor-pointer"
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-[#FF9933] hover:bg-[#f07d12] text-white text-xs font-bold transition-colors shadow-sm disabled:opacity-50 cursor-pointer"
                 >
                   {existingPropertyId && existingPaymentStatus === 'PAID' ? (
                     <CheckCircle2 className="w-4 h-4" />
@@ -2333,12 +2360,12 @@ function SellPageForm() {
                     {isSubmitting
                       ? 'Saving Changes...'
                       : isUpdateSuccess
-                      ? 'Listing Updated Successfully!'
-                      : existingPropertyId && existingPaymentStatus === 'PAID'
-                      ? 'Save & Update Property'
-                      : `Proceed to Pay ₹${listingFeeAmount.toLocaleString(
-                          'en-IN',
-                        )}`}
+                        ? 'Listing Updated Successfully!'
+                        : existingPropertyId && existingPaymentStatus === 'PAID'
+                          ? 'Save & Update Property'
+                          : `Proceed to Pay ₹${listingFeeAmount.toLocaleString(
+                            'en-IN',
+                          )}`}
                   </span>
                 </button>
               )}
@@ -2353,7 +2380,7 @@ function SellPageForm() {
             </span>
             <span className="flex items-center gap-1.5">
               <MapPin className="w-3.5 h-3.5" />
-              Location verification
+              GPS Location Pinning
             </span>
             <span className="flex items-center gap-1.5">
               <FileText className="w-3.5 h-3.5" />
@@ -2398,7 +2425,7 @@ export default function SellPage() {
         <div className="min-h-screen flex flex-col bg-slate-50">
           <Navbar />
           <div className="flex-1 flex items-center justify-center py-20">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-700" />
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#FF9933]" />
           </div>
           <Footer />
         </div>

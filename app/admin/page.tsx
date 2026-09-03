@@ -98,7 +98,7 @@ const ADMIN_TABS: {
   },
   {
     id: 'VERIFICATION',
-    label: 'Verification',
+    label: 'Moderation',
     icon: FileCheck2,
   },
   {
@@ -910,7 +910,7 @@ export default function AdminControlPage() {
    */
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 selection:bg-emerald-600 selection:text-white">
+    <div className="min-h-screen bg-slate-950 text-slate-100 selection:bg-[#FF9933] selection:text-white">
 
       {/* ============================================================
           ADMIN HEADER
@@ -1729,9 +1729,9 @@ export default function AdminControlPage() {
 
             <AdminSectionHeader
               eyebrow="Compliance"
-              title="Property Verification"
-              description="Review ownership documents and approve or reject property submissions."
-              count={`${pendingVerificationProperties.length} pending`}
+              title="Content Moderation"
+              description="Review reported or flagged listings for policy compliance, abusive content, or takedown requests."
+              count={`${pendingVerificationProperties.length} in queue`}
             />
 
             {pendingVerificationProperties.length > 0 ? (

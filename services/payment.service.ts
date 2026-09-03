@@ -400,7 +400,7 @@ async function executePaymentSettlementPipeline({
         razorpayPaymentId,
       },
     },
-    { new: true, upsert: true, returnDocument: 'after' },
+    { upsert: true, returnDocument: 'after' },
   );
 
   if (subscription && !paymentDoc.subscriptionId) {
@@ -409,17 +409,12 @@ async function executePaymentSettlementPipeline({
   }
 
   /*
-   * 6. PROPERTY LIFECYCLE TRANSITION
+   * 6. PROPERTY LIFECYCLE TRANSITION (DIRECT CLASSIFIEDS MODEL)
    *
-   * If property is already VERIFIED (e.g. renewal of active listing): PUBLISHED.
-   * If property is NOT VERIFIED (e.g. new draft): PENDING_VERIFICATION.
+   * Payment activates the advertisement directly onto the marketplace.
+   * There is no administrative title verification queue.
    */
-  let nextListingStatus = property.listingStatus;
-  if (property.verificationStatus === 'VERIFIED') {
-    nextListingStatus = 'PUBLISHED';
-  } else {
-    nextListingStatus = 'PENDING_VERIFICATION';
-  }
+  const nextListingStatus = 'PUBLISHED';
 
   const activePeriodEnd = subscription ? subscription.periodEnd : newPeriodEnd;
 
@@ -429,12 +424,13 @@ async function executePaymentSettlementPipeline({
       $set: {
         paymentStatus: 'PAID',
         listingStatus: nextListingStatus,
+        publishedAt: property.publishedAt || now,
         subscriptionStartedAt: property.subscriptionStartedAt || newPeriodStart,
         subscriptionExpiresAt: activePeriodEnd,
         updatedAt: new Date(),
       },
     },
-    { new: true },
+    { returnDocument: 'after' },
   );
 
   /*
@@ -610,10 +606,7 @@ export async function verifyAndProcessPayment(
 
   return {
     success: true,
-    message:
-      propertyDoc?.verificationStatus === 'VERIFIED'
-        ? 'Payment verified successfully. Listing subscription renewed and published.'
-        : 'Payment verified successfully. Listing submitted for admin verification.',
+    message: 'Payment verified successfully. Listing published live on the marketplace.',
     payment: settledPayment.toObject() as unknown as IPayment,
   };
 }

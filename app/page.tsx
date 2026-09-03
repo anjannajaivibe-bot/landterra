@@ -1,53 +1,180 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import {
-  ArrowRight,
-  CheckCircle2,
-  FileCheck2,
-  Filter,
-  LandPlot,
-  MapPin,
   Search,
+  MapPin,
   ShieldCheck,
+  Phone,
+  ArrowRight,
   Sparkles,
-  WalletCards,
+  Layers,
+  LandPlot,
+  Building2,
+  Tractor,
+  Trees,
+  FileText,
+  BadgeCheck,
+  ChevronRight,
+  ChevronDown,
+  Check,
+  Tag,
+  HeartHandshake,
+  CheckCircle2,
+  Lock,
+  Home,
+  Scale,
 } from 'lucide-react';
 
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { PropertyCard } from '@/components/properties/PropertyCard';
+import { CallSellerModal } from '@/components/properties/CallSellerModal';
+import { LandAreaConverter } from '@/components/tools/LandAreaConverter';
+import { DueDiligenceChecklist } from '@/components/legal/DueDiligenceChecklist';
+import { AuthModal } from '@/components/auth/AuthModal';
 import { IProperty } from '@/types/property';
-import { LAND_TYPES } from '@/config/constants';
+import { IUser } from '@/types/user';
+
+/* ================================================================
+   HERO SEARCH CONFIG
+================================================================ */
+
+interface LandTypeOption {
+  id: string;
+  label: string;
+  category: 'Residential' | 'Commercial' | 'Other Property Types';
+}
+
+const HERO_LAND_TYPES: LandTypeOption[] = [
+  // Residential (Matching Screenshot 1 & 2)
+  { id: 'FLAT', label: 'Flat', category: 'Residential' },
+  { id: 'HOUSE_VILLA', label: 'House/Villa', category: 'Residential' },
+  { id: 'RESIDENTIAL_PLOT', label: 'Plot', category: 'Residential' },
+
+  // Commercial (Matching Screenshot 1 & 2)
+  { id: 'OFFICE_SPACE', label: 'Office Space', category: 'Commercial' },
+  { id: 'SHOP_SHOWROOM', label: 'Shop/Showroom', category: 'Commercial' },
+  { id: 'COMMERCIAL_LAND', label: 'Commercial Land', category: 'Commercial' },
+  { id: 'WAREHOUSE_LAND', label: 'Warehouse/Godown', category: 'Commercial' },
+  { id: 'INDUSTRIAL_BUILDING', label: 'Industrial Building', category: 'Commercial' },
+  { id: 'INDUSTRIAL_SHED', label: 'Industrial Shed', category: 'Commercial' },
+
+  // Other Property Types (Matching Screenshot 1 & 2)
+  { id: 'AGRICULTURAL_LAND', label: 'Agricultural Land', category: 'Other Property Types' },
+  { id: 'FARM_HOUSE_LAND', label: 'Farm House', category: 'Other Property Types' },
+];
+
+const BHK_OPTIONS = ['1 Bhk', '2 Bhk', '3 Bhk', '4 Bhk', '5 Bhk', '5+ Bhk'];
+
+const BUDGET_PRESETS = [
+  { label: 'Any Budget', minPrice: 0, maxPrice: 0 },
+  { label: 'Under ₹25 Lakhs', minPrice: 0, maxPrice: 2500000 },
+  { label: '₹25L – ₹50 Lakhs', minPrice: 2500000, maxPrice: 5000000 },
+  { label: '₹50L – ₹1 Crore', minPrice: 5000000, maxPrice: 10000000 },
+  { label: '₹1 Cr – ₹3 Crores', minPrice: 10000000, maxPrice: 30000000 },
+  { label: '₹3 Cr – ₹5 Crores', minPrice: 30000000, maxPrice: 50000000 },
+  { label: '₹5 Cr – ₹10 Crores', minPrice: 50000000, maxPrice: 100000000 },
+  { label: 'Above ₹10 Crores', minPrice: 100000000, maxPrice: 0 },
+];
+
+const POPULAR_SEARCH_TAGS = [
+  { label: 'Kokapet Plots', query: 'Kokapet' },
+  { label: 'Moinabad Farmlands', query: 'Moinabad' },
+  { label: 'Shamshabad Airport Zone', query: 'Shamshabad' },
+  { label: 'Shankarpally Plots', query: 'Shankarpally' },
+  { label: 'Vijayawada Highway', query: 'Vijayawada Highway' },
+  { label: 'Bengaluru Rural', query: 'Bengaluru Rural' },
+];
 
 export default function HomePage() {
   const [properties, setProperties] = useState<IProperty[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const [searchLocation, setSearchLocation] = useState('');
-  const [selectedLandType, setSelectedLandType] = useState('ALL');
-
+  /* Platform settings */
   const [publicListingFee, setPublicListingFee] = useState(10);
   const [listingDurationDays, setListingDurationDays] = useState(30);
+
+  /* Hero Omnibar Search states */
+  const [searchLocation, setSearchLocation] = useState('');
+  const [selectedLandTypes, setSelectedLandTypes] = useState<string[]>(['FLAT']);
+  const [selectedBhks, setSelectedBhks] = useState<string[]>([]);
+  const [selectedBudgetIndex, setSelectedBudgetIndex] = useState(0);
+  const [verifiedOnly, setVerifiedOnly] = useState(false);
+
+  /* Popover states */
+  const [landTypePopoverOpen, setLandTypePopoverOpen] = useState(false);
+  const [budgetPopoverOpen, setBudgetPopoverOpen] = useState(false);
+
+  /* Category accordion in Land Type Popover (Commercial & Other collapsed by default) */
+  const [expandedCategories, setExpandedCategories] = useState<{
+    residential: boolean;
+    commercial: boolean;
+    other: boolean;
+  }>({
+    residential: true,
+    commercial: false,
+    other: false,
+  });
+
+  const toggleCategory = (cat: 'residential' | 'commercial' | 'other') => {
+    setExpandedCategories((prev) => ({
+      ...prev,
+      [cat]: !prev[cat],
+    }));
+  };
+
+  const handleToggleBhk = (bhk: string) => {
+    setSelectedBhks((prev) =>
+      prev.includes(bhk) ? prev.filter((b) => b !== bhk) : [...prev, bhk]
+    );
+  };
+
+  const landTypeRef = useRef<HTMLDivElement>(null);
+  const budgetRef = useRef<HTMLDivElement>(null);
+
+  /* User & Auth */
+  const [user, setUser] = useState<Partial<IUser> | null>(null);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+
+  /* Call Seller State */
+  const [callModalOpen, setCallModalOpen] = useState(false);
+  const [selectedPropertyForCall, setSelectedPropertyForCall] =
+    useState<IProperty | null>(null);
+  const [sellerCallData, setSellerCallData] = useState<{
+    sellerName: string;
+    sellerPhone: string;
+    sellerEmail?: string;
+  } | null>(null);
+
+  /* ================================================================
+     LOAD REAL DATA & SESSION
+  ================================================================ */
 
   useEffect(() => {
     let cancelled = false;
 
     async function loadData() {
       try {
-        const [propsRes, settingsRes] = await Promise.all([
-          fetch('/api/properties?limit=8', { cache: 'no-store' }),
+        const [propsRes, settingsRes, sessionRes] = await Promise.all([
+          fetch('/api/properties?limit=12', { cache: 'no-store' }),
           fetch('/api/settings/public', { cache: 'no-store' }).catch(() => null),
+          fetch('/api/auth/session', { cache: 'no-store' }).catch(() => null),
         ]);
 
         if (settingsRes?.ok) {
           const s = await settingsRes.json();
-          if (!cancelled && typeof s.listingFeeAmount === 'number') {
-            setPublicListingFee(s.listingFeeAmount);
+          if (!cancelled) {
+            if (typeof s.listingFeeAmount === 'number') setPublicListingFee(s.listingFeeAmount);
+            if (typeof s.listingFeeDurationDays === 'number') setListingDurationDays(s.listingFeeDurationDays);
           }
-          if (!cancelled && typeof s.listingFeeDurationDays === 'number') {
-            setListingDurationDays(s.listingFeeDurationDays);
+        }
+
+        if (sessionRes?.ok) {
+          const sess = await sessionRes.json();
+          if (!cancelled && sess?.session?.user) {
+            setUser(sess.session.user);
           }
         }
 
@@ -58,14 +185,9 @@ export default function HomePage() {
           }
         }
       } catch (error) {
-        console.error('Failed to load homepage data:', error);
-        if (!cancelled) {
-          setProperties([]);
-        }
+        console.error('Failed to load portal data:', error);
       } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
+        if (!cancelled) setLoading(false);
       }
     }
 
@@ -76,693 +198,944 @@ export default function HomePage() {
     };
   }, []);
 
-  const featuredProperties = properties.slice(0, 3);
-  const recentProperties = properties.slice(3, 8);
+  /* Close popovers on outside click */
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (
+        landTypeRef.current &&
+        !landTypeRef.current.contains(e.target as Node)
+      ) {
+        setLandTypePopoverOpen(false);
+      }
+      if (budgetRef.current && !budgetRef.current.contains(e.target as Node)) {
+        setBudgetPopoverOpen(false);
+      }
+    }
 
-  function handleSearch(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleToggleLandType = (id: string) => {
+    setSelectedLandTypes((prev) => {
+      const next = prev.includes(id)
+        ? prev.filter((t) => t !== id)
+        : [...prev, id];
+      // If neither FLAT nor HOUSE_VILLA is selected anymore, clear BHKs
+      if (!next.includes('FLAT') && !next.includes('HOUSE_VILLA')) {
+        setSelectedBhks([]);
+      }
+      return next;
+    });
+  };
+
+  /* ================================================================
+     HANDLE SEARCH SUBMIT
+  ================================================================ */
+
+  function handleSearchSubmit(e: React.FormEvent) {
+    e.preventDefault();
 
     const params = new URLSearchParams();
-    const location = searchLocation.trim();
-
-    if (location) {
-      params.set('city', location);
+    if (searchLocation.trim()) {
+      params.set('query', searchLocation.trim());
+      params.set('city', searchLocation.trim());
     }
 
-    if (selectedLandType !== 'ALL') {
-      params.set('landType', selectedLandType);
+    if (selectedLandTypes.length > 0) {
+      const typeId = selectedLandTypes[0];
+      if (typeId === 'FLAT' || typeId === 'HOUSE_VILLA' || typeId === 'RESIDENTIAL_PLOT') {
+        params.set('landType', 'RESIDENTIAL_PLOT');
+      } else if (
+        typeId === 'OFFICE_SPACE' ||
+        typeId === 'SHOP_SHOWROOM' ||
+        typeId === 'COMMERCIAL_LAND'
+      ) {
+        params.set('landType', 'COMMERCIAL_LAND');
+      } else if (
+        typeId === 'WAREHOUSE_LAND' ||
+        typeId === 'INDUSTRIAL_BUILDING' ||
+        typeId === 'INDUSTRIAL_SHED'
+      ) {
+        params.set('landType', 'INDUSTRIAL_PLOT');
+      } else if (typeId === 'FARM_HOUSE_LAND') {
+        params.set('landType', 'FARM_HOUSE_LAND');
+      } else if (typeId === 'AGRICULTURAL_LAND') {
+        params.set('landType', 'AGRICULTURAL_LAND');
+      } else {
+        params.set('landType', typeId);
+      }
     }
 
-    const query = params.toString();
-    window.location.href = query ? `/buy?${query}` : '/buy';
+    if (selectedBhks.length > 0) {
+      params.set('bhk', selectedBhks.join(','));
+    }
+
+    const budget = BUDGET_PRESETS[selectedBudgetIndex];
+    if (budget.minPrice > 0) {
+      params.set('minPrice', String(budget.minPrice));
+    }
+    if (budget.maxPrice > 0) {
+      params.set('maxPrice', String(budget.maxPrice));
+    }
+
+    if (verifiedOnly) {
+      params.set('verifiedOnly', 'true');
+    }
+
+    setLandTypePopoverOpen(false);
+    setBudgetPopoverOpen(false);
+
+    const q = params.toString();
+    window.location.href = q ? `/buy?${q}` : '/buy';
   }
 
+  /* Land Type & BHK Trigger Text (Matches Screenshot 1 & 2) */
+  let landTypeTriggerText = 'Property Type';
+  if (selectedLandTypes.length > 0) {
+    const firstSelected = HERO_LAND_TYPES.find(
+      (t) => t.id === selectedLandTypes[0]
+    );
+    if (firstSelected) {
+      if (
+        (firstSelected.id === 'FLAT' || firstSelected.id === 'HOUSE_VILLA') &&
+        selectedBhks.length > 0
+      ) {
+        landTypeTriggerText = `${firstSelected.label} (${selectedBhks.join(', ')})`;
+      } else if (selectedLandTypes.length > 1) {
+        landTypeTriggerText = `${firstSelected.label} +${selectedLandTypes.length - 1}`;
+      } else {
+        landTypeTriggerText = firstSelected.label;
+      }
+    }
+  }
+
+  const selectedBudget = BUDGET_PRESETS[selectedBudgetIndex];
+
+  /* ================================================================
+     HANDLE CALL SELLER ACTION
+  ================================================================ */
+
+  const handleCallSellerClick = async (property: IProperty) => {
+    if (!user) {
+      setAuthModalOpen(true);
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/properties/${property._id}/call`, {
+        method: 'POST',
+      });
+      const data = await res.json();
+
+      if (res.ok && data) {
+        setSelectedPropertyForCall(property);
+        setSellerCallData({
+          sellerName: data.sellerName || property.sellerName,
+          sellerPhone: data.sellerPhone || property.sellerPhone,
+          sellerEmail: data.sellerEmail || property.sellerEmail,
+        });
+        setCallModalOpen(true);
+      } else {
+        alert(data.error || 'Unable to retrieve seller contact.');
+      }
+    } catch {
+      alert('Network error. Please try again.');
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-[#f8faf9] text-slate-900">
+    <div className="min-h-screen bg-white text-slate-900 flex flex-col selection:bg-[#FF9933] selection:text-white">
       <Navbar />
 
-      {/* ═══════════════════════════════════════════════════════
-          HERO — Trust-first dark green
-      ═══════════════════════════════════════════════════════ */}
-      <section className="relative overflow-hidden bg-[#0c1f17] text-white">
-        {/* Soft trust glow */}
-        <div className="pointer-events-none absolute inset-0">
-          <div className="absolute -top-24 left-1/2 h-[480px] w-[900px] -translate-x-1/2 rounded-full bg-emerald-500/15 blur-[100px]" />
-          <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-[#0c1f17] to-transparent" />
-          <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.025)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.025)_1px,transparent_1px)] bg-[size:56px_56px]" />
-        </div>
-
-        <div className="relative mx-auto max-w-7xl px-4 pb-24 pt-16 sm:px-6 sm:pb-28 sm:pt-20 lg:px-8">
-          <div className="mx-auto max-w-3xl text-center">
-            <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-emerald-400/25 bg-emerald-500/10 px-4 py-2 text-xs font-semibold tracking-wide text-emerald-300">
-              <ShieldCheck className="h-4 w-4" />
-              Land marketplace with administrative verification
-            </div>
-
-            <h1 className="text-4xl font-black tracking-tight sm:text-5xl lg:text-6xl lg:leading-[1.08]">
-              Find the right land.
-              <br />
-              <span className="text-emerald-400">
-                Deal directly with the seller.
-              </span>
-            </h1>
-
-            <p className="mx-auto mt-6 max-w-xl text-base leading-7 text-emerald-50/70 sm:text-lg">
-              Search by location and land type. Review verification status,
-              save properties you like, and contact sellers directly.
-            </p>
-
-            {/* Search card */}
-            <div className="mx-auto mt-12 max-w-3xl">
-              <form
-                onSubmit={handleSearch}
-                className="rounded-2xl border border-white/10 bg-white p-4 shadow-2xl shadow-black/20 sm:p-5"
-              >
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-12">
-                  <div className="sm:col-span-5">
-                    <label
-                      htmlFor="home-location"
-                      className="mb-2 block px-0.5 text-[11px] font-bold uppercase tracking-wider text-slate-500"
-                    >
-                      Where do you want land?
-                    </label>
-                    <div className="relative">
-                      <MapPin className="absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-emerald-600" />
-                      <input
-                        id="home-location"
-                        type="text"
-                        value={searchLocation}
-                        onChange={(e) => setSearchLocation(e.target.value)}
-                        placeholder="City, locality or area"
-                        className="h-12 w-full rounded-xl border border-slate-200 bg-white pl-11 pr-4 text-sm font-medium text-slate-900 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="sm:col-span-4">
-                    <label
-                      htmlFor="home-land-type"
-                      className="mb-2 block px-0.5 text-[11px] font-bold uppercase tracking-wider text-slate-500"
-                    >
-                      Land type
-                    </label>
-                    <select
-                      id="home-land-type"
-                      value={selectedLandType}
-                      onChange={(e) => setSelectedLandType(e.target.value)}
-                      className="h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-900 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
-                    >
-                      <option value="ALL">All land types</option>
-                      {LAND_TYPES.map((type) => (
-                        <option key={type.value} value={type.value}>
-                          {type.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="flex items-end sm:col-span-3">
-                    <button
-                      type="submit"
-                      className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 text-sm font-bold text-white transition hover:bg-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-offset-2"
-                    >
-                      <Search className="h-4 w-4" />
-                      Search
-                    </button>
-                  </div>
-                </div>
-              </form>
-            </div>
-
-            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
-              <Link
-                href="/buy"
-                className="inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3.5 text-sm font-bold text-slate-900 shadow-sm transition hover:bg-emerald-50"
-              >
-                Browse all land
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-              <Link
-                href="/sell"
-                className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/5 px-6 py-3.5 text-sm font-semibold text-white transition hover:bg-white/10"
-              >
-                Sell your land
-                <ArrowRight className="h-4 w-4 text-emerald-400" />
-              </Link>
-            </div>
-          </div>
-
-          {/* Trust points — larger cards */}
-          <div className="mx-auto mt-16 grid max-w-4xl grid-cols-1 gap-4 sm:grid-cols-3">
-            <TrustPoint
-              icon={<Search className="h-5 w-5" />}
-              title="Search freely"
-              description="Browse available listings without creating an account."
-            />
-            <TrustPoint
-              icon={<FileCheck2 className="h-5 w-5" />}
-              title="Verification status"
-              description="See the review status provided for each listing."
-            />
-            <TrustPoint
-              icon={<ShieldCheck className="h-5 w-5" />}
-              title="Direct seller contact"
-              description="Send an inquiry directly through the platform."
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* ═══════════════════════════════════════════════════════
-          FEATURED LAND
-      ═══════════════════════════════════════════════════════ */}
-      <section className="bg-[#f8faf9]">
-        <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 sm:py-24 lg:px-8">
-          <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <div className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-700">
-                <Sparkles className="h-4 w-4" />
-                Featured listings
+      <main className="flex-1 space-y-16 pb-20">
+        {/* ═══════════════════════════════════════════════════════
+            1. HERO PORTAL SEARCH SECTION (Ultra-Clean & Modern)
+        ═══════════════════════════════════════════════════════ */}
+        <section className="relative bg-gradient-to-b from-[#fff9f0] via-white to-white border-b border-slate-100 pt-10 pb-16 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-5xl mx-auto space-y-8">
+            {/* Header copy */}
+            <div className="text-center max-w-3xl mx-auto space-y-4">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-[#FF9933]/30 text-[#c75e0a] text-xs font-black shadow-xs">
+                <ShieldCheck className="w-4 h-4 text-[#FF9933]" />
+                <span>India&apos;s Direct Land &amp; Plot Portal • 0% Broker Commission</span>
               </div>
-              <h2 className="text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">
-                Land worth exploring
-              </h2>
-              <p className="mt-3 max-w-lg text-base leading-7 text-slate-600">
-                Compare available listings and decide which properties you want
-                to investigate further.
+
+              <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-slate-950 tracking-tight leading-[1.15]">
+                Direct Land &amp; Agricultural Plots Across India
+              </h1>
+
+              <p className="text-sm sm:text-base text-slate-600 font-medium max-w-2xl mx-auto leading-relaxed">
+                India&apos;s direct peer-to-peer land marketplace. Connect directly with genuine landowners with zero broker commissions and transparent document disclosure.
               </p>
             </div>
+
+            {/* ── Main Unified Capsule Omnibar (Matching Magicbricks Screenshot) ── */}
+            <div className="w-full max-w-4xl mx-auto space-y-4">
+              <div className="relative bg-white rounded-3xl sm:rounded-full border border-slate-200/90 shadow-[0_12px_35px_rgba(0,0,0,0.08)] p-2 sm:p-2.5 transition-all focus-within:border-[#FF9933]/50 focus-within:shadow-[0_16px_40px_rgba(255,153,51,0.12)]">
+                <form
+                  onSubmit={handleSearchSubmit}
+                  className="flex flex-col sm:flex-row items-stretch sm:items-center divide-y sm:divide-y-0 sm:divide-x divide-slate-100 gap-2 sm:gap-0"
+                >
+                  {/* Segment 1: Location Input */}
+                  <div className="flex-1 flex items-center px-4 py-2 sm:py-1">
+                    <MapPin className="w-4 h-4 text-[#FF9933] shrink-0 mr-2.5" />
+                    <input
+                      type="text"
+                      value={searchLocation}
+                      onChange={(e) => setSearchLocation(e.target.value)}
+                      placeholder="Enter City, Locality, or Project e.g. Kokapet"
+                      className="w-full bg-transparent text-xs sm:text-sm font-semibold text-slate-900 placeholder:text-slate-400 focus:outline-none"
+                    />
+                  </div>
+
+                  {/* Segment 2: Property / Land Type Dropdown with Popover */}
+                  <div ref={landTypeRef} className="relative px-4 py-2 sm:py-1">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setLandTypePopoverOpen(!landTypePopoverOpen);
+                        setBudgetPopoverOpen(false);
+                      }}
+                      className="w-full flex items-center justify-between sm:justify-start gap-2 text-left cursor-pointer select-none"
+                    >
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <Home className="w-4 h-4 text-[#FF9933] shrink-0" />
+                        <span className="text-xs sm:text-sm font-extrabold text-slate-800 truncate max-w-[150px]">
+                          {landTypeTriggerText}
+                        </span>
+                      </div>
+                      <ChevronDown
+                        className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${landTypePopoverOpen ? 'rotate-180 text-[#FF9933]' : ''
+                          }`}
+                      />
+                    </button>
+
+                    {/* Land Type Popover (Directly matching Screenshot 2) */}
+                    {landTypePopoverOpen && (
+                      <div className="absolute left-0 sm:left-auto sm:right-0 top-[calc(100%+14px)] z-50 w-[320px] sm:w-[390px] p-4 sm:p-5 rounded-3xl bg-white border border-slate-200 shadow-[0_20px_50px_rgba(0,0,0,0.15)] animate-in fade-in slide-in-from-top-2 duration-150 space-y-3">
+                        {/* 1. Residential (Expanded by default) */}
+                        <div className="space-y-2">
+                          <button
+                            type="button"
+                            onClick={() => toggleCategory('residential')}
+                            className="w-full flex items-center justify-between py-1 text-[11px] font-black uppercase tracking-wider text-slate-600 hover:text-slate-900 cursor-pointer select-none"
+                          >
+                            <div className="flex items-center gap-2">
+                              <span>Residential</span>
+                              {HERO_LAND_TYPES.filter(
+                                (t) => t.category === 'Residential' && selectedLandTypes.includes(t.id)
+                              ).length > 0 && (
+                                  <span className="px-1.5 py-0.5 rounded-full bg-[#fff1dc] text-[#c75e0a] text-[10px] font-bold">
+                                    {
+                                      HERO_LAND_TYPES.filter(
+                                        (t) => t.category === 'Residential' && selectedLandTypes.includes(t.id)
+                                      ).length
+                                    }
+                                  </span>
+                                )}
+                            </div>
+                            <ChevronDown
+                              className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${expandedCategories.residential ? 'rotate-180 text-[#FF9933]' : ''
+                                }`}
+                            />
+                          </button>
+
+                          {expandedCategories.residential && (
+                            <div className="space-y-2.5 pt-1 animate-in fade-in duration-150">
+                              <div className="flex flex-wrap gap-1.5">
+                                {HERO_LAND_TYPES.filter(
+                                  (t) => t.category === 'Residential'
+                                ).map((t) => {
+                                  const isSelected = selectedLandTypes.includes(t.id);
+                                  return (
+                                    <button
+                                      key={t.id}
+                                      type="button"
+                                      onClick={() => handleToggleLandType(t.id)}
+                                      className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer border ${isSelected
+                                          ? 'bg-[#fff1dc] text-[#c75e0a] border-[#FF9933] shadow-2xs ring-1 ring-[#FF9933]/30'
+                                          : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                                        }`}
+                                    >
+                                      {t.label}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+
+                              {/* BHK Selection Row when Flat or House/Villa is selected (Directly matching Screenshot 2) */}
+                              {(selectedLandTypes.includes('FLAT') ||
+                                selectedLandTypes.includes('HOUSE_VILLA')) && (
+                                  <div className="pt-2 border-t border-dashed border-slate-100 animate-in fade-in slide-in-from-top-1 duration-150">
+                                    <div className="flex flex-wrap gap-1.5">
+                                      {BHK_OPTIONS.map((bhk) => {
+                                        const isBhkSelected = selectedBhks.includes(bhk);
+                                        return (
+                                          <button
+                                            key={bhk}
+                                            type="button"
+                                            onClick={() => handleToggleBhk(bhk)}
+                                            className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer border ${isBhkSelected
+                                                ? 'bg-[#fff1dc] text-[#c75e0a] border-[#FF9933] shadow-2xs ring-1 ring-[#FF9933]/30'
+                                                : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                                              }`}
+                                          >
+                                            {bhk}
+                                          </button>
+                                        );
+                                      })}
+                                    </div>
+                                  </div>
+                                )}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* 2. Commercial (Collapsed by default) */}
+                        <div className="space-y-2 pt-2 border-t border-slate-100">
+                          <button
+                            type="button"
+                            onClick={() => toggleCategory('commercial')}
+                            className="w-full flex items-center justify-between py-1 text-[11px] font-black uppercase tracking-wider text-slate-600 hover:text-slate-900 cursor-pointer select-none"
+                          >
+                            <div className="flex items-center gap-2">
+                              <span>Commercial</span>
+                              {HERO_LAND_TYPES.filter(
+                                (t) => t.category === 'Commercial' && selectedLandTypes.includes(t.id)
+                              ).length > 0 && (
+                                  <span className="px-1.5 py-0.5 rounded-full bg-[#fff1dc] text-[#c75e0a] text-[10px] font-bold">
+                                    {
+                                      HERO_LAND_TYPES.filter(
+                                        (t) => t.category === 'Commercial' && selectedLandTypes.includes(t.id)
+                                      ).length
+                                    }
+                                  </span>
+                                )}
+                            </div>
+                            <ChevronDown
+                              className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${expandedCategories.commercial ? 'rotate-180 text-[#FF9933]' : ''
+                                }`}
+                            />
+                          </button>
+
+                          {expandedCategories.commercial && (
+                            <div className="flex flex-wrap gap-1.5 pt-1 animate-in fade-in duration-150">
+                              {HERO_LAND_TYPES.filter(
+                                (t) => t.category === 'Commercial'
+                              ).map((t) => {
+                                const isSelected = selectedLandTypes.includes(t.id);
+                                return (
+                                  <button
+                                    key={t.id}
+                                    type="button"
+                                    onClick={() => handleToggleLandType(t.id)}
+                                    className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer border ${isSelected
+                                        ? 'bg-[#fff1dc] text-[#c75e0a] border-[#FF9933] shadow-2xs ring-1 ring-[#FF9933]/30'
+                                        : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                                      }`}
+                                  >
+                                    {t.label}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* 3. Other Property Types (Collapsed by default) */}
+                        <div className="space-y-2 pt-2 border-t border-slate-100">
+                          <button
+                            type="button"
+                            onClick={() => toggleCategory('other')}
+                            className="w-full flex items-center justify-between py-1 text-[11px] font-black uppercase tracking-wider text-slate-600 hover:text-slate-900 cursor-pointer select-none"
+                          >
+                            <div className="flex items-center gap-2">
+                              <span>Other Property Types</span>
+                              {HERO_LAND_TYPES.filter(
+                                (t) => t.category === 'Other Property Types' && selectedLandTypes.includes(t.id)
+                              ).length > 0 && (
+                                  <span className="px-1.5 py-0.5 rounded-full bg-[#fff1dc] text-[#c75e0a] text-[10px] font-bold">
+                                    {
+                                      HERO_LAND_TYPES.filter(
+                                        (t) => t.category === 'Other Property Types' && selectedLandTypes.includes(t.id)
+                                      ).length
+                                    }
+                                  </span>
+                                )}
+                            </div>
+                            <ChevronDown
+                              className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${expandedCategories.other ? 'rotate-180 text-[#FF9933]' : ''
+                                }`}
+                            />
+                          </button>
+
+                          {expandedCategories.other && (
+                            <div className="flex flex-wrap gap-1.5 pt-1 animate-in fade-in duration-150">
+                              {HERO_LAND_TYPES.filter(
+                                (t) => t.category === 'Other Property Types'
+                              ).map((t) => {
+                                const isSelected = selectedLandTypes.includes(t.id);
+                                return (
+                                  <button
+                                    key={t.id}
+                                    type="button"
+                                    onClick={() => handleToggleLandType(t.id)}
+                                    className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer border ${isSelected
+                                        ? 'bg-[#fff1dc] text-[#c75e0a] border-[#FF9933] shadow-2xs ring-1 ring-[#FF9933]/30'
+                                        : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                                      }`}
+                                  >
+                                    {t.label}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Segment 3: Budget Dropdown with Popover */}
+                  <div ref={budgetRef} className="relative px-4 py-2 sm:py-1">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setBudgetPopoverOpen(!budgetPopoverOpen);
+                        setLandTypePopoverOpen(false);
+                      }}
+                      className="w-full flex items-center justify-between sm:justify-start gap-2 text-left cursor-pointer select-none"
+                    >
+                      <div className="flex items-center gap-1 min-w-0">
+                        <span className="w-5 h-5 rounded-full bg-[#fff1dc] text-[#c75e0a] flex items-center justify-center text-xs font-black shrink-0">
+                          ₹
+                        </span>
+                        <span className="text-xs sm:text-sm font-extrabold text-slate-800 truncate max-w-[130px]">
+                          {selectedBudget.label}
+                        </span>
+                      </div>
+                      <ChevronDown
+                        className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${budgetPopoverOpen ? 'rotate-180 text-[#FF9933]' : ''
+                          }`}
+                      />
+                    </button>
+
+                    {/* Budget Popover */}
+                    {budgetPopoverOpen && (
+                      <div className="absolute left-0 sm:left-auto sm:right-0 top-[calc(100%+14px)] z-50 w-[280px] sm:w-[320px] p-4 rounded-3xl bg-white border border-slate-200 shadow-[0_20px_50px_rgba(0,0,0,0.15)] animate-in fade-in slide-in-from-top-2 duration-150 space-y-3">
+                        <div className="text-[11px] font-black uppercase tracking-wider text-slate-400">
+                          Select Budget Range
+                        </div>
+
+                        <div className="space-y-1.5">
+                          {BUDGET_PRESETS.map((preset, idx) => {
+                            const isSelected = selectedBudgetIndex === idx;
+                            return (
+                              <button
+                                key={preset.label}
+                                type="button"
+                                onClick={() => {
+                                  setSelectedBudgetIndex(idx);
+                                  setBudgetPopoverOpen(false);
+                                }}
+                                className={`w-full flex items-center justify-between p-2.5 rounded-xl text-left text-xs font-bold transition-colors cursor-pointer ${isSelected
+                                    ? 'bg-[#fff1dc] text-[#c75e0a] border border-[#FF9933]/40'
+                                    : 'hover:bg-slate-50 text-slate-700'
+                                  }`}
+                              >
+                                <span>{preset.label}</span>
+                                {isSelected && (
+                                  <Check className="w-3.5 h-3.5 text-[#FF9933] shrink-0" />
+                                )}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Segment 4: Search Button */}
+                  <div className="px-2 py-1">
+                    <button
+                      type="submit"
+                      className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3 rounded-2xl sm:rounded-full bg-[#FF9933] hover:bg-[#f07d12] text-white text-sm font-black shadow-md hover:shadow-lg transition-all cursor-pointer shrink-0"
+                    >
+                      <Search className="w-4 h-4" />
+                      <span>Search</span>
+                    </button>
+                  </div>
+                </form>
+              </div>
+
+              {/* ── Popular Search Chips & Verified Toggle Beneath ── */}
+              <div className="flex flex-wrap items-center justify-between gap-3 px-2 text-xs">
+                <label className="flex items-center gap-2 text-slate-700 font-semibold cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={verifiedOnly}
+                    onChange={(e) => setVerifiedOnly(e.target.checked)}
+                    className="w-4 h-4 rounded accent-[#FF9933] border-slate-300"
+                  />
+                  <span className="flex items-center gap-1.5">
+                    <Sparkles className="w-4 h-4 text-[#FF9933]" />
+                    <span className="text-[11px] sm:text-xs font-bold text-slate-700">
+                      Direct Landowner Listings Only (0% Brokerage)
+                    </span>
+                  </span>
+                </label>
+
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className="text-slate-400 font-bold text-[11px]">Popular:</span>
+                  {POPULAR_SEARCH_TAGS.map((tag) => (
+                    <Link
+                      key={tag.label}
+                      href={`/buy?query=${encodeURIComponent(tag.query)}`}
+                      className="px-3 py-1 rounded-full bg-white hover:bg-[#fff1dc] hover:text-[#c75e0a] text-slate-600 text-[11px] font-bold border border-slate-200/80 shadow-2xs transition-colors"
+                    >
+                      {tag.label}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ═══════════════════════════════════════════════════════
+            2. FOUR VALUE PILLARS (Clean Minimalist White Cards)
+        ═══════════════════════════════════════════════════════ */}
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            <div className="p-6 rounded-3xl bg-white border border-slate-200 shadow-2xs space-y-2.5">
+              <div className="w-11 h-11 rounded-2xl bg-[#fff1dc] text-[#c75e0a] flex items-center justify-center font-bold">
+                <HeartHandshake className="w-5 h-5 text-[#FF9933]" />
+              </div>
+              <h3 className="text-sm font-extrabold text-slate-950">0% Broker Commission</h3>
+              <p className="text-xs text-slate-500 leading-relaxed">
+                Deal directly with genuine landowners. No middleman cuts, broker markups, or success commissions.
+              </p>
+            </div>
+
+            <div className="p-6 rounded-3xl bg-white border border-slate-200 shadow-2xs space-y-2.5">
+              <div className="w-11 h-11 rounded-2xl bg-[#fff1dc] text-[#c75e0a] flex items-center justify-center font-bold">
+                <Scale className="w-5 h-5 text-[#FF9933]" />
+              </div>
+              <h3 className="text-sm font-extrabold text-slate-950">Buyer Due Diligence Guide</h3>
+              <p className="text-xs text-slate-500 leading-relaxed">
+                Inspect 30-year sale deed chains, EC Form 15, Pahani/7-12 extracts, and FMB sketches before finalizing deals.
+              </p>
+            </div>
+
+            <div className="p-6 rounded-3xl bg-white border border-slate-200 shadow-2xs space-y-2.5">
+              <div className="w-11 h-11 rounded-2xl bg-[#fff1dc] text-[#c75e0a] flex items-center justify-center font-bold">
+                <Phone className="w-5 h-5 text-[#FF9933]" />
+              </div>
+              <h3 className="text-sm font-extrabold text-slate-950">Direct &quot;Call Owner&quot;</h3>
+              <p className="text-xs text-slate-500 leading-relaxed">
+                Call genuine landowners directly. Inquiries are safely logged in your dashboard for total transparency.
+              </p>
+            </div>
+
+            <div className="p-6 rounded-3xl bg-white border border-slate-200 shadow-2xs space-y-2.5">
+              <div className="w-11 h-11 rounded-2xl bg-[#fff1dc] text-[#c75e0a] flex items-center justify-center font-bold">
+                <Tag className="w-5 h-5 text-[#FF9933]" />
+              </div>
+              <h3 className="text-sm font-extrabold text-slate-950">Flat ₹{publicListingFee} for {listingDurationDays} Days</h3>
+              <p className="text-xs text-slate-500 leading-relaxed">
+                Transparent and affordable classifieds publishing fee for sellers with zero commission upon sale.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* ═══════════════════════════════════════════════════════
+            3. REAL FEATURED PROPERTIES SECTION (Direct Classifieds)
+        ═══════════════════════════════════════════════════════ */}
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <div className="flex items-center gap-2">
+                <h2 className="text-xl sm:text-2xl font-black text-slate-950 tracking-tight">
+                  Featured Land Classifieds
+                </h2>
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#fff1dc] text-[#c75e0a] text-[10px] font-bold">
+                  <Sparkles className="w-3.5 h-3.5 text-[#FF9933]" />
+                  <span>Direct Classifieds • 0% Brokerage</span>
+                </span>
+              </div>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Real published properties from direct landowners with direct phone contact
+              </p>
+            </div>
+
             <Link
               href="/buy"
-              className="inline-flex items-center gap-2 text-sm font-bold text-emerald-700 transition hover:text-emerald-800"
+              className="inline-flex items-center gap-1 text-xs font-bold text-[#c75e0a] hover:text-[#FF9933] hover:underline"
             >
-              View all listings
-              <ArrowRight className="h-4 w-4" />
+              <span>View All Lands</span>
+              <ChevronRight className="w-4 h-4" />
             </Link>
           </div>
 
           {loading ? (
-            <PropertySkeletonGrid count={3} />
-          ) : featuredProperties.length > 0 ? (
-            <div className="grid grid-cols-1 gap-7 md:grid-cols-3">
-              {featuredProperties.map((property) => (
-                <PropertyCard key={property._id} property={property} />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+              {[1, 2, 3, 4].map((n) => (
+                <div
+                  key={n}
+                  className="rounded-3xl border border-slate-200 bg-white p-4 space-y-3 animate-pulse"
+                >
+                  <div className="h-44 bg-slate-100 rounded-2xl" />
+                  <div className="h-4 bg-slate-100 rounded w-3/4" />
+                  <div className="h-3 bg-slate-100 rounded w-1/2" />
+                  <div className="h-9 bg-slate-100 rounded-xl" />
+                </div>
               ))}
             </div>
-          ) : (
-            <EmptyPropertiesState />
-          )}
-        </div>
-      </section>
-
-      {/* ═══════════════════════════════════════════════════════
-          WHY BHOOMIMITRA
-      ═══════════════════════════════════════════════════════ */}
-      <section className="border-y border-emerald-900/5 bg-white">
-        <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 sm:py-24 lg:px-8">
-          <div className="mx-auto max-w-2xl text-center">
-            <span className="text-xs font-bold uppercase tracking-wider text-emerald-700">
-              Why use BhoomiMitra?
-            </span>
-            <h2 className="mt-3 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">
-              Built around a simpler land search
-            </h2>
-            <p className="mt-4 text-base leading-7 text-slate-600">
-              Discover land, understand the listing, and connect with the seller
-              without unnecessary friction.
-            </p>
-          </div>
-
-          <div className="mt-14 grid grid-cols-1 gap-6 md:grid-cols-3">
-            <FeatureCard
-              icon={<Filter className="h-6 w-6" />}
-              title="Search the way you need"
-              description="Filter by location, land type, area, price and other available listing information."
-            />
-            <FeatureCard
-              icon={<FileCheck2 className="h-6 w-6" />}
-              title="Know the listing status"
-              description="Verified listings go through an administrative document review before receiving the verified badge."
-            />
-            <FeatureCard
-              icon={<WalletCards className="h-6 w-6" />}
-              title="Direct seller connection"
-              description="Send an inquiry through BhoomiMitra instead of going through a traditional brokerage process."
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* ═══════════════════════════════════════════════════════
-          RECENT LISTINGS
-      ═══════════════════════════════════════════════════════ */}
-      {recentProperties.length > 0 && (
-        <section className="bg-[#f8faf9]">
-          <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 sm:py-24 lg:px-8">
-            <div className="mb-10 flex items-end justify-between">
-              <div>
-                <span className="text-xs font-bold uppercase tracking-wider text-emerald-700">
-                  Recently listed
-                </span>
-                <h2 className="mt-3 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">
-                  New land listings
-                </h2>
-                <p className="mt-3 text-base text-slate-600">
-                  Recently added properties on the marketplace.
+          ) : properties.length === 0 ? (
+            /* Clean, elegant real empty state without any fake/demo cards */
+            <div className="p-10 sm:p-14 text-center bg-gradient-to-b from-[#fffbf5] to-white rounded-3xl border border-dashed border-[#FF9933]/40 space-y-4 max-w-2xl mx-auto">
+              <div className="w-14 h-14 rounded-2xl bg-white text-[#FF9933] border border-[#FF9933]/30 shadow-xs flex items-center justify-center mx-auto">
+                <LandPlot className="w-7 h-7" />
+              </div>
+              <div className="space-y-1.5">
+                <h3 className="text-base font-extrabold text-slate-900">
+                  No Active Land Listings Published Yet
+                </h3>
+                <p className="text-xs text-slate-500 max-w-md mx-auto leading-relaxed">
+                  Be the first landowner to list your plot or agricultural land. Reach thousands of serious buyers across India with zero brokerage.
                 </p>
               </div>
-              <Link
-                href="/buy"
-                className="hidden items-center gap-2 text-sm font-bold text-slate-800 transition hover:text-emerald-700 sm:inline-flex"
-              >
-                Explore marketplace
-                <ArrowRight className="h-4 w-4" />
-              </Link>
+              <div className="pt-2">
+                <Link
+                  href="/sell"
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-[#FF9933] text-white text-xs font-extrabold shadow-md hover:bg-[#f07d12] transition-colors"
+                >
+                  <span>Post Your Land Listing — Flat ₹{publicListingFee} for {listingDurationDays} Days</span>
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
             </div>
-
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              {recentProperties.map((property) => (
-                <PropertyCard key={property._id} property={property} />
+          ) : (
+            <div className="flex flex-col gap-5 sm:gap-6">
+              {properties.map((property) => (
+                <PropertyCard
+                  key={property._id}
+                  property={property}
+                  onRequireLogin={() => setAuthModalOpen(true)}
+                  onCallSeller={() => handleCallSellerClick(property)}
+                />
               ))}
+            </div>
+          )}
+        </section>
+
+        {/* ═══════════════════════════════════════════════════════
+            4. LAND BUYER'S DUE DILIGENCE CHECKLIST
+        ═══════════════════════════════════════════════════════ */}
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <DueDiligenceChecklist />
+        </section>
+
+        {/* ═══════════════════════════════════════════════════════
+            5. INTERACTIVE INDIAN LAND AREA CONVERTER
+        ═══════════════════════════════════════════════════════ */}
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <LandAreaConverter />
+        </section>
+
+        {/* ═══════════════════════════════════════════════════════
+            5. "SELL YOUR LAND" HIGH-CONVERSION BANNER
+        ═══════════════════════════════════════════════════════ */}
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-stone-950 via-[#7f3e10] to-[#c75e0a] text-white p-8 sm:p-12 shadow-xl border border-[#FF9933]/30">
+            <div className="pointer-events-none absolute inset-0 opacity-10 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:16px_16px]" />
+
+            <div className="relative z-10 max-w-2xl space-y-4">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 text-[#ffe1b8] text-[11px] font-bold border border-white/20">
+                <Sparkles className="w-3.5 h-3.5 text-[#FF9933]" />
+                <span>For Direct Land Owners</span>
+              </div>
+
+              <h2 className="text-2xl sm:text-4xl font-black tracking-tight leading-tight">
+                Are You a Landowner? Sell Your Land in 3 Simple Steps
+              </h2>
+
+              <p className="text-xs sm:text-sm text-slate-200 leading-relaxed">
+                Publish your land parcel for a flat advertisement fee of just{' '}
+                <strong className="text-[#FF9933] font-extrabold">
+                  ₹{publicListingFee} for {listingDurationDays} Days
+                </strong>
+                . Zero broker commission upon sale. Reach thousands of serious land buyers across India.
+              </p>
+
+              {/* 3 Step indicators */}
+              <div className="pt-2 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                <div className="flex items-center gap-2 p-3 rounded-2xl bg-white/10 border border-white/15">
+                  <div className="w-6 h-6 rounded-full bg-[#FF9933] text-white font-black text-xs flex items-center justify-center shrink-0">
+                    1
+                  </div>
+                  <span className="font-semibold text-white">Enter Land Extent &amp; Price</span>
+                </div>
+
+                <div className="flex items-center gap-2 p-3 rounded-2xl bg-white/10 border border-white/15">
+                  <div className="w-6 h-6 rounded-full bg-[#FF9933] text-white font-black text-xs flex items-center justify-center shrink-0">
+                    2
+                  </div>
+                  <span className="font-semibold text-white">Upload Survey Proofs (Pahani / 7-12)</span>
+                </div>
+
+                <div className="flex items-center gap-2 p-3 rounded-2xl bg-white/10 border border-white/15">
+                  <div className="w-6 h-6 rounded-full bg-[#FF9933] text-white font-black text-xs flex items-center justify-center shrink-0">
+                    3
+                  </div>
+                  <span className="font-semibold text-white">Pay ₹{publicListingFee} &amp; Go Live</span>
+                </div>
+              </div>
+
+              <div className="pt-4 flex flex-wrap items-center gap-4">
+                <Link
+                  href="/sell"
+                  className="inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-[#FF9933] hover:bg-[#f07d12] text-white text-xs font-black shadow-lg transition-all hover:shadow-[#FF9933]/30 cursor-pointer"
+                >
+                  <span>Post Your Land Listing Now</span>
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+
+                <Link
+                  href="/listing-rules"
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-white hover:text-[#ffe1b8] hover:underline"
+                >
+                  <span>Read Listing Guidelines</span>
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </Link>
+              </div>
             </div>
           </div>
         </section>
-      )}
 
-      {/* ═══════════════════════════════════════════════════════
-          HOW IT WORKS
-      ═══════════════════════════════════════════════════════ */}
-      <section className="bg-white">
-        <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 sm:py-24 lg:px-8">
-          <div className="mx-auto max-w-2xl text-center">
-            <span className="text-xs font-bold uppercase tracking-wider text-emerald-700">
-              How it works
-            </span>
-            <h2 className="mt-3 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">
-              From search to seller
+        {/* ═══════════════════════════════════════════════════════
+            6. LAND BUYER'S DUE DILIGENCE & DOCUMENT GUIDE
+        ═══════════════════════════════════════════════════════ */}
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-2xl mx-auto mb-8 space-y-2">
+            <h2 className="text-xl sm:text-2xl font-black text-slate-950 tracking-tight">
+              Land Buyer&apos;s Due Diligence Checklist
             </h2>
-            <p className="mt-4 text-base leading-7 text-slate-600">
-              A simple process for both sides of the marketplace.
+            <p className="text-xs text-slate-500">
+              Essential Indian land documents every buyer must inspect before entering transactions
             </p>
           </div>
 
-          <div className="mt-14 grid grid-cols-1 gap-8 lg:grid-cols-2">
-            {/* Buyer */}
-            <div className="rounded-3xl border border-slate-200/80 bg-[#f8faf9] p-8 sm:p-10">
-              <div className="mb-8 flex items-center gap-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-900 text-white">
-                  <Search className="h-5 w-5" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-black text-slate-950">
-                    Looking for land?
-                  </h3>
-                  <p className="mt-0.5 text-sm text-slate-500">
-                    Find and evaluate listings
-                  </p>
-                </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            <div className="p-6 rounded-3xl bg-white border border-slate-200 shadow-2xs space-y-3">
+              <div className="w-10 h-10 rounded-2xl bg-[#fff1dc] text-[#c75e0a] flex items-center justify-center font-black text-sm">
+                1
               </div>
-
-              <div className="space-y-6">
-                <Step
-                  number="01"
-                  title="Search"
-                  description="Choose your location, land type, budget and area."
-                />
-                <Step
-                  number="02"
-                  title="Compare listings"
-                  description="Review price, area, location, photos and verification status."
-                />
-                <Step
-                  number="03"
-                  title="Open the property"
-                  description="Sign in when required to access protected property details."
-                />
-                <Step
-                  number="04"
-                  title="Contact the seller"
-                  description="Send an inquiry directly through BhoomiMitra."
-                />
-              </div>
-
-              <Link
-                href="/buy"
-                className="mt-10 inline-flex items-center gap-2 rounded-xl bg-slate-900 px-6 py-3.5 text-sm font-bold text-white transition hover:bg-slate-800"
-              >
-                Start finding land
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </div>
-
-            {/* Seller */}
-            <div className="rounded-3xl border border-emerald-200/60 bg-emerald-50/50 p-8 sm:p-10">
-              <div className="mb-8 flex items-center gap-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-600 text-white">
-                  <LandPlot className="h-5 w-5" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-black text-slate-950">
-                    Want to sell land?
-                  </h3>
-                  <p className="mt-0.5 text-sm text-slate-500">
-                    Create a listing and reach buyers
-                  </p>
-                </div>
-              </div>
-
-              <div className="space-y-6">
-                <Step
-                  number="01"
-                  title="Sign in"
-                  description="Create or access your BhoomiMitra account with Google."
-                />
-                <Step
-                  number="02"
-                  title="Verify your phone"
-                  description="Complete phone OTP verification when required."
-                />
-                <Step
-                  number="03"
-                  title="Create your listing"
-                  description="Add land details, asking price, photos and a Google Maps share link."
-                />
-                <Step
-                  number="04"
-                  title="Pay and submit"
-                  description="Pay the flat listing publishing fee and submit for the platform’s verification workflow."
-                />
-              </div>
-
-              <Link
-                href="/sell"
-                className="mt-10 inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-6 py-3.5 text-sm font-bold text-white transition hover:bg-emerald-500"
-              >
-                List your land
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ═══════════════════════════════════════════════════════
-          SELLER PRICING
-      ═══════════════════════════════════════════════════════ */}
-      <section className="bg-[#0c1f17] text-white">
-        <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 sm:py-24 lg:px-8">
-          <div className="grid items-center gap-14 lg:grid-cols-2 lg:gap-16">
-            <div>
-              <span className="inline-flex items-center gap-2 rounded-full border border-emerald-400/25 bg-emerald-500/10 px-3.5 py-1.5 text-xs font-bold text-emerald-300">
-                <WalletCards className="h-3.5 w-3.5" />
-                Seller pricing
-              </span>
-
-              <h2 className="mt-6 text-3xl font-black tracking-tight sm:text-4xl">
-                A simple listing fee.
-                <br />
-                <span className="text-emerald-400">
-                  No percentage of your land price.
-                </span>
-              </h2>
-
-              <p className="mt-6 max-w-lg text-base leading-7 text-emerald-50/70">
-                BhoomiMitra charges a flat listing publishing fee for a{' '}
-                {listingDurationDays}-day listing subscription. Your land’s
-                asking price remains completely under your control.
+              <h3 className="text-xs font-extrabold text-slate-950">
+                Registered Sale Deed &amp; 30-Year Chain
+              </h3>
+              <p className="text-[11px] text-slate-500 leading-relaxed">
+                Inspect the parent document history establishing an unbroken 30-year flow of ownership from original titleholders.
               </p>
-
-              <div className="mt-8 space-y-4">
-                <Bullet text="You set your own asking price." />
-                <Bullet text="You can mark the price as negotiable." />
-                <Bullet
-                  text={`Transparent flat listing fee: ₹${publicListingFee} for ${listingDurationDays} days.`}
-                />
-                <Bullet text="Renew your listing when the publishing period ends." />
-              </div>
             </div>
 
-            <div className="rounded-3xl border border-white/10 bg-white/[0.06] p-8 shadow-2xl sm:p-10">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                    Universal pricing
-                  </p>
-                  <h3 className="mt-1 text-xl font-bold text-white">
-                    Flat publishing fee
-                  </h3>
-                </div>
-                <span className="rounded-lg bg-emerald-400/10 px-3.5 py-1.5 text-xs font-bold text-emerald-300">
-                  ₹{publicListingFee} / {listingDurationDays} days
-                </span>
+            <div className="p-6 rounded-3xl bg-white border border-slate-200 shadow-2xs space-y-3">
+              <div className="w-10 h-10 rounded-2xl bg-[#fff1dc] text-[#c75e0a] flex items-center justify-center font-black text-sm">
+                2
               </div>
+              <h3 className="text-xs font-extrabold text-slate-950">
+                Encumbrance Certificate (EC Form 15)
+              </h3>
+              <p className="text-[11px] text-slate-500 leading-relaxed">
+                Issued by the Sub-Registrar Office verifying zero existing mortgages, legal disputes, or third-party liabilities.
+              </p>
+            </div>
 
-              <div className="mt-8 rounded-2xl border border-white/10 bg-black/25 p-7">
-                <div className="flex items-baseline justify-between">
-                  <span className="text-sm font-semibold text-slate-300">
-                    {listingDurationDays}-day listing pass
-                  </span>
-                  <span className="text-4xl font-black text-emerald-400">
-                    ₹{publicListingFee.toLocaleString('en-IN')}
-                  </span>
-                </div>
-
-                <div className="mt-5 space-y-3 border-t border-white/10 pt-5 text-sm text-slate-400">
-                  <div className="flex items-center gap-2.5">
-                    <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-400" />
-                    Unlimited plot size & any price tier
-                  </div>
-                  <div className="flex items-center gap-2.5">
-                    <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-400" />
-                    Direct inquiries from verified buyers
-                  </div>
-                  <div className="flex items-center gap-2.5">
-                    <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-400" />
-                    Human-verified title & survey badge option
-                  </div>
-                </div>
+            <div className="p-6 rounded-3xl bg-white border border-slate-200 shadow-2xs space-y-3">
+              <div className="w-10 h-10 rounded-2xl bg-[#fff1dc] text-[#c75e0a] flex items-center justify-center font-black text-sm">
+                3
               </div>
+              <h3 className="text-xs font-extrabold text-slate-950">
+                Pahani / 7-12 Extract / ROR 1-B
+              </h3>
+              <p className="text-[11px] text-slate-500 leading-relaxed">
+                Official Revenue Department record confirming agricultural possession, extent, soil type, and crop status.
+              </p>
+            </div>
 
-              <Link
-                href="/sell"
-                className="mt-7 flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 py-4 text-sm font-bold text-white transition hover:bg-emerald-500"
-              >
-                Start listing
-                <ArrowRight className="h-4 w-4" />
-              </Link>
+            <div className="p-6 rounded-3xl bg-white border border-slate-200 shadow-2xs space-y-3">
+              <div className="w-10 h-10 rounded-2xl bg-[#fff1dc] text-[#c75e0a] flex items-center justify-center font-black text-sm">
+                4
+              </div>
+              <h3 className="text-xs font-extrabold text-slate-950">
+                Survey Number &amp; FMB Map Sketch
+              </h3>
+              <p className="text-[11px] text-slate-500 leading-relaxed">
+                Field Measurement Book (FMB) diagram verifying physical boundary stone coordinates and road access easements.
+              </p>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* ═══════════════════════════════════════════════════════
-          VERIFICATION / TRUST
-      ═══════════════════════════════════════════════════════ */}
-      <section className="bg-[#f8faf9]">
-        <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 sm:py-24 lg:px-8">
-          <div className="rounded-3xl border border-slate-200/80 bg-white p-8 shadow-sm sm:p-12">
-            <div className="grid gap-12 lg:grid-cols-[1fr_1.5fr] lg:items-center">
-              <div>
-                <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-700">
-                  <ShieldCheck className="h-4 w-4" />
-                  Verification
-                </div>
-                <h2 className="mt-4 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">
-                  Know what has been reviewed
-                </h2>
-                <p className="mt-5 text-base leading-7 text-slate-600">
-                  BhoomiMitra separates listing payment from property
-                  verification. A paid listing does not automatically mean the
-                  property is verified.
-                </p>
+        {/* ═══════════════════════════════════════════════════════
+            7. MULTI-COLUMN SEO DIRECTORY (Clean Real Routes)
+        ═══════════════════════════════════════════════════════ */}
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+          <div className="border-t border-slate-200 pt-10">
+            <h3 className="text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-6">
+              Explore Land &amp; Plots by State, Land Type &amp; Legal Guides
+            </h3>
+
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-6 text-xs">
+              <div className="space-y-2">
+                <div className="font-bold text-slate-900">Land by State</div>
+                <ul className="space-y-1.5 text-slate-500">
+                  <li>
+                    <Link href="/buy?state=Telangana" className="hover:text-[#FF9933]">
+                      Plots for Sale in Telangana
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/buy?state=Andhra+Pradesh" className="hover:text-[#FF9933]">
+                      Land in Andhra Pradesh
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/buy?state=Karnataka" className="hover:text-[#FF9933]">
+                      Farmland in Karnataka
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/buy?state=Maharashtra" className="hover:text-[#FF9933]">
+                      Agricultural Plots Maharashtra
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/buy?state=Tamil+Nadu" className="hover:text-[#FF9933]">
+                      Land for Sale in Tamil Nadu
+                    </Link>
+                  </li>
+                </ul>
               </div>
 
-              <div className="grid gap-5 sm:grid-cols-3">
-                <TrustCard
-                  title="Listing information"
-                  description="Review the information supplied by the seller."
-                />
-                <TrustCard
-                  title="Document review"
-                  description="Verified listings undergo an administrative review process."
-                />
-                <TrustCard
-                  title="Clear status"
-                  description="See whether a listing is verified, pending or unavailable."
-                />
+              <div className="space-y-2">
+                <div className="font-bold text-slate-900">Land by Category</div>
+                <ul className="space-y-1.5 text-slate-500">
+                  <li>
+                    <Link href="/buy?landType=AGRICULTURAL_LAND" className="hover:text-[#FF9933]">
+                      Agricultural Land for Sale
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/buy?landType=RESIDENTIAL_PLOT" className="hover:text-[#FF9933]">
+                      Gated Residential Layouts
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/buy?landType=COMMERCIAL_LAND" className="hover:text-[#FF9933]">
+                      Highway Commercial Land
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/buy?landType=FARM_HOUSE_LAND" className="hover:text-[#FF9933]">
+                      Weekend Farmhouse Plots
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/buy?landType=INDUSTRIAL_PLOT" className="hover:text-[#FF9933]">
+                      Industrial Land Parcels
+                    </Link>
+                  </li>
+                </ul>
+              </div>
+
+              <div className="space-y-2">
+                <div className="font-bold text-slate-900">Popular Corridors</div>
+                <ul className="space-y-1.5 text-slate-500">
+                  <li>
+                    <Link href="/buy?query=Kokapet" className="hover:text-[#FF9933]">
+                      Kokapet &amp; Neopolis Plots
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/buy?query=Shamshabad" className="hover:text-[#FF9933]">
+                      Shamshabad Airport Zone
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/buy?query=Moinabad" className="hover:text-[#FF9933]">
+                      Moinabad Farmlands
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/buy?query=Shankarpally" className="hover:text-[#FF9933]">
+                      Shankarpally Residential Plots
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/buy?query=Devanahalli" className="hover:text-[#FF9933]">
+                      Devanahalli Bengaluru Rural
+                    </Link>
+                  </li>
+                </ul>
+              </div>
+
+              <div className="space-y-2">
+                <div className="font-bold text-slate-900">Help &amp; Legal Guides</div>
+                <ul className="space-y-1.5 text-slate-500">
+                  <li>
+                    <Link href="/pricing" className="hover:text-[#FF9933]">
+                      Listing Pricing &amp; Plans
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/listing-rules" className="hover:text-[#FF9933]">
+                      Classifieds Publishing Rules
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/contact" className="hover:text-[#FF9933]">
+                      Grievance &amp; Customer Support
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/refund-policy" className="hover:text-[#FF9933]">
+                      Refund Policy
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/terms" className="hover:text-[#FF9933]">
+                      Terms of Service
+                    </Link>
+                  </li>
+                </ul>
               </div>
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* ═══════════════════════════════════════════════════════
-          FINAL CTA
-      ═══════════════════════════════════════════════════════ */}
-      <section className="bg-emerald-600">
-        <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-8 px-4 py-16 sm:flex-row sm:items-center sm:px-6 sm:py-20 lg:px-8">
-          <div>
-            <h2 className="text-3xl font-black tracking-tight text-white sm:text-4xl">
-              Looking for land?
-            </h2>
-            <p className="mt-3 max-w-xl text-base leading-7 text-emerald-50">
-              Start with the marketplace. Search by location, compare listings
-              and find properties that match what you need.
-            </p>
-          </div>
-          <Link
-            href="/buy"
-            className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-white px-8 py-4 text-base font-black text-emerald-700 shadow-sm transition hover:bg-emerald-50"
-          >
-            Find land
-            <ArrowRight className="h-5 w-5" />
-          </Link>
-        </div>
-      </section>
+        </section>
+      </main>
 
       <Footer />
-    </div>
-  );
-}
 
-/* ═══════════════════════════════════════════════════════════
-   SMALL UI COMPONENTS
-═══════════════════════════════════════════════════════════ */
+      {/* Call Seller Modal */}
+      <CallSellerModal
+        isOpen={callModalOpen}
+        onClose={() => {
+          setCallModalOpen(false);
+          setSelectedPropertyForCall(null);
+          setSellerCallData(null);
+        }}
+        sellerData={sellerCallData}
+        propertyTitle={selectedPropertyForCall?.title}
+      />
 
-function TrustPoint({
-  icon,
-  title,
-  description,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-}) {
-  return (
-    <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-5 backdrop-blur-sm">
-      <div className="flex items-start gap-4">
-        <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-400/15 text-emerald-300">
-          {icon}
-        </div>
-        <div>
-          <h3 className="text-base font-bold text-white">{title}</h3>
-          <p className="mt-1.5 text-sm leading-6 text-slate-400">{description}</p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function FeatureCard({
-  icon,
-  title,
-  description,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-}) {
-  return (
-    <div className="rounded-2xl border border-slate-200/80 bg-[#f8faf9] p-8 transition hover:-translate-y-1 hover:border-emerald-200 hover:shadow-lg">
-      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700">
-        {icon}
-      </div>
-      <h3 className="mt-6 text-lg font-bold text-slate-950">{title}</h3>
-      <p className="mt-3 text-base leading-7 text-slate-600">{description}</p>
-    </div>
-  );
-}
-
-function Step({
-  number,
-  title,
-  description,
-}: {
-  number: string;
-  title: string;
-  description: string;
-}) {
-  return (
-    <div className="flex gap-4">
-      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-xs font-black text-slate-700 shadow-sm ring-1 ring-slate-200">
-        {number}
-      </div>
-      <div>
-        <h4 className="text-base font-bold text-slate-950">{title}</h4>
-        <p className="mt-1 text-sm leading-6 text-slate-600">{description}</p>
-      </div>
-    </div>
-  );
-}
-
-function Bullet({ text }: { text: string }) {
-  return (
-    <div className="flex items-center gap-3 text-base text-emerald-50/80">
-      <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-400" />
-      <span>{text}</span>
-    </div>
-  );
-}
-
-function TrustCard({
-  title,
-  description,
-}: {
-  title: string;
-  description: string;
-}) {
-  return (
-    <div className="rounded-2xl bg-[#f8faf9] p-6">
-      <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
-        <CheckCircle2 className="h-5 w-5" />
-      </div>
-      <h3 className="text-base font-bold text-slate-950">{title}</h3>
-      <p className="mt-2 text-sm leading-6 text-slate-600">{description}</p>
-    </div>
-  );
-}
-
-function PropertySkeletonGrid({ count }: { count: number }) {
-  return (
-    <div className="grid grid-cols-1 gap-7 md:grid-cols-3">
-      {Array.from({ length: count }).map((_, index) => (
-        <div
-          key={index}
-          className="overflow-hidden rounded-2xl border border-slate-200 bg-white"
-        >
-          <div className="h-56 animate-pulse bg-slate-200" />
-          <div className="space-y-3 p-6">
-            <div className="h-5 w-3/4 animate-pulse rounded bg-slate-200" />
-            <div className="h-4 w-1/2 animate-pulse rounded bg-slate-200" />
-            <div className="h-4 w-2/3 animate-pulse rounded bg-slate-200" />
-            <div className="h-11 w-full animate-pulse rounded-xl bg-slate-200" />
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function EmptyPropertiesState() {
-  return (
-    <div className="rounded-3xl border border-dashed border-slate-300 bg-white px-8 py-20 text-center">
-      <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#f8faf9] text-slate-400 shadow-sm">
-        <LandPlot className="h-7 w-7" />
-      </div>
-      <h3 className="mt-6 text-xl font-bold text-slate-950">
-        No listings available yet
-      </h3>
-      <p className="mx-auto mt-3 max-w-md text-base leading-7 text-slate-500">
-        New land listings will appear here once properties are published on the
-        marketplace.
-      </p>
-      <Link
-        href="/sell"
-        className="mt-8 inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-6 py-3.5 text-sm font-bold text-white transition hover:bg-emerald-500"
-      >
-        List your land
-        <ArrowRight className="h-4 w-4" />
-      </Link>
+      {/* Authentication Modal */}
+      <AuthModal
+        isOpen={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
+      />
     </div>
   );
 }

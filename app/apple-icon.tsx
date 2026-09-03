@@ -11,19 +11,28 @@ export default function AppleIcon() {
     (
       <div
         style={{
-          fontSize: 80,
-          background: 'linear-gradient(135deg, #064e3b 0%, #047857 50%, #059669 100%)',
+          background: 'linear-gradient(135deg, #c75e0a 0%, #FF9933 50%, #ffae4d 100%)',
           width: '100%',
           height: '100%',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          borderRadius: 40,
-          color: '#ffffff',
-          fontWeight: 900,
+          borderRadius: 44,
         }}
       >
-        🌾
+        <svg
+          width="100"
+          height="100"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#ffffff"
+          strokeWidth="2.2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <circle cx="12" cy="12" r="10" />
+          <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" fill="#ffffff" />
+        </svg>
       </div>
     ),
     {

@@ -29,8 +29,9 @@ import {
   MessageSquare,
   Phone,
   Search,
-  ShieldCheck,
   Share2,
+  ShieldCheck,
+  Sparkles,
   Tag,
   UserRound,
   X,
@@ -40,6 +41,7 @@ import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { ReportModal } from '@/components/properties/ReportModal';
+import { DueDiligenceChecklist } from '@/components/legal/DueDiligenceChecklist';
 
 import { IProperty } from '@/types/property';
 
@@ -312,7 +314,7 @@ function PropertyDetailsContent() {
           setFavorite(data.favorites.includes(propertyId));
         }
       })
-      .catch(() => {});
+      .catch(() => { });
 
     return () => {
       cancelled = true;
@@ -349,14 +351,14 @@ function PropertyDetailsContent() {
 
   const verificationLabel =
     property?.verificationStatus === 'VERIFIED'
-      ? 'Verified listing'
+      ? 'Direct Classified'
       : property?.verificationStatus === 'PENDING'
-        ? 'Verification in progress'
+        ? 'Draft'
         : property?.verificationStatus === 'VERIFICATION_REQUIRED'
-          ? 'Verification information required'
+          ? 'Information needed'
           : property?.verificationStatus === 'REJECTED'
-            ? 'Verification not approved'
-            : 'Verification status available';
+            ? 'Suspended'
+            : 'Direct Classified';
 
   const publishedDate = formatDate(property?.publishedAt);
 
@@ -396,10 +398,10 @@ function PropertyDetailsContent() {
         geo:
           property.latitude && property.longitude
             ? {
-                '@type': 'GeoCoordinates',
-                latitude: property.latitude,
-                longitude: property.longitude,
-              }
+              '@type': 'GeoCoordinates',
+              latitude: property.latitude,
+              longitude: property.longitude,
+            }
             : undefined,
       },
       image: property.images?.map((img) => img.secureUrl).filter(Boolean),
@@ -629,10 +631,14 @@ function PropertyDetailsContent() {
         throw new Error(data.error || 'Failed to initiate phone call.');
       }
 
-      const phone = data.sellerPhone || property.sellerPhone || '+919876543210';
+      const phone = data.sellerPhone || property.sellerPhone;
+
+      if (!phone) {
+        throw new Error('Seller contact phone number is not available for this listing.');
+      }
 
       setSellerCallData({
-        sellerName: data.sellerName || property.sellerName || 'Verified Landowner',
+        sellerName: data.sellerName || property.sellerName || 'Landowner',
         sellerPhone: phone,
         sellerEmail: data.sellerEmail || property.sellerEmail,
       });
@@ -745,7 +751,7 @@ function PropertyDetailsContent() {
           <div className="flex items-center gap-2 overflow-hidden text-[11px] text-slate-500">
             <Link
               href="/"
-              className="shrink-0 hover:text-emerald-700"
+              className="shrink-0 hover:text-[#c75e0a]"
             >
               Home
             </Link>
@@ -754,7 +760,7 @@ function PropertyDetailsContent() {
 
             <Link
               href="/buy"
-              className="shrink-0 hover:text-emerald-700"
+              className="shrink-0 hover:text-[#c75e0a]"
             >
               Find Land
             </Link>
@@ -778,7 +784,7 @@ function PropertyDetailsContent() {
         <button
           type="button"
           onClick={() => router.back()}
-          className="mb-5 inline-flex items-center gap-2 text-xs font-bold text-slate-500 transition-colors hover:text-emerald-700"
+          className="mb-5 inline-flex items-center gap-2 text-xs font-bold text-slate-500 transition-colors hover:text-[#c75e0a]"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to listings
@@ -796,12 +802,10 @@ function PropertyDetailsContent() {
                   {formatLandType(property.landType)}
                 </span>
 
-                {property.verificationStatus === 'VERIFIED' && (
-                  <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[10px] font-bold text-emerald-700">
-                    <BadgeCheck className="h-3.5 w-3.5" />
-                    Verified
-                  </span>
-                )}
+                <span className="inline-flex items-center gap-1 rounded-full border border-[#FF9933]/40 bg-[#fff1dc] px-2.5 py-1 text-[10px] font-bold text-[#c75e0a]">
+                  <ShieldCheck className="h-3.5 w-3.5 text-[#FF9933]" />
+                  Direct Classified
+                </span>
 
                 {property.priceNegotiable && (
                   <span className="rounded-full border border-blue-200 bg-blue-50 px-2.5 py-1 text-[10px] font-bold text-blue-700">
@@ -816,7 +820,7 @@ function PropertyDetailsContent() {
 
               <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-slate-500">
                 <span className="inline-flex items-center gap-1.5">
-                  <MapPin className="h-3.5 w-3.5 text-emerald-600" />
+                  <MapPin className="h-3.5 w-3.5 text-[#FF9933]" />
                   {locationText || 'Location available in listing'}
                 </span>
 
@@ -951,12 +955,10 @@ function PropertyDetailsContent() {
 
                 {/* Verification */}
 
-                {property.verificationStatus === 'VERIFIED' && (
-                  <div className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-2 text-[10px] font-black text-white shadow-lg">
-                    <ShieldCheck className="h-4 w-4" />
-                    Verified listing
-                  </div>
-                )}
+                <div className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-lg bg-[#FF9933] px-3 py-2 text-[10px] font-black text-white shadow-lg">
+                  <ShieldCheck className="h-4 w-4" />
+                  Direct Classified
+                </div>
               </div>
 
               {/* Thumbnails */}
@@ -975,7 +977,7 @@ function PropertyDetailsContent() {
                         setActiveImageIndex(index)
                       }
                       className={`relative h-16 w-20 shrink-0 overflow-hidden rounded-lg border-2 transition-colors ${activeImageIndex === index
-                        ? 'border-emerald-600'
+                        ? 'border-[#FF9933]'
                         : 'border-transparent'
                         }`}
                     >
@@ -1068,7 +1070,7 @@ function PropertyDetailsContent() {
                 <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4">
                   <div className="flex items-start gap-3">
                     <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white shadow-sm">
-                      <ShieldCheck className="h-4 w-4 text-emerald-600" />
+                      <ShieldCheck className="h-4 w-4 text-[#FF9933]" />
                     </div>
 
                     <div>
@@ -1108,7 +1110,7 @@ function PropertyDetailsContent() {
                         </>
                       ) : (
                         <>
-                          <Phone className="h-4 w-4 text-emerald-400" />
+                          <Phone className="h-4 w-4 text-[#FF9933]" />
                           Call Seller
                         </>
                       )}
@@ -1117,7 +1119,7 @@ function PropertyDetailsContent() {
                     <button
                       type="button"
                       onClick={openInquiry}
-                      className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-3.5 text-xs font-black text-white shadow-sm transition-colors hover:bg-emerald-700 cursor-pointer"
+                      className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#FF9933] px-4 py-3.5 text-xs font-black text-white shadow-sm transition-colors hover:bg-[#f07d12] cursor-pointer"
                     >
                       <MessageSquare className="h-4 w-4" />
                       Send Message
@@ -1125,7 +1127,7 @@ function PropertyDetailsContent() {
                   </div>
 
                   <div className="flex items-center justify-center gap-2 text-[10px] text-slate-400 pt-1">
-                    <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
+                    <ShieldCheck className="h-3.5 w-3.5 text-[#FF9933]" />
                     Buyer protection: direct call action is logged on BhoomiMitra
                   </div>
                 </div>
@@ -1261,7 +1263,7 @@ function PropertyDetailsContent() {
                     href={property.googleMapsShareLink}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-xs font-bold text-slate-700 transition-colors hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700"
+                    className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-xs font-bold text-slate-700 transition-colors hover:border-[#FF9933] hover:bg-[#fff9f0] hover:text-[#c75e0a]"
                   >
                     <MapPin className="h-4 w-4" />
                     Open in Google Maps
@@ -1342,48 +1344,12 @@ function PropertyDetailsContent() {
             VERIFICATION
         ======================================================== */}
 
-        <section className="mt-6">
-          <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 sm:p-6">
-            <div className="flex flex-col gap-5 sm:flex-row">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white shadow-sm">
-                {property.verificationStatus ===
-                  'VERIFIED' ? (
-                  <BadgeCheck className="h-6 w-6 text-emerald-600" />
-                ) : (
-                  <ShieldCheck className="h-6 w-6 text-emerald-600" />
-                )}
-              </div>
+        {/* ========================================================
+            LAND BUYER'S DUE DILIGENCE CHECKLIST & LEGAL NOTICE
+        ========================================================= */}
 
-              <div className="min-w-0">
-                <h2 className="text-sm font-black text-emerald-950">
-                  {verificationLabel}
-                </h2>
-
-                <p className="mt-2 max-w-3xl text-xs leading-6 text-emerald-900/75">
-                  {property.verificationStatus ===
-                    'VERIFIED'
-                    ? 'This listing has passed BhoomiMitra’s internal verification workflow based on the information and documents submitted by the seller.'
-                    : property.verificationStatus ===
-                      'PENDING'
-                      ? 'The seller has submitted this listing and it is currently undergoing BhoomiMitra’s internal review process.'
-                      : property.verificationStatus ===
-                        'VERIFICATION_REQUIRED'
-                        ? 'Additional information or documentation may be required before this listing can be marked verified.'
-                        : 'Review the listing information carefully and perform your own legal and property due diligence before making a purchase decision.'}
-                </p>
-
-                <div className="mt-4 flex items-start gap-2 text-[10px] leading-5 text-emerald-900/70">
-                  <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-
-                  <span>
-                    BhoomiMitra verification does not replace independent
-                    legal due diligence, title search, physical
-                    inspection, or professional advice.
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
+        <section className="mt-8">
+          <DueDiligenceChecklist />
         </section>
 
         {/* ========================================================
@@ -1413,7 +1379,7 @@ function PropertyDetailsContent() {
                 <button
                   type="button"
                   onClick={openInquiry}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 py-3 text-xs font-black text-white hover:bg-emerald-700"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#FF9933] px-5 py-3 text-xs font-black text-white hover:bg-[#f07d12] transition-colors"
                 >
                   <MessageSquare className="h-4 w-4" />
                   Contact Seller
@@ -1438,14 +1404,14 @@ function PropertyDetailsContent() {
                 </h3>
 
                 <p className="mt-1 text-[10px] leading-5 text-slate-500">
-                  BhoomiMitra facilitates property discovery, listing
-                  management, document review workflows and direct
-                  communication between sellers and prospective buyers.
-                  A listing or verification status does not constitute
-                  a guarantee of title, ownership, legality, valuation,
-                  or suitability. Conduct independent legal, title,
-                  registration and physical due diligence before
-                  entering into any transaction.
+                  BhoomiMitra facilitates property discovery, advertising hosting,
+                  and direct communication between sellers and prospective buyers.
+                  BhoomiMitra does not provide title verification, legal opinions,
+                  or survey certification. A listing does not constitute a guarantee
+                  of title, ownership, legality, boundary accuracy, or dispute-free status.
+                  Conduct independent legal, title, registration, and physical due
+                  diligence with qualified advocates and revenue authorities before entering
+                  into any transaction.
                 </p>
 
                 <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between">
@@ -1455,8 +1421,8 @@ function PropertyDetailsContent() {
                     onClick={openReportModal}
                     className="inline-flex items-center gap-1.5 text-xs font-bold text-rose-700 hover:underline cursor-pointer"
                   >
-                    <Flag className="h-3.5 w-3.5" />
-                    <span>Report Listing</span>
+                    <Flag className="h-3.5 w-3.5 text-rose-600" />
+                    <span>Report Listing to Moderation</span>
                   </button>
                 </div>
               </div>
@@ -1494,7 +1460,7 @@ function PropertyDetailsContent() {
           <button
             type="button"
             onClick={openInquiry}
-            className="flex h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 text-xs font-black text-white hover:bg-emerald-700"
+            className="flex h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-[#FF9933] px-4 text-xs font-black text-white hover:bg-[#f07d12] transition-colors"
           >
             <MessageSquare className="h-4 w-4" />
             {user ? 'Contact Seller' : 'Sign in to Contact'}
@@ -1533,8 +1499,8 @@ function PropertyDetailsContent() {
             <div className="p-5">
               {inquirySuccess ? (
                 <div className="py-8 text-center">
-                  <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-50">
-                    <Check className="h-7 w-7 text-emerald-600" />
+                  <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#fff1dc]">
+                    <Check className="h-7 w-7 text-[#FF9933]" />
                   </div>
 
                   <h3 className="mt-4 text-base font-black text-slate-900">
@@ -1549,7 +1515,7 @@ function PropertyDetailsContent() {
                   <button
                     type="button"
                     onClick={() => setInquiryOpen(false)}
-                    className="mt-6 rounded-xl bg-slate-950 px-5 py-3 text-xs font-bold text-white"
+                    className="mt-6 rounded-xl bg-slate-950 px-5 py-3 text-xs font-bold text-white hover:bg-slate-800 transition-colors"
                   >
                     Done
                   </button>
@@ -1571,7 +1537,7 @@ function PropertyDetailsContent() {
                     }
                     rows={6}
                     placeholder="I'm interested in this property. Please share more details about the land, availability and next steps."
-                    className="mt-2 w-full resize-none rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs leading-5 text-slate-900 outline-none placeholder:text-slate-400 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/20"
+                    className="mt-2 w-full resize-none rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs leading-5 text-slate-900 outline-none placeholder:text-slate-400 focus:border-[#FF9933] focus:bg-white focus:ring-2 focus:ring-[#FF9933]/20 transition-all"
                   />
 
                   {inquiryError && (
@@ -1581,7 +1547,7 @@ function PropertyDetailsContent() {
                   )}
 
                   <div className="mt-4 flex items-start gap-2 rounded-xl bg-slate-50 p-3">
-                    <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-600" />
+                    <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#FF9933]" />
 
                     <p className="text-[10px] leading-4 text-slate-500">
                       Keep your first message focused on the property.
@@ -1597,7 +1563,7 @@ function PropertyDetailsContent() {
                       inquirySending ||
                       !inquiryMessage.trim()
                     }
-                    className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 py-3.5 text-xs font-black text-white transition-colors hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-[#FF9933] py-3.5 text-xs font-black text-white transition-colors hover:bg-[#f07d12] disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {inquirySending ? (
                       <>
@@ -1627,7 +1593,7 @@ function PropertyDetailsContent() {
           <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl border border-slate-100 space-y-5 animate-in zoom-in-95 duration-150">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#fff1dc] text-[#c75e0a]">
                   <Phone className="h-4 w-4" />
                 </div>
                 <div>
@@ -1674,9 +1640,9 @@ function PropertyDetailsContent() {
                       </p>
                     </div>
 
-                    <div className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-bold text-emerald-800 border border-emerald-200">
-                      <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
-                      Verified
+                    <div className="inline-flex items-center gap-1 rounded-full bg-[#fff1dc] px-2.5 py-1 text-[10px] font-bold text-[#c75e0a] border border-[#FF9933]/30">
+                      <Sparkles className="h-3.5 w-3.5 text-[#FF9933]" />
+                      Direct Seller
                     </div>
                   </div>
 
@@ -1702,8 +1668,8 @@ function PropertyDetailsContent() {
                       >
                         {callCopied ? (
                           <>
-                            <Check className="h-3.5 w-3.5 text-emerald-600" />
-                            <span className="text-emerald-700">Copied</span>
+                            <Check className="h-3.5 w-3.5 text-[#FF9933]" />
+                            <span className="text-[#c75e0a]">Copied</span>
                           </>
                         ) : (
                           <>
@@ -1719,7 +1685,7 @@ function PropertyDetailsContent() {
                 <div className="space-y-2 pt-1">
                   <a
                     href={`tel:${sellerCallData.sellerPhone}`}
-                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 px-4 py-3.5 text-xs font-black text-white shadow-md transition-all cursor-pointer"
+                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#FF9933] hover:bg-[#f07d12] px-4 py-3.5 text-xs font-black text-white shadow-md transition-all cursor-pointer"
                   >
                     <Phone className="h-4 w-4" />
                     <span>Call Now ({sellerCallData.sellerPhone})</span>
@@ -1738,10 +1704,10 @@ function PropertyDetailsContent() {
                   </button>
                 </div>
 
-                <div className="rounded-xl bg-emerald-50/70 border border-emerald-100 p-3 text-[11px] text-emerald-950 flex items-start gap-2.5">
-                  <ShieldCheck className="h-4 w-4 text-emerald-700 shrink-0 mt-0.5" />
+                <div className="rounded-xl bg-[#fff9f0] border border-[#FF9933]/25 p-3 text-[11px] text-[#7a3705] flex items-start gap-2.5">
+                  <ShieldCheck className="h-4 w-4 text-[#FF9933] shrink-0 mt-0.5" />
                   <p className="leading-relaxed">
-                    <strong>Buyer Protection:</strong> This call connection was logged with your verified account (<code className="font-semibold text-emerald-900">{user?.email}</code>) to ensure safe marketplace communications.
+                    <strong>Buyer Protection:</strong> This call connection was logged with your verified account (<code className="font-semibold text-[#c75e0a]">{user?.email}</code>) to ensure safe marketplace communications.
                   </p>
                 </div>
               </div>
@@ -1789,7 +1755,7 @@ function SectionHeading({
 }) {
   return (
     <div className="flex items-center gap-2">
-      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
+      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#fff1dc] text-[#c75e0a]">
         {icon}
       </div>
 

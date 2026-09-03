@@ -56,21 +56,24 @@ export async function notifyListingSubmitted(
 ) {
   return sendEmail({
     to: sellerEmail,
-    subject: `Listing Received: ${propertyTitle} - BhoomiMitra`,
+    subject: `Listing Published Live: ${propertyTitle} - BhoomiMitra`,
     html: `
       <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #1e293b;">
-        <h2 style="color: #047857;">Listing Payment Received</h2>
+        <h2 style="color: #FF9933;">Listing Published Live</h2>
         <p>Dear ${sellerName},</p>
         <p>We have successfully received your listing <strong>${propertyTitle}</strong> and publishing fee of <strong>₹${publishingFee.toLocaleString(
           'en-IN',
         )}</strong>.</p>
-        <p>Your property is now in <strong>Verification Pending</strong> status. Our admin team will inspect your uploaded title deed and government land registration ID.</p>
-        <div style="background: #f8fafc; border-left: 4px solid #047857; padding: 12px 16px; margin: 20px 0;">
-          <p style="margin: 0; font-size: 14px; color: #475569;">
-            <strong>Verification Policy:</strong> Payment covers listing processing and administrative review. Listings are approved only after document and registration validity confirmation.
+        <p>Your property is now <strong>Published &amp; Live</strong> on the BhoomiMitra marketplace for the next 30 days.</p>
+        <div style="background: #fff9f0; border-left: 4px solid #FF9933; padding: 12px 16px; margin: 20px 0;">
+          <p style="margin: 0; font-size: 14px; color: #7a3705;">
+            <strong>Direct Classifieds Policy:</strong> Buyers can now discover your property, explore satellite map pins, and contact you directly. BhoomiMitra maintains community standards and content moderation for fraudulent or abusive listings.
           </p>
         </div>
-        <p>Best regards,<br/>The BhoomiMitra Verification Team</p>
+        <p>You can check and manage your property from your <a href="${
+          process.env.NEXT_PUBLIC_APP_URL || ''
+        }/dashboard/seller">Seller Dashboard</a>.</p>
+        <p>Best regards,<br/>The BhoomiMitra Team</p>
       </div>
     `,
   });
@@ -87,23 +90,23 @@ export async function notifyVerificationResult(
   return sendEmail({
     to: sellerEmail,
     subject: isApproved
-      ? `Property Verified & Published: ${propertyTitle}`
-      : `Property Verification Update: ${propertyTitle}`,
+      ? `Listing Approved & Live: ${propertyTitle}`
+      : `Listing Moderation Update: ${propertyTitle}`,
     html: `
       <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #1e293b;">
-        <h2 style="color: ${isApproved ? '#047857' : '#e11d48'};">
+        <h2 style="color: ${isApproved ? '#FF9933' : '#e11d48'};">
           ${
             isApproved
-              ? 'Property Verified & Live on Marketplace'
-              : 'Property Verification Update'
+              ? 'Listing Approved & Live on Marketplace'
+              : 'Listing Moderation Notice'
           }
         </h2>
         <p>Dear ${sellerName},</p>
-        <p>Your property listing <strong>${propertyTitle}</strong> has been updated to: <strong>${status}</strong>.</p>
+        <p>Your property listing <strong>${propertyTitle}</strong> moderation status is: <strong>${status}</strong>.</p>
         ${
           reason
             ? `<div style="background: #fef2f2; border-left: 4px solid #e11d48; padding: 12px 16px; margin: 20px 0;">
-                <p style="margin: 0; font-weight: bold; color: #991b1b;">Review Notes:</p>
+                <p style="margin: 0; font-weight: bold; color: #991b1b;">Moderation Notes:</p>
                 <p style="margin: 4px 0 0 0; color: #7f1d1d;">${reason}</p>
               </div>`
             : ''
@@ -111,7 +114,7 @@ export async function notifyVerificationResult(
         <p>You can check and manage your property from your <a href="${
           process.env.NEXT_PUBLIC_APP_URL || ''
         }/dashboard/seller">Seller Dashboard</a>.</p>
-        <p>Best regards,<br/>BhoomiMitra Compliance Team</p>
+        <p>Best regards,<br/>BhoomiMitra Trust & Safety Team</p>
       </div>
     `,
   });
@@ -185,7 +188,7 @@ export async function enqueueAndDispatchPaymentEmail({
         attempts: 0,
       },
     },
-    { upsert: true, new: true },
+    { upsert: true, returnDocument: 'after' },
   );
 
   if (!delivery || delivery.status === 'SENT') {

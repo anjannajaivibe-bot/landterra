@@ -5,11 +5,11 @@ export default function manifest(): MetadataRoute.Manifest {
     name: 'BhoomiMitra — Direct Land & Plot Marketplace',
     short_name: 'BhoomiMitra',
     description:
-      'Direct-to-owner Indian land and plot marketplace. Verified revenue records, 0% brokerage commission, and interactive satellite mapping.',
+      'Direct-to-owner Indian land and plot marketplace. Direct peer-to-peer listings, 0% brokerage commission, and interactive satellite mapping.',
     start_url: '/',
     display: 'standalone',
-    background_color: '#020617',
-    theme_color: '#047857',
+    background_color: '#ffffff',
+    theme_color: '#FF9933',
     orientation: 'portrait-primary',
     scope: '/',
     icons: [

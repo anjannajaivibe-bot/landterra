@@ -102,7 +102,7 @@ export async function updateInquiryStatus(
   const updated = await InquiryModel.findOneAndUpdate(
     { _id: inquiryId, sellerId },
     { $set: { status, updatedAt: new Date() } },
-    { new: true }
+    { returnDocument: 'after' }
   ).lean();
 
   if (!updated) return null;
@@ -324,11 +324,15 @@ export async function recordBuyerCallAction(data: {
     console.error('Failed to create audit log for buyer call:', err);
   });
 
-  const sellerPhone = property.sellerPhone || '+919876543210';
+  if (!property.sellerPhone) {
+    throw new Error('Seller phone number is not available for this listing.');
+  }
+
+  const sellerPhone = property.sellerPhone;
 
   return {
     success: true,
-    sellerName: property.sellerName || 'Verified Landowner',
+    sellerName: property.sellerName || 'Landowner',
     sellerPhone,
     sellerEmail: property.sellerEmail,
     propertyTitle: property.title,

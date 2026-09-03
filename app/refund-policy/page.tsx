@@ -33,28 +33,28 @@ export default function RefundPolicyPage() {
       {/* Hero Header */}
       <div className="bg-slate-950 text-white py-16 border-b border-slate-800">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="inline-flex items-center gap-2 text-xs font-semibold px-3 py-1 rounded-full bg-slate-900 text-emerald-400 border border-slate-800 mb-4">
-            <RotateCcw className="w-4 h-4" />
-            <span>Fair Commerce & Billing Transparency</span>
+          <div className="inline-flex items-center gap-2 text-xs font-semibold px-3 py-1 rounded-full bg-[#fff1dc] text-[#c75e0a] border border-[#FF9933]/30 mb-4">
+            <RotateCcw className="w-4 h-4 text-[#FF9933]" />
+            <span>Fair Commerce &amp; Billing Transparency</span>
           </div>
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight">
-            Cancellation & Refund Policy
+            Cancellation &amp; Refund Policy
           </h1>
           <p className="text-slate-300 text-sm sm:text-base mt-4 max-w-2xl leading-relaxed">
-            BhoomiMitra charges sellers solely for digital property advertisement publishing and verification infrastructure. Learn about our billing rules, refund criteria, and processing timelines.
+            BhoomiMitra charges sellers solely for digital property advertisement publishing and classifieds hosting services. Review our billing rules, refund criteria, and processing timelines.
           </p>
         </div>
       </div>
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full flex-1 space-y-10 text-slate-700 leading-relaxed text-xs sm:text-sm">
         {/* Important Notice Banner */}
-        <div className="p-5 rounded-2xl bg-amber-50 border border-amber-200/80 text-amber-950 space-y-2 shadow-xs">
-          <div className="flex items-center gap-2 font-bold text-amber-900 text-sm">
-            <AlertTriangle className="w-4 h-4 text-amber-700 shrink-0" />
-            <span>Important Classification Notice</span>
+        <div className="p-5 rounded-2xl bg-[#fff9f0] border border-[#FF9933]/30 text-[#7a3705] space-y-2 shadow-xs">
+          <div className="flex items-center gap-2 font-bold text-slate-950 text-sm">
+            <AlertTriangle className="w-4 h-4 text-[#FF9933] shrink-0" />
+            <span>Important Billing Notice</span>
           </div>
-          <p className="leading-relaxed text-xs sm:text-sm text-amber-900/90">
-            Payments made to BhoomiMitra are strictly for <strong>digital advertising, listing hosting, and administrative document auditing services</strong>. BhoomiMitra is not a party to, nor does it collect, escrow, or handle any property sale considerations, token advances, booking payments, or stamp duty.
+          <p className="leading-relaxed text-xs sm:text-sm text-[#9c4c0b]">
+            Payments made to BhoomiMitra are strictly for <strong>digital advertising, listing hosting, and marketplace discovery services</strong>. BhoomiMitra is not a party to, nor does it collect, escrow, or handle any property sale considerations, token advances, booking payments, or stamp duty.
           </p>
         </div>
 
@@ -62,7 +62,7 @@ export default function RefundPolicyPage() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
           <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-2">
             <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-800">
-              <Clock className="w-5 h-5" />
+              <Clock className="w-5 h-5 text-blue-600" />
             </div>
             <h3 className="font-bold text-slate-900 text-sm">Automated Payment Reversals</h3>
             <p className="text-xs text-slate-600 leading-relaxed">
@@ -71,8 +71,8 @@ export default function RefundPolicyPage() {
           </div>
 
           <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-2">
-            <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-800">
-              <CheckCircle2 className="w-5 h-5" />
+            <div className="w-10 h-10 rounded-xl bg-[#fff1dc] border border-[#FF9933]/20 flex items-center justify-center text-[#c75e0a]">
+              <CheckCircle2 className="w-5 h-5 text-[#FF9933]" />
             </div>
             <h3 className="font-bold text-slate-900 text-sm">Duplicate Charge Refund</h3>
             <p className="text-xs text-slate-600 leading-relaxed">
@@ -82,11 +82,11 @@ export default function RefundPolicyPage() {
 
           <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-2">
             <div className="w-10 h-10 rounded-xl bg-purple-50 border border-purple-100 flex items-center justify-center text-purple-800">
-              <ShieldCheck className="w-5 h-5" />
+              <ShieldCheck className="w-5 h-5 text-purple-600" />
             </div>
             <h3 className="font-bold text-slate-900 text-sm">Service Non-Delivery Guarantee</h3>
             <p className="text-xs text-slate-600 leading-relaxed">
-              If a system error on BhoomiMitra prevents listing publication, we will either resolve the issue or process a complete refund.
+              If a system defect on BhoomiMitra prevents listing publication, we will either resolve the issue or process a complete refund.
             </p>
           </div>
         </div>
@@ -96,7 +96,7 @@ export default function RefundPolicyPage() {
           {/* Section 1 */}
           <section className="space-y-3 pb-6 border-b border-slate-100">
             <h2 className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
-              <span className="text-emerald-700 font-mono">1.</span>
+              <span className="text-[#c75e0a] font-mono">1.</span>
               <span>Failed or Incomplete Transactions</span>
             </h2>
             <p>
@@ -110,15 +110,15 @@ export default function RefundPolicyPage() {
           {/* Section 2 */}
           <section className="space-y-3 pb-6 border-b border-slate-100">
             <h2 className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
-              <span className="text-emerald-700 font-mono">2.</span>
+              <span className="text-[#c75e0a] font-mono">2.</span>
               <span>Duplicate Payment Claims</span>
             </h2>
             <p>
               In rare instances where a seller accidentally initiates multiple payment authorizations for the same listing order identifier:
             </p>
             <ul className="list-disc pl-5 space-y-1.5 text-slate-600">
-              <li>Our automated payment gateway reconciler detects duplicate captures during nightly batch processing.</li>
-              <li>Sellers may also flag duplicate charges by emailing <span className="font-semibold text-emerald-800">{SITE_CONFIG.supportEmail}</span> with the Razorpay Payment ID or transaction reference.</li>
+              <li>Our automated payment gateway reconciler detects duplicate captures during batch processing.</li>
+              <li>Sellers may also report duplicate charges by emailing <span className="font-semibold text-[#c75e0a]">{SITE_CONFIG.supportEmail}</span> with the Razorpay Payment ID or transaction reference.</li>
               <li>Upon reconciliation, duplicate amounts are refunded within 3 to 5 business days to the original payment source.</li>
             </ul>
           </section>
@@ -126,16 +126,16 @@ export default function RefundPolicyPage() {
           {/* Section 3 */}
           <section className="space-y-3 pb-6 border-b border-slate-100">
             <h2 className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
-              <span className="text-emerald-700 font-mono">3.</span>
-              <span>Voluntary Listing Cancellation & Pausing</span>
+              <span className="text-[#c75e0a] font-mono">3.</span>
+              <span>Voluntary Listing Cancellation &amp; Pausing</span>
             </h2>
             <p>
               Sellers have full control to edit, pause, or remove their property listing at any time from their Seller Dashboard.
             </p>
             <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-1.5">
-              <strong className="text-slate-900 block">Non-Refundability of Active / Reviewed Listings:</strong>
+              <strong className="text-slate-900 block">Non-Refundability of Published Listings:</strong>
               <p className="text-slate-600">
-                Because the listing fee is immediately applied toward encrypted deed storage, automated CDN image distribution, and human administrative document review, voluntary removal or early sale of a property does not create an entitlement to a pro-rated or full refund.
+                Because the digital publishing fee is immediately applied toward active marketplace hosting, encrypted cloud storage, and automated CDN image processing, voluntary removal or early sale of a property does not create an entitlement to a pro-rated or full refund.
               </p>
             </div>
           </section>
@@ -143,7 +143,7 @@ export default function RefundPolicyPage() {
           {/* Section 4 */}
           <section className="space-y-3 pb-6 border-b border-slate-100">
             <h2 className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
-              <span className="text-emerald-700 font-mono">4.</span>
+              <span className="text-[#c75e0a] font-mono">4.</span>
               <span>Service Non-Delivery / Technical Outages</span>
             </h2>
             <p>
@@ -158,8 +158,8 @@ export default function RefundPolicyPage() {
           {/* Section 5 */}
           <section className="space-y-3">
             <h2 className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
-              <span className="text-emerald-700 font-mono">5.</span>
-              <span>Property Transactions & Third-Party Disputes</span>
+              <span className="text-[#c75e0a] font-mono">5.</span>
+              <span>Property Transactions &amp; Third-Party Disputes</span>
             </h2>
             <p>
               BhoomiMitra is strictly an advertising platform and does not participate in financial negotiations, token advances, earnest deposits, or final sale considerations between buyers and sellers.
@@ -173,8 +173,8 @@ export default function RefundPolicyPage() {
         {/* Refund Process & SLA Table */}
         <div className="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-xs space-y-4">
           <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-            <Clock className="w-4 h-4 text-emerald-700" />
-            <span>Refund Processing Timeline & SLA</span>
+            <Clock className="w-4 h-4 text-[#FF9933]" />
+            <span>Refund Processing Timeline &amp; SLA</span>
           </h3>
 
           <div className="overflow-x-auto">
@@ -190,46 +190,59 @@ export default function RefundPolicyPage() {
               <tbody className="divide-y divide-slate-100 text-slate-600">
                 <tr>
                   <td className="py-3 px-3.5 font-semibold text-slate-900">Duplicate Charge</td>
-                  <td className="py-3 px-3.5 text-emerald-800 font-bold">Eligible (100%)</td>
+                  <td className="py-3 px-3.5 text-[#c75e0a] font-bold">Eligible (100%)</td>
                   <td className="py-3 px-3.5">24–48 Hours</td>
                   <td className="py-3 px-3.5">Original Source Account</td>
                 </tr>
                 <tr>
                   <td className="py-3 px-3.5 font-semibold text-slate-900">Platform Outage / Non-Delivery</td>
-                  <td className="py-3 px-3.5 text-emerald-800 font-bold">Eligible (100%)</td>
+                  <td className="py-3 px-3.5 text-[#c75e0a] font-bold">Eligible (100%)</td>
                   <td className="py-3 px-3.5">24 Hours</td>
                   <td className="py-3 px-3.5">Original Source Account</td>
                 </tr>
                 <tr>
-                  <td className="py-3 px-3.5 font-semibold text-slate-900">Voluntary Removal by Seller</td>
-                  <td className="py-3 px-3.5 text-rose-800 font-bold">Not Eligible</td>
-                  <td className="py-3 px-3.5">N/A</td>
+                  <td className="py-3 px-3.5 font-semibold text-slate-900">Failed / Dropped Transaction</td>
+                  <td className="py-3 px-3.5 text-blue-800 font-bold">Auto-Reversal (Bank)</td>
+                  <td className="py-3 px-3.5">5–7 Working Days</td>
+                  <td className="py-3 px-3.5">Original Source Account</td>
+                </tr>
+                <tr>
+                  <td className="py-3 px-3.5 font-semibold text-slate-900">Early Property Sale</td>
+                  <td className="py-3 px-3.5 text-slate-400 font-bold">Not Eligible</td>
+                  <td className="py-3 px-3.5">—</td>
                   <td className="py-3 px-3.5">N/A</td>
                 </tr>
                 <tr>
-                  <td className="py-3 px-3.5 font-semibold text-slate-900">Failed Bank Transaction</td>
-                  <td className="py-3 px-3.5 text-blue-800 font-bold">Auto-Reversal</td>
-                  <td className="py-3 px-3.5">5–7 Working Days</td>
-                  <td className="py-3 px-3.5">Issuing Bank Reversal</td>
+                  <td className="py-3 px-3.5 font-semibold text-slate-900">Voluntary Deactivation</td>
+                  <td className="py-3 px-3.5 text-slate-400 font-bold">Not Eligible</td>
+                  <td className="py-3 px-3.5">—</td>
+                  <td className="py-3 px-3.5">N/A</td>
                 </tr>
               </tbody>
             </table>
           </div>
         </div>
 
-        {/* Contact Desk Box */}
-        <div className="p-6 rounded-2xl bg-slate-900 text-white flex flex-col sm:flex-row items-center justify-between gap-4">
+        {/* Statutory Buyer Advisory Notice */}
+        <div className="p-6 rounded-2xl bg-[#fff9f0] border border-[#FF9933]/30 text-xs text-[#7a3705] space-y-2">
+          <div className="flex items-center gap-2 font-bold text-sm text-slate-950">
+            <Scale className="w-4 h-4 text-[#FF9933]" />
+            <span>Buyer Due Diligence Advisory</span>
+          </div>
+          <p className="leading-relaxed text-[#9c4c0b]">{LEGAL_DISCLAIMER}</p>
+        </div>
+
+        {/* Contact CTA */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-6 rounded-2xl bg-slate-900 text-white">
           <div>
-            <h3 className="font-bold text-sm sm:text-base">Need help with a billing or refund query?</h3>
-            <p className="text-xs text-slate-400 mt-0.5">
-              Contact our billing team with your payment ID at <span className="font-mono text-emerald-400">{SITE_CONFIG.supportEmail}</span>
-            </p>
+            <h4 className="font-bold text-sm sm:text-base">Have billing or payment questions?</h4>
+            <p className="text-xs text-slate-400 mt-0.5">Our support team is available to assist with transaction queries.</p>
           </div>
           <Link
             href="/contact"
-            className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-xs font-bold transition-colors shrink-0"
+            className="px-5 py-2.5 rounded-xl bg-[#FF9933] hover:bg-[#f07d12] text-white text-xs font-bold transition-colors shrink-0"
           >
-            Submit Billing Query
+            Contact Billing Support
           </Link>
         </div>
       </main>

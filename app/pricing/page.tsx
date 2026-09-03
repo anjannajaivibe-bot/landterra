@@ -3,31 +3,33 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
-import { SITE_CONFIG, SELLER_LISTING_FEE_DESCRIPTION } from '@/config/constants';
 import {
-  CreditCard,
-  ShieldCheck,
-  HeartHandshake,
+  SITE_CONFIG,
+  SELLER_LISTING_FEE_DESCRIPTION,
+} from '@/config/constants';
+import {
   CheckCircle2,
   XCircle,
   HelpCircle,
+  ShieldCheck,
+  Zap,
   ArrowRight,
+  CreditCard,
+  HeartHandshake,
   TrendingDown,
   Sparkles,
-  Zap,
   Lock,
-  LandPlot,
 } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Seller Listing Pricing & 0% Brokerage | BhoomiMitra',
+  title: 'Pricing & Publishing Plans | BhoomiMitra',
   description:
-    'Transparent flat digital property advertisement fee for 30 days with 0% brokerage commission. Retain 100% of your land deal value.',
+    'Transparent digital classifieds pricing for Indian landowners. Flat listing fee for 30 days of active visibility with 0% brokerage or success commission.',
 };
 
 export default function PricingPage() {
-  const listingFee = SITE_CONFIG.listingPricePerSqYardPerMonth || 10;
-  const durationDays = SITE_CONFIG.subscriptionDurationDays || 30;
+  const listingFee = 10;
+  const durationDays = 30;
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900">
@@ -36,15 +38,15 @@ export default function PricingPage() {
       {/* Hero Header */}
       <div className="bg-slate-950 text-white py-16 border-b border-slate-800">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="inline-flex items-center gap-2 text-xs font-semibold px-3 py-1 rounded-full bg-emerald-950/80 text-emerald-400 border border-emerald-800/50 mb-4">
-            <CreditCard className="w-4 h-4" />
+          <div className="inline-flex items-center gap-2 text-xs font-semibold px-3 py-1 rounded-full bg-[#fff1dc] text-[#c75e0a] border border-[#FF9933]/30 mb-4">
+            <CreditCard className="w-4 h-4 text-[#FF9933]" />
             <span>Transparent Classifieds Pricing</span>
           </div>
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight">
-            Seller Listing Pricing & 0% Brokerage
+            Seller Listing Pricing &amp; 0% Brokerage
           </h1>
           <p className="text-slate-300 text-sm sm:text-base mt-4 max-w-2xl leading-relaxed">
-            Sell your agricultural plots, farmhouses, or commercial land directly to verified buyers. Pay only a nominal flat fee to host your advertisement and keep 100% of your sale proceeds.
+            Sell your agricultural plots, farmhouses, or commercial land directly to serious buyers. Pay only a nominal flat fee to host your advertisement and keep 100% of your sale proceeds.
           </p>
         </div>
       </div>
@@ -53,8 +55,8 @@ export default function PricingPage() {
         {/* Value Highlights Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
           <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-3">
-            <div className="w-12 h-12 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-800">
-              <Zap className="w-6 h-6" />
+            <div className="w-12 h-12 rounded-xl bg-[#fff1dc] border border-[#FF9933]/20 flex items-center justify-center text-[#c75e0a]">
+              <Zap className="w-6 h-6 text-[#FF9933]" />
             </div>
             <h3 className="font-bold text-slate-900 text-base">Flat Digital Ad Fee</h3>
             <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
@@ -64,7 +66,7 @@ export default function PricingPage() {
 
           <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-3">
             <div className="w-12 h-12 rounded-xl bg-purple-50 border border-purple-100 flex items-center justify-center text-purple-800">
-              <HeartHandshake className="w-6 h-6" />
+              <HeartHandshake className="w-6 h-6 text-purple-600" />
             </div>
             <h3 className="font-bold text-slate-900 text-base">0% Commission Ever</h3>
             <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
@@ -74,7 +76,7 @@ export default function PricingPage() {
 
           <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-3">
             <div className="w-12 h-12 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-800">
-              <Lock className="w-6 h-6" />
+              <Lock className="w-6 h-6 text-blue-600" />
             </div>
             <h3 className="font-bold text-slate-900 text-base">No Auto-Debit</h3>
             <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
@@ -84,15 +86,15 @@ export default function PricingPage() {
         </div>
 
         {/* Pricing Plan Card */}
-        <div className="bg-white rounded-3xl border-2 border-emerald-600/30 p-6 sm:p-10 shadow-sm relative overflow-hidden">
-          <div className="absolute top-0 right-0 bg-emerald-600 text-white text-[11px] font-extrabold uppercase tracking-wider py-1.5 px-5 rounded-bl-2xl">
+        <div className="bg-white rounded-3xl border-2 border-[#FF9933]/40 p-6 sm:p-10 shadow-sm relative overflow-hidden">
+          <div className="absolute top-0 right-0 bg-[#FF9933] text-white text-[11px] font-extrabold uppercase tracking-wider py-1.5 px-5 rounded-bl-2xl">
             Single Transparent Plan
           </div>
 
           <div className="max-w-xl space-y-4">
-            <div className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>Full Access Classifieds Listing</span>
+            <div className="inline-flex items-center gap-1.5 text-xs font-bold text-[#c75e0a] bg-[#fff1dc] border border-[#FF9933]/30 px-3 py-1 rounded-full">
+              <Sparkles className="w-3.5 h-3.5 text-[#FF9933]" />
+              <span>Direct Classifieds Listing</span>
             </div>
             <div className="flex items-baseline gap-2">
               <span className="text-4xl sm:text-5xl font-black text-slate-950 tracking-tight">
@@ -114,19 +116,19 @@ export default function PricingPage() {
               </h4>
               <ul className="space-y-2.5 text-xs sm:text-sm text-slate-700">
                 <li className="flex items-start gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                  <CheckCircle2 className="w-4 h-4 text-[#FF9933] shrink-0 mt-0.5" />
                   <span><strong>{durationDays}-Day Public Hosting:</strong> Indexed across search and map discovery.</span>
                 </li>
                 <li className="flex items-start gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                  <span><strong>Human Admin Review:</strong> Document verification for the trust badge.</span>
+                  <CheckCircle2 className="w-4 h-4 text-[#FF9933] shrink-0 mt-0.5" />
+                  <span><strong>Direct Live Publishing:</strong> Goes live immediately upon successful payment.</span>
                 </li>
                 <li className="flex items-start gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                  <span><strong>Private Document Vault:</strong> Bank-grade encrypted storage for title deeds.</span>
+                  <CheckCircle2 className="w-4 h-4 text-[#FF9933] shrink-0 mt-0.5" />
+                  <span><strong>Private Document Vault:</strong> Encrypted storage for optional title and survey scans.</span>
                 </li>
                 <li className="flex items-start gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                  <CheckCircle2 className="w-4 h-4 text-[#FF9933] shrink-0 mt-0.5" />
                   <span><strong>Geo-Privacy Blur:</strong> 400m radius toggle to shield exact boundaries.</span>
                 </li>
               </ul>
@@ -138,19 +140,19 @@ export default function PricingPage() {
               </h4>
               <ul className="space-y-2.5 text-xs sm:text-sm text-slate-700">
                 <li className="flex items-start gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                  <span><strong>Direct Buyer Leads:</strong> Inquiries routed straight to your inbox and phone.</span>
+                  <CheckCircle2 className="w-4 h-4 text-[#FF9933] shrink-0 mt-0.5" />
+                  <span><strong>Direct Buyer Leads:</strong> Inquiries routed straight to your dashboard and phone.</span>
                 </li>
                 <li className="flex items-start gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                  <span><strong>Seller Dashboard:</strong> Real-time view count, inquiry management, and edits.</span>
+                  <CheckCircle2 className="w-4 h-4 text-[#FF9933] shrink-0 mt-0.5" />
+                  <span><strong>Seller Dashboard:</strong> Real-time view count, inquiry tracking, and updates.</span>
                 </li>
                 <li className="flex items-start gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                  <span><strong>Unlimited Photos:</strong> Upload high-resolution boundary and site images.</span>
+                  <CheckCircle2 className="w-4 h-4 text-[#FF9933] shrink-0 mt-0.5" />
+                  <span><strong>Multi-Image Showcase:</strong> Upload high-resolution boundary and site images.</span>
                 </li>
                 <li className="flex items-start gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                  <CheckCircle2 className="w-4 h-4 text-[#FF9933] shrink-0 mt-0.5" />
                   <span><strong>0% Commission:</strong> Zero success fees or broker cuts upon land deal closing.</span>
                 </li>
               </ul>
@@ -163,7 +165,7 @@ export default function PricingPage() {
             </span>
             <Link
               href="/sell"
-              className="w-full sm:w-auto px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 shadow-xs"
+              className="w-full sm:w-auto px-6 py-3 rounded-xl bg-[#FF9933] hover:bg-[#f07d12] text-white font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 shadow-xs"
             >
               <span>List Your Property Now</span>
               <ArrowRight className="w-4 h-4" />
@@ -174,8 +176,8 @@ export default function PricingPage() {
         {/* Savings Comparison Table */}
         <div className="bg-white rounded-2xl border border-slate-200 p-6 sm:p-10 shadow-xs space-y-6">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-emerald-50 text-emerald-800">
-              <TrendingDown className="w-5 h-5" />
+            <div className="p-2 rounded-xl bg-[#fff1dc] text-[#c75e0a]">
+              <TrendingDown className="w-5 h-5 text-[#FF9933]" />
             </div>
             <div>
               <h2 className="text-lg sm:text-xl font-bold text-slate-900">
@@ -193,7 +195,7 @@ export default function PricingPage() {
                 <tr className="border-b border-slate-200 bg-slate-50/70 text-slate-900">
                   <th className="py-3.5 px-4 font-bold rounded-l-xl">Land Deal Value</th>
                   <th className="py-3.5 px-4 font-bold text-rose-700">Traditional Broker (2%–4%)</th>
-                  <th className="py-3.5 px-4 font-bold text-emerald-700">BhoomiMitra</th>
+                  <th className="py-3.5 px-4 font-bold text-[#c75e0a]">BhoomiMitra</th>
                   <th className="py-3.5 px-4 font-bold text-slate-950 rounded-r-xl">Your Net Savings</th>
                 </tr>
               </thead>
@@ -201,25 +203,25 @@ export default function PricingPage() {
                 <tr>
                   <td className="py-3.5 px-4 font-semibold text-slate-900">₹25 Lakhs</td>
                   <td className="py-3.5 px-4 text-rose-600 line-through">₹50,000 – ₹1,00,000</td>
-                  <td className="py-3.5 px-4 font-extrabold text-emerald-700">₹{listingFee} – ₹25</td>
+                  <td className="py-3.5 px-4 font-extrabold text-[#c75e0a]">₹{listingFee} – ₹25</td>
                   <td className="py-3.5 px-4 font-extrabold text-slate-900">Save ₹49,975+</td>
                 </tr>
                 <tr>
                   <td className="py-3.5 px-4 font-semibold text-slate-900">₹50 Lakhs</td>
                   <td className="py-3.5 px-4 text-rose-600 line-through">₹1,00,000 – ₹2,00,000</td>
-                  <td className="py-3.5 px-4 font-extrabold text-emerald-700">₹{listingFee} – ₹25</td>
+                  <td className="py-3.5 px-4 font-extrabold text-[#c75e0a]">₹{listingFee} – ₹25</td>
                   <td className="py-3.5 px-4 font-extrabold text-slate-900">Save ₹99,975+</td>
                 </tr>
                 <tr>
                   <td className="py-3.5 px-4 font-semibold text-slate-900">₹1 Crore</td>
                   <td className="py-3.5 px-4 text-rose-600 line-through">₹2,00,000 – ₹4,00,000</td>
-                  <td className="py-3.5 px-4 font-extrabold text-emerald-700">₹{listingFee} – ₹25</td>
+                  <td className="py-3.5 px-4 font-extrabold text-[#c75e0a]">₹{listingFee} – ₹25</td>
                   <td className="py-3.5 px-4 font-extrabold text-slate-900">Save ₹1,99,975+</td>
                 </tr>
                 <tr>
                   <td className="py-3.5 px-4 font-semibold text-slate-900">₹5 Crores</td>
                   <td className="py-3.5 px-4 text-rose-600 line-through">₹10,00,000 – ₹20,00,000</td>
-                  <td className="py-3.5 px-4 font-extrabold text-emerald-700">₹{listingFee} – ₹25</td>
+                  <td className="py-3.5 px-4 font-extrabold text-[#c75e0a]">₹{listingFee} – ₹25</td>
                   <td className="py-3.5 px-4 font-extrabold text-slate-900">Save ₹9,99,975+</td>
                 </tr>
               </tbody>
@@ -230,11 +232,11 @@ export default function PricingPage() {
         {/* What BhoomiMitra Does Not Collect */}
         <div className="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-xs space-y-4">
           <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-            <ShieldCheck className="w-5 h-5 text-emerald-700" />
+            <ShieldCheck className="w-5 h-5 text-[#FF9933]" />
             <span>What BhoomiMitra Never Collects</span>
           </h2>
           <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-            To prevent fraud and maintain regulatory transparency as a pure classifieds platform, BhoomiMitra does not handle customer money transfers:
+            To maintain regulatory clarity as an advertising classifieds marketplace, BhoomiMitra does not handle financial sale transactions:
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs sm:text-sm">
@@ -244,11 +246,11 @@ export default function PricingPage() {
             </div>
             <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex items-start gap-2.5">
               <XCircle className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
-              <span><strong>No Token / Advance Amounts:</strong> Advance payments are agreed directly between parties.</span>
+              <span><strong>No Token / Advance Amounts:</strong> Advance payments are negotiated directly between parties.</span>
             </div>
             <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex items-start gap-2.5">
               <XCircle className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
-              <span><strong>No Stamp Duty or Taxes:</strong> Registration and legal dues are paid to state revenue portals.</span>
+              <span><strong>No Stamp Duty or Taxes:</strong> Registration fees and taxes are paid to state revenue portals.</span>
             </div>
             <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex items-start gap-2.5">
               <XCircle className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
@@ -260,7 +262,7 @@ export default function PricingPage() {
         {/* Frequently Asked Questions */}
         <div className="bg-white rounded-2xl border border-slate-200 p-6 sm:p-10 shadow-xs space-y-6">
           <h2 className="text-lg sm:text-xl font-bold text-slate-900 flex items-center gap-2">
-            <HelpCircle className="w-5 h-5 text-emerald-700" />
+            <HelpCircle className="w-5 h-5 text-[#FF9933]" />
             <span>Frequently Asked Questions</span>
           </h2>
 
@@ -268,7 +270,7 @@ export default function PricingPage() {
             <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
               <strong className="text-slate-900 block font-bold">When does the 30-day listing period begin?</strong>
               <p className="text-slate-600 leading-relaxed text-xs">
-                Your 30-day visibility period begins immediately upon payment completion and listing approval by our administrative review desk.
+                Your 30-day visibility period begins immediately upon completing payment for your listing advertisement.
               </p>
             </div>
 
@@ -280,16 +282,16 @@ export default function PricingPage() {
             </div>
 
             <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
-              <strong className="text-slate-900 block font-bold">What happens if my listing is not verified?</strong>
+              <strong className="text-slate-900 block font-bold">When does my listing go live after payment?</strong>
               <p className="text-slate-600 leading-relaxed text-xs">
-                If our compliance team finds mismatched survey numbers or incomplete documents, you will receive a notification to update your records. Listing fees cover the administrative review work and storage.
+                Immediately. In our direct classifieds marketplace, your listing is published live on the platform instantly upon successful flat-fee payment, with zero administrative queues or delays.
               </p>
             </div>
 
             <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
               <strong className="text-slate-900 block font-bold">Are there any hidden costs for buyers?</strong>
               <p className="text-slate-600 leading-relaxed text-xs">
-                No. Browsing properties, searching on maps, filtering land types, and contacting verified landowners is 100% free for all buyers.
+                No. Browsing properties, searching on maps, filtering land types, and contacting landowners is 100% free for all buyers.
               </p>
             </div>
           </div>
@@ -301,12 +303,12 @@ export default function PricingPage() {
             Ready to list your property directly?
           </h3>
           <p className="text-xs sm:text-sm text-slate-300 max-w-xl mx-auto leading-relaxed">
-            Reach thousands of serious buyers across India with full document credibility and zero middleman commissions.
+            Reach thousands of serious buyers across India with zero middleman commissions and direct peer-to-peer contact.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
             <Link
               href="/sell"
-              className="w-full sm:w-auto px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-2"
+              className="w-full sm:w-auto px-6 py-3 rounded-xl bg-[#FF9933] hover:bg-[#f07d12] text-white font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-2"
             >
               <span>Publish Property</span>
               <ArrowRight className="w-4 h-4" />

@@ -162,13 +162,13 @@ export function RazorpayCheckoutModal({
         name: 'BhoomiMitra Marketplace',
         description: isRenewal
           ? `Digital listing advertisement renewal (${activeOrderDuration} days) for ${property.title.substring(
-              0,
-              25,
-            )}...`
+            0,
+            25,
+          )}...`
           : `Digital property advertisement publishing fee (${activeOrderDuration} days) for ${property.title.substring(
-              0,
-              25,
-            )}...`,
+            0,
+            25,
+          )}...`,
         order_id: order.orderId,
 
         config: {
@@ -290,7 +290,7 @@ export function RazorpayCheckoutModal({
         {/* Header */}
         <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
           <div className="flex items-center gap-2">
-            <CreditCard className="w-4 h-4 text-emerald-700" />
+            <CreditCard className="w-4 h-4 text-[#FF9933]" />
             <h3 className="text-base font-bold text-slate-900">
               {isRenewal
                 ? 'Listing Subscription Renewal'
@@ -312,7 +312,7 @@ export function RazorpayCheckoutModal({
           {/* Success State */}
           {success ? (
             <div className="text-center py-6">
-              <div className="w-14 h-14 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto mb-4">
+              <div className="w-14 h-14 rounded-full bg-[#fff1dc] text-[#c75e0a] flex items-center justify-center mx-auto mb-4">
                 <CheckCircle2 className="w-8 h-8" />
               </div>
               <h4 className="text-lg font-bold text-slate-900 mb-1">
@@ -322,7 +322,7 @@ export function RazorpayCheckoutModal({
                 ₹ {activeFee.toLocaleString('en-IN')} received.{' '}
                 {isRenewal
                   ? `Subscription extended for ${listingDurationDays} days.`
-                  : 'Listing moved to Pending Verification.'}
+                  : 'Listing is now published live directly on the marketplace.'}
               </p>
               <p className="text-[11px] text-slate-400">
                 Redirecting to your seller dashboard...
@@ -366,7 +366,7 @@ export function RazorpayCheckoutModal({
                 </div>
                 <div className="flex justify-between text-slate-600">
                   <span>Validity Duration</span>
-                  <span className="font-semibold text-emerald-800">
+                  <span className="font-semibold text-[#c75e0a]">
                     {listingDurationDays} Days
                   </span>
                 </div>
@@ -379,7 +379,7 @@ export function RazorpayCheckoutModal({
                 </div>
                 <div className="pt-2 border-t border-slate-200 flex justify-between items-baseline text-sm">
                   <span className="font-bold text-slate-900">Amount Due</span>
-                  <span className="text-lg font-extrabold text-emerald-800 flex items-center">
+                  <span className="text-lg font-extrabold text-[#c75e0a] flex items-center">
                     <IndianRupee className="w-4 h-4 inline" />
                     {activeFee.toLocaleString('en-IN')}
                   </span>
@@ -412,8 +412,8 @@ export function RazorpayCheckoutModal({
               </div>
 
               {/* Policy Notice */}
-              <div className="p-3 rounded-lg bg-emerald-50/70 border border-emerald-200/80 text-[11px] text-emerald-950 flex items-start gap-2">
-                <ShieldCheck className="w-4 h-4 text-emerald-700 shrink-0 mt-0.5" />
+              <div className="p-3 rounded-lg bg-[#fff9f0] border border-[#FF9933]/30 text-[11px] text-[#7a3705] flex items-start gap-2">
+                <ShieldCheck className="w-4 h-4 text-[#FF9933] shrink-0 mt-0.5" />
                 <p className="leading-relaxed">
                   {isRenewal ? (
                     <span>
@@ -421,7 +421,7 @@ export function RazorpayCheckoutModal({
                     </span>
                   ) : (
                     <span>
-                      <strong>Verification Notice:</strong> Payment confirms listing processing and queue placement. Our human admin team will review your uploaded title documents and survey ID before final public marketplace release.
+                      <strong>Instant Live Publishing:</strong> Once payment is confirmed, your land listing goes live immediately on the public search and map directory with zero administrative waiting queues.
                     </span>
                   )}
                 </p>
@@ -446,7 +446,7 @@ export function RazorpayCheckoutModal({
                     type="button"
                     onClick={handleInitiatePayment}
                     disabled={isProcessing}
-                    className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg bg-emerald-700 text-white text-xs font-bold hover:bg-emerald-800 transition-colors shadow-xs cursor-pointer disabled:opacity-50"
+                    className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg bg-[#FF9933] text-white text-xs font-bold hover:bg-[#f07d12] transition-colors shadow-xs cursor-pointer disabled:opacity-50"
                   >
                     {error ? (
                       <RotateCcw className="w-3.5 h-3.5" />
@@ -457,8 +457,8 @@ export function RazorpayCheckoutModal({
                       {isProcessing
                         ? 'Processing...'
                         : error
-                        ? `Try Again (₹${activeFee.toLocaleString('en-IN')})`
-                        : `Pay ₹${activeFee.toLocaleString('en-IN')}`}
+                          ? `Try Again (₹${activeFee.toLocaleString('en-IN')})`
+                          : `Pay ₹${activeFee.toLocaleString('en-IN')}`}
                     </span>
                   </button>
                 </div>

@@ -30,7 +30,7 @@ export function PropertyReviewModal({
   const handleAction = async (action: 'APPROVE' | 'REJECT' | 'REQUEST_INFO' | 'SUSPEND') => {
     if (action === 'REJECT' && !rejectionReason.trim()) {
       setShowRejectInput(true);
-      setError('Please provide a specific rejection reason explaining why the title or documents did not pass verification.');
+      setError('Please provide a specific rejection reason explaining why the listing violates marketplace rules.');
       return;
     }
 
@@ -48,12 +48,12 @@ export function PropertyReviewModal({
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Verification action failed');
+      if (!res.ok) throw new Error(data.error || 'Moderation action failed');
 
       onActionComplete();
       onClose();
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Error executing verification';
+      const msg = err instanceof Error ? err.message : 'Error executing moderation';
       setError(msg);
     } finally {
       setIsSubmitting(false);
@@ -88,17 +88,17 @@ export function PropertyReviewModal({
             onClick={() => setActiveTab('DETAILS')}
             className={`py-3 border-b-2 transition-colors ${
               activeTab === 'DETAILS'
-                ? 'border-emerald-600 text-emerald-800'
+                ? 'border-[#FF9933] text-[#c75e0a]'
                 : 'border-transparent hover:text-slate-900'
             }`}
           >
-            Property & Seller Information
+            Property &amp; Seller Information
           </button>
           <button
             onClick={() => setActiveTab('DOCUMENTS')}
             className={`py-3 border-b-2 flex items-center gap-1.5 transition-colors ${
               activeTab === 'DOCUMENTS'
-                ? 'border-emerald-600 text-emerald-800'
+                ? 'border-[#FF9933] text-[#c75e0a]'
                 : 'border-transparent hover:text-slate-900'
             }`}
           >
@@ -109,11 +109,11 @@ export function PropertyReviewModal({
             onClick={() => setActiveTab('IMAGES')}
             className={`py-3 border-b-2 transition-colors ${
               activeTab === 'IMAGES'
-                ? 'border-emerald-600 text-emerald-800'
+                ? 'border-[#FF9933] text-[#c75e0a]'
                 : 'border-transparent hover:text-slate-900'
             }`}
           >
-            Images & Maps ({property.images?.length || 0})
+            Images &amp; Maps ({property.images?.length || 0})
           </button>
         </div>
 
@@ -127,21 +127,21 @@ export function PropertyReviewModal({
 
           {activeTab === 'DETAILS' && (
             <div className="space-y-6">
-              {/* Government Land Record Registration ID Card */}
-              <div className="p-4 rounded-xl border border-emerald-300 bg-emerald-50/60 flex items-start justify-between">
+              {/* Government Land Record Survey Registration ID Card */}
+              <div className="p-4 rounded-xl border border-[#FF9933]/30 bg-[#fff9f0] flex items-start justify-between">
                 <div>
-                  <span className="text-[11px] font-bold text-emerald-900 uppercase tracking-wider block mb-1">
-                    Government Land Record / Survey Registration ID
+                  <span className="text-[11px] font-bold text-[#c75e0a] uppercase tracking-wider block mb-1">
+                    Government Land Record / Survey Registration ID (Self-Declared)
                   </span>
-                  <span className="text-base font-mono font-bold text-emerald-950">
+                  <span className="text-base font-mono font-bold text-slate-950">
                     {property.governmentRegistrationId}
                   </span>
-                  <p className="text-[11px] text-emerald-800 mt-1">
-                    Check this ID against state registration portal (Dharani / Kaveri / Bhulekh / IGR).
+                  <p className="text-[11px] text-[#7a3705] mt-1">
+                    Self-declared reference number provided by seller for buyer independent inspection.
                   </p>
                 </div>
-                <span className="px-2.5 py-1 rounded-md bg-emerald-700 text-white font-bold text-[11px]">
-                  Requires Audit Match
+                <span className="px-2.5 py-1 rounded-md bg-[#FF9933] text-white font-bold text-[11px]">
+                  Seller Reference
                 </span>
               </div>
 
@@ -162,7 +162,7 @@ export function PropertyReviewModal({
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-500">Total Valuation:</span>
-                    <span className="font-bold text-emerald-800">₹{property.totalPrice.toLocaleString('en-IN')}</span>
+                    <span className="font-bold text-[#c75e0a]">₹{property.totalPrice.toLocaleString('en-IN')}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-500">Publishing Fee Paid:</span>
@@ -220,7 +220,7 @@ export function PropertyReviewModal({
               {/* Location */}
               <div>
                 <h4 className="font-bold text-slate-900 text-xs uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-                  <MapPin className="w-3.5 h-3.5 text-emerald-700" />
+                  <MapPin className="w-3.5 h-3.5 text-[#FF9933]" />
                   <span>Physical Address & Coordinates</span>
                 </h4>
                 <div className="p-3.5 rounded-xl border border-slate-200 bg-white space-y-1">
@@ -237,7 +237,7 @@ export function PropertyReviewModal({
           {activeTab === 'DOCUMENTS' && (
             <div className="space-y-4">
               <div className="p-3 bg-amber-50 rounded-xl border border-amber-200 text-[11px] text-amber-900">
-                <strong>Confidential Documents:</strong> Sale deeds and revenue records are private and only accessible by authorized admins. Verify encumbrance, seller title continuity, and seal stamps.
+                <strong>Confidential Documents:</strong> Supporting documents are private and not exposed to the public. Moderate for abusive, unlawful, or infringing content.
               </div>
 
               <div className="space-y-3">
@@ -294,7 +294,7 @@ export function PropertyReviewModal({
                     referrerPolicy="no-referrer"
                   />
                   {img.isPrimary && (
-                    <span className="absolute top-2 left-2 bg-emerald-700 text-white text-[10px] font-bold px-2 py-0.5 rounded-md">
+                    <span className="absolute top-2 left-2 bg-[#FF9933] text-white text-[10px] font-bold px-2 py-0.5 rounded-md shadow-xs">
                       Primary
                     </span>
                   )}
@@ -313,7 +313,7 @@ export function PropertyReviewModal({
                 rows={3}
                 value={rejectionReason}
                 onChange={(e) => setRejectionReason(e.target.value)}
-                placeholder="e.g. Uploaded sale deed is illegible, survey number does not match Dharani records..."
+                placeholder="e.g. Listing contains prohibited content, duplicate post, or policy violations..."
                 className="w-full p-2.5 text-xs border border-rose-300 rounded-lg focus:ring-2 focus:ring-rose-500 bg-white"
                 required
               />
@@ -342,7 +342,7 @@ export function PropertyReviewModal({
                   handleAction('REJECT');
                 }
               }}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-rose-600 text-white text-xs font-bold hover:bg-rose-700 transition-colors"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-rose-600 text-white text-xs font-bold hover:bg-rose-700 transition-colors cursor-pointer"
             >
               <XCircle className="w-3.5 h-3.5" />
               <span>{showRejectInput ? 'Confirm Rejection' : 'Reject Listing'}</span>
@@ -352,7 +352,7 @@ export function PropertyReviewModal({
               type="button"
               disabled={isSubmitting}
               onClick={() => handleAction('REQUEST_INFO')}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-amber-600 text-white text-xs font-bold hover:bg-amber-700 transition-colors"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-amber-600 text-white text-xs font-bold hover:bg-amber-700 transition-colors cursor-pointer"
             >
               <AlertCircle className="w-3.5 h-3.5" />
               <span>Request Info</span>
@@ -362,10 +362,10 @@ export function PropertyReviewModal({
               type="button"
               disabled={isSubmitting}
               onClick={() => handleAction('APPROVE')}
-              className="inline-flex items-center gap-1.5 px-5 py-2 rounded-lg bg-emerald-700 text-white text-xs font-bold hover:bg-emerald-800 transition-colors shadow-xs"
+              className="inline-flex items-center gap-1.5 px-5 py-2 rounded-lg bg-[#FF9933] text-white text-xs font-bold hover:bg-[#f07d12] transition-colors shadow-xs cursor-pointer"
             >
               <ShieldCheck className="w-4 h-4" />
-              <span>Verify & Publish Live</span>
+              <span>Clear &amp; Approve Listing</span>
             </button>
           </div>
         </div>

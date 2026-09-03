@@ -36,8 +36,8 @@ export function PropertyDetailMap({
       <div className="p-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50/50">
         <div>
           <h3 className="font-bold text-slate-900 text-sm sm:text-base flex items-center gap-2">
-            <MapPin className="w-4 h-4 text-emerald-700" />
-            <span>Geographic Location & Satellite Map</span>
+            <MapPin className="w-4 h-4 text-[#FF9933]" />
+            <span>Geographic Location &amp; Satellite Map</span>
           </h3>
           <p className="text-xs text-slate-500 mt-0.5">
             {address} • {city}, {state}
@@ -75,9 +75,9 @@ export function PropertyDetailMap({
             href={directionsUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-800 text-xs font-bold hover:bg-emerald-100 transition-colors border border-emerald-200"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#fff1dc] text-[#c75e0a] text-xs font-bold hover:bg-[#ffe5c2] transition-colors border border-[#FF9933]/30"
           >
-            <Navigation className="w-3.5 h-3.5 text-emerald-700" />
+            <Navigation className="w-3.5 h-3.5 text-[#FF9933]" />
             <span>Directions</span>
           </a>
         </div>
@@ -98,7 +98,7 @@ export function PropertyDetailMap({
           className="w-full h-full"
         />
 
-        {/* Floating Privacy or Verified Pin Badge */}
+        {/* Floating Privacy or GPS Pin Badge */}
         <div className="absolute top-3 left-3 bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-lg border border-slate-200 shadow-md text-xs flex items-center gap-1.5 text-slate-800 pointer-events-none">
           {approximateLocation ? (
             <>
@@ -107,8 +107,8 @@ export function PropertyDetailMap({
             </>
           ) : (
             <>
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-              <span className="font-semibold text-emerald-950">Verified Coordinates</span>
+              <MapPin className="w-3.5 h-3.5 text-[#FF9933]" />
+              <span className="font-semibold text-slate-900">GPS Site Coordinates</span>
             </>
           )}
         </div>

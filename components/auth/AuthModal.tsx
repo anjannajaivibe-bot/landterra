@@ -101,8 +101,8 @@ export function AuthModal({
       aria-labelledby="bhoomimitra-auth-title"
     >
       <div className="w-full max-w-md overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl">
-        <div className="relative overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950 p-6 text-white">
-          <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-emerald-500/10 blur-3xl" />
+        <div className="relative overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-amber-950/40 p-6 text-white">
+          <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-[#FF9933]/15 blur-3xl" />
 
           <button
             type="button"
@@ -115,13 +115,13 @@ export function AuthModal({
           </button>
 
           <div className="relative flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-600 text-white shadow-lg">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#FF9933] text-white shadow-lg">
               <Compass className="h-4 w-4" />
             </div>
 
             <span className="text-lg font-black tracking-tight">
               Bhoomi
-              <span className="text-emerald-400">
+              <span className="text-[#FF9933]">
                 Mitra
               </span>
             </span>
@@ -194,16 +194,16 @@ export function AuthModal({
             />
           </div>
 
-          <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
+          <div className="rounded-2xl border border-[#FF9933]/30 bg-[#fff9f0] p-4">
             <div className="flex items-start gap-2.5">
-              <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-emerald-700" />
+              <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-[#FF9933]" />
 
               <div>
-                <p className="text-[11px] font-black text-emerald-950">
+                <p className="text-[11px] font-black text-slate-900">
                   Your account stays yours
                 </p>
 
-                <p className="mt-1 text-[10px] leading-5 text-emerald-900/75">
+                <p className="mt-1 text-[10px] leading-5 text-[#7a3705]">
                   We use Google to securely identify your account.
                   BhoomiMitra does not ask you to create another password.
                 </p>
@@ -258,8 +258,8 @@ function AuthBenefit({
 }) {
   return (
     <div className="flex items-start gap-3">
-      <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-50">
-        <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+      <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#fff1dc]">
+        <CheckCircle2 className="h-3.5 w-3.5 text-[#FF9933]" />
       </div>
 
       <div>

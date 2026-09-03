@@ -234,41 +234,15 @@ export async function getProperties(
 
     /*
      * ------------------------------------------------------------
-     * VERIFICATION
+     * STATUS FILTERING
      * ------------------------------------------------------------
+     *
+     * In the classifieds model, all PUBLISHED listings are visible.
+     * Sellers may inspect their own properties by verificationStatus.
      */
 
-    if (params.verifiedOnly) {
-      query.verificationStatus =
-        'VERIFIED';
-    } else if (
-      !params.sellerId &&
-      params.verificationStatus &&
-      params.verificationStatus !== 'ALL'
-    ) {
-      /*
-       * Public callers may request VERIFIED,
-       * but should never be able to browse rejected /
-       * pending private inventory.
-       */
-
-      if (
-        params.verificationStatus ===
-        'VERIFIED'
-      ) {
-        query.verificationStatus =
-          'VERIFIED';
-      } else {
-        query.verificationStatus =
-          'VERIFIED';
-      }
-    } else if (
-      params.sellerId &&
-      params.verificationStatus &&
-      params.verificationStatus !== 'ALL'
-    ) {
-      query.verificationStatus =
-        params.verificationStatus;
+    if (params.sellerId && params.verificationStatus && params.verificationStatus !== 'ALL') {
+      query.verificationStatus = params.verificationStatus;
     }
 
     /*
@@ -775,7 +749,7 @@ export async function createProperty(
 
     sellerName:
       data.sellerName ||
-      'Verified Seller',
+      'Landowner',
 
     sellerPhone:
       data.sellerPhone,
@@ -1008,39 +982,14 @@ export async function updateProperty(
 
   /*
    * ------------------------------------------------------------
-   * MATERIAL CHANGE → REVERIFICATION
+   * DIRECT CLASSIFIEDS MODEL — IN-PLACE PROPERTY UPDATES
    * ------------------------------------------------------------
+   * In the direct classifieds marketplace model, an update to property
+   * details by an authenticated landowner preserves its current published
+   * status without moving the listing to an admin verification queue.
    */
-
-  if (
-    hasMaterialPropertyChange(
-      incoming,
-    )
-  ) {
-    /*
-     * Only reset verification when the property was previously
-     * verified or published.
-     *
-     * A property already waiting for verification stays there.
-     */
-
-    if (
-      existing.verificationStatus ===
-      'VERIFIED' ||
-      existing.listingStatus ===
-      'PUBLISHED'
-    ) {
-      propertyUpdates.verificationStatus =
-        'PENDING';
-
-      /*
-       * A materially changed property should not remain
-       * publicly published while waiting for review.
-       */
-
-      propertyUpdates.listingStatus =
-        'PENDING_VERIFICATION';
-    }
+  if (existing.listingStatus === 'PUBLISHED') {
+    propertyUpdates.listingStatus = 'PUBLISHED';
   }
 
   /*
@@ -1064,7 +1013,7 @@ export async function updateProperty(
         $set: propertyUpdates,
       },
       {
-        new: true,
+        returnDocument: 'after',
         runValidators: true,
       },
     ).lean();
@@ -1166,7 +1115,7 @@ export async function markPropertyAsSold(
           },
         },
         {
-          new: true,
+          returnDocument: 'after',
           runValidators: true,
         },
       ).lean();
@@ -1233,7 +1182,7 @@ export async function togglePropertyPause(
         },
       },
       {
-        new: true,
+        returnDocument: 'after',
         runValidators: true,
       },
     ).lean();
@@ -1304,18 +1253,12 @@ export async function renewPropertySubscription(
     );
 
   /*
-   * A verified property can return to PUBLISHED.
+   * DIRECT CLASSIFIEDS MODEL — INSTANT LIVE PUBLISHING
    *
-   * An unverified property must remain in the verification
-   * workflow rather than being published merely because payment
-   * succeeded.
+   * In the direct classifieds marketplace model, activating a paid
+   * subscription publishes the listing live directly on the marketplace.
    */
-
-  const nextListingStatus =
-    property.verificationStatus ===
-      'VERIFIED'
-      ? 'PUBLISHED'
-      : 'PENDING_VERIFICATION';
+  const nextListingStatus = 'PUBLISHED';
 
   const conn =
     await connectToDatabase();
@@ -1344,7 +1287,7 @@ export async function renewPropertySubscription(
         },
       },
       {
-        new: true,
+        returnDocument: 'after',
         runValidators: true,
       },
     ).lean();

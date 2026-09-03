@@ -7,26 +7,26 @@
 [![Razorpay](https://img.shields.io/badge/Razorpay-Verified%20Payments-0C2340?style=flat&logo=razorpay)](https://razorpay.com/)
 [![Cloudflare R2](https://img.shields.io/badge/Cloudflare-R2%20Storage-F38020?style=flat&logo=cloudflare)](https://www.cloudflare.com/products/r2/)
 
-**BhoomiMitra** is a direct-to-owner land and agricultural plot classifieds platform designed for Indian real estate buyers, sellers, and agricultural investors. It eliminates broker commissions by connecting buyers directly with verified landowners through high-trust title document verification, interactive satellite map-based property exploration, direct phone call lead tracking, and a flat-fee digital advertising model.
+**BhoomiMitra** is a direct-to-owner land and agricultural plot classifieds platform designed for Indian real estate buyers, sellers, and agricultural investors. It eliminates broker commissions by connecting buyers directly with landowners through direct peer-to-peer listings, transparent buyer due diligence notices, interactive satellite map-based property exploration, direct phone call lead tracking, and a flat-fee digital advertising model.
 
 ---
 
 ## 🌟 Key Highlights & Features
 
 ### 🏡 Buyer Experience
-- **Interactive Satellite & Roadmap Exploration**: Switchable Google Maps Satellite / Roadmap view on `/properties/[id]` with verified coordinate overlays, privacy radius approximation, and one-click Google Maps driving directions.
-- **📞 Direct "Call Seller" Action**: Reach verified landowners with one-click calling; automatically records the buyer's lead, property, and seller details into MongoDB `inquiries` and immutable `auditlogs`.
+- **Interactive Satellite & Roadmap Exploration**: Switchable Google Maps Satellite / Roadmap view on `/properties/[id]` with GPS site coordinate overlays, privacy radius approximation, and one-click Google Maps driving directions.
+- **📞 Direct "Call Seller" Action**: Reach landowners with one-click calling; automatically records the buyer's lead, property, and seller details into MongoDB `inquiries` and immutable `auditlogs`.
 - **Smart Land Unit Converter**: Automatic area normalization across Indian land measurement units (`Square Yards`, `Guntas`, `Cents`, `Acres`, `Hectares`).
-- **Verified Listings & Title Records**: Badges distinguishing listings verified by admin-reviewed title deeds, 7/12 extract (Khata), Encumbrance Certificates (EC), and government survey numbers.
+- **Direct Peer-to-Peer Classifieds**: Clear direct classified badges paired with mandatory independent legal due diligence notices (advising advocate and registrar checks).
 - **Direct Inquiries & Messaging**: Submit structured purchase queries with optional contact sharing directly to the seller's dashboard.
 - **Persistent Favorites**: Save shortlisted plots to a private watchlist synced to MongoDB.
-- **Trust & Safety Reporting**: Report fraud or misleading listings with one-click violation reporting and admin audit logging.
+- **Trust & Safety Reporting**: Report abusive, fraudulent, or infringing listings with one-click violation reporting and admin audit logging.
 - **🔍 SEO Rich Snippets**: Native JSON-LD structured data (`schema.org/RealEstateListing`, `Place`, `GeoCoordinates`, `Offer`) for search engine visibility.
 
 ### 🚜 Seller Portal & Listing Engine
 - **Multi-Step Listing Creator**: Form with automated client-side image compression (<900 KB) and Cloudflare R2 presigned direct uploads.
 - **Interactive GPS Location Picker**: Drop pins on Google Maps, define road width, facing direction, soil type, and toggle approximate location radius privacy.
-- **Secure Document Uploads**: Upload government land documents (Pahani, Passbook, EC, Tax Receipts) securely for admin verification.
+- **Secure Document Uploads**: Upload documents (Pahani, Passbook, EC, Tax Receipts) securely for content moderation.
 - **Flat 30-Day Classifieds Model**: Server-controlled flat listing advertisement fee with 30-day listing subscriptions and renewal lifecycle.
 - **Seller Dashboard & Lead Management (`/dashboard/seller`)**:
   - One-click **"Call Buyer" (`tel:`)** and **"Email Buyer" (`mailto:`)** quick actions on incoming leads.
@@ -140,7 +140,7 @@
 │   ├── properties/[id]/
 │   │   └── page.tsx                     # Property details, satellite map, call seller & JSON-LD
 │   └── api/
-│       ├── admin/                       # Admin verification, stats, and audit APIs
+│       ├── admin/                       # Admin moderation, stats, and audit APIs
 │       ├── auth/                        # Google OAuth, Session, and OTP APIs
 │       ├── contact/                     # Contact query API
 │       ├── documents/                   # Secure document download streaming

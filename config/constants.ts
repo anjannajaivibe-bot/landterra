@@ -182,19 +182,19 @@ export const DOCUMENT_TYPES = [
 
 export const VERIFICATION_BADGES = {
   VERIFIED: {
-    label: 'Verified',
+    label: 'Direct Classified',
 
-    color: 'emerald',
+    color: 'saffron',
 
     badgeClass:
-      'bg-emerald-50 text-emerald-700 border-emerald-200',
+      'bg-[#fff1dc] text-[#c75e0a] border-[#FF9933]/40',
 
     description:
-      'The listing has completed BhoomiMitra’s internal document review process.',
+      'Direct peer-to-peer listing published directly by the landowner.',
   },
 
   PENDING: {
-    label: 'Under Review',
+    label: 'Draft',
 
     color: 'amber',
 
@@ -202,11 +202,11 @@ export const VERIFICATION_BADGES = {
       'bg-amber-50 text-amber-700 border-amber-200',
 
     description:
-      'The listing is currently undergoing BhoomiMitra’s internal review.',
+      'Listing draft awaiting publishing fee completion.',
   },
 
   VERIFICATION_REQUIRED: {
-    label: 'Review Required',
+    label: 'Information Needed',
 
     color: 'blue',
 
@@ -214,11 +214,11 @@ export const VERIFICATION_BADGES = {
       'bg-blue-50 text-blue-700 border-blue-200',
 
     description:
-      'Additional information or documentation may be required.',
+      'Additional property information requested from the seller.',
   },
 
   REJECTED: {
-    label: 'Not Verified',
+    label: 'Suspended',
 
     color: 'rose',
 
@@ -226,7 +226,7 @@ export const VERIFICATION_BADGES = {
       'bg-rose-50 text-rose-700 border-rose-200',
 
     description:
-      'The submitted information did not pass the current review process.',
+      'Listing has been suspended or deactivated by moderation.',
   },
 } as const;
 

@@ -20,6 +20,7 @@ export default function robots(): MetadataRoute.Robots {
           '/refund-policy',
           '/properties/',
           '/llms.txt',
+          '/llms-full.txt',
           '/manifest.webmanifest',
         ],
         disallow: [

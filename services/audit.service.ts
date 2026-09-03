@@ -43,7 +43,7 @@ export async function createAuditLog({
           ipAddress,
         },
       },
-      { new: true, upsert: true, returnDocument: 'after' }
+      { upsert: true, returnDocument: 'after' }
     );
   }
 

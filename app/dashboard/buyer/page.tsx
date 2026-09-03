@@ -83,12 +83,12 @@ export default function BuyerDashboardPage() {
       <div className="bg-slate-900 text-white py-8 border-b border-slate-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <div className="inline-flex items-center gap-1.5 text-xs text-emerald-400 font-semibold mb-1">
+            <div className="inline-flex items-center gap-1.5 text-xs text-[#FF9933] font-semibold mb-1">
               <UserCheck className="w-4 h-4" />
               <span>Buyer Dashboard</span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
-              My Saved Lands & Messages
+              My Saved Lands &amp; Messages
             </h1>
             <p className="text-xs sm:text-sm text-slate-300 mt-1">
               Access your bookmarked land parcels and tracked seller inquiries.
@@ -97,10 +97,10 @@ export default function BuyerDashboardPage() {
 
           <Link
             href="/buy"
-            className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-colors shadow-xs"
+            className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#FF9933] hover:bg-[#f07d12] text-white text-xs font-bold transition-colors shadow-xs"
           >
             <Search className="w-4 h-4" />
-            <span>Search Verified Lands</span>
+            <span>Browse Land Listings</span>
           </Link>
         </div>
       </div>
@@ -114,7 +114,7 @@ export default function BuyerDashboardPage() {
                 onClick={() => setActiveTab('SAVED')}
                 className={`py-4 border-b-2 transition-colors flex items-center gap-1.5 cursor-pointer ${
                   activeTab === 'SAVED'
-                    ? 'border-emerald-600 text-emerald-800'
+                    ? 'border-[#FF9933] text-[#c75e0a]'
                     : 'border-transparent hover:text-slate-900'
                 }`}
               >
@@ -126,7 +126,7 @@ export default function BuyerDashboardPage() {
                 onClick={() => setActiveTab('INQUIRIES')}
                 className={`py-4 border-b-2 transition-colors flex items-center gap-1.5 cursor-pointer ${
                   activeTab === 'INQUIRIES'
-                    ? 'border-emerald-600 text-emerald-800'
+                    ? 'border-[#FF9933] text-[#c75e0a]'
                     : 'border-transparent hover:text-slate-900'
                 }`}
               >
@@ -160,7 +160,7 @@ export default function BuyerDashboardPage() {
                     </Link>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div className="flex flex-col gap-5 sm:gap-6">
                     {favorites.map((prop) =>
                       prop?._id ? (
                         <PropertyCard
@@ -200,7 +200,7 @@ export default function BuyerDashboardPage() {
                       </p>
                       <div className="flex items-center justify-between text-[11px] text-slate-500 pt-1">
                         <span>Property Reference: {inq.propertyId}</span>
-                        <span className="text-emerald-700 font-semibold">Active Request</span>
+                        <span className="text-[#c75e0a] font-semibold">Active Request</span>
                       </div>
                     </div>
                   ))

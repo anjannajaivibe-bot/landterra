@@ -1,80 +1,80 @@
 export type LandType =
-  | 'RESIDENTIAL_PLOT'
-  | 'COMMERCIAL_LAND'
-  | 'AGRICULTURAL_LAND'
-  | 'INDUSTRIAL_PLOT'
-  | 'FARM_HOUSE_LAND'
-  | 'INSTITUTIONAL';
+   | 'RESIDENTIAL_PLOT'
+   | 'COMMERCIAL_LAND'
+   | 'AGRICULTURAL_LAND'
+   | 'INDUSTRIAL_PLOT'
+   | 'FARM_HOUSE_LAND'
+   | 'INSTITUTIONAL';
 
 export type VerificationStatus =
-  | 'PENDING'
-  | 'VERIFIED'
-  | 'REJECTED'
-  | 'VERIFICATION_REQUIRED';
+   | 'PENDING'
+   | 'VERIFIED'
+   | 'REJECTED'
+   | 'VERIFICATION_REQUIRED';
 
 export type ListingStatus =
-  | 'DRAFT'
-  | 'PAYMENT_PENDING'
-  | 'PENDING_VERIFICATION'
-  | 'PUBLISHED'
-  | 'EXPIRING_SOON'
-  | 'EXPIRED'
-  | 'PAUSED'
-  | 'SOLD'
-  | 'REJECTED'
-  | 'DELETED';
+   | 'DRAFT'
+   | 'PAYMENT_PENDING'
+   | 'PENDING_VERIFICATION'
+   | 'PUBLISHED'
+   | 'EXPIRING_SOON'
+   | 'EXPIRED'
+   | 'PAUSED'
+   | 'SOLD'
+   | 'REJECTED'
+   | 'DELETED';
 
 export type PaymentStatus =
-  | 'UNPAID'
-  | 'PENDING'
-  | 'PAID'
-  | 'FAILED';
+   | 'UNPAID'
+   | 'PENDING'
+   | 'PAID'
+   | 'FAILED';
 
 export type SellerType =
-  | 'INDIVIDUAL'
-  | 'COMPANY'
-  | 'AGENT';
+   | 'INDIVIDUAL'
+   | 'COMPANY'
+   | 'AGENT';
 
 export type DocumentType =
-  | 'TITLE_DEED'
-  | 'KHATA_7_12_CERTIFICATE'
-  | 'TAX_RECEIPT'
-  | 'ENCUMBRANCE_CERTIFICATE'
-  | 'GOVT_SURVEY_RECORD'
-  | 'POA_OR_OTHER';
+   | 'TITLE_DEED'
+   | 'KHATA_7_12_CERTIFICATE'
+   | 'TAX_RECEIPT'
+   | 'ENCUMBRANCE_CERTIFICATE'
+   | 'GOVT_SURVEY_RECORD'
+   | 'POA_OR_OTHER';
 
 export type DocumentVerificationStatus =
-  | 'PENDING'
-  | 'VERIFIED'
-  | 'REJECTED';
+   | 'PENDING'
+   | 'VERIFIED'
+   | 'REJECTED';
 
 /* ================================================================
    PROPERTY IMAGE
 ================================================================ */
 
 export interface IPropertyImage {
-  _id?: string;
-  propertyId?: string;
+   _id?: string;
+   propertyId?: string;
 
-  /**
-   * R2 object key.
-   * Never expose this directly to an unauthenticated client.
-   */
-  objectKey: string;
+   /**
+    * R2 object key.
+    * Never expose this directly to an unauthenticated client.
+    */
+   objectKey: string;
 
-  /**
-   * Public CDN/R2 URL for property images.
-   */
-  secureUrl: string;
+   /**
+    * Public CDN/R2 URL for property images.
+    */
+   secureUrl: string;
 
-  fileName: string;
-  mimeType: string;
-  size: number;
+   fileName: string;
+   mimeType: string;
+   size: number;
 
-  isPrimary: boolean;
-  sortOrder: number;
+   isPrimary: boolean;
+   sortOrder: number;
 
-  createdAt?: string | Date;
+   createdAt?: string | Date;
 }
 
 /* ================================================================
@@ -82,29 +82,29 @@ export interface IPropertyImage {
 ================================================================ */
 
 export interface IPropertyDocument {
-  _id?: string;
-  propertyId?: string;
-  sellerId?: string;
+   _id?: string;
+   propertyId?: string;
+   sellerId?: string;
 
-  documentType: DocumentType;
+   documentType: DocumentType;
 
-  /**
-   * Private R2 object key.
-   * This should NEVER be rendered publicly.
-   */
-  objectKey: string;
+   /**
+    * Private R2 object key.
+    * This should NEVER be rendered publicly.
+    */
+   objectKey: string;
 
-  fileName: string;
-  mimeType: string;
-  size: number;
+   fileName: string;
+   mimeType: string;
+   size: number;
 
-  verificationStatus: DocumentVerificationStatus;
+   verificationStatus: DocumentVerificationStatus;
 
-  uploadedAt: string | Date;
-  reviewedAt?: string | Date;
-  reviewedBy?: string;
+   uploadedAt: string | Date;
+   reviewedAt?: string | Date;
+   reviewedBy?: string;
 
-  rejectionReason?: string;
+   rejectionReason?: string;
 }
 
 /* ================================================================
@@ -112,19 +112,19 @@ export interface IPropertyDocument {
 ================================================================ */
 
 export interface IPropertyLocation {
-  /**
-   * Public-facing address.
-   *
-   * Do not assume this is the exact physical location unless
-   * the seller intentionally provided it for public display.
-   */
-  address: string;
+   /**
+    * Public-facing address.
+    *
+    * Do not assume this is the exact physical location unless
+    * the seller intentionally provided it for public display.
+    */
+   address: string;
 
-  city: string;
-  state: string;
-  pincode: string;
+   city: string;
+   state: string;
+   pincode: string;
 
-  district?: string;
+   district?: string;
 }
 
 /* ================================================================
@@ -132,165 +132,165 @@ export interface IPropertyLocation {
 ================================================================ */
 
 export interface IProperty {
-  _id: string;
+   _id: string;
 
-  sellerId: string;
+   sellerId: string;
 
-  sellerName?: string;
-  sellerPhone?: string;
-  sellerEmail?: string;
-  sellerType?: SellerType;
+   sellerName?: string;
+   sellerPhone?: string;
+   sellerEmail?: string;
+   sellerType?: SellerType;
 
-  /* --------------------------------------------------------------
-     BASIC LISTING INFORMATION
-  -------------------------------------------------------------- */
+   /* --------------------------------------------------------------
+      BASIC LISTING INFORMATION
+   -------------------------------------------------------------- */
 
-  title: string;
-  description: string;
+   title: string;
+   description: string;
 
-  landAreaYards: number;
+   landAreaYards: number;
 
-  /**
-   * Seller's asking price per sq. yard.
-   * This is NOT the BhoomiMitra listing subscription price.
-   */
-  pricePerYard: number;
+   /**
+    * Seller's asking price per sq. yard.
+    * This is NOT the BhoomiMitra listing subscription price.
+    */
+   pricePerYard: number;
 
-  /**
-   * Seller's total asking price.
-   */
-  totalPrice: number;
+   /**
+    * Seller's total asking price.
+    */
+   totalPrice: number;
 
-  /**
-   * True when seller is open to negotiation.
-   */
-  priceNegotiable?: boolean;
+   /**
+    * True when seller is open to negotiation.
+    */
+   priceNegotiable?: boolean;
 
-  /* --------------------------------------------------------------
-     BHOOMIMITRA SELLER LISTING FEE
-  -------------------------------------------------------------- */
+   /* --------------------------------------------------------------
+      BHOOMIMITRA SELLER LISTING FEE
+   -------------------------------------------------------------- */
 
-  /**
-   * Monthly listing subscription amount.
-   *
-   * Business rule:
-   * landAreaYards × ₹10
-   */
-  publishingFee: number;
+   /**
+    * Monthly listing subscription amount.
+    *
+    * Business rule:
+    * landAreaYards × ₹10
+    */
+   publishingFee: number;
 
-  monthlyListingFee?: number;
+   monthlyListingFee?: number;
 
-  subscriptionStartedAt?: string | Date;
-  subscriptionExpiresAt?: string | Date;
+   subscriptionStartedAt?: string | Date;
+   subscriptionExpiresAt?: string | Date;
 
-  paymentStatus?: PaymentStatus;
+   paymentStatus?: PaymentStatus;
 
-  isFeePaid?: boolean;
+   isFeePaid?: boolean;
 
-  /* --------------------------------------------------------------
-     LAND CLASSIFICATION
-  -------------------------------------------------------------- */
+   /* --------------------------------------------------------------
+      LAND CLASSIFICATION
+   -------------------------------------------------------------- */
 
-  landType: LandType;
+   landType: LandType;
 
-  roadAccess: string;
+   roadAccess: string;
 
-  nearbyLandmarks: string[];
+   nearbyLandmarks: string[];
 
-  /* --------------------------------------------------------------
-     LOCATION
-  -------------------------------------------------------------- */
+   /* --------------------------------------------------------------
+      LOCATION
+   -------------------------------------------------------------- */
 
-  location: IPropertyLocation;
+   location: IPropertyLocation;
 
-  /**
-   * Seller-provided Google Maps share URL.
-   *
-   * Example:
-   * https://maps.app.goo.gl/...
-   */
-  googleMapsShareLink?: string;
+   /**
+    * Seller-provided Google Maps share URL.
+    *
+    * Example:
+    * https://maps.app.goo.gl/...
+    */
+   googleMapsShareLink?: string;
 
-  /**
-   * Internal/derived coordinates.
-   *
-   * Do not expose these blindly in public API responses.
-   */
-  latitude?: number;
-  longitude?: number;
+   /**
+    * Internal/derived coordinates.
+    *
+    * Do not expose these blindly in public API responses.
+    */
+   latitude?: number;
+   longitude?: number;
 
-  /**
-   * When enabled, exact coordinates should not be publicly exposed.
-   */
-  approximateLocation?: boolean;
+   /**
+    * When enabled, exact coordinates should not be publicly exposed.
+    */
+   approximateLocation?: boolean;
 
-  /* --------------------------------------------------------------
-     OPTIONAL GOVERNMENT INFORMATION
-  -------------------------------------------------------------- */
+   /* --------------------------------------------------------------
+      OPTIONAL GOVERNMENT INFORMATION
+   -------------------------------------------------------------- */
 
-  /**
-   * Optional seller-provided survey / registration / khata /
-   * patta reference.
-   *
-   * This is NOT mandatory for listing.
-   */
-  governmentRegistrationId?: string;
+   /**
+    * Optional seller-provided survey / registration / khata /
+    * patta reference.
+    *
+    * This is NOT mandatory for listing.
+    */
+   governmentRegistrationId?: string;
 
-  /* --------------------------------------------------------------
-     VERIFICATION
-  -------------------------------------------------------------- */
+   /* --------------------------------------------------------------
+      VERIFICATION
+   -------------------------------------------------------------- */
 
-  verificationStatus: VerificationStatus;
+   verificationStatus: VerificationStatus;
 
-  verificationReviewedAt?: string | Date;
-  verificationReviewedBy?: string;
+   verificationReviewedAt?: string | Date;
+   verificationReviewedBy?: string;
 
-  rejectionReason?: string;
+   rejectionReason?: string;
 
-  /* --------------------------------------------------------------
-     LISTING LIFECYCLE
-  -------------------------------------------------------------- */
+   /* --------------------------------------------------------------
+      LISTING LIFECYCLE
+   -------------------------------------------------------------- */
 
-  listingStatus: ListingStatus;
+   listingStatus: ListingStatus;
 
-  publishedAt?: string | Date;
+   publishedAt?: string | Date;
 
-  /* --------------------------------------------------------------
-     MEDIA
-  -------------------------------------------------------------- */
+   /* --------------------------------------------------------------
+      MEDIA
+   -------------------------------------------------------------- */
 
-  images: IPropertyImage[];
+   images: IPropertyImage[];
 
-  /**
-   * Documents are private.
-   *
-   * Do not include them in public marketplace API responses.
-   */
-  documents?: IPropertyDocument[];
+   /**
+    * Documents are private.
+    *
+    * Do not include them in public marketplace API responses.
+    */
+   documents?: IPropertyDocument[];
 
-  /* --------------------------------------------------------------
-     ANALYTICS
-  -------------------------------------------------------------- */
+   /* --------------------------------------------------------------
+      ANALYTICS
+   -------------------------------------------------------------- */
 
-  viewsCount?: number;
-  inquiriesCount?: number;
+   viewsCount?: number;
+   inquiriesCount?: number;
 
-  /* --------------------------------------------------------------
-     USER-SPECIFIC STATE
-  -------------------------------------------------------------- */
+   /* --------------------------------------------------------------
+      USER-SPECIFIC STATE
+   -------------------------------------------------------------- */
 
-  /**
-   * Only meaningful when the authenticated user's favorite
-   * relationship has been checked.
-   */
-  isFavorite?: boolean;
+   /**
+    * Only meaningful when the authenticated user's favorite
+    * relationship has been checked.
+    */
+   isFavorite?: boolean;
 
-  /* --------------------------------------------------------------
-     TIMESTAMPS
-  -------------------------------------------------------------- */
+   /* --------------------------------------------------------------
+      TIMESTAMPS
+   -------------------------------------------------------------- */
 
-  createdAt: string | Date;
-  updatedAt: string | Date;
+   createdAt: string | Date;
+   updatedAt: string | Date;
 }
 
 /* ================================================================
@@ -302,44 +302,44 @@ export interface IProperty {
 ================================================================ */
 
 export interface IPublicProperty {
-  _id: string;
+   _id: string;
 
-  title: string;
-  description?: string;
+   title: string;
+   description?: string;
 
-  landAreaYards: number;
+   landAreaYards: number;
 
-  pricePerYard: number;
-  totalPrice: number;
+   pricePerYard: number;
+   totalPrice: number;
 
-  priceNegotiable?: boolean;
+   priceNegotiable?: boolean;
 
-  landType: LandType;
+   landType: LandType;
 
-  roadAccess: string;
+   roadAccess: string;
 
-  nearbyLandmarks: string[];
+   nearbyLandmarks: string[];
 
-  location: IPropertyLocation;
+   location: IPropertyLocation;
 
-  googleMapsShareLink?: string;
+   googleMapsShareLink?: string;
 
-  approximateLocation?: boolean;
+   approximateLocation?: boolean;
 
-  verificationStatus: VerificationStatus;
+   verificationStatus: VerificationStatus;
 
-  listingStatus: ListingStatus;
+   listingStatus: ListingStatus;
 
-  images: IPropertyImage[];
+   images: IPropertyImage[];
 
-  publishedAt?: string | Date;
+   publishedAt?: string | Date;
 
-  createdAt: string | Date;
-  updatedAt: string | Date;
+   createdAt: string | Date;
+   updatedAt: string | Date;
 
-  viewsCount?: number;
+   viewsCount?: number;
 
-  isFavorite?: boolean;
+   isFavorite?: boolean;
 }
 
 /* ================================================================
@@ -347,26 +347,26 @@ export interface IPublicProperty {
 ================================================================ */
 
 export interface IAuthenticatedProperty
-  extends IPublicProperty {
-  sellerName?: string;
-  sellerType?: SellerType;
+   extends IPublicProperty {
+   sellerName?: string;
+   sellerType?: SellerType;
 
-  /**
-   * Contact information should only be populated when the
-   * backend explicitly authorizes the requesting user.
-   */
-  sellerPhone?: string;
-  sellerEmail?: string;
+   /**
+    * Contact information should only be populated when the
+    * backend explicitly authorizes the requesting user.
+    */
+   sellerPhone?: string;
+   sellerEmail?: string;
 
-  inquiriesCount?: number;
-  documents?: IPropertyDocument[];
-  governmentRegistrationId?: string;
-  publishingFee?: number;
-  monthlyListingFee?: number;
-  paymentStatus?: PaymentStatus;
-  subscriptionStartedAt?: string | Date;
-  subscriptionExpiresAt?: string | Date;
-  rejectionReason?: string;
+   inquiriesCount?: number;
+   documents?: IPropertyDocument[];
+   governmentRegistrationId?: string;
+   publishingFee?: number;
+   monthlyListingFee?: number;
+   paymentStatus?: PaymentStatus;
+   subscriptionStartedAt?: string | Date;
+   subscriptionExpiresAt?: string | Date;
+   rejectionReason?: string;
 }
 
 /* ================================================================
@@ -374,45 +374,45 @@ export interface IAuthenticatedProperty
 ================================================================ */
 
 export interface PropertyFilterParams {
-  query?: string;
+   query?: string;
 
-  location?: string;
+   location?: string;
 
-  city?: string;
+   city?: string;
 
-  state?: string;
+   state?: string;
 
-  minPrice?: number;
-  maxPrice?: number;
+   minPrice?: number;
+   maxPrice?: number;
 
-  minArea?: number;
-  maxArea?: number;
+   minArea?: number;
+   maxArea?: number;
 
-  minPricePerYard?: number;
-  maxPricePerYard?: number;
+   minPricePerYard?: number;
+   maxPricePerYard?: number;
 
-  landType?: LandType | 'ALL';
+   landType?: LandType | 'ALL';
 
-  verifiedOnly?: boolean;
+   verifiedOnly?: boolean;
 
-  sortBy?:
-  | 'newest'
-  | 'price_asc'
-  | 'price_desc'
-  | 'area_asc'
-  | 'area_desc';
+   sortBy?:
+   | 'newest'
+   | 'price_asc'
+   | 'price_desc'
+   | 'area_asc'
+   | 'area_desc';
 
-  page?: number;
+   page?: number;
 
-  limit?: number;
+   limit?: number;
 
-  sellerId?: string;
+   sellerId?: string;
 
-  listingStatus?: ListingStatus | 'ALL';
+   listingStatus?: ListingStatus | 'ALL';
 
-  verificationStatus?:
-  | VerificationStatus
-  | 'ALL';
+   verificationStatus?:
+   | VerificationStatus
+   | 'ALL';
 }
 
 /* ================================================================
@@ -420,15 +420,15 @@ export interface PropertyFilterParams {
 ================================================================ */
 
 export interface PaginatedResponse<T> {
-  data: T[];
+   data: T[];
 
-  total: number;
+   total: number;
 
-  page: number;
+   page: number;
 
-  totalPages: number;
+   totalPages: number;
 
-  limit: number;
+   limit: number;
 }
 
 /* ================================================================
@@ -436,7 +436,7 @@ export interface PaginatedResponse<T> {
 ================================================================ */
 
 export interface PropertyResponse<T = IProperty> {
-  data: T;
+   data: T;
 }
 
 /* ================================================================
@@ -444,13 +444,13 @@ export interface PropertyResponse<T = IProperty> {
 ================================================================ */
 
 export interface PropertyMutationResponse {
-  success: boolean;
+   success: boolean;
 
-  property?: IProperty;
+   property?: IProperty;
 
-  message?: string;
+   message?: string;
 
-  error?: string;
+   error?: string;
 }
 
 /* ================================================================
@@ -458,7 +458,7 @@ export interface PropertyMutationResponse {
 ================================================================ */
 
 export interface PropertyStatusUpdatePayload {
-  status: ListingStatus;
+   status: ListingStatus;
 
-  reason?: string;
+   reason?: string;
 }

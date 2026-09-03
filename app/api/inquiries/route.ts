@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'Inquiry sent directly to verified seller. Check your buyer dashboard for updates.',
+      message: 'Inquiry sent directly to landowner. Check your buyer dashboard for updates.',
       inquiry,
     });
   } catch (err: unknown) {

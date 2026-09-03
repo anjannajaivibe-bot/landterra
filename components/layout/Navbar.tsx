@@ -23,6 +23,7 @@ import {
 
 import { IUser } from '@/types/user';
 import { AuthModal } from '@/components/auth/AuthModal';
+import { CitySelectorMegaMenu } from './CitySelectorMegaMenu';
 
 export function Navbar() {
   const pathname = usePathname();
@@ -159,15 +160,15 @@ export function Navbar() {
         <div className="border-b border-slate-100 bg-slate-50/90 text-slate-800">
           <div className="mx-auto flex h-8 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
             <div className="flex min-w-0 items-center gap-2 text-[11px] font-semibold text-slate-800">
-              <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-emerald-700" />
+              <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-[#FF9933]" />
               <span className="truncate">
-                Direct-to-owner land marketplace • 0% Broker Commission • Verified Revenue Records
+                Direct-to-owner land marketplace • 0% Broker Commission • Direct Peer-to-Peer Listings
               </span>
             </div>
 
             <div className="hidden shrink-0 items-center gap-3 text-[11px] text-slate-600 sm:flex">
               <span>Classifieds Publishing:</span>
-              <span className="font-bold text-emerald-800">
+              <span className="font-bold text-[#c75e0a]">
                 Flat ₹10 for 30 Days
               </span>
             </div>
@@ -179,28 +180,34 @@ export function Navbar() {
         ====================================================== */}
 
         <div className="mx-auto flex h-[68px] max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          {/* LOGO */}
-          <Link
-            href="/"
-            onClick={closeAllMenus}
-            className="group flex shrink-0 items-center gap-2.5"
-            aria-label="BhoomiMitra home"
-          >
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-600 text-white shadow-sm transition-all group-hover:bg-emerald-700 group-hover:shadow-md">
-              <Compass className="h-5 w-5" />
-            </div>
+          {/* LOGO & CITY SELECTOR */}
+          <div className="flex items-center gap-3">
+            <Link
+              href="/"
+              onClick={closeAllMenus}
+              className="group flex shrink-0 items-center gap-2.5"
+              aria-label="BhoomiMitra home"
+            >
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#FF9933] text-white shadow-sm transition-all group-hover:bg-[#f07d12] group-hover:shadow-md">
+                <Compass className="h-5 w-5" />
+              </div>
 
-            <div className="leading-none">
-              <span className="flex items-center text-xl font-black tracking-tight text-slate-950">
-                Bhoomi
-                <span className="text-emerald-700">Mitra</span>
-              </span>
+              <div className="leading-none">
+                <span className="flex items-center text-xl font-black tracking-tight text-slate-950">
+                  Bhoomi
+                  <span className="text-[#FF9933]">Mitra</span>
+                </span>
+                <span className="mt-1 block text-[9px] font-extrabold uppercase tracking-[0.18em] text-slate-500">
+                  Land Marketplace
+                </span>
+              </div>
+            </Link>
 
-              <span className="mt-1 block text-[9px] font-extrabold uppercase tracking-[0.18em] text-slate-500">
-                Land Marketplace
-              </span>
+            {/* City Mega-Menu Selector */}
+            <div className="flex items-center ml-1 pl-2.5 border-l border-slate-200">
+              <CitySelectorMegaMenu />
             </div>
-          </Link>
+          </div>
 
           {/* ====================================================
               DESKTOP NAVIGATION LINKS (Solid Black / Bold)
@@ -269,7 +276,7 @@ export function Navbar() {
                   className="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-white px-3 py-2 transition-all hover:border-slate-300 hover:bg-slate-50 shadow-2xs"
                 >
                   {/* Avatar */}
-                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-100 text-xs font-black text-emerald-900 border border-emerald-200">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#fff1dc] text-xs font-black text-[#c75e0a] border border-[#FF9933]/30">
                     {userInitial}
                   </div>
 
@@ -299,7 +306,7 @@ export function Navbar() {
                     {/* Account header */}
                     <div className="border-b border-slate-100 px-3 pb-3 pt-2">
                       <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-sm font-black text-emerald-900 border border-emerald-200">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#fff1dc] text-sm font-black text-[#c75e0a] border border-[#FF9933]/30">
                           {userInitial}
                         </div>
 
@@ -313,8 +320,8 @@ export function Navbar() {
                           </div>
 
                           {user.phone && (
-                            <div className="mt-1 flex items-center gap-1 text-[10px] font-bold text-emerald-800">
-                              <CheckCircle2 className="h-3 w-3" />
+                            <div className="mt-1 flex items-center gap-1 text-[10px] font-bold text-[#c75e0a]">
+                              <CheckCircle2 className="h-3 w-3 text-[#FF9933]" />
                               <span>Phone Verified</span>
                             </div>
                           )}
@@ -337,7 +344,7 @@ export function Navbar() {
                       <AccountMenuLink
                         href="/dashboard/seller"
                         icon={
-                          <LayoutDashboard className="h-4 w-4 text-emerald-700" />
+                          <LayoutDashboard className="h-4 w-4 text-[#FF9933]" />
                         }
                         title="My Land Listings"
                         description="Manage listings and subscriptions"
@@ -382,20 +389,23 @@ export function Navbar() {
               <button
                 type="button"
                 onClick={openAuthModal}
-                className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-bold text-slate-900 shadow-2xs transition-all hover:border-slate-300 hover:bg-slate-50 hover:text-emerald-800"
+                className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-bold text-slate-900 shadow-2xs transition-all hover:border-slate-300 hover:bg-slate-50 hover:text-[#c75e0a]"
               >
                 <LogIn className="h-4 w-4 text-slate-700" />
                 <span>Sign In</span>
               </button>
             )}
 
-            {/* PRIMARY SELL CTA */}
+            {/* PRIMARY SELL CTA WITH BADGE */}
             <Link
               href="/sell"
-              className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-xs font-bold text-white shadow-sm transition-all hover:bg-emerald-700 hover:shadow-md"
+              className="inline-flex items-center gap-2 rounded-xl bg-[#FF9933] px-4 py-2.5 text-xs font-bold text-white shadow-sm transition-all hover:bg-[#f07d12] hover:shadow-md cursor-pointer"
             >
               <Plus className="h-4 w-4" />
-              <span>List Your Land</span>
+              <span>Post Land</span>
+              <span className="ml-0.5 rounded-md bg-white text-[#9e490f] px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider shadow-2xs">
+                ₹10
+              </span>
             </Link>
           </div>
 
@@ -410,7 +420,7 @@ export function Navbar() {
                 onClick={openAuthModal}
                 className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-900"
               >
-                <LogIn className="h-3.5 w-3.5 text-emerald-700" />
+                <LogIn className="h-3.5 w-3.5 text-[#c75e0a]" />
                 <span>Sign In</span>
               </button>
             )}
@@ -418,7 +428,7 @@ export function Navbar() {
             <Link
               href="/sell"
               onClick={closeAllMenus}
-              className="inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-3 py-2 text-xs font-bold text-white"
+              className="inline-flex items-center gap-1 rounded-lg bg-[#FF9933] px-3 py-2 text-xs font-bold text-white"
             >
               <Plus className="h-3.5 w-3.5" />
               <span>List Land</span>
@@ -454,17 +464,17 @@ export function Navbar() {
               {/* Mobile primary discovery card */}
               <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 shadow-2xs">
                 <div className="flex items-start gap-3">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-600 text-white">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#FF9933] text-white">
                     <Search className="h-4 w-4" />
                   </div>
 
                   <div>
                     <p className="text-sm font-bold text-slate-950">
-                      Explore Verified Land
+                      Explore Land Listings
                     </p>
 
                     <p className="mt-0.5 text-xs text-slate-600">
-                      Browse agricultural land, residential plots, and commercial corridors directly from owners.
+                      Browse agricultural land, residential plots, and commercial corridors directly from landowners.
                     </p>
                   </div>
                 </div>
@@ -472,7 +482,7 @@ export function Navbar() {
                 <Link
                   href="/buy"
                   onClick={closeAllMenus}
-                  className="mt-3.5 flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-xs font-bold text-white transition-colors hover:bg-emerald-700 shadow-xs"
+                  className="mt-3.5 flex w-full items-center justify-center gap-2 rounded-xl bg-[#FF9933] px-4 py-2.5 text-xs font-bold text-white transition-colors hover:bg-[#f07d12] shadow-xs"
                 >
                   <Search className="h-4 w-4" />
                   <span>Browse All Properties</span>
@@ -549,7 +559,7 @@ export function Navbar() {
                     <MobileAccountLink
                       href="/dashboard/seller"
                       icon={
-                        <LayoutDashboard className="h-4 w-4 text-emerald-700" />
+                        <LayoutDashboard className="h-4 w-4 text-[#FF9933]" />
                       }
                       onClick={closeAllMenus}
                     >
@@ -583,7 +593,7 @@ export function Navbar() {
                     onClick={openAuthModal}
                     className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-xs font-bold text-slate-900 shadow-2xs transition-colors hover:bg-slate-50"
                   >
-                    <LogIn className="h-4 w-4 text-emerald-700" />
+                    <LogIn className="h-4 w-4 text-[#c75e0a]" />
                     <span>Sign In to Your Account</span>
                   </button>
                 </div>
@@ -611,7 +621,7 @@ export function Navbar() {
 }
 
 /* ==============================================================
-   DESKTOP NAV LINK (Crisp Black & Emerald Active)
+   DESKTOP NAV LINK
 ================================================================ */
 
 function NavLink({
@@ -629,8 +639,8 @@ function NavLink({
     <Link
       href={href}
       className={`inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-bold transition-all ${active
-          ? 'bg-emerald-50 text-emerald-900 border border-emerald-200/80 shadow-2xs'
-          : 'text-slate-900 hover:bg-slate-100/80 hover:text-emerald-800'
+          ? 'bg-[#fff1dc] text-[#c75e0a] border border-[#FF9933]/30 shadow-2xs'
+          : 'text-slate-900 hover:bg-slate-100/80 hover:text-[#c75e0a]'
         }`}
     >
       {icon}
@@ -702,12 +712,12 @@ function MobileNavLink({
       href={href}
       onClick={onClick}
       className={`flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-xs transition-colors ${active
-          ? 'bg-emerald-50 font-bold text-emerald-900 border border-emerald-200/80'
+          ? 'bg-[#fff1dc] font-bold text-[#c75e0a] border border-[#FF9933]/30'
           : 'font-bold text-slate-900 hover:bg-slate-100'
         }`}
     >
       {icon && (
-        <span className={active ? 'text-emerald-700' : 'text-slate-500'}>
+        <span className={active ? 'text-[#FF9933]' : 'text-slate-500'}>
           {icon}
         </span>
       )}

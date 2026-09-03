@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Document key required' }, { status: 400 });
   }
 
-  // Authorization check: ADMIN has access to verify documents,
+  // Authorization check: ADMIN has access for content moderation,
   // otherwise only the property owner who uploaded the document has access.
   if (authUser.role !== 'ADMIN') {
     try {

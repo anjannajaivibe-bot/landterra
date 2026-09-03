@@ -53,7 +53,7 @@ export function VerificationBadge({
       case 'VERIFIED':
         return (
           <ShieldCheck
-            className={`${iconClass} shrink-0 text-emerald-600`}
+            className={`${iconClass} shrink-0 text-[#FF9933]`}
           />
         );
 
@@ -85,7 +85,7 @@ export function VerificationBadge({
 
   const label =
     compact && status === 'VERIFIED'
-      ? 'Verified'
+      ? 'Direct Classified'
       : badge.label;
 
   return (
