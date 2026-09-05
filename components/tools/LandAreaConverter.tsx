@@ -92,10 +92,12 @@ export function LandAreaConverter() {
       {/* Input Controls */}
       <div className="pt-6 grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
         <div className="sm:col-span-6">
-          <label className="block text-xs font-bold text-slate-700 mb-1.5">
+          <label htmlFor="land-area-input" className="block text-xs font-bold text-slate-700 mb-1.5">
             Enter Land Area Value
           </label>
           <input
+            id="land-area-input"
+            aria-label="Enter Land Area Value"
             type="number"
             min="0"
             step="any"
@@ -107,11 +109,13 @@ export function LandAreaConverter() {
         </div>
 
         <div className="sm:col-span-6">
-          <label className="block text-xs font-bold text-slate-700 mb-1.5">
+          <label htmlFor="land-area-unit-select" className="block text-xs font-bold text-slate-700 mb-1.5">
             Select Starting Unit
           </label>
           <div className="relative">
             <select
+              id="land-area-unit-select"
+              aria-label="Select Starting Unit"
               value={selectedUnit}
               onChange={(e) => setSelectedUnit(e.target.value as UnitKey)}
               className="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-white text-xs font-bold text-slate-900 focus:outline-[#FF9933] focus:border-[#FF9933] shadow-2xs appearance-none cursor-pointer"
@@ -155,11 +159,10 @@ export function LandAreaConverter() {
               <div
                 key={u.key}
                 onClick={() => setSelectedUnit(u.key)}
-                className={`p-3.5 rounded-2xl border transition-all cursor-pointer ${
-                  isSelected
+                className={`p-3.5 rounded-2xl border transition-all cursor-pointer ${isSelected
                     ? 'border-[#FF9933] bg-[#fffbf5] shadow-xs ring-2 ring-[#FF9933]/20'
                     : 'border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300'
-                }`}
+                  }`}
               >
                 <div className="flex items-center justify-between text-[11px] font-bold text-slate-500">
                   <span className="truncate">{u.shortLabel}</span>

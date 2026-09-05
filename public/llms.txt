@@ -2,15 +2,9 @@
 
 > BhoomiMitra is India's direct-to-owner land and agricultural plot classifieds platform, facilitating direct connection between landowners and prospective buyers with 0% brokerage commissions, transparent document disclosure, interactive satellite maps, and a flat advertising fee model.
 
-## Platform Summary
-- **Website**: https://bhoomimitra.com
-- **Operating Model**: Direct peer-to-peer classifieds marketplace.
-- **Target Audience**: Indian landowners, agricultural buyers, residential plot buyers, and commercial land investors.
-- **Geographic Coverage**: Pan-India across all 28 states and 8 union territories.
-- **Core Value Proposition**: 0% Broker Commission, Direct landowner listings, Transparent seller-provided document disclosure, Direct Phone inquiry contact, and Interactive Google Satellite property boundary viewing.
-- **Legal Advisory**: BhoomiMitra does not provide title verification, legal certification, or government survey verification. All listings are seller-provided. Prospective buyers are advised to independently conduct due diligence (inspecting 30-year deed chains, EC Form 15, Pahani/7-12 extracts, and revenue survey sketches) with independent legal counsel before transacting.
+BhoomiMitra operates a direct peer-to-peer classifieds marketplace covering Indian landowners, agricultural buyers, residential plot buyers, and commercial land investors across all 28 states and 8 union territories. Core value propositions include 0% broker commission, direct landowner listings, transparent seller-provided document disclosure, and interactive Google Satellite property boundary viewing.
 
-## Indian Land Measurement Conversions
+Indian Land Measurement Conversions:
 - 1 Square Yard = 1 sq. yd (9 sq. ft)
 - 1 Gunta = 121 sq. yds
 - 1 Cent = 48.4 sq. yds
@@ -18,11 +12,15 @@
 - 1 Hectare = 11,959.9 sq. yds (2.471 Acres)
 
 ## Key Public Routes
-- `/`: Marketplace homepage with multi-attribute search and featured land classifieds.
-- `/buy`: Interactive land explorer with price sliders, unit conversions, and location filters.
-- `/sell`: Multi-step land listing creator with seller legal declarations and instant publishing upon payment.
-- `/pricing`: Platform advertising pricing (Flat ₹10-₹25 for 30-day listing subscriptions).
-- `/about`: BhoomiMitra mission, transparency policies, and zero-brokerage classifieds model.
-- `/contact`: Customer support desk and listing grievance redressal team.
-- `/listing-rules`: Standards for seller submissions, legal declarations, and prohibited listings.
-- `/properties/[id]`: Dedicated property details page featuring satellite map views, road width, facing direction, seller-provided documents, Land Buyer's Due Diligence Checklist, and "Call Seller" action.
+
+- [Marketplace Homepage](https://bhoomimitra.com/): Multi-attribute search and featured land classifieds.
+- [Find Land & Properties](https://bhoomimitra.com/buy): Interactive land explorer with price sliders, unit conversions, and location filters.
+- [List Your Land](https://bhoomimitra.com/sell): Multi-step land listing creator with seller legal declarations and instant publishing upon payment.
+- [Advertising Pricing](https://bhoomimitra.com/pricing): Platform advertising pricing (Flat ₹10-₹25 for 30-day listing subscriptions).
+- [About BhoomiMitra](https://bhoomimitra.com/about): Mission, transparency policies, and zero-brokerage classifieds model.
+- [Customer Support](https://bhoomimitra.com/contact): Customer support desk and listing grievance redressal team.
+- [Listing Rules](https://bhoomimitra.com/listing-rules): Standards for seller submissions, legal declarations, and prohibited listings.
+
+## Optional
+
+- [Full Site Specification](https://bhoomimitra.com/llms-full.txt): Extended documentation on platform architecture, security, and statutory due diligence advisory.

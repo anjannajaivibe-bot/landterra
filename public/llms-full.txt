@@ -2,16 +2,11 @@
 
 > BhoomiMitra is India's direct-to-owner land and agricultural plot classifieds platform, facilitating direct connection between landowners and prospective buyers with 0% brokerage commissions, transparent document disclosure, interactive satellite maps, and a flat advertising fee model.
 
-## Platform Summary
-- **Website**: https://bhoomimitra.com
-- **Operating Model**: Direct peer-to-peer classifieds marketplace.
-- **Target Audience**: Indian landowners, agricultural buyers, residential plot buyers, and commercial land investors.
-- **Geographic Coverage**: Pan-India across all 28 states and 8 union territories (including Telangana, Andhra Pradesh, Maharashtra, Karnataka, Tamil Nadu, Uttar Pradesh, and Gujarat).
-- **Core Value Proposition**: 0% Broker Commission, Direct landowner listings, Transparent seller-provided document disclosure, Direct Phone contact with registered sellers, and Interactive Google Satellite property boundary viewing.
-- **Legal Advisory**: BhoomiMitra does not provide title verification, legal certification, or government survey verification. All listings are seller-provided. Prospective buyers are advised to independently conduct due diligence (inspecting 30-year deed chains, EC Form 15, Pahani/7-12 extracts, and revenue survey sketches) with independent legal counsel before transacting.
+BhoomiMitra operates a direct peer-to-peer classifieds marketplace covering Indian landowners, agricultural buyers, residential plot buyers, and commercial land investors across all 28 states and 8 union territories (including Telangana, Andhra Pradesh, Maharashtra, Karnataka, Tamil Nadu, Uttar Pradesh, and Gujarat).
 
-## Indian Land Measurement Conversions
-BhoomiMitra standardizes all land areas to Square Yards (sq. yd) using the following authoritative conversion table:
+Core Value Propositions: 0% Broker Commission, Direct landowner listings, Transparent seller-provided document disclosure, Direct Phone contact with registered sellers, and Interactive Google Satellite property boundary viewing.
+
+Indian Land Measurement Conversions:
 - 1 Square Yard = 1 sq. yd (9 sq. ft)
 - 1 Gunta = 121 sq. yds
 - 1 Cent = 48.4 sq. yds
@@ -20,19 +15,18 @@ BhoomiMitra standardizes all land areas to Square Yards (sq. yd) using the follo
 - 1 Bigha (Standard) = 1,600 to 3,025 sq. yds (region-dependent)
 
 ## Key Public Routes
-- `/`: Marketplace homepage with multi-attribute search and featured land classifieds.
-- `/buy`: Interactive land explorer with price sliders, unit conversions, and location filters.
-- `/sell`: Multi-step land listing creator with seller legal declarations and instant publishing upon payment.
-- `/pricing`: Platform advertising pricing (Flat ₹10-₹25 for 30-day listing subscriptions).
-- `/about`: BhoomiMitra mission, transparency policies, and zero-brokerage classifieds model.
-- `/contact`: Customer support desk and listing grievance redressal team.
-- `/listing-rules`: Standards for seller submissions, legal declarations, and prohibited listings.
-- `/properties/[id]`: Dedicated property details page featuring satellite map views, road width, facing direction, seller-provided documents, Land Buyer's Due Diligence Checklist, and "Call Seller" action.
 
-## Technical Architecture & Security
-- **Framework**: Next.js 15 (App Router), React 19, TypeScript
-- **Database**: MongoDB Atlas with Mongoose 8
-- **Authentication**: Google OAuth 2.0 and Distributed SMS OTP (HMAC-SHA256 salted hashes)
-- **Object Storage**: Cloudflare R2 (S3-compatible secure document storage with private presigned access)
-- **Payments**: Razorpay server-verified checkout and webhooks (flat digital listing fee)
-- **Maps**: Google Maps Platform with Satellite vs. Roadmap switcher
+- [Marketplace Homepage](https://bhoomimitra.com/): Marketplace homepage with multi-attribute search and featured land classifieds.
+- [Buy Properties](https://bhoomimitra.com/buy): Interactive land explorer with price sliders, unit conversions, and location filters.
+- [Sell Property](https://bhoomimitra.com/sell): Multi-step land listing creator with seller legal declarations and instant publishing upon payment.
+- [Pricing](https://bhoomimitra.com/pricing): Platform advertising pricing (Flat ₹10-₹25 for 30-day listing subscriptions).
+- [About BhoomiMitra](https://bhoomimitra.com/about): BhoomiMitra mission, transparency policies, and zero-brokerage classifieds model.
+- [Customer Support](https://bhoomimitra.com/contact): Customer support desk and listing grievance redressal team.
+- [Listing Rules](https://bhoomimitra.com/listing-rules): Standards for seller submissions, legal declarations, and prohibited listings.
+- [Terms of Service](https://bhoomimitra.com/terms): Platform user terms, listing conditions, and liability disclaimers.
+- [Privacy Policy](https://bhoomimitra.com/privacy): Data security, private document vault protection, and cookie rules.
+
+## Core Features & Tools
+
+- [Land Area Converter](https://bhoomimitra.com/#converter): Live Indian land unit converter across Guntas, Cents, Acres, Sq. Yards, and Hectares.
+- [Buyer Due Diligence](https://bhoomimitra.com/listing-rules): Checklist for inspecting 30-year deed chains, EC Form 15, and survey sketches.
