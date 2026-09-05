@@ -23,6 +23,7 @@ import {
   ExternalLink,
   Flag,
   Heart,
+  ImageIcon,
   Info,
   LandPlot,
   LayoutDashboard,
@@ -38,6 +39,9 @@ import {
   Tag,
   UserRound,
   Home,
+  Video,
+  Play,
+  Film,
   X,
 } from 'lucide-react';
 
@@ -160,6 +164,7 @@ function PropertyDetailsContent() {
   --------------------------------------------------------------- */
 
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [activeMediaTab, setActiveMediaTab] = useState<'PHOTOS' | 'VIDEO'>('PHOTOS');
 
   const [favorite, setFavorite] = useState(false);
   const [favoriteLoading, setFavoriteLoading] = useState(false);
@@ -1050,8 +1055,45 @@ function PropertyDetailsContent() {
 
           <section className="lg:col-span-7">
             <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-              <div className="relative aspect-[4/3] overflow-hidden bg-slate-100 sm:aspect-[16/10]">
-                {activeImage?.secureUrl ? (
+              <div className="relative aspect-[4/3] overflow-hidden bg-slate-900 sm:aspect-[16/10]">
+                {/* Media Switcher Tab (Photos vs Video Tour) */}
+                {property.video?.secureUrl && (
+                  <div className="absolute top-3 right-3 z-20 flex items-center gap-1 rounded-xl bg-black/70 p-1 backdrop-blur-md text-white text-[11px] font-bold">
+                    <button
+                      type="button"
+                      onClick={() => setActiveMediaTab('PHOTOS')}
+                      className={`flex items-center gap-1.5 px-3 py-1 rounded-lg transition-colors cursor-pointer ${
+                        activeMediaTab === 'PHOTOS' ? 'bg-[#FF9933] text-white shadow-xs' : 'text-slate-300 hover:text-white'
+                      }`}
+                    >
+                      <ImageIcon className="w-3.5 h-3.5" />
+                      <span>Photos ({images.length})</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setActiveMediaTab('VIDEO')}
+                      className={`flex items-center gap-1.5 px-3 py-1 rounded-lg transition-colors cursor-pointer ${
+                        activeMediaTab === 'VIDEO' ? 'bg-[#FF9933] text-white shadow-xs' : 'text-slate-300 hover:text-white'
+                      }`}
+                    >
+                      <Play className="w-3.5 h-3.5 fill-current" />
+                      <span>Video Tour</span>
+                    </button>
+                  </div>
+                )}
+
+                {activeMediaTab === 'VIDEO' && property.video?.secureUrl ? (
+                  <div className="relative w-full h-full flex items-center justify-center bg-black">
+                    <video
+                      src={property.video.secureUrl}
+                      controls
+                      playsInline
+                      autoPlay
+                      preload="metadata"
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+                ) : activeImage?.secureUrl ? (
                   <Image
                     src={activeImage.secureUrl}
                     alt={
@@ -1064,7 +1106,7 @@ function PropertyDetailsContent() {
                     priority
                   />
                 ) : (
-                  <div className="flex h-full items-center justify-center">
+                  <div className="flex h-full items-center justify-center bg-slate-100">
                     <div className="text-center">
                       <LandPlot className="mx-auto h-12 w-12 text-slate-300" />
 
@@ -1076,16 +1118,14 @@ function PropertyDetailsContent() {
                 )}
 
                 {/* Image count */}
-
-                {images.length > 0 && (
+                {activeMediaTab === 'PHOTOS' && images.length > 0 && (
                   <div className="absolute bottom-3 left-3 rounded-lg bg-black/60 px-2.5 py-1.5 text-[10px] font-bold text-white backdrop-blur">
                     {activeImageIndex + 1} / {images.length}
                   </div>
                 )}
 
-                {/* Navigation */}
-
-                {images.length > 1 && (
+                {/* Navigation (Only on photos) */}
+                {activeMediaTab === 'PHOTOS' && images.length > 1 && (
                   <>
                     <button
                       type="button"
@@ -1108,7 +1148,6 @@ function PropertyDetailsContent() {
                 )}
 
                 {/* Verification */}
-
                 <div className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-lg bg-[#FF9933] px-3 py-2 text-[10px] font-black text-white shadow-lg">
                   <ShieldCheck className="h-4 w-4" />
                   Direct Classified
@@ -1116,9 +1155,8 @@ function PropertyDetailsContent() {
               </div>
 
               {/* Thumbnails */}
-
-              {images.length > 1 && (
-                <div className="flex gap-2 overflow-x-auto p-3">
+              {(images.length > 1 || Boolean(property.video?.secureUrl)) && (
+                <div className="flex gap-2 overflow-x-auto p-3 items-center">
                   {images.map((image, index) => (
                     <button
                       type="button"
@@ -1127,13 +1165,15 @@ function PropertyDetailsContent() {
                         image.objectKey ||
                         index
                       }
-                      onClick={() =>
-                        setActiveImageIndex(index)
-                      }
-                      className={`relative h-16 w-20 shrink-0 overflow-hidden rounded-lg border-2 transition-colors ${activeImageIndex === index
-                        ? 'border-[#FF9933]'
-                        : 'border-transparent'
-                        }`}
+                      onClick={() => {
+                        setActiveImageIndex(index);
+                        setActiveMediaTab('PHOTOS');
+                      }}
+                      className={`relative h-16 w-20 shrink-0 overflow-hidden rounded-lg border-2 transition-colors cursor-pointer ${
+                        activeMediaTab === 'PHOTOS' && activeImageIndex === index
+                          ? 'border-[#FF9933]'
+                          : 'border-transparent opacity-80 hover:opacity-100'
+                      }`}
                     >
                       <Image
                         src={image.secureUrl}
@@ -1144,6 +1184,25 @@ function PropertyDetailsContent() {
                       />
                     </button>
                   ))}
+
+                  {/* Video Thumbnail Button */}
+                  {property.video?.secureUrl && (
+                    <button
+                      type="button"
+                      onClick={() => setActiveMediaTab('VIDEO')}
+                      className={`relative h-16 w-20 shrink-0 overflow-hidden rounded-lg border-2 bg-slate-950 flex flex-col items-center justify-center text-white transition-all cursor-pointer ${
+                        activeMediaTab === 'VIDEO'
+                          ? 'border-[#FF9933] shadow-sm'
+                          : 'border-slate-800 opacity-80 hover:opacity-100 hover:border-slate-700'
+                      }`}
+                      title="Watch Video Tour"
+                    >
+                      <div className="w-7 h-7 rounded-full bg-[#fff1dc] text-[#c75e0a] flex items-center justify-center mb-0.5">
+                        <Play className="w-3.5 h-3.5 fill-current ml-0.5" />
+                      </div>
+                      <span className="text-[9px] font-black text-white uppercase tracking-wider">Video</span>
+                    </button>
+                  )}
                 </div>
               )}
             </div>

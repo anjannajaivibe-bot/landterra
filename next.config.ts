@@ -8,6 +8,7 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: false,
   },
+  serverExternalPackages: ['ffmpeg-static'],
   // Allow access to remote image placeholders and R2/Unsplash domains
   images: {
     remotePatterns: [

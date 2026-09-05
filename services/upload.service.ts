@@ -23,7 +23,12 @@ export async function uploadFileToStorage(
   const sanitizedFileName = fileName.replace(/[^a-zA-Z0-9.-]/g, '_');
   const timestamp = Date.now();
   const randomStr = Math.random().toString(36).substring(2, 8);
-  const objectKey = `${folder}/${isPrivate ? 'documents' : 'images'}/${timestamp}_${randomStr}_${sanitizedFileName}`;
+  const subfolder = isPrivate
+    ? 'documents'
+    : mimeType.startsWith('video/')
+      ? 'videos'
+      : 'images';
+  const objectKey = `${folder}/${subfolder}/${timestamp}_${randomStr}_${sanitizedFileName}`;
 
   // If Cloudflare R2 is configured, upload directly to R2 bucket
   if (!isR2Configured()) {

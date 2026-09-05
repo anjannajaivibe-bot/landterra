@@ -41,6 +41,10 @@ import {
   SlidersHorizontal,
   Loader2,
   Navigation,
+  Video,
+  Film,
+  Play,
+  Camera,
 } from 'lucide-react';
 
 interface UploadedImagePreview {
@@ -585,7 +589,7 @@ function SellPageForm() {
   const [governmentRegistrationId, setGovernmentRegistrationId] =
     useState<string>('');
 
-  // Step 5: Images
+  // Step 5: Images & Video
   const [images, setImages] =
     useState<UploadedImagePreview[]>([]);
 
@@ -593,6 +597,23 @@ function SellPageForm() {
     useState<boolean>(false);
 
   const [imageCompressionMessage, setImageCompressionMessage] =
+    useState<string>('');
+
+  const [video, setVideo] =
+    useState<{
+      secureUrl: string;
+      objectKey: string;
+      fileName: string;
+      size: number;
+      mimeType: string;
+      originalSize?: number;
+      compressionRatio?: number;
+    } | null>(null);
+
+  const [isUploadingVideo, setIsUploadingVideo] =
+    useState<boolean>(false);
+
+  const [videoUploadMessage, setVideoUploadMessage] =
     useState<string>('');
 
   // Step 6: Documents
@@ -814,6 +835,16 @@ function SellPageForm() {
                     size: typeof doc.size === 'number' ? doc.size : 0,
                   })),
                 );
+              }
+
+              if (property.video && property.video.secureUrl) {
+                setVideo({
+                  secureUrl: property.video.secureUrl,
+                  objectKey: property.video.objectKey,
+                  fileName: property.video.fileName || 'property_video.webm',
+                  size: typeof property.video.size === 'number' ? property.video.size : 0,
+                  mimeType: property.video.mimeType || 'video/webm',
+                });
               }
             }
           }
@@ -1063,6 +1094,216 @@ function SellPageForm() {
     }
   };
 
+  // Video Upload with Server-Side WebM Transcoding
+  const handleVideoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 50 * 1024 * 1024) {
+      setErrorMessage('Video exceeds the maximum allowed size of 50 MB. Please choose a shorter clip.');
+      event.target.value = '';
+      return;
+    }
+
+    setIsUploadingVideo(true);
+    setErrorMessage('');
+    setVideoUploadMessage(`Uploading & transcoding ${file.name} to WebM on server...`);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch('/api/uploads/video', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Video upload and WebM conversion failed.');
+      }
+
+      if (data.file) {
+        setVideo({
+          secureUrl: data.file.secureUrl,
+          objectKey: data.file.objectKey,
+          fileName: data.file.fileName,
+          size: data.file.size,
+          mimeType: data.file.mimeType || 'video/webm',
+          originalSize: data.file.originalSize,
+          compressionRatio: data.file.compressionRatio,
+        });
+
+        const ratioTxt = data.file.compressionRatio ? ` (${data.file.compressionRatio}% smaller)` : '';
+        setVideoUploadMessage(`✓ Converted to WebM: ${formatFileSize(data.file.originalSize)} → ${formatFileSize(data.file.size)}${ratioTxt}`);
+      }
+    } catch (err: unknown) {
+      console.error('Video upload error:', err);
+      const msg = err instanceof Error ? err.message : 'Failed to process video';
+      setErrorMessage(msg);
+    } finally {
+      setIsUploadingVideo(false);
+      event.target.value = '';
+      window.setTimeout(() => {
+        setVideoUploadMessage('');
+      }, 6000);
+    }
+  };
+
+  // Unified Media Upload (Upload photos & video in one go)
+  const handleMediaUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const fileList = event.target.files;
+    if (!fileList || fileList.length === 0) return;
+
+    const files = Array.from(fileList);
+    const imageFiles: File[] = [];
+    const videoFiles: File[] = [];
+
+    for (const file of files) {
+      if (file.type.startsWith('image/')) {
+        imageFiles.push(file);
+      } else if (file.type.startsWith('video/')) {
+        videoFiles.push(file);
+      } else {
+        const ext = file.name.split('.').pop()?.toLowerCase();
+        if (['jpg', 'jpeg', 'png', 'webp'].includes(ext || '')) {
+          imageFiles.push(file);
+        } else if (['mp4', 'mov', 'webm', 'avi', 'mkv'].includes(ext || '')) {
+          videoFiles.push(file);
+        } else {
+          setErrorMessage(`Unsupported file format "${file.name}". Please select images or video.`);
+        }
+      }
+    }
+
+    event.target.value = '';
+
+    // 1. Process Images
+    if (imageFiles.length > 0) {
+      setIsUploadingImage(true);
+      setErrorMessage('');
+      setImageCompressionMessage('');
+
+      try {
+        for (let index = 0; index < imageFiles.length; index += 1) {
+          const originalFile = imageFiles[index];
+
+          try {
+            setImageCompressionMessage(`Optimizing ${originalFile.name}...`);
+            const compressedFile = await compressImage(originalFile);
+
+            setImageCompressionMessage(
+              `${originalFile.name}: ${formatFileSize(originalFile.size)} → ${formatFileSize(compressedFile.size)}`,
+            );
+
+            const formData = new FormData();
+            formData.append('file', compressedFile);
+            formData.append('isPrivate', 'false');
+            formData.append('folder', 'properties');
+
+            const response = await fetch('/api/uploads/direct', {
+              method: 'POST',
+              body: formData,
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.file) {
+              setImages((prev) => [
+                ...prev,
+                {
+                  secureUrl: data.file.secureUrl,
+                  isPrimary: prev.length === 0,
+                  objectKey: data.file.objectKey,
+                  fileName: compressedFile.name,
+                  size: compressedFile.size,
+                  mimeType: compressedFile.type,
+                },
+              ]);
+            } else {
+              setErrorMessage(
+                data.error || `Failed to upload ${originalFile.name}`,
+              );
+            }
+          } catch (imageError) {
+            console.error('Image optimization/upload error:', imageError);
+            const message =
+              imageError instanceof Error
+                ? imageError.message
+                : `Failed to process ${originalFile.name}`;
+            setErrorMessage(message);
+          }
+        }
+      } catch (error) {
+        console.error('Image upload failed:', error);
+        setErrorMessage('Image upload error occurred. Please try again.');
+      } finally {
+        setIsUploadingImage(false);
+        window.setTimeout(() => {
+          setImageCompressionMessage('');
+        }, 4000);
+      }
+    }
+
+    // 2. Process Video
+    if (videoFiles.length > 0) {
+      const videoFile = videoFiles[0];
+      if (videoFiles.length > 1) {
+        setErrorMessage('Only 1 video tour is supported per listing. Processing the first video.');
+      }
+
+      if (videoFile.size > 50 * 1024 * 1024) {
+        setErrorMessage('Video exceeds the maximum allowed size of 50 MB. Please choose a shorter clip.');
+        return;
+      }
+
+      setIsUploadingVideo(true);
+      setErrorMessage('');
+      setVideoUploadMessage(`Uploading & transcoding ${videoFile.name} to WebM on server...`);
+
+      try {
+        const formData = new FormData();
+        formData.append('file', videoFile);
+
+        const response = await fetch('/api/uploads/video', {
+          method: 'POST',
+          body: formData,
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Video upload and WebM conversion failed.');
+        }
+
+        if (data.file) {
+          setVideo({
+            secureUrl: data.file.secureUrl,
+            objectKey: data.file.objectKey,
+            fileName: data.file.fileName,
+            size: data.file.size,
+            mimeType: data.file.mimeType || 'video/webm',
+            originalSize: data.file.originalSize,
+            compressionRatio: data.file.compressionRatio,
+          });
+
+          const ratioTxt = data.file.compressionRatio ? ` (${data.file.compressionRatio}% smaller)` : '';
+          setVideoUploadMessage(`✓ Converted to WebM: ${formatFileSize(data.file.originalSize)} → ${formatFileSize(data.file.size)}${ratioTxt}`);
+        }
+      } catch (err: unknown) {
+        console.error('Video upload error:', err);
+        const msg = err instanceof Error ? err.message : 'Failed to process video';
+        setErrorMessage(msg);
+      } finally {
+        setIsUploadingVideo(false);
+        window.setTimeout(() => {
+          setVideoUploadMessage('');
+        }, 6000);
+      }
+    }
+  };
+
   // Document Upload
   const handleDocUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -1260,6 +1501,15 @@ function SellPageForm() {
           isPrimary: image.isPrimary,
           sortOrder: index,
         })),
+        video: video
+          ? {
+              objectKey: video.objectKey,
+              secureUrl: video.secureUrl,
+              fileName: video.fileName,
+              mimeType: video.mimeType || 'video/webm',
+              size: video.size,
+            }
+          : undefined,
         documents: documents.map((document) => ({
           documentType: document.documentType,
           objectKey: document.objectKey,
@@ -1582,7 +1832,7 @@ function SellPageForm() {
               'Location',
               'Seller',
               'Records',
-              'Photos',
+              'Photos & Video',
               'Documents',
               'Payment',
             ].map((label, index) => {
@@ -3938,147 +4188,253 @@ function SellPageForm() {
               </div>
             )}
 
-            {/* STEP 5: Photos with In-Browser Compression */}
+            {/* STEP 5: Unified Photos & Video Walkthrough with In-Browser & Server Optimization */}
             {currentStep === 5 && (
               <div className="p-5 sm:p-8 space-y-7 animate-in fade-in duration-150">
-                <div>
-                  <h2 className="text-lg font-extrabold text-slate-950">
-                    Property Photos
-                  </h2>
-                  <p className="text-xs text-slate-500 mt-1">
-                    Upload clear photographs of the land, road frontage, boundaries, and surroundings.
-                  </p>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div>
+                    <h2 className="text-lg font-extrabold text-slate-950 flex items-center gap-2">
+                      <span>Property Photos &amp; Video</span>
+                    </h2>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      Upload clear photographs of the land and an optional drone/walkaround video.
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/60">
+                      Min 1 Photo Required
+                    </span>
+                    <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-slate-100 text-slate-600">
+                      Video Optional
+                    </span>
+                  </div>
                 </div>
 
-                {/* Upload Zone */}
+                {/* Universal Drag & Drop Upload Zone */}
                 <label className="block cursor-pointer">
                   <input
                     type="file"
-                    accept="image/jpeg,image/png,image/webp,image/jpg"
+                    accept="image/jpeg,image/png,image/webp,image/jpg,video/mp4,video/quicktime,video/webm,video/x-matroska,video/avi"
                     multiple
-                    onChange={handleImageUpload}
-                    disabled={isUploadingImage}
+                    onChange={handleMediaUpload}
+                    disabled={isUploadingImage || isUploadingVideo}
                     className="hidden"
                   />
-                  <div className="rounded-2xl border-2 border-dashed border-slate-300 hover:border-[#FF9933] hover:bg-[#fff9f0] transition-colors p-8 text-center">
-                    <div className="w-12 h-12 rounded-2xl bg-[#fff1dc] text-[#c75e0a] flex items-center justify-center mx-auto mb-3">
-                      {isUploadingImage ? (
+                  <div className="rounded-2xl border-2 border-dashed border-slate-300 hover:border-[#FF9933] hover:bg-[#fff9f0] transition-all p-7 text-center group">
+                    <div className="w-14 h-14 rounded-2xl bg-[#fff1dc] text-[#c75e0a] flex items-center justify-center mx-auto mb-3 shadow-xs group-hover:scale-105 transition-transform">
+                      {isUploadingImage || isUploadingVideo ? (
                         <RefreshCw className="w-6 h-6 animate-spin" />
                       ) : (
-                        <Upload className="w-6 h-6" />
+                        <div className="flex items-center -space-x-1.5">
+                          <Camera className="w-5 h-5" />
+                          <Video className="w-5 h-5" />
+                        </div>
                       )}
                     </div>
                     <p className="text-sm font-extrabold text-slate-900">
                       {isUploadingImage
-                        ? 'Optimizing & uploading...'
-                        : 'Upload property photos'}
+                        ? 'Optimizing & uploading photos...'
+                        : isUploadingVideo
+                        ? 'Transcoding & uploading video to WebM...'
+                        : 'Upload property photos & video tour'}
                     </p>
                     <p className="text-[11px] text-slate-500 mt-1">
-                      JPG, PNG or WebP • Multiple images supported
+                      Select JPG, PNG, WebP images and/or MP4, MOV, WebM video (up to 50 MB) • Multiple files supported
                     </p>
-                    <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#fff9f0] border border-[#FF9933]/30 text-[10px] text-[#c75e0a] font-semibold">
-                      <Sparkles className="w-3 h-3" />
-                      Automatically compressed below 850 KB
+                    <div className="mt-3.5 flex flex-wrap items-center justify-center gap-2">
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white border border-slate-200 text-[10px] text-slate-700 font-semibold shadow-2xs">
+                        <Sparkles className="w-3 h-3 text-[#FF9933]" />
+                        Photos auto-compressed below 850 KB (WebP)
+                      </span>
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#fff1dc]/60 border border-[#FF9933]/30 text-[10px] text-[#c75e0a] font-semibold">
+                        <Film className="w-3 h-3" />
+                        Video auto-converted to high-efficiency WebM
+                      </span>
                     </div>
                   </div>
                 </label>
 
-                {/* Compression Status Message */}
-                {imageCompressionMessage && (
-                  <div className="flex items-center gap-2 p-3 rounded-xl bg-blue-50 border border-blue-100 text-blue-800 text-[11px] font-semibold">
-                    <RefreshCw className="w-3.5 h-3.5 animate-spin shrink-0" />
-                    <span>{imageCompressionMessage}</span>
+                {/* Live Status Messages */}
+                {(imageCompressionMessage || videoUploadMessage) && (
+                  <div className="space-y-2">
+                    {imageCompressionMessage && (
+                      <div className="flex items-center gap-2 p-3 rounded-xl bg-blue-50 border border-blue-100 text-blue-800 text-[11px] font-semibold">
+                        <RefreshCw className="w-3.5 h-3.5 animate-spin shrink-0" />
+                        <span>{imageCompressionMessage}</span>
+                      </div>
+                    )}
+                    {videoUploadMessage && (
+                      <div className="flex items-center gap-2 p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-[11px] font-semibold">
+                        {isUploadingVideo && <RefreshCw className="w-3.5 h-3.5 animate-spin shrink-0" />}
+                        <span>{videoUploadMessage}</span>
+                      </div>
+                    )}
                   </div>
                 )}
 
-                {/* Uploaded Image Previews */}
-                {images.length > 0 && (
-                  <div className="space-y-3">
+                {/* Uploaded Media Showcase (Unified Photos & Video Section) */}
+                {(images.length > 0 || video || isUploadingVideo) && (
+                  <div className="space-y-4 pt-2">
                     <div className="flex items-center justify-between">
-                      <h3 className="text-xs font-extrabold text-slate-900">
-                        Uploaded Photos ({images.length})
-                      </h3>
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-xs font-extrabold text-slate-900">
+                          Uploaded Media ({images.length + (video ? 1 : 0)})
+                        </h3>
+                        <span className="text-[10px] text-slate-500 font-medium">
+                          ({images.length} {images.length === 1 ? 'photo' : 'photos'}{video ? ', 1 video' : ''})
+                        </span>
+                      </div>
                       <span className="text-[10px] text-[#FF9933] font-semibold">
-                        Optimized & Ready
+                        Optimized &amp; Ready
                       </span>
                     </div>
 
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                      {images.map((image, index) => (
-                        <div
-                          key={image.objectKey || `${image.fileName}-${index}`}
-                          className="group relative rounded-xl overflow-hidden border border-slate-200 bg-slate-100 aspect-square"
-                        >
-                          <Image
-                            src={image.secureUrl}
-                            alt={image.fileName}
-                            fill
-                            sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 25vw"
-                            className="object-cover"
-                          />
-                          {image.isPrimary && (
-                            <div className="absolute left-2 top-2 px-2 py-1 rounded-md bg-[#FF9933] text-white text-[9px] font-bold">
-                              Primary
-                            </div>
-                          )}
-                          <div className="absolute bottom-2 left-2 px-2 py-1 rounded-md bg-black/65 text-white text-[9px] font-semibold">
-                            {formatFileSize(image.size)}
+                    {/* Video Card (if present) */}
+                    {video && (
+                      <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:p-5 shadow-xs space-y-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#FF9933] text-white text-[10px] font-black uppercase tracking-wider shadow-xs">
+                              <Play className="w-3 h-3 fill-current" />
+                              Video Walkthrough
+                            </span>
+                            <span className="px-2 py-0.5 rounded-md bg-[#fff1dc] text-[#c75e0a] text-[10px] font-bold">
+                              WebM Ready
+                            </span>
                           </div>
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setImages((prev) => {
-                                const remaining = prev.filter(
-                                  (_, itemIndex) => itemIndex !== index,
-                                );
-                                if (
-                                  remaining.length > 0 &&
-                                  !remaining.some((item) => item.isPrimary)
-                                ) {
-                                  remaining[0] = {
-                                    ...remaining[0],
-                                    isPrimary: true,
-                                  };
-                                }
-                                return remaining;
-                              })
-                            }
-                            className="absolute right-2 top-2 w-8 h-8 rounded-full bg-black/65 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-rose-600 cursor-pointer"
-                            aria-label="Remove image"
+                          <div className="flex items-center gap-2">
+                            <label className="cursor-pointer px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 text-xs font-bold transition-colors shadow-xs">
+                              <input
+                                type="file"
+                                accept="video/mp4,video/quicktime,video/webm,video/x-matroska,video/avi"
+                                onChange={handleVideoUpload}
+                                disabled={isUploadingVideo}
+                                className="hidden"
+                              />
+                              {isUploadingVideo ? 'Transcoding...' : 'Replace Video'}
+                            </label>
+                            <button
+                              type="button"
+                              onClick={() => setVideo(null)}
+                              className="px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold transition-colors flex items-center gap-1 cursor-pointer"
+                              title="Remove Video"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                              <span>Remove</span>
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className="relative rounded-xl overflow-hidden bg-black aspect-video max-h-72 flex items-center justify-center border border-slate-200">
+                          <video
+                            src={video.secureUrl}
+                            controls
+                            playsInline
+                            preload="metadata"
+                            className="w-full h-full max-h-72 object-contain"
+                          />
+                        </div>
+
+                        <div className="flex flex-wrap items-center justify-between gap-2 text-[10px] text-slate-600 pt-1">
+                          <span className="truncate max-w-[240px] font-bold text-slate-900">
+                            {video.fileName}
+                          </span>
+                          <div className="flex items-center gap-2">
+                            <span>Size: {formatFileSize(video.size)}</span>
+                            {video.originalSize && video.originalSize > video.size && (
+                              <span className="text-[#c75e0a] font-bold">
+                                (Saved {formatFileSize(video.originalSize - video.size)} • {video.compressionRatio}% smaller)
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Video Transcoding Placeholder Card */}
+                    {isUploadingVideo && !video && (
+                      <div className="rounded-2xl border-2 border-dashed border-[#FF9933]/50 bg-[#fff9f0] p-6 text-center space-y-2">
+                        <RefreshCw className="w-6 h-6 animate-spin text-[#c75e0a] mx-auto" />
+                        <p className="text-xs font-black text-slate-900">
+                          Transcoding and optimizing video to WebM on server...
+                        </p>
+                        <p className="text-[10px] text-slate-500">
+                          Compressing bitrate, scaling resolution, and configuring instant mobile playback.
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Photo Grid */}
+                    {images.length > 0 && (
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                        {images.map((image, index) => (
+                          <div
+                            key={image.objectKey || `${image.fileName}-${index}`}
+                            className="group relative rounded-xl overflow-hidden border border-slate-200 bg-slate-100 aspect-square shadow-2xs"
                           >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                          {!image.isPrimary && (
+                            <Image
+                              src={image.secureUrl}
+                              alt={image.fileName}
+                              fill
+                              sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 25vw"
+                              className="object-cover"
+                            />
+                            {image.isPrimary && (
+                              <div className="absolute left-2 top-2 px-2 py-1 rounded-md bg-[#FF9933] text-white text-[9px] font-black shadow-xs">
+                                Primary Photo
+                              </div>
+                            )}
+                            <div className="absolute bottom-2 left-2 px-2 py-0.5 rounded-md bg-black/65 text-white text-[9px] font-semibold backdrop-blur-xs">
+                              {formatFileSize(image.size)} WebP
+                            </div>
                             <button
                               type="button"
                               onClick={() =>
-                                setImages((prev) =>
-                                  prev.map((item, itemIndex) => ({
-                                    ...item,
-                                    isPrimary: itemIndex === index,
-                                  })),
-                                )
+                                setImages((prev) => {
+                                  const remaining = prev.filter((_, itemIndex) => itemIndex !== index);
+                                  if (remaining.length > 0 && !remaining.some((item) => item.isPrimary)) {
+                                    remaining[0] = { ...remaining[0], isPrimary: true };
+                                  }
+                                  return remaining;
+                                })
                               }
-                              className="absolute bottom-2 right-2 px-2 py-1 rounded-md bg-white/90 text-slate-700 text-[9px] font-bold opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                              className="absolute right-2 top-2 w-7 h-7 rounded-full bg-black/65 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-rose-600 cursor-pointer"
+                              aria-label="Remove image"
                             >
-                              Make Primary
+                              <Trash2 className="w-3.5 h-3.5" />
                             </button>
-                          )}
-                        </div>
-                      ))}
-                    </div>
+                            {!image.isPrimary && (
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setImages((prev) =>
+                                    prev.map((item, itemIndex) => ({
+                                      ...item,
+                                      isPrimary: itemIndex === index,
+                                    }))
+                                  )
+                                }
+                                className="absolute bottom-2 right-2 px-2 py-1 rounded-md bg-white/95 text-slate-800 text-[9px] font-bold opacity-0 group-hover:opacity-100 transition-opacity hover:bg-[#FF9933] hover:text-white cursor-pointer shadow-xs"
+                              >
+                                Make Primary
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
 
                 <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
                   <div className="flex items-start gap-3">
-                    <ImageIcon className="w-4 h-4 text-[#FF9933] shrink-0 mt-0.5" />
+                    <Sparkles className="w-4 h-4 text-[#FF9933] shrink-0 mt-0.5" />
                     <div className="text-[10px] text-slate-600 leading-relaxed">
-                      <p className="font-bold text-slate-800 mb-1">
-                        Automatic image optimization
+                      <p className="font-bold text-slate-800 mb-0.5">
+                        Automatic media compression &amp; acceleration
                       </p>
                       <p>
-                        Photographs are optimized and converted to lightweight WebP files in your browser before upload, ensuring lightning-fast listing page load times for buyers.
+                        Photographs are converted in your browser to lightweight WebP files (&lt;850 KB), and videos are transcoded on our backend to high-efficiency WebM for lightning-fast playback on any mobile device.
                       </p>
                     </div>
                   </div>

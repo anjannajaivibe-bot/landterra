@@ -114,6 +114,21 @@ export interface IPropertyImage {
 }
 
 /* ================================================================
+   PROPERTY VIDEO
+================================================================ */
+
+export interface IPropertyVideo {
+   objectKey: string;
+   secureUrl: string;
+   fileName: string;
+   mimeType: string;
+   size: number;
+   duration?: number;
+   thumbnailUrl?: string;
+   createdAt?: string | Date;
+}
+
+/* ================================================================
    PROPERTY DOCUMENT
 ================================================================ */
 
@@ -336,6 +351,11 @@ export interface IProperty {
    images: IPropertyImage[];
 
    /**
+    * Optional property video walkthrough (transcoded WebM).
+    */
+   video?: IPropertyVideo;
+
+   /**
     * Documents are private.
     *
     * Do not include them in public marketplace API responses.
@@ -443,6 +463,7 @@ export interface IPublicProperty {
    listingStatus: ListingStatus;
 
    images: IPropertyImage[];
+   video?: IPropertyVideo;
 
    publishedAt?: string | Date;
 

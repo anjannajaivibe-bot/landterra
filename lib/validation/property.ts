@@ -18,6 +18,16 @@ export const PropertyImageInputSchema = z.object({
   sortOrder: z.number().default(0),
 });
 
+export const PropertyVideoInputSchema = z.object({
+  objectKey: z.string().min(1),
+  secureUrl: z.string().url(),
+  fileName: z.string().min(1),
+  mimeType: z.string().default('video/webm'),
+  size: z.number().max(50 * 1024 * 1024, 'Video must be under 50MB'),
+  duration: z.number().optional(),
+  thumbnailUrl: z.string().optional(),
+});
+
 export const PropertyDocumentInputSchema = z.object({
   documentType: z.enum([
     'TITLE_DEED',
@@ -115,6 +125,7 @@ export const CreatePropertySchema = z.object({
   sellerEmail: z.string().email().optional().or(z.literal('')),
   sellerType: z.enum(['INDIVIDUAL', 'COMPANY', 'AGENT']).default('INDIVIDUAL'),
   images: z.array(PropertyImageInputSchema).min(1, 'At least one property image is required'),
+  video: PropertyVideoInputSchema.optional().nullable(),
   documents: z.array(PropertyDocumentInputSchema).optional().default([]),
   sellerDeclarationAccepted: z.preprocess((val) => val === true || val === 'true' || val === 1, z.boolean()).default(true),
 });

@@ -15,6 +15,20 @@ const PropertyImageSchema = new Schema(
   { _id: true }
 );
 
+const PropertyVideoSchema = new Schema(
+  {
+    objectKey: { type: String, required: true },
+    secureUrl: { type: String, required: true },
+    fileName: { type: String, required: true },
+    mimeType: { type: String, required: true },
+    size: { type: Number, required: true },
+    duration: { type: Number },
+    thumbnailUrl: { type: String },
+    createdAt: { type: Date, default: Date.now },
+  },
+  { _id: false }
+);
+
 const PropertyDocumentSchema = new Schema(
   {
     sellerId: { type: String, required: true },
@@ -138,6 +152,7 @@ const PropertySchema = new Schema<IProperty>(
       index: true,
     },
     images: [PropertyImageSchema],
+    video: { type: PropertyVideoSchema, default: null },
     documents: [PropertyDocumentSchema],
     rejectionReason: { type: String },
     publishedAt: { type: Date },
