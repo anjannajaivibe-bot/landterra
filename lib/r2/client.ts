@@ -9,8 +9,8 @@ function cleanEnv(val: string | undefined): string {
 const R2_ACCOUNT_ID = cleanEnv(process.env.R2_ACCOUNT_ID);
 const R2_ACCESS_KEY_ID = cleanEnv(process.env.R2_ACCESS_KEY_ID);
 const R2_SECRET_ACCESS_KEY = cleanEnv(process.env.R2_SECRET_ACCESS_KEY);
-const R2_BUCKET_NAME = cleanEnv(process.env.R2_BUCKET_NAME) || 'bhoomimitra-assets';
-const R2_PUBLIC_URL = cleanEnv(process.env.R2_PUBLIC_URL || process.env.R2_PUBLIC_DOMAIN);
+export const R2_BUCKET_NAME = cleanEnv(process.env.R2_BUCKET_NAME) || 'bhoomimitra-assets';
+export const R2_PUBLIC_URL = cleanEnv(process.env.R2_PUBLIC_URL || process.env.R2_PUBLIC_DOMAIN);
 
 export function isR2Configured(): boolean {
   return Boolean(

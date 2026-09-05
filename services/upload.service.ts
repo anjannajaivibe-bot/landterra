@@ -1,5 +1,12 @@
-import { isR2Configured, getPresignedUploadUrl, getSignedDocumentDownloadUrl, getR2Client } from '@/lib/r2/client';
-import { PutObjectCommand } from '@aws-sdk/client-s3';
+import {
+  isR2Configured,
+  getPresignedUploadUrl,
+  getSignedDocumentDownloadUrl,
+  getR2Client,
+  R2_BUCKET_NAME,
+  R2_PUBLIC_URL,
+} from '@/lib/r2/client';
+import { PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 
 export interface UploadResult {
   objectKey: string;
@@ -28,7 +35,9 @@ export async function uploadFileToStorage(
     : mimeType.startsWith('video/')
       ? 'videos'
       : 'images';
-  const objectKey = `${folder}/${subfolder}/${timestamp}_${randomStr}_${sanitizedFileName}`;
+  const objectKey = folder.includes('/')
+    ? `${folder}/${timestamp}_${randomStr}_${sanitizedFileName}`
+    : `${folder}/${subfolder}/${timestamp}_${randomStr}_${sanitizedFileName}`;
 
   // If Cloudflare R2 is configured, upload directly to R2 bucket
   if (!isR2Configured()) {
@@ -41,7 +50,7 @@ export async function uploadFileToStorage(
   }
 
   const command = new PutObjectCommand({
-    Bucket: process.env.R2_BUCKET_NAME || 'bhoomimitra-assets',
+    Bucket: R2_BUCKET_NAME,
     Key: objectKey,
     Body: fileBuffer,
     ContentType: mimeType,
@@ -49,7 +58,7 @@ export async function uploadFileToStorage(
 
   await client.send(command);
 
-  const publicBase = process.env.R2_PUBLIC_URL || '';
+  const publicBase = R2_PUBLIC_URL || '';
   const secureUrl = isPrivate
     ? `/api/documents/download?key=${encodeURIComponent(objectKey)}`
     : `${publicBase.replace(/\/$/, '')}/${objectKey}`;
@@ -86,7 +95,9 @@ export async function generateUploadTicket(
     : mimeType.startsWith('video/')
       ? 'videos'
       : 'images';
-  const objectKey = `${baseFolder}/${subfolder}/${timestamp}_${randomStr}_${sanitized}`;
+  const objectKey = baseFolder.includes('/')
+    ? `${baseFolder}/${timestamp}_${randomStr}_${sanitized}`
+    : `${baseFolder}/${subfolder}/${timestamp}_${randomStr}_${sanitized}`;
 
   const ticket = await getPresignedUploadUrl(objectKey, mimeType);
   if (!ticket) {
@@ -109,4 +120,51 @@ export async function getDocumentAccessUrl(objectKey: string): Promise<string> {
     if (signedUrl) return signedUrl;
   }
   return `/api/documents/download?key=${encodeURIComponent(objectKey)}`;
+}
+
+/**
+ * Download a file from Cloudflare R2 into a Buffer
+ */
+export async function downloadFileFromStorage(objectKey: string): Promise<Buffer> {
+  const client = getR2Client();
+  if (!client) {
+    throw new Error('Cloudflare R2 client is not configured.');
+  }
+
+  const response = await client.send(
+    new GetObjectCommand({
+      Bucket: R2_BUCKET_NAME,
+      Key: objectKey,
+    })
+  );
+
+  if (!response.Body) {
+    throw new Error(`File at ${objectKey} is empty or not found.`);
+  }
+
+  const chunks: Uint8Array[] = [];
+  for await (const chunk of response.Body as any) {
+    chunks.push(chunk);
+  }
+  return Buffer.concat(chunks);
+}
+
+/**
+ * Delete a file from Cloudflare R2
+ */
+export async function deleteFileFromStorage(objectKey: string): Promise<boolean> {
+  const client = getR2Client();
+  if (!client) return false;
+  try {
+    await client.send(
+      new DeleteObjectCommand({
+        Bucket: R2_BUCKET_NAME,
+        Key: objectKey,
+      })
+    );
+    return true;
+  } catch (err) {
+    console.warn('Failed to delete file from storage:', objectKey, err);
+    return false;
+  }
 }

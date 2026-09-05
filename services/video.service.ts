@@ -18,34 +18,38 @@ export interface TranscodeResult {
  * Handles Next.js server bundling where __dirname is redirected to .next/server/vendor-chunks.
  */
 function resolveFfmpegExecutable(): string {
+  let resolved: string | null = null;
+  const exeName = process.platform === 'win32' ? 'ffmpeg.exe' : 'ffmpeg';
+
   // 1. Explicit env variables
   if (process.env.FFMPEG_BIN && fs.existsSync(process.env.FFMPEG_BIN)) {
-    return process.env.FFMPEG_BIN;
-  }
-  if (process.env.FFMPEG_PATH && fs.existsSync(process.env.FFMPEG_PATH)) {
-    return process.env.FFMPEG_PATH;
-  }
-
-  // 2. Direct node_modules check relative to project root (process.cwd())
-  const exeName = process.platform === 'win32' ? 'ffmpeg.exe' : 'ffmpeg';
-  const nodeModulesPath = path.join(process.cwd(), 'node_modules', 'ffmpeg-static', exeName);
-  if (fs.existsSync(nodeModulesPath)) {
-    return nodeModulesPath;
-  }
-
-  // 3. Check imported ffmpegPath if valid
-  if (ffmpegPath && typeof ffmpegPath === 'string' && fs.existsSync(ffmpegPath)) {
-    return ffmpegPath;
-  }
-
-  // 4. Also check relative to __dirname going up
-  const candidateRelative = path.resolve(process.cwd(), '..', 'node_modules', 'ffmpeg-static', exeName);
-  if (fs.existsSync(candidateRelative)) {
-    return candidateRelative;
+    resolved = process.env.FFMPEG_BIN;
+  } else if (process.env.FFMPEG_PATH && fs.existsSync(process.env.FFMPEG_PATH)) {
+    resolved = process.env.FFMPEG_PATH;
+  } else {
+    // 2. Direct node_modules check relative to project root (process.cwd())
+    const nodeModulesPath = path.join(process.cwd(), 'node_modules', 'ffmpeg-static', exeName);
+    if (fs.existsSync(nodeModulesPath)) {
+      resolved = nodeModulesPath;
+    } else if (ffmpegPath && typeof ffmpegPath === 'string' && fs.existsSync(ffmpegPath)) {
+      // 3. Check imported ffmpegPath if valid
+      resolved = ffmpegPath;
+    } else {
+      // 4. Also check relative to __dirname going up
+      const candidateRelative = path.resolve(process.cwd(), '..', 'node_modules', 'ffmpeg-static', exeName);
+      if (fs.existsSync(candidateRelative)) {
+        resolved = candidateRelative;
+      }
+    }
   }
 
-  // 5. System PATH fallback
-  return 'ffmpeg';
+  const finalPath = resolved || 'ffmpeg';
+  if (process.platform !== 'win32' && fs.existsSync(finalPath)) {
+    try {
+      fs.chmodSync(finalPath, 0o755);
+    } catch {}
+  }
+  return finalPath;
 }
 
 /**
@@ -85,9 +89,8 @@ export async function transcodeVideoToWebM(
       '-vf', `scale='min(${targetWidth},iw)':-2`,
       '-c:v', 'libvpx',
       '-b:v', '1200k',
-      '-crf', '12',
-      '-quality', 'good',
-      '-cpu-used', '4',
+      '-quality', 'realtime',
+      '-cpu-used', '8',
       '-map', '0:v:0',
       '-map', '0:a?',
       '-c:a', 'libvorbis',

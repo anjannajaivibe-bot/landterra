@@ -1094,7 +1094,7 @@ function SellPageForm() {
     }
   };
 
-  // Video Upload via Direct Cloudflare R2 Presigned URL (Bypasses Vercel 4.5MB limit)
+  // Video Upload via Direct Cloudflare R2 Presigned URL + Serverless WebM Compression
   const uploadVideoFile = async (file: File) => {
     if (file.size > 50 * 1024 * 1024) {
       setErrorMessage('Video exceeds the maximum allowed size of 50 MB. Please choose a shorter clip.');
@@ -1106,7 +1106,7 @@ function SellPageForm() {
     setVideoUploadMessage(`Preparing direct upload for ${file.name}...`);
 
     try {
-      // 1. Request presigned ticket from our API (only ~100 bytes payload, lightning fast on Vercel)
+      // Step 1: Request presigned ticket from API for temporary staging in R2 (bypasses Vercel 4.5MB limit)
       const ticketRes = await fetch('/api/uploads/presigned-url', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1114,7 +1114,7 @@ function SellPageForm() {
           fileName: file.name,
           mimeType: file.type || 'video/mp4',
           isPrivate: false,
-          folder: 'properties',
+          folder: 'temp/raw-videos',
         }),
       });
 
@@ -1136,7 +1136,7 @@ function SellPageForm() {
         throw new Error('Storage ticket did not return an upload URL.');
       }
 
-      // 2. Direct upload to Cloudflare R2 via XMLHttpRequest to track upload percentage
+      // Step 2: Direct raw upload to Cloudflare R2 via XMLHttpRequest to track upload percentage
       await new Promise<void>((resolve, reject) => {
         const xhr = new XMLHttpRequest();
         xhr.open('PUT', ticket.uploadUrl);
@@ -1145,7 +1145,7 @@ function SellPageForm() {
         xhr.upload.onprogress = (evt) => {
           if (evt.lengthComputable) {
             const percent = Math.round((evt.loaded / evt.total) * 100);
-            setVideoUploadMessage(`Uploading to cloud storage... ${percent}%`);
+            setVideoUploadMessage(`Uploading raw video to cloud storage... ${percent}%`);
           }
         };
 
@@ -1168,17 +1168,48 @@ function SellPageForm() {
         xhr.send(file);
       });
 
-      const secureUrl = ticket.publicUrl || ticket.uploadUrl.split('?')[0];
+      // Step 3: Call backend to transcode & compress video to WebM and delete raw staging file
+      setVideoUploadMessage(`Compressing & optimizing video to WebM (~85% size reduction)... Please wait`);
 
-      setVideo({
-        secureUrl,
-        objectKey: ticket.key,
-        fileName: file.name,
-        size: file.size,
-        mimeType: file.type || 'video/mp4',
+      const processRes = await fetch('/api/uploads/video/process', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          rawKey: ticket.key,
+          fileName: file.name,
+        }),
       });
 
-      setVideoUploadMessage(`✓ Video uploaded successfully: ${file.name} (${formatFileSize(file.size)})`);
+      if (!processRes.ok) {
+        let procErr = 'Failed to compress video';
+        try {
+          const errData = await processRes.json();
+          procErr = errData.error || procErr;
+        } catch {
+          const text = await processRes.text().catch(() => '');
+          if (text) procErr = text;
+        }
+        throw new Error(procErr);
+      }
+
+      const processData = await processRes.json();
+      const processedFile = processData.file;
+
+      setVideo({
+        secureUrl: processedFile.secureUrl,
+        objectKey: processedFile.objectKey,
+        fileName: processedFile.fileName,
+        size: processedFile.size,
+        mimeType: processedFile.mimeType || 'video/webm',
+        originalSize: processedFile.originalSize,
+        compressionRatio: processedFile.compressionRatio,
+      });
+
+      const savingsMsg = processedFile.compressionRatio
+        ? ` (${processedFile.compressionRatio}% size reduction • ${formatFileSize(processedFile.originalSize)} → ${formatFileSize(processedFile.size)})`
+        : ` (${formatFileSize(processedFile.size)})`;
+
+      setVideoUploadMessage(`✓ Video compressed & uploaded: ${processedFile.fileName}${savingsMsg}`);
     } catch (err: unknown) {
       console.error('Direct video upload error:', err);
       const msg = err instanceof Error ? err.message : 'Failed to upload video';
@@ -1187,7 +1218,7 @@ function SellPageForm() {
       setIsUploadingVideo(false);
       window.setTimeout(() => {
         setVideoUploadMessage('');
-      }, 6000);
+      }, 7000);
     }
   };
 
@@ -4297,8 +4328,9 @@ function SellPageForm() {
                               <Play className="w-3 h-3 fill-current" />
                               Video Walkthrough
                             </span>
-                            <span className="px-2 py-0.5 rounded-md bg-[#fff1dc] text-[#c75e0a] text-[10px] font-bold">
-                              Cloud Video Ready
+                            <span className="px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 text-[10px] font-bold flex items-center gap-1">
+                              <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                              WebM Compressed {typeof video.compressionRatio === 'number' && video.compressionRatio > 0 ? `(${video.compressionRatio}% smaller)` : ''}
                             </span>
                           </div>
                           <div className="flex items-center gap-2">
@@ -4339,7 +4371,12 @@ function SellPageForm() {
                             {video.fileName}
                           </span>
                           <div className="flex items-center gap-2">
-                            <span>Size: {formatFileSize(video.size)}</span>
+                            <span className="font-semibold text-slate-700">Size: {formatFileSize(video.size)}</span>
+                            {video.originalSize && video.originalSize > video.size && (
+                              <span className="text-emerald-700 font-bold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
+                                Saved {formatFileSize(video.originalSize - video.size)}
+                              </span>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -4350,10 +4387,10 @@ function SellPageForm() {
                       <div className="rounded-2xl border-2 border-dashed border-[#FF9933]/50 bg-[#fff9f0] p-6 text-center space-y-2">
                         <RefreshCw className="w-6 h-6 animate-spin text-[#c75e0a] mx-auto" />
                         <p className="text-xs font-black text-slate-900">
-                          Uploading video directly to cloud storage...
+                          {videoUploadMessage || 'Uploading & optimizing video...'}
                         </p>
                         <p className="text-[10px] text-slate-500">
-                          Streaming directly to global CDN for instant mobile playback.
+                          Bypasses server payload limits and automatically compresses to lightweight WebM.
                         </p>
                       </div>
                     )}

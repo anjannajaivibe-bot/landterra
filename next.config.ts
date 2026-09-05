@@ -9,6 +9,9 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: false,
   },
   serverExternalPackages: ['ffmpeg-static'],
+  outputFileTracingIncludes: {
+    '/api/**/*': ['./node_modules/ffmpeg-static/**/*'],
+  },
   // Allow access to remote image placeholders and R2/Unsplash domains
   images: {
     remotePatterns: [
