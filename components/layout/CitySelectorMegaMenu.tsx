@@ -299,6 +299,7 @@ export function CitySelectorMegaMenu() {
         onClick={() => setIsOpen(!isOpen)}
         aria-expanded={isOpen}
         aria-haspopup="dialog"
+        aria-label="Select City or Region"
         title={selectedCity}
         suppressHydrationWarning
         className={`flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-xl border text-xs font-black transition-all cursor-pointer select-none max-w-[130px] sm:max-w-[150px] shrink-0 ${
@@ -333,6 +334,7 @@ export function CitySelectorMegaMenu() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                aria-label="Search across 100+ Indian cities and districts"
                 placeholder="Search across 100+ Indian cities and districts..."
                 className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 bg-white text-xs sm:text-sm font-semibold text-slate-900 placeholder:text-slate-400 focus:outline-[#FF9933] focus:border-[#FF9933] shadow-2xs transition-all"
                 autoFocus
@@ -341,6 +343,7 @@ export function CitySelectorMegaMenu() {
                 <button
                   type="button"
                   onClick={() => setSearchQuery('')}
+                  aria-label="Clear city search query"
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
                 >
                   <X className="w-3.5 h-3.5" />

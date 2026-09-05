@@ -273,6 +273,7 @@ export function Navbar() {
                   }
                   aria-expanded={accountDropdownOpen}
                   aria-haspopup="menu"
+                  aria-label="User account menu"
                   className="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-white px-3 py-2 transition-all hover:border-slate-300 hover:bg-slate-50 shadow-2xs"
                 >
                   {/* Avatar */}

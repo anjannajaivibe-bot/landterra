@@ -408,6 +408,7 @@ export default function HomePage() {
                       type="text"
                       value={searchLocation}
                       onChange={(e) => setSearchLocation(e.target.value)}
+                      aria-label="Search by city, locality, or project name"
                       placeholder="Enter City, Locality, or Project e.g. Kokapet"
                       className="w-full bg-transparent text-xs sm:text-sm font-semibold text-slate-900 placeholder:text-slate-400 focus:outline-none"
                     />
@@ -421,6 +422,8 @@ export default function HomePage() {
                         setLandTypePopoverOpen(!landTypePopoverOpen);
                         setBudgetPopoverOpen(false);
                       }}
+                      aria-label="Select property or land type"
+                      aria-expanded={landTypePopoverOpen}
                       className="w-full flex items-center justify-between sm:justify-start gap-2 text-left cursor-pointer select-none"
                     >
                       <div className="flex items-center gap-1.5 min-w-0">
@@ -731,6 +734,8 @@ export default function HomePage() {
                         setBudgetPopoverOpen(!budgetPopoverOpen);
                         setLandTypePopoverOpen(false);
                       }}
+                      aria-label="Select budget range"
+                      aria-expanded={budgetPopoverOpen}
                       className="w-full flex items-center justify-between sm:justify-start gap-2 text-left cursor-pointer select-none"
                     >
                       <div className="flex items-center gap-1 min-w-0">
@@ -750,7 +755,7 @@ export default function HomePage() {
                     {/* Budget Popover */}
                     {budgetPopoverOpen && (
                       <div className="absolute left-0 sm:left-auto sm:right-0 top-[calc(100%+14px)] z-50 w-[280px] sm:w-[320px] p-4 rounded-3xl bg-white border border-slate-200 shadow-[0_20px_50px_rgba(0,0,0,0.15)] animate-in fade-in slide-in-from-top-2 duration-150 space-y-3">
-                        <div className="text-[11px] font-black uppercase tracking-wider text-slate-400">
+                        <div className="text-[11px] font-black uppercase tracking-wider text-slate-600">
                           Select Budget Range
                         </div>
 
@@ -786,6 +791,7 @@ export default function HomePage() {
                   <div className="px-2 py-1">
                     <button
                       type="submit"
+                      aria-label="Search verified properties"
                       className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3 rounded-2xl sm:rounded-full bg-[#FF9933] hover:bg-[#f07d12] text-white text-sm font-black shadow-md hover:shadow-lg transition-all cursor-pointer shrink-0"
                     >
                       <Search className="w-4 h-4" />

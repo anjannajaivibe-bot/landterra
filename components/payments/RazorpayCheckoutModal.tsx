@@ -41,9 +41,35 @@ export function RazorpayCheckoutModal({
 
   const isRenewal = purpose === 'SUBSCRIPTION_RENEWAL';
 
+  const loadRazorpayScript = (): Promise<boolean> => {
+    return new Promise((resolve) => {
+      if (typeof window === 'undefined') return resolve(false);
+      if ((window as any).Razorpay) return resolve(true);
+
+      const existingScript = document.querySelector(
+        'script[src="https://checkout.razorpay.com/v1/checkout.js"]'
+      );
+      if (existingScript) {
+        existingScript.addEventListener('load', () => resolve(true));
+        existingScript.addEventListener('error', () => resolve(false));
+        return;
+      }
+
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.async = true;
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
+
   useEffect(() => {
     if (!isOpen) return;
     let mounted = true;
+
+    // Prefetch Razorpay script on-demand when checkout modal opens
+    loadRazorpayScript();
 
     async function fetchPlatformSettings() {
       try {
@@ -134,12 +160,14 @@ export function RazorpayCheckoutModal({
        * 2. CHECK RAZORPAY CLIENT
        * ============================================================
        */
+      const isScriptReady = await loadRazorpayScript();
       if (
+        !isScriptReady ||
         typeof window === 'undefined' ||
         !(window as any).Razorpay
       ) {
         throw new Error(
-          'Payment gateway client is not ready. Please refresh the page and try again.',
+          'Payment gateway client could not be initialized. Please check your connection and try again.',
         );
       }
 

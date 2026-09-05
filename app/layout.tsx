@@ -91,6 +91,38 @@ export const metadata: Metadata = {
   },
 };
 
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebSite',
+      '@id': 'https://bhoomimitra.com/#website',
+      url: 'https://bhoomimitra.com',
+      name: 'BhoomiMitra',
+      description: "India's Direct Peer-to-Peer Real Estate & Property Marketplace",
+      potentialAction: {
+        '@type': 'SearchAction',
+        target: 'https://bhoomimitra.com/buy?q={search_term_string}',
+        'query-input': 'required name=search_term_string',
+      },
+      inLanguage: 'en-IN',
+    },
+    {
+      '@type': 'Organization',
+      '@id': 'https://bhoomimitra.com/#organization',
+      name: 'BhoomiMitra Marketplace',
+      url: 'https://bhoomimitra.com',
+      logo: 'https://bhoomimitra.com/icon-192.png',
+      contactPoint: {
+        '@type': 'ContactPoint',
+        contactType: 'Customer Support',
+        areaServed: 'IN',
+        availableLanguage: ['en', 'hi', 'te'],
+      },
+    },
+  ],
+};
+
 export default function RootLayout({
   children,
 }: {
@@ -98,18 +130,21 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`dark scroll-smooth ${plusJakartaSans.variable}`}>
+      <head>
+        <link rel="alternate" type="text/plain" href="/llms.txt" title="LLM Agentic Manifest" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </head>
       <body
         suppressHydrationWarning
         className="min-h-screen bg-slate-950 text-slate-100 antialiased font-sans selection:bg-[#FF9933] selection:text-white"
       >
         {children}
-        <Script
-          src="https://checkout.razorpay.com/v1/checkout.js"
-          strategy="lazyOnload"
-        />
         <Script id="register-sw" strategy="afterInteractive">
           {`
-            if ('serviceWorker' in navigator && window.location.protocol === 'https:' || window.location.hostname === 'localhost') {
+            if ('serviceWorker' in navigator && (window.location.protocol === 'https:' || window.location.hostname === 'localhost')) {
               window.addEventListener('load', function() {
                 navigator.serviceWorker.register('/sw.js').catch(function() {});
               });
