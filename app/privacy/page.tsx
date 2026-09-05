@@ -55,7 +55,7 @@ export default function PrivacyPage() {
             </div>
             <h3 className="font-bold text-slate-900 text-sm">Location Privacy</h3>
             <p className="text-xs text-slate-600 leading-relaxed">
-              Sellers can toggle an approximate 400m radius blur to keep exact parcel boundaries confidential until direct contact.
+              Sellers can toggle an approximate 50–100m radius blur to keep exact parcel boundaries confidential until direct contact.
             </p>
           </div>
 

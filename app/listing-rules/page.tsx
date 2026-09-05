@@ -168,7 +168,7 @@ export default function ListingRulesPage() {
               <div className="space-y-1">
                 <h4 className="font-bold text-xs sm:text-sm text-slate-900">Accurate GPS Site Coordinates</h4>
                 <p className="text-xs text-slate-600 leading-relaxed">
-                  Pin drops must accurately match the physical land parcel. Sellers can enable the <strong>400m Privacy Radius Blur</strong> if they wish to keep exact boundaries confidential until direct buyer inquiry.
+                  Pin drops must accurately match the physical land parcel. Sellers can enable the <strong>50–100m Privacy Radius Blur</strong> if they wish to keep exact boundaries confidential until direct buyer inquiry.
                 </p>
               </div>
             </div>

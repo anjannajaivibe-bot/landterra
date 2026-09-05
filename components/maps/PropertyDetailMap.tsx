@@ -26,10 +26,8 @@ export function PropertyDetailMap({
   const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`;
   const fullMapUrl = `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
 
-  // Safe Google Maps Embed URL (or OSM fallback if needed)
-  const embedMapUrl = apiKey
-    ? `https://www.google.com/maps/embed/v1/view?key=${apiKey}&center=${latitude},${longitude}&zoom=16&maptype=${mapType}`
-    : `https://maps.google.com/maps?q=${latitude},${longitude}&t=${mapType === 'satellite' ? 'k' : 'm'}&z=16&output=embed`;
+  // Reliable Google Maps Embed URL (satellite and roadmap views without API key restrictions)
+  const embedMapUrl = `https://maps.google.com/maps?q=${latitude},${longitude}&t=${mapType === 'satellite' ? 'k' : 'm'}&z=16&output=embed`;
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-xs">

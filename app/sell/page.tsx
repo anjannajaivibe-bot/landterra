@@ -39,6 +39,8 @@ import {
   Check,
   X,
   SlidersHorizontal,
+  Loader2,
+  Navigation,
 } from 'lucide-react';
 
 interface UploadedImagePreview {
@@ -504,6 +506,64 @@ function SellPageForm() {
 
   const [approximateLocation, setApproximateLocation] =
     useState<boolean>(false);
+
+  const [isResolvingMapLink, setIsResolvingMapLink] =
+    useState<boolean>(false);
+
+  const [hasLocatedMap, setHasLocatedMap] =
+    useState<boolean>(false);
+
+  const [resolvedPlaceName, setResolvedPlaceName] =
+    useState<string>('');
+
+  const [mapLinkResolutionStatus, setMapLinkResolutionStatus] =
+    useState<{
+      type: 'success' | 'error';
+      message: string;
+    } | null>(null);
+
+  const handleResolveMapLink = async (customUrl?: string) => {
+    const rawUrl = (customUrl !== undefined ? customUrl : googleMapsShareLink).trim();
+    if (!rawUrl) return;
+
+    setIsResolvingMapLink(true);
+    setMapLinkResolutionStatus(null);
+
+    try {
+      const res = await fetch(`/api/resolve-map-link?url=${encodeURIComponent(rawUrl)}`);
+      const data = await res.json();
+
+      if (data.success && typeof data.latitude === 'number' && typeof data.longitude === 'number') {
+        setLatitude(data.latitude);
+        setLongitude(data.longitude);
+        setHasLocatedMap(true);
+        if (data.placeName) {
+          setResolvedPlaceName(data.placeName);
+          if (!address || address.length < 5) {
+            setAddress(data.placeName);
+          }
+        }
+        setMapLinkResolutionStatus({
+          type: 'success',
+          message: data.placeName
+            ? `✓ GPS Locked: ${data.placeName} (${data.latitude.toFixed(4)}° N, ${data.longitude.toFixed(4)}° E)`
+            : `✓ GPS Locked (${data.latitude.toFixed(4)}° N, ${data.longitude.toFixed(4)}° E)`,
+        });
+      } else {
+        setMapLinkResolutionStatus({
+          type: 'error',
+          message: data.error || 'Could not parse coordinates from this Google Maps link.',
+        });
+      }
+    } catch {
+      setMapLinkResolutionStatus({
+        type: 'error',
+        message: 'Could not resolve link. Please adjust location manually on the map.',
+      });
+    } finally {
+      setIsResolvingMapLink(false);
+    }
+  };
 
   // Step 3: Seller
   const [sellerName, setSellerName] =
@@ -3538,43 +3598,115 @@ function SellPageForm() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                    Google Maps Share Link (Optional)
-                  </label>
-                  <input
-                    type="url"
-                    value={googleMapsShareLink}
-                    onChange={(event) =>
-                      setGoogleMapsShareLink(event.target.value)
-                    }
-                    placeholder="https://maps.app.goo.gl/..."
-                    className="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#fff1dc] focus:border-[#FF9933]"
-                  />
-                  <p className="text-[10px] text-slate-400 mt-1">
-                    You can paste the location link copied directly from Google Maps.
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="block text-xs font-bold text-slate-700">
+                      Google Maps Share Link (Optional)
+                    </label>
+                    {isResolvingMapLink && (
+                      <span className="text-[11px] font-semibold text-[#c75e0a] flex items-center gap-1">
+                        <Loader2 className="w-3 h-3 animate-spin" />
+                        Extracting GPS...
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex gap-2">
+                    <div className="relative flex-1">
+                      <input
+                        type="url"
+                        value={googleMapsShareLink}
+                        onChange={(event) => {
+                          const val = event.target.value;
+                          setGoogleMapsShareLink(val);
+                          if (val.includes('goo.gl/') || val.includes('/maps/') || val.includes('@')) {
+                            handleResolveMapLink(val);
+                          }
+                        }}
+                        onPaste={(event) => {
+                          const pasted = event.clipboardData.getData('text');
+                          if (pasted) {
+                            setTimeout(() => handleResolveMapLink(pasted), 50);
+                          }
+                        }}
+                        placeholder="https://maps.app.goo.gl/..."
+                        className="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#fff1dc] focus:border-[#FF9933] bg-white"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleResolveMapLink()}
+                      disabled={isResolvingMapLink || !googleMapsShareLink.trim()}
+                      className="px-4 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50 shrink-0 shadow-xs"
+                    >
+                      {isResolvingMapLink ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Navigation className="w-4 h-4 text-[#FF9933]" />
+                      )}
+                      <span>Locate Link</span>
+                    </button>
+                  </div>
+
+                  {mapLinkResolutionStatus && (
+                    <div
+                      className={`mt-2.5 p-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 border ${
+                        mapLinkResolutionStatus.type === 'success'
+                          ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                          : 'bg-amber-50 text-amber-900 border-amber-200'
+                      }`}
+                    >
+                      {mapLinkResolutionStatus.type === 'success' ? (
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                      ) : (
+                        <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+                      )}
+                      <span>{mapLinkResolutionStatus.message}</span>
+                    </div>
+                  )}
+
+                  <p className="text-[10px] text-slate-400 mt-1.5">
+                    You can paste the location link copied directly from Google Maps (e.g. from the Google Maps app Share button). We automatically extract the coordinates and lock the live satellite map below.
                   </p>
                 </div>
 
-                <div className="rounded-2xl overflow-hidden border border-slate-200">
-                  <GoogleMapPicker
-                    latitude={latitude}
-                    longitude={longitude}
-                    address={address}
-                    city={city}
-                    state={state}
-                    pincode={pincode}
-                    approximateLocation={approximateLocation}
-                    onChange={(data) => {
-                      setLatitude(data.latitude);
-                      setLongitude(data.longitude);
-                      if (data.address) setAddress(data.address);
-                      if (data.city) setCity(data.city);
-                      if (data.state) setState(data.state);
-                      if (data.pincode) setPincode(data.pincode);
-                      setApproximateLocation(data.approximateLocation);
-                    }}
-                  />
-                </div>
+                {/* Map Display: shows cleanly below once link is entered and located */}
+                {hasLocatedMap || googleMapsShareLink ? (
+                  <div className="rounded-2xl overflow-hidden border border-slate-200 animate-in fade-in duration-200">
+                    <GoogleMapPicker
+                      latitude={latitude}
+                      longitude={longitude}
+                      address={address}
+                      city={city}
+                      state={state}
+                      pincode={pincode}
+                      approximateLocation={approximateLocation}
+                      placeName={resolvedPlaceName}
+                      showAddressInputs={false}
+                      onChange={(data) => {
+                        setLatitude(data.latitude);
+                        setLongitude(data.longitude);
+                        if (data.address) setAddress(data.address);
+                        if (data.city) setCity(data.city);
+                        if (data.state) setState(data.state);
+                        if (data.pincode) setPincode(data.pincode);
+                        setApproximateLocation(data.approximateLocation);
+                      }}
+                    />
+                  </div>
+                ) : (
+                  <div className="rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50/60 p-8 text-center flex flex-col items-center justify-center space-y-3">
+                    <div className="w-12 h-12 rounded-full bg-amber-100/70 text-[#c75e0a] flex items-center justify-center">
+                      <MapPin className="w-6 h-6 text-[#FF9933]" />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-bold text-slate-800">
+                        Paste your Google Maps link above
+                      </h3>
+                      <p className="text-xs text-slate-500 max-w-md mt-1">
+                        Paste the location link from Google Maps into the box above and click <span className="font-semibold text-slate-700">&quot;Locate Link&quot;</span>. Your interactive property satellite map will appear directly here.
+                      </p>
+                    </div>
+                  </div>
+                )}
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div>
@@ -3659,7 +3791,7 @@ function SellPageForm() {
                       Show approximate location publicly
                     </span>
                     <span className="block text-[10px] text-amber-800 mt-1 leading-relaxed">
-                      Your exact coordinates can remain private while buyers see an approximate 500m area on the public map.
+                      Your exact coordinates can remain private while buyers see an approximate 50–100m area on the public map.
                     </span>
                   </span>
                 </label>

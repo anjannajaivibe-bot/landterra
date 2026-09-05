@@ -129,7 +129,7 @@ export default function PricingPage() {
                 </li>
                 <li className="flex items-start gap-2.5">
                   <CheckCircle2 className="w-4 h-4 text-[#FF9933] shrink-0 mt-0.5" />
-                  <span><strong>Geo-Privacy Blur:</strong> 400m radius toggle to shield exact boundaries.</span>
+                  <span><strong>Geo-Privacy Blur:</strong> 50–100m radius toggle to shield exact boundaries.</span>
                 </li>
               </ul>
             </div>

@@ -22,13 +22,13 @@ export function getPublicMapCoordinates(lat: number, lng: number, isApproximate:
 
   // Consistent pseudo-random offset based on lat/lng so marker doesn't jump around
   const hash = Math.sin(lat * 1000 + lng * 1000) * 10000;
-  const offsetLat = ((hash % 10) - 5) * 0.0008; // ~80-100m offset
-  const offsetLng = (((hash * 10) % 10) - 5) * 0.0008;
+  const offsetLat = ((hash % 10) - 5) * 0.00015; // ~15-20m offset within 50-100m circle
+  const offsetLng = (((hash * 10) % 10) - 5) * 0.00015;
 
   return {
     lat: Number((lat + offsetLat).toFixed(6)),
     lng: Number((lng + offsetLng).toFixed(6)),
     isApproximate: true,
-    radiusMeters: 400, // 400m privacy circle
+    radiusMeters: 75, // 50–100m privacy circle
   };
 }
