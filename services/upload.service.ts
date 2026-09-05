@@ -71,7 +71,7 @@ export async function generateUploadTicket(
   fileName: string,
   mimeType: string,
   isPrivate = false,
-  options?: { maxBytes?: number }
+  options?: { maxBytes?: number; folder?: string }
 ) {
   if (!isR2Configured()) {
     throw new Error('Cloudflare R2 storage is not configured. Please set R2 credentials.');
@@ -80,7 +80,13 @@ export async function generateUploadTicket(
   const sanitized = fileName.replace(/[^a-zA-Z0-9.-]/g, '_');
   const timestamp = Date.now();
   const randomStr = Math.random().toString(36).substring(2, 8);
-  const objectKey = `uploads/${isPrivate ? 'private' : 'public'}/${timestamp}_${randomStr}_${sanitized}`;
+  const baseFolder = options?.folder || 'properties';
+  const subfolder = isPrivate
+    ? 'documents'
+    : mimeType.startsWith('video/')
+      ? 'videos'
+      : 'images';
+  const objectKey = `${baseFolder}/${subfolder}/${timestamp}_${randomStr}_${sanitized}`;
 
   const ticket = await getPresignedUploadUrl(objectKey, mimeType);
   if (!ticket) {

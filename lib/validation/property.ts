@@ -22,7 +22,7 @@ export const PropertyVideoInputSchema = z.object({
   objectKey: z.string().min(1),
   secureUrl: z.string().url(),
   fileName: z.string().min(1),
-  mimeType: z.string().default('video/webm'),
+  mimeType: z.string().min(1).default('video/mp4'),
   size: z.number().max(50 * 1024 * 1024, 'Video must be under 50MB'),
   duration: z.number().optional(),
   thumbnailUrl: z.string().optional(),

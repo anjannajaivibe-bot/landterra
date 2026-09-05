@@ -1,11 +1,16 @@
 import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
-const R2_ACCOUNT_ID = process.env.R2_ACCOUNT_ID;
-const R2_ACCESS_KEY_ID = process.env.R2_ACCESS_KEY_ID;
-const R2_SECRET_ACCESS_KEY = process.env.R2_SECRET_ACCESS_KEY;
-const R2_BUCKET_NAME = process.env.R2_BUCKET_NAME || 'bhoomimitra-assets';
-const R2_PUBLIC_URL = process.env.R2_PUBLIC_URL || process.env.R2_PUBLIC_DOMAIN;
+function cleanEnv(val: string | undefined): string {
+  if (!val) return '';
+  return val.replace(/^["']|["']$/g, '').trim();
+}
+
+const R2_ACCOUNT_ID = cleanEnv(process.env.R2_ACCOUNT_ID);
+const R2_ACCESS_KEY_ID = cleanEnv(process.env.R2_ACCESS_KEY_ID);
+const R2_SECRET_ACCESS_KEY = cleanEnv(process.env.R2_SECRET_ACCESS_KEY);
+const R2_BUCKET_NAME = cleanEnv(process.env.R2_BUCKET_NAME) || 'bhoomimitra-assets';
+const R2_PUBLIC_URL = cleanEnv(process.env.R2_PUBLIC_URL || process.env.R2_PUBLIC_DOMAIN);
 
 export function isR2Configured(): boolean {
   return Boolean(

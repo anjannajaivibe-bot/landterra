@@ -1094,61 +1094,108 @@ function SellPageForm() {
     }
   };
 
-  // Video Upload with Server-Side WebM Transcoding
-  const handleVideoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
+  // Video Upload via Direct Cloudflare R2 Presigned URL (Bypasses Vercel 4.5MB limit)
+  const uploadVideoFile = async (file: File) => {
     if (file.size > 50 * 1024 * 1024) {
       setErrorMessage('Video exceeds the maximum allowed size of 50 MB. Please choose a shorter clip.');
-      event.target.value = '';
       return;
     }
 
     setIsUploadingVideo(true);
     setErrorMessage('');
-    setVideoUploadMessage(`Uploading & transcoding ${file.name} to WebM on server...`);
+    setVideoUploadMessage(`Preparing direct upload for ${file.name}...`);
 
     try {
-      const formData = new FormData();
-      formData.append('file', file);
-
-      const response = await fetch('/api/uploads/video', {
+      // 1. Request presigned ticket from our API (only ~100 bytes payload, lightning fast on Vercel)
+      const ticketRes = await fetch('/api/uploads/presigned-url', {
         method: 'POST',
-        body: formData,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fileName: file.name,
+          mimeType: file.type || 'video/mp4',
+          isPrivate: false,
+          folder: 'properties',
+        }),
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Video upload and WebM conversion failed.');
+      if (!ticketRes.ok) {
+        let errMsg = 'Failed to generate upload ticket';
+        try {
+          const errData = await ticketRes.json();
+          errMsg = errData.error || errMsg;
+        } catch {
+          const text = await ticketRes.text().catch(() => '');
+          if (text) errMsg = text;
+        }
+        throw new Error(errMsg);
       }
 
-      if (data.file) {
-        setVideo({
-          secureUrl: data.file.secureUrl,
-          objectKey: data.file.objectKey,
-          fileName: data.file.fileName,
-          size: data.file.size,
-          mimeType: data.file.mimeType || 'video/webm',
-          originalSize: data.file.originalSize,
-          compressionRatio: data.file.compressionRatio,
-        });
+      const ticket = await ticketRes.json();
 
-        const ratioTxt = data.file.compressionRatio ? ` (${data.file.compressionRatio}% smaller)` : '';
-        setVideoUploadMessage(`✓ Converted to WebM: ${formatFileSize(data.file.originalSize)} → ${formatFileSize(data.file.size)}${ratioTxt}`);
+      if (!ticket.uploadUrl) {
+        throw new Error('Storage ticket did not return an upload URL.');
       }
+
+      // 2. Direct upload to Cloudflare R2 via XMLHttpRequest to track upload percentage
+      await new Promise<void>((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('PUT', ticket.uploadUrl);
+        xhr.setRequestHeader('Content-Type', file.type || 'video/mp4');
+
+        xhr.upload.onprogress = (evt) => {
+          if (evt.lengthComputable) {
+            const percent = Math.round((evt.loaded / evt.total) * 100);
+            setVideoUploadMessage(`Uploading to cloud storage... ${percent}%`);
+          }
+        };
+
+        xhr.onload = () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            resolve();
+          } else {
+            reject(new Error(`Cloud storage rejected upload with status ${xhr.status}.`));
+          }
+        };
+
+        xhr.onerror = () => {
+          reject(new Error('Network or CORS error while uploading video to cloud storage. Please ensure CORS is enabled on Cloudflare R2 bucket.'));
+        };
+
+        xhr.ontimeout = () => {
+          reject(new Error('Video upload timed out. Please try again with a smaller file.'));
+        };
+
+        xhr.send(file);
+      });
+
+      const secureUrl = ticket.publicUrl || ticket.uploadUrl.split('?')[0];
+
+      setVideo({
+        secureUrl,
+        objectKey: ticket.key,
+        fileName: file.name,
+        size: file.size,
+        mimeType: file.type || 'video/mp4',
+      });
+
+      setVideoUploadMessage(`✓ Video uploaded successfully: ${file.name} (${formatFileSize(file.size)})`);
     } catch (err: unknown) {
-      console.error('Video upload error:', err);
-      const msg = err instanceof Error ? err.message : 'Failed to process video';
+      console.error('Direct video upload error:', err);
+      const msg = err instanceof Error ? err.message : 'Failed to upload video';
       setErrorMessage(msg);
     } finally {
       setIsUploadingVideo(false);
-      event.target.value = '';
       window.setTimeout(() => {
         setVideoUploadMessage('');
       }, 6000);
     }
+  };
+
+  const handleVideoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) return;
+    await uploadVideoFile(file);
   };
 
   // Unified Media Upload (Upload photos & video in one go)
@@ -1252,55 +1299,7 @@ function SellPageForm() {
       if (videoFiles.length > 1) {
         setErrorMessage('Only 1 video tour is supported per listing. Processing the first video.');
       }
-
-      if (videoFile.size > 50 * 1024 * 1024) {
-        setErrorMessage('Video exceeds the maximum allowed size of 50 MB. Please choose a shorter clip.');
-        return;
-      }
-
-      setIsUploadingVideo(true);
-      setErrorMessage('');
-      setVideoUploadMessage(`Uploading & transcoding ${videoFile.name} to WebM on server...`);
-
-      try {
-        const formData = new FormData();
-        formData.append('file', videoFile);
-
-        const response = await fetch('/api/uploads/video', {
-          method: 'POST',
-          body: formData,
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.error || 'Video upload and WebM conversion failed.');
-        }
-
-        if (data.file) {
-          setVideo({
-            secureUrl: data.file.secureUrl,
-            objectKey: data.file.objectKey,
-            fileName: data.file.fileName,
-            size: data.file.size,
-            mimeType: data.file.mimeType || 'video/webm',
-            originalSize: data.file.originalSize,
-            compressionRatio: data.file.compressionRatio,
-          });
-
-          const ratioTxt = data.file.compressionRatio ? ` (${data.file.compressionRatio}% smaller)` : '';
-          setVideoUploadMessage(`✓ Converted to WebM: ${formatFileSize(data.file.originalSize)} → ${formatFileSize(data.file.size)}${ratioTxt}`);
-        }
-      } catch (err: unknown) {
-        console.error('Video upload error:', err);
-        const msg = err instanceof Error ? err.message : 'Failed to process video';
-        setErrorMessage(msg);
-      } finally {
-        setIsUploadingVideo(false);
-        window.setTimeout(() => {
-          setVideoUploadMessage('');
-        }, 6000);
-      }
+      await uploadVideoFile(videoFile);
     }
   };
 
@@ -4235,7 +4234,7 @@ function SellPageForm() {
                       {isUploadingImage
                         ? 'Optimizing & uploading photos...'
                         : isUploadingVideo
-                        ? 'Transcoding & uploading video to WebM...'
+                        ? 'Uploading video to cloud storage...'
                         : 'Upload property photos & video tour'}
                     </p>
                     <p className="text-[11px] text-slate-500 mt-1">
@@ -4248,7 +4247,7 @@ function SellPageForm() {
                       </span>
                       <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#fff1dc]/60 border border-[#FF9933]/30 text-[10px] text-[#c75e0a] font-semibold">
                         <Film className="w-3 h-3" />
-                        Video auto-converted to high-efficiency WebM
+                        Direct high-speed cloud video streaming
                       </span>
                     </div>
                   </div>
@@ -4299,7 +4298,7 @@ function SellPageForm() {
                               Video Walkthrough
                             </span>
                             <span className="px-2 py-0.5 rounded-md bg-[#fff1dc] text-[#c75e0a] text-[10px] font-bold">
-                              WebM Ready
+                              Cloud Video Ready
                             </span>
                           </div>
                           <div className="flex items-center gap-2">
@@ -4311,7 +4310,7 @@ function SellPageForm() {
                                 disabled={isUploadingVideo}
                                 className="hidden"
                               />
-                              {isUploadingVideo ? 'Transcoding...' : 'Replace Video'}
+                              {isUploadingVideo ? 'Uploading...' : 'Replace Video'}
                             </label>
                             <button
                               type="button"
@@ -4341,25 +4340,20 @@ function SellPageForm() {
                           </span>
                           <div className="flex items-center gap-2">
                             <span>Size: {formatFileSize(video.size)}</span>
-                            {video.originalSize && video.originalSize > video.size && (
-                              <span className="text-[#c75e0a] font-bold">
-                                (Saved {formatFileSize(video.originalSize - video.size)} • {video.compressionRatio}% smaller)
-                              </span>
-                            )}
                           </div>
                         </div>
                       </div>
                     )}
 
-                    {/* Video Transcoding Placeholder Card */}
+                    {/* Video Uploading Placeholder Card */}
                     {isUploadingVideo && !video && (
                       <div className="rounded-2xl border-2 border-dashed border-[#FF9933]/50 bg-[#fff9f0] p-6 text-center space-y-2">
                         <RefreshCw className="w-6 h-6 animate-spin text-[#c75e0a] mx-auto" />
                         <p className="text-xs font-black text-slate-900">
-                          Transcoding and optimizing video to WebM on server...
+                          Uploading video directly to cloud storage...
                         </p>
                         <p className="text-[10px] text-slate-500">
-                          Compressing bitrate, scaling resolution, and configuring instant mobile playback.
+                          Streaming directly to global CDN for instant mobile playback.
                         </p>
                       </div>
                     )}
