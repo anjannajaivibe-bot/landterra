@@ -199,7 +199,19 @@ export default function BuyerDashboardPage() {
                         {inq.message}
                       </p>
                       <div className="flex items-center justify-between text-[11px] text-slate-500 pt-1">
-                        <span>Property Reference: {inq.propertyId}</span>
+                        <span className="flex items-center gap-1.5 flex-wrap">
+                          <span className="text-slate-400">Property:</span>
+                          {inq.propertyTitle ? (
+                            <Link
+                              href={`/properties/${inq.propertyId}`}
+                              className="font-bold text-slate-800 hover:text-[#c75e0a] hover:underline transition-colors"
+                            >
+                              {inq.propertyTitle}
+                            </Link>
+                          ) : (
+                            <span className="font-mono text-slate-500">Ref: {inq.propertyId}</span>
+                          )}
+                        </span>
                         <span className="text-[#c75e0a] font-semibold">Active Request</span>
                       </div>
                     </div>

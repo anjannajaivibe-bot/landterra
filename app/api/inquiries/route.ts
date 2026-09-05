@@ -30,16 +30,30 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const validated = CreateInquirySchema.parse(body);
+
+    let rawPhone = (body.buyerPhone || authUser.phone || '').toString().trim().replace(/\D/g, '');
+    if (rawPhone.length === 12 && rawPhone.startsWith('91')) {
+      rawPhone = rawPhone.slice(2);
+    } else if (rawPhone.length === 11 && rawPhone.startsWith('0')) {
+      rawPhone = rawPhone.slice(1);
+    }
+
+    const payload = {
+      ...body,
+      buyerEmail: (body.buyerEmail?.trim() || authUser.email || '').trim(),
+      buyerPhone: rawPhone,
+      phoneShared: true,
+    };
+    const validated = CreateInquirySchema.parse(payload);
 
     const inquiry = await createInquiry({
       propertyId: validated.propertyId,
       buyerId: authUser.id,
       buyerName: authUser.name,
-      buyerEmail: authUser.email,
-      buyerPhone: validated.buyerPhone || authUser.phone,
+      buyerEmail: validated.buyerEmail,
+      buyerPhone: validated.buyerPhone,
       message: validated.message,
-      phoneShared: validated.phoneShared,
+      phoneShared: true,
     });
 
     return NextResponse.json({

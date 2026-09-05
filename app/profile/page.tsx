@@ -496,19 +496,34 @@ export default function ProfilePage() {
                     </div>
 
                     <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
-                      <Link
-                        href={`/sell?propertyId=${prop._id}`}
-                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#fff1dc] hover:bg-[#ffe5c2] text-[#c75e0a] border border-[#FF9933]/30 text-xs font-bold transition-colors cursor-pointer"
-                        title="Edit title, photos, price, description, etc."
-                      >
-                        <Edit3 className="w-3.5 h-3.5" />
-                        <span>Edit Property</span>
-                      </Link>
+                      {prop.listingStatus === 'PAYMENT_PENDING' || prop.listingStatus === 'DRAFT' ? (
+                        <Link
+                          href={`/sell?propertyId=${prop._id}`}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#FF9933] hover:bg-[#f07d12] text-white text-xs font-bold transition-colors cursor-pointer shadow-xs"
+                          title="Pay listing fee to publish live on the marketplace"
+                        >
+                          <span>Pay &amp; Publish (₹10)</span>
+                          <ExternalLink className="w-3.5 h-3.5" />
+                        </Link>
+                      ) : (
+                        <Link
+                          href={`/sell?propertyId=${prop._id}`}
+                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#fff1dc] hover:bg-[#ffe5c2] text-[#c75e0a] border border-[#FF9933]/30 text-xs font-bold transition-colors cursor-pointer"
+                          title="Edit title, photos, price, description, etc."
+                        >
+                          <Edit3 className="w-3.5 h-3.5" />
+                          <span>Edit Property</span>
+                        </Link>
+                      )}
 
                       <Link
                         href={`/properties/${prop._id}`}
                         className="p-2 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-600 cursor-pointer"
-                        title="View public page"
+                        title={
+                          prop.listingStatus === 'PUBLISHED' || prop.listingStatus === 'EXPIRING_SOON'
+                            ? 'View public page'
+                            : 'Private preview (Only visible to you - Draft)'
+                        }
                       >
                         <ExternalLink className="w-3.5 h-3.5" />
                       </Link>

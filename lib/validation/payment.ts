@@ -19,8 +19,9 @@ export const VerifyPaymentSchema = z.object({
 export const CreateInquirySchema = z.object({
   propertyId: z.string().min(1, 'Property ID is required'),
   message: z.string().min(10, 'Inquiry message must be at least 10 characters').max(1000),
-  phoneShared: z.boolean().default(false),
-  buyerPhone: z.string().regex(/^[6-9]\d{9}$/, 'Invalid Indian 10-digit mobile number').optional().or(z.literal('')),
+  phoneShared: z.boolean().default(true),
+  buyerPhone: z.string().regex(/^[6-9]\d{9}$/, 'Please provide a valid 10-digit Indian mobile number (e.g. 9876543210)'),
+  buyerEmail: z.string().email('Please provide a valid contact email address'),
 });
 
 export const CreateReportSchema = z.object({

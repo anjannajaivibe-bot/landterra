@@ -259,7 +259,7 @@ export async function GET(
 
     /*
      * Owner/admin can receive the authenticated
-     * property representation.
+     * property representation (including draft previews).
      */
 
     if (isOwner || isAdmin) {
@@ -282,7 +282,30 @@ export async function GET(
     }
 
     /*
-     * Everyone else receives ONLY the public representation.
+     * Check if property is publicly visible.
+     * Only PUBLISHED or EXPIRING_SOON listings can be seen by the public.
+     * Drafts, payment pending, expired, paused, or rejected listings
+     * are strictly restricted to the listing owner and platform admin.
+     */
+    const isPubliclyVisible =
+      property.listingStatus === 'PUBLISHED' ||
+      property.listingStatus === 'EXPIRING_SOON';
+
+    if (!isPubliclyVisible) {
+      return NextResponse.json(
+        {
+          error:
+            'This property listing is currently in draft and is not visible to the public.',
+          isDraft: true,
+        },
+        {
+          status: 404,
+        },
+      );
+    }
+
+    /*
+     * Everyone else receives ONLY the public representation of published listings.
      */
 
     const publicProperty =

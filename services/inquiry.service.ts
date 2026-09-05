@@ -25,10 +25,17 @@ export async function createInquiry(data: {
     throw new Error('Property not found');
   }
 
+  if (property.listingStatus !== 'PUBLISHED' && property.listingStatus !== 'EXPIRING_SOON') {
+    throw new Error('This listing is currently in draft and is not open for inquiries.');
+  }
+
+  if (property.sellerId === data.buyerId) {
+    throw new Error('You cannot send an inquiry on your own property listing.');
+  }
+
   await connectToDatabase();
 
-  const newInquiry: IInquiry = {
-    _id: 'inq_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
+  const newInquiry = {
     propertyId: data.propertyId,
     propertyTitle: property.title,
     propertyLocation: `${property.location.city}, ${property.location.state}`,
@@ -40,31 +47,33 @@ export async function createInquiry(data: {
     sellerId: property.sellerId,
     message: data.message,
     phoneShared: Boolean(data.phoneShared),
-    status: 'PENDING',
-    createdAt: new Date(),
-    updatedAt: new Date(),
+    status: 'PENDING' as const,
   };
 
   const createdDoc = await InquiryModel.create(newInquiry);
 
-  // Increment property inquiriesCount in database
-  await updateProperty(data.propertyId, {
-    inquiriesCount: (property.inquiriesCount || 0) + 1,
-  }).catch((e) => {
+  // 1. Atomic non-blocking property inquiriesCount increment
+  PropertyModel.updateOne(
+    { _id: data.propertyId },
+    { $inc: { inquiriesCount: 1 } },
+  ).exec().catch((e) => {
     console.error('Failed to increment property inquiry count:', e);
   });
 
-  // Notify seller via Resend email in background
+  // 2. Dispatch seller email asynchronously in the background so sender gets instant response
   if (property.sellerEmail) {
-    notifySellerInquiry(
-      property.sellerEmail,
-      property.sellerName || 'Seller',
-      data.buyerName,
-      property.title,
-      data.message,
-      data.phoneShared ? data.buyerPhone : undefined
-    ).catch((err) => {
-      console.error('Failed to notify seller of inquiry:', err);
+    setImmediate(() => {
+      notifySellerInquiry(
+        property.sellerEmail!,
+        property.sellerName || 'Seller',
+        data.buyerName,
+        property.title,
+        data.message,
+        data.phoneShared ? data.buyerPhone : undefined,
+        data.buyerEmail,
+      ).catch((err) => {
+        console.error('Failed to notify seller of inquiry:', err);
+      });
     });
   }
 
@@ -198,7 +207,6 @@ export async function createReport(data: {
   await connectToDatabase();
 
   const reportData = {
-    _id: 'rep_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
     propertyId: data.propertyId,
     propertyTitle: property?.title || 'Reported Property',
     reporterId: data.reporterId,
@@ -207,7 +215,6 @@ export async function createReport(data: {
     reason: data.reason,
     description: data.description,
     status: 'PENDING' as const,
-    createdAt: new Date(),
   };
 
   const createdDoc = await ReportModel.create(reportData);
@@ -220,7 +227,7 @@ export async function createReport(data: {
     actorRole: 'BUYER',
     action: 'PROPERTY_REPORTED',
     entityType: 'REPORT',
-    entityId: reportData._id,
+    entityId: String(createdDoc._id),
     metadata: {
       propertyId: data.propertyId,
       reason: data.reason,
@@ -267,6 +274,14 @@ export async function recordBuyerCallAction(data: {
   const property = await getPropertyById(data.propertyId);
   if (!property) {
     throw new Error('Property not found');
+  }
+
+  if (property.listingStatus !== 'PUBLISHED' && property.listingStatus !== 'EXPIRING_SOON') {
+    throw new Error('This listing is currently in draft and is not open for direct calls.');
+  }
+
+  if (property.sellerId === data.buyerId) {
+    throw new Error('You cannot record a call action on your own property listing.');
   }
 
   await connectToDatabase();

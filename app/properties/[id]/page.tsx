@@ -19,12 +19,15 @@ import {
   ChevronLeft,
   ChevronRight,
   Copy,
+  Edit,
   ExternalLink,
   Flag,
   Heart,
   Info,
   LandPlot,
+  LayoutDashboard,
   Loader2,
+  Mail,
   MapPin,
   MessageSquare,
   Phone,
@@ -165,11 +168,15 @@ function PropertyDetailsContent() {
 
   const [inquiryOpen, setInquiryOpen] = useState(false);
   const [inquiryMessage, setInquiryMessage] = useState('');
+  const [inquiryPhone, setInquiryPhone] = useState('');
+  const [inquiryEmail, setInquiryEmail] = useState('');
+  const [sharePhone, setSharePhone] = useState(true);
   const [inquirySending, setInquirySending] = useState(false);
   const [inquirySuccess, setInquirySuccess] = useState(false);
   const [inquiryError, setInquiryError] = useState('');
   const [reportModalOpen, setReportModalOpen] = useState(false);
   const [reloadCount, setReloadCount] = useState(0);
+  const [isListingOwner, setIsListingOwner] = useState(false);
 
   /* Call Seller State */
   const [callModalOpen, setCallModalOpen] = useState(false);
@@ -248,9 +255,13 @@ function PropertyDetailsContent() {
         );
 
         if (response.status === 404) {
+          const errData = await response.json().catch(() => null);
           if (!cancelled) {
             setProperty(null);
-            setError('This land listing could not be found.');
+            setError(
+              errData?.error ||
+              'This land listing could not be found or has not been published yet.',
+            );
           }
           return;
         }
@@ -273,6 +284,9 @@ function PropertyDetailsContent() {
         if (cancelled) return;
 
         setProperty(loadedProperty);
+        if (data?.isOwner !== undefined) {
+          setIsListingOwner(Boolean(data.isOwner));
+        }
 
         if (loadedProperty.isFavorite) {
           setFavorite(true);
@@ -362,6 +376,18 @@ function PropertyDetailsContent() {
             : 'Direct Classified';
 
   const publishedDate = formatDate(property?.publishedAt);
+
+  const isOwner = Boolean(
+    isListingOwner || (user && property && user.id === property.sellerId),
+  );
+
+  const isDraft = Boolean(
+    property &&
+    (property.listingStatus === 'DRAFT' ||
+      property.listingStatus === 'PAYMENT_PENDING' ||
+      property.listingStatus === 'PENDING_VERIFICATION' ||
+      property.paymentStatus !== 'PAID'),
+  );
 
   /* ================================================================
      SEO SCHEMA (JSON-LD)
@@ -473,6 +499,14 @@ function PropertyDetailsContent() {
   const shareProperty = async () => {
     if (!property) return;
 
+    if (isDraft) {
+      setShareMessage('Draft listings cannot be shared publicly. Please publish this listing first.');
+      window.setTimeout(() => {
+        setShareMessage('');
+      }, 4000);
+      return;
+    }
+
     const url = window.location.href;
 
     try {
@@ -540,6 +574,18 @@ function PropertyDetailsContent() {
   const openInquiry = () => {
     if (!property) return;
 
+    if (isOwner) {
+      setShareMessage('You are the owner of this listing.');
+      window.setTimeout(() => setShareMessage(''), 3000);
+      return;
+    }
+
+    if (isDraft) {
+      setShareMessage('Draft listings cannot receive inquiries until published.');
+      window.setTimeout(() => setShareMessage(''), 4000);
+      return;
+    }
+
     if (!user) {
       setAuthModalOpen(true);
       return;
@@ -547,12 +593,49 @@ function PropertyDetailsContent() {
 
     setInquiryError('');
     setInquirySuccess(false);
+    setInquiryPhone(''); // Empty by default - manual entry
+    setInquiryEmail(user?.email || ''); // Default to signed-in email
     setInquiryOpen(true);
   };
 
   const sendInquiry = async () => {
-    if (!property || !inquiryMessage.trim()) {
-      setInquiryError('Please enter a message.');
+    if (!property) return;
+
+    const trimmedMsg = inquiryMessage.trim();
+    if (!trimmedMsg) {
+      setInquiryError('Please enter an inquiry message.');
+      return;
+    }
+
+    if (trimmedMsg.length < 10) {
+      setInquiryError('Inquiry message must be at least 10 characters.');
+      return;
+    }
+
+    let cleanPhone = inquiryPhone.trim().replace(/\D/g, '');
+    if (cleanPhone.length === 12 && cleanPhone.startsWith('91')) {
+      cleanPhone = cleanPhone.slice(2);
+    } else if (cleanPhone.length === 11 && cleanPhone.startsWith('0')) {
+      cleanPhone = cleanPhone.slice(1);
+    }
+    if (!cleanPhone) {
+      setInquiryError('Please enter your 10-digit mobile number so the landowner can contact you.');
+      return;
+    }
+
+    if (!/^[6-9]\d{9}$/.test(cleanPhone)) {
+      setInquiryError('Please enter a valid 10-digit Indian mobile number (starting with 6, 7, 8, or 9).');
+      return;
+    }
+
+    const cleanEmail = inquiryEmail.trim() || user?.email?.trim();
+    if (!cleanEmail) {
+      setInquiryError('Please enter your contact email address.');
+      return;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+      setInquiryError('Please enter a valid email address.');
       return;
     }
 
@@ -567,7 +650,10 @@ function PropertyDetailsContent() {
         },
         body: JSON.stringify({
           propertyId: property._id,
-          message: inquiryMessage.trim(),
+          message: trimmedMsg,
+          phoneShared: true,
+          buyerPhone: cleanPhone,
+          buyerEmail: cleanEmail,
         }),
       });
 
@@ -608,6 +694,18 @@ function PropertyDetailsContent() {
 
   const initiateCallSeller = async () => {
     if (!property) return;
+
+    if (isOwner) {
+      setShareMessage('You are the owner of this listing.');
+      window.setTimeout(() => setShareMessage(''), 3000);
+      return;
+    }
+
+    if (isDraft) {
+      setShareMessage('Draft listings cannot receive direct calls until published.');
+      window.setTimeout(() => setShareMessage(''), 4000);
+      return;
+    }
 
     if (!user) {
       setAuthModalOpen(true);
@@ -795,6 +893,48 @@ function PropertyDetailsContent() {
             PROPERTY HEADER
         ======================================================== */}
 
+        {/* ========================================================
+            DRAFT PREVIEW BANNER (OWNER ONLY)
+        ======================================================== */}
+        {isDraft && (
+          <div className="mb-6 rounded-2xl border-2 border-amber-300 bg-amber-50/95 p-4 sm:p-5 shadow-xs">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex items-start gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-500 text-white font-black text-sm shadow-xs">
+                  🔒
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="rounded-full bg-amber-200 px-2.5 py-0.5 text-[10px] font-black uppercase text-amber-900 tracking-wider">
+                      Private Draft Preview
+                    </span>
+                    <span className="text-[11px] font-bold text-amber-800">
+                      Not Visible to Public
+                    </span>
+                  </div>
+                  <p className="mt-1 text-xs text-amber-900/90 leading-relaxed max-w-2xl">
+                    This listing is currently in <strong>Draft (Payment Pending)</strong>. Only you can view this preview. 
+                    Public buyers and search engines cannot find or view this page until you activate your listing subscription.
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <Link
+                  href={`/sell?propertyId=${property._id}`}
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#FF9933] px-5 py-2.5 text-xs font-black text-white hover:bg-[#f07d12] shadow-sm transition-all"
+                >
+                  <span>Pay ₹10 &amp; Publish Live</span>
+                  <ExternalLink className="h-3.5 w-3.5" />
+                </Link>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ========================================================
+            PROPERTY HEADER
+        ======================================================== */}
+
         <section className="mb-6">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <div className="min-w-0">
@@ -803,10 +943,16 @@ function PropertyDetailsContent() {
                   {formatLandType(property.landType)}
                 </span>
 
-                <span className="inline-flex items-center gap-1 rounded-full border border-[#FF9933]/40 bg-[#fff1dc] px-2.5 py-1 text-[10px] font-bold text-[#c75e0a]">
-                  <ShieldCheck className="h-3.5 w-3.5 text-[#FF9933]" />
-                  Direct Classified
-                </span>
+                {isDraft ? (
+                  <span className="inline-flex items-center gap-1 rounded-full border border-amber-300 bg-amber-100 px-2.5 py-1 text-[10px] font-black text-amber-900">
+                    🔒 Private Draft Preview
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 rounded-full border border-[#FF9933]/40 bg-[#fff1dc] px-2.5 py-1 text-[10px] font-bold text-[#c75e0a]">
+                    <ShieldCheck className="h-3.5 w-3.5 text-[#FF9933]" />
+                    Direct Classified
+                  </span>
+                )}
 
                 {property.priceNegotiable && (
                   <span className="rounded-full border border-blue-200 bg-blue-50 px-2.5 py-1 text-[10px] font-bold text-blue-700">
@@ -840,12 +986,17 @@ function PropertyDetailsContent() {
               <button
                 type="button"
                 onClick={shareProperty}
-                className="relative inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs font-bold text-slate-700 shadow-sm hover:bg-slate-50"
+                className={`relative inline-flex items-center gap-2 rounded-xl border px-3.5 py-2.5 text-xs font-bold shadow-sm transition-colors ${
+                  isDraft
+                    ? 'border-amber-300 bg-amber-50 text-amber-900 hover:bg-amber-100'
+                    : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+                }`}
+                title={isDraft ? 'Draft listings cannot be shared' : 'Share property'}
               >
-                <Share2 className="h-4 w-4" />
+                <Share2 className={`h-4 w-4 ${isDraft ? 'text-amber-600' : ''}`} />
 
                 <span className="hidden sm:inline">
-                  {shareMessage || 'Share'}
+                  {shareMessage || (isDraft ? 'Draft (Private)' : 'Share')}
                 </span>
               </button>
 
@@ -872,16 +1023,18 @@ function PropertyDetailsContent() {
                 </span>
               </button>
 
-              <button
-                type="button"
-                onClick={openReportModal}
-                className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs font-bold text-slate-700 shadow-sm transition-colors hover:border-rose-200 hover:bg-rose-50 hover:text-rose-700"
-                title="Report suspicious or incorrect listing"
-                aria-label="Report listing"
-              >
-                <Flag className="h-4 w-4" />
-                <span className="hidden sm:inline">Report</span>
-              </button>
+              {!isDraft && (
+                <button
+                  type="button"
+                  onClick={openReportModal}
+                  className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs font-bold text-slate-700 shadow-sm transition-colors hover:border-rose-200 hover:bg-rose-50 hover:text-rose-700"
+                  title="Report suspicious or incorrect listing"
+                  aria-label="Report listing"
+                >
+                  <Flag className="h-4 w-4" />
+                  <span className="hidden sm:inline">Report</span>
+                </button>
+              )}
             </div>
           </div>
         </section>
@@ -1094,6 +1247,56 @@ function PropertyDetailsContent() {
                   >
                     Continue with Google
                   </button>
+                </div>
+              ) : isDraft ? (
+                <div className="mt-5 space-y-3">
+                  <div className="rounded-xl border border-amber-200 bg-amber-50 p-3.5 text-center">
+                    <p className="text-xs font-bold text-amber-900 flex items-center justify-center gap-1.5">
+                      <span>🔒</span>
+                      <span>Listing In Draft Mode</span>
+                    </p>
+                    <p className="text-[11px] text-amber-700 mt-1 leading-relaxed">
+                      Buyer phone calls and inquiries will be activated once you publish this listing live.
+                    </p>
+                  </div>
+
+                  <Link
+                    href={`/sell?propertyId=${property._id}`}
+                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#FF9933] px-4 py-3.5 text-xs font-black text-white shadow-sm transition-all hover:bg-[#f07d12]"
+                  >
+                    <span>Pay ₹10 &amp; Publish Listing</span>
+                    <ExternalLink className="h-4 w-4" />
+                  </Link>
+                </div>
+              ) : isOwner ? (
+                <div className="mt-5 space-y-3">
+                  <div className="rounded-xl border border-blue-200 bg-blue-50/90 p-3.5 text-center">
+                    <p className="text-xs font-bold text-blue-900 flex items-center justify-center gap-1.5">
+                      <ShieldCheck className="h-4 w-4 text-[#FF9933]" />
+                      <span>You Own This Listing</span>
+                    </p>
+                    <p className="text-[11px] text-blue-700 mt-1 leading-relaxed">
+                      This listing is live on the marketplace. You can edit details or review buyer inquiries.
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <Link
+                      href={`/sell?propertyId=${property._id}`}
+                      className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs font-bold text-slate-800 shadow-xs hover:bg-slate-50 transition-colors"
+                    >
+                      <Edit className="h-3.5 w-3.5 text-slate-500" />
+                      <span>Edit Listing</span>
+                    </Link>
+
+                    <Link
+                      href="/dashboard/seller"
+                      className="flex items-center justify-center gap-1.5 rounded-xl bg-[#FF9933] px-3 py-3 text-xs font-bold text-white shadow-xs hover:bg-[#f07d12] transition-colors"
+                    >
+                      <LayoutDashboard className="h-3.5 w-3.5" />
+                      <span>Seller Hub</span>
+                    </Link>
+                  </div>
                 </div>
               ) : (
                 <div className="mt-5 space-y-2.5">
@@ -1584,23 +1787,35 @@ function PropertyDetailsContent() {
 
                   <div>
                     <p className="text-sm font-black text-slate-900">
-                      Interested in this property?
+                      {isOwner ? 'Listing Management' : 'Interested in this property?'}
                     </p>
 
                     <p className="mt-1 text-xs text-slate-500">
-                      Send the seller an inquiry through BhoomiMitra.
+                      {isOwner
+                        ? 'Manage details, review incoming inquiries, or check performance in your Seller Dashboard.'
+                        : 'Send the seller an inquiry through BhoomiMitra.'}
                     </p>
                   </div>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={openInquiry}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#FF9933] px-5 py-3 text-xs font-black text-white hover:bg-[#f07d12] transition-colors"
-                >
-                  <MessageSquare className="h-4 w-4" />
-                  Contact Seller
-                </button>
+                {isOwner ? (
+                  <Link
+                    href="/dashboard/seller"
+                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-slate-950 px-5 py-3 text-xs font-black text-white hover:bg-slate-800 transition-colors"
+                  >
+                    <LayoutDashboard className="h-4 w-4 text-[#FF9933]" />
+                    <span>View Seller Dashboard</span>
+                  </Link>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={openInquiry}
+                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#FF9933] px-5 py-3 text-xs font-black text-white hover:bg-[#f07d12] transition-colors"
+                  >
+                    <MessageSquare className="h-4 w-4" />
+                    Contact Seller
+                  </button>
+                )}
               </div>
             </div>
           </section>
@@ -1674,14 +1889,32 @@ function PropertyDetailsContent() {
             />
           </button>
 
-          <button
-            type="button"
-            onClick={openInquiry}
-            className="flex h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-[#FF9933] px-4 text-xs font-black text-white hover:bg-[#f07d12] transition-colors"
-          >
-            <MessageSquare className="h-4 w-4" />
-            {user ? 'Contact Seller' : 'Sign in to Contact'}
-          </button>
+          {isDraft ? (
+            <Link
+              href={`/sell?propertyId=${property._id}`}
+              className="flex h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-[#FF9933] px-4 text-xs font-black text-white hover:bg-[#f07d12] transition-colors"
+            >
+              <span>Publish Listing (₹10)</span>
+              <ExternalLink className="h-4 w-4" />
+            </Link>
+          ) : isOwner ? (
+            <Link
+              href="/dashboard/seller"
+              className="flex h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-slate-950 px-4 text-xs font-black text-white hover:bg-slate-800 transition-colors"
+            >
+              <LayoutDashboard className="h-4 w-4 text-[#FF9933]" />
+              <span>Seller Control Center</span>
+            </Link>
+          ) : (
+            <button
+              type="button"
+              onClick={openInquiry}
+              className="flex h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-[#FF9933] px-4 text-xs font-black text-white hover:bg-[#f07d12] transition-colors"
+            >
+              <MessageSquare className="h-4 w-4" />
+              {user ? 'Contact Seller' : 'Sign in to Contact'}
+            </button>
+          )}
         </div>
       </div>
 
@@ -1691,109 +1924,240 @@ function PropertyDetailsContent() {
 
       {inquiryOpen && (
         <div className="fixed inset-0 z-[80] flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl">
-            <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
-              <div>
-                <h2 className="text-sm font-black text-slate-900">
-                  Contact Seller
-                </h2>
-
-                <p className="mt-1 text-[10px] text-slate-500">
-                  {property.title}
-                </p>
+          <div className="w-full max-w-lg max-h-[92vh] flex flex-col overflow-hidden rounded-2xl bg-white shadow-2xl animate-in fade-in zoom-in-95 duration-150">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4 bg-slate-50/80">
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#fff1dc] text-[#c75e0a]">
+                  <Mail className="h-4 w-4" />
+                </div>
+                <div>
+                  <h2 className="text-sm font-black text-slate-900">
+                    Contact Landowner
+                  </h2>
+                  <p className="text-[11px] text-slate-500 line-clamp-1 max-w-xs sm:max-w-sm">
+                    {property.title}
+                  </p>
+                </div>
               </div>
 
               <button
                 type="button"
                 onClick={() => setInquiryOpen(false)}
-                className="rounded-lg p-2 text-slate-400 hover:bg-slate-100"
+                className="rounded-lg p-2 text-slate-400 hover:bg-slate-200/80 hover:text-slate-700 transition-colors"
                 aria-label="Close inquiry"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
-            <div className="p-5">
+            <div className="p-5 sm:p-6 overflow-y-auto space-y-4">
               {inquirySuccess ? (
                 <div className="py-8 text-center">
                   <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#fff1dc]">
-                    <Check className="h-7 w-7 text-[#FF9933]" />
+                    <CheckCircle2 className="h-7 w-7 text-[#FF9933]" />
                   </div>
 
                   <h3 className="mt-4 text-base font-black text-slate-900">
-                    Inquiry sent
+                    Inquiry Sent Successfully
                   </h3>
 
-                  <p className="mt-2 text-xs leading-5 text-slate-500">
-                    Your inquiry has been submitted. The seller can
-                    respond through the BhoomiMitra platform.
+                  <p className="mt-2 text-xs leading-5 text-slate-600 max-w-sm mx-auto">
+                    Your inquiry and contact details have been securely dispatched to the landowner. You can view updates anytime in your Buyer Dashboard.
                   </p>
 
-                  <button
-                    type="button"
-                    onClick={() => setInquiryOpen(false)}
-                    className="mt-6 rounded-xl bg-slate-950 px-5 py-3 text-xs font-bold text-white hover:bg-slate-800 transition-colors"
-                  >
-                    Done
-                  </button>
+                  <div className="mt-6 flex items-center justify-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setInquiryOpen(false)}
+                      className="rounded-xl bg-slate-950 px-5 py-2.5 text-xs font-bold text-white hover:bg-slate-800 transition-colors"
+                    >
+                      Done
+                    </button>
+                    <Link
+                      href="/dashboard/buyer"
+                      onClick={() => setInquiryOpen(false)}
+                      className="rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors"
+                    >
+                      View Buyer Dashboard
+                    </Link>
+                  </div>
                 </div>
               ) : (
                 <>
-                  <label
-                    htmlFor="inquiry-message"
-                    className="text-xs font-bold text-slate-800"
-                  >
-                    Your message
-                  </label>
+                  {/* 1. Buyer Contact Details (First Section) */}
+                  <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-3.5 space-y-3">
+                    <div>
+                      <h4 className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                        <Phone className="h-3.5 w-3.5 text-[#FF9933]" />
+                        <span>Your Contact Information</span>
+                      </h4>
+                      <p className="text-[10px] text-slate-500 mt-0.5">
+                        The landowner will use these details to contact you directly.
+                      </p>
+                    </div>
 
-                  <textarea
-                    id="inquiry-message"
-                    value={inquiryMessage}
-                    onChange={(event) =>
-                      setInquiryMessage(event.target.value)
-                    }
-                    rows={6}
-                    placeholder="I'm interested in this property. Please share more details about the land, availability and next steps."
-                    className="mt-2 w-full resize-none rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs leading-5 text-slate-900 outline-none placeholder:text-slate-400 focus:border-[#FF9933] focus:bg-white focus:ring-2 focus:ring-[#FF9933]/20 transition-all"
-                  />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {/* Email Address Input (Prefilled with signed-in email) */}
+                      <div>
+                        <label
+                          htmlFor="inquiry-email"
+                          className="block text-[11px] font-semibold text-slate-700 mb-1"
+                        >
+                          Email Address <span className="text-rose-500">*</span>
+                        </label>
+                        <div className="relative flex items-center">
+                          <Mail className="absolute left-3 h-3.5 w-3.5 text-slate-400" />
+                          <input
+                            id="inquiry-email"
+                            type="email"
+                            required
+                            value={inquiryEmail}
+                            onChange={(e) =>
+                              setInquiryEmail(e.target.value)
+                            }
+                            placeholder="your.email@example.com"
+                            className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-xs text-slate-900 placeholder:text-slate-400 focus:border-[#FF9933] focus:outline-none focus:ring-2 focus:ring-[#FF9933]/20"
+                          />
+                        </div>
+                        <p className="text-[10px] text-slate-400 mt-1">
+                          Written replies &amp; status updates
+                        </p>
+                      </div>
+
+                      {/* Mobile Number Input (Empty by default for manual entry) */}
+                      <div>
+                        <label
+                          htmlFor="inquiry-phone"
+                          className="block text-[11px] font-semibold text-slate-700 mb-1"
+                        >
+                          Mobile Number <span className="text-rose-500">*</span>
+                        </label>
+                        <div className="relative flex items-center">
+                          <span className="absolute left-3 text-xs font-bold text-slate-500">
+                            +91
+                          </span>
+                          <input
+                            id="inquiry-phone"
+                            type="tel"
+                            required
+                            maxLength={10}
+                            value={inquiryPhone}
+                            onChange={(e) =>
+                              setInquiryPhone(e.target.value.replace(/\D/g, ''))
+                            }
+                            placeholder="Enter 10-digit mobile"
+                            className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-11 pr-3 text-xs text-slate-900 placeholder:text-slate-400 focus:border-[#FF9933] focus:outline-none focus:ring-2 focus:ring-[#FF9933]/20"
+                          />
+                        </div>
+                        <p className="text-[10px] text-slate-400 mt-1">
+                          Direct phone / WhatsApp callbacks
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 2. Quick Preset Message Chips */}
+                  <div>
+                    <label className="text-[11px] font-bold text-slate-600 mb-1.5 block">
+                      Quick Questions
+                    </label>
+                    <div className="flex flex-wrap gap-1.5">
+                      {[
+                        '💰 Is the price negotiable?',
+                        '📅 Schedule a site visit',
+                        '📐 Share boundary & survey details',
+                        '📄 Legal documents & clear title?',
+                      ].map((preset) => (
+                        <button
+                          key={preset}
+                          type="button"
+                          onClick={() => {
+                            setInquiryMessage((prev) =>
+                              prev ? `${prev.trim()}\n${preset}` : preset,
+                            );
+                          }}
+                          className="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-medium text-slate-700 hover:border-[#FF9933]/50 hover:bg-[#fff9f0] hover:text-[#7a3705] transition-colors cursor-pointer"
+                        >
+                          {preset}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* 3. Message Textarea */}
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <label
+                        htmlFor="inquiry-message"
+                        className="text-xs font-bold text-slate-800"
+                      >
+                        Your Message <span className="text-rose-500">*</span>
+                      </label>
+                      <span className="text-[10px] text-slate-400">
+                        {inquiryMessage.length}/1000 (min 10 chars)
+                      </span>
+                    </div>
+
+                    <textarea
+                      id="inquiry-message"
+                      value={inquiryMessage}
+                      onChange={(event) =>
+                        setInquiryMessage(event.target.value)
+                      }
+                      rows={4}
+                      placeholder="Hi, I am interested in this parcel. Please share current availability, road access details, and when we can arrange a physical inspection."
+                      className="w-full resize-none rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs leading-5 text-slate-900 outline-none placeholder:text-slate-400 focus:border-[#FF9933] focus:bg-white focus:ring-2 focus:ring-[#FF9933]/20 transition-all"
+                    />
+                  </div>
 
                   {inquiryError && (
-                    <p className="mt-2 text-[11px] font-medium text-rose-600">
+                    <div className="rounded-lg bg-rose-50 border border-rose-200 p-2.5 text-xs font-medium text-rose-700">
                       {inquiryError}
-                    </p>
+                    </div>
                   )}
 
-                  <div className="mt-4 flex items-start gap-2 rounded-xl bg-slate-50 p-3">
+                  {/* Shield Notice */}
+                  <div className="flex items-start gap-2 rounded-xl bg-[#fff9f0] border border-[#FF9933]/20 p-2.5">
                     <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#FF9933]" />
-
-                    <p className="text-[10px] leading-4 text-slate-500">
-                      Keep your first message focused on the property.
-                      Do not share passwords, OTPs or sensitive account
-                      information.
+                    <p className="text-[10px] leading-4 text-[#7a3705]">
+                      <strong>Direct Connect Policy:</strong> Your contact email and mobile number are dispatched directly to the verified landowner via email &amp; dashboard.
                     </p>
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={sendInquiry}
-                    disabled={
-                      inquirySending ||
-                      !inquiryMessage.trim()
-                    }
-                    className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-[#FF9933] py-3.5 text-xs font-black text-white transition-colors hover:bg-[#f07d12] disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    {inquirySending ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        Sending...
-                      </>
-                    ) : (
-                      <>
-                        <MessageSquare className="h-4 w-4" />
-                        Send Inquiry
-                      </>
-                    )}
-                  </button>
+                  {/* Submit Button */}
+                  <div className="flex items-center justify-end gap-2 pt-1">
+                    <button
+                      type="button"
+                      onClick={() => setInquiryOpen(false)}
+                      className="rounded-xl px-4 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      onClick={sendInquiry}
+                      disabled={
+                        inquirySending ||
+                        inquiryMessage.trim().length < 10 ||
+                        inquiryPhone.trim().length < 10 ||
+                        !inquiryEmail.trim()
+                      }
+                      className="flex items-center justify-center gap-2 rounded-xl bg-[#FF9933] px-6 py-2.5 text-xs font-black text-white transition-colors hover:bg-[#f07d12] disabled:cursor-not-allowed disabled:opacity-50 shadow-xs"
+                    >
+                      {inquirySending ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          Sending...
+                        </>
+                      ) : (
+                        <>
+                          <MessageSquare className="h-4 w-4" />
+                          Send Inquiry
+                        </>
+                      )}
+                    </button>
+                  </div>
                 </>
               )}
             </div>

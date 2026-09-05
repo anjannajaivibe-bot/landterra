@@ -31,6 +31,12 @@ export async function sendEmail({
     };
   }
 
+  // Gracefully skip mock or example domains used in test data
+  if (to.includes('@example.com') || to.endsWith('.example')) {
+    console.log(`[Email Service]: Skipped dispatch for mock domain: ${to}`);
+    return { success: true, id: 'mock_delivered' };
+  }
+
   try {
     const data = await client.emails.send({
       from: FROM_EMAIL,
@@ -127,26 +133,104 @@ export async function notifySellerInquiry(
   propertyTitle: string,
   message: string,
   buyerPhone?: string,
+  buyerEmail?: string,
 ) {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+
   return sendEmail({
     to: sellerEmail,
-    subject: `New Buyer Inquiry on ${propertyTitle}`,
+    subject: `New Inquiry on "${propertyTitle}" from ${buyerName}`,
     html: `
-      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #1e293b;">
-        <h2 style="color: #0284c7;">New Buyer Inquiry</h2>
-        <p>Dear ${sellerName},</p>
-        <p>A prospective buyer, <strong>${buyerName}</strong>, has inquired about your property <strong>${propertyTitle}</strong>.</p>
-        <div style="background: #f1f5f9; padding: 16px; border-radius: 8px; margin: 20px 0;">
-          <p style="margin: 0; font-style: italic;">"${message}"</p>
-          ${
-            buyerPhone
-              ? `<p style="margin: 10px 0 0 0; font-weight: bold; color: #0f172a;">Buyer Contact Number: ${buyerPhone}</p>`
-              : ''
-          }
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; color: #1e293b;">
+        <!-- Header -->
+        <div style="background: #0f172a; padding: 24px 28px; text-align: left;">
+          <h1 style="margin: 0; font-size: 20px; font-weight: 800; color: #ffffff;">
+            Bhoomi<span style="color: #FF9933;">Mitra</span>
+          </h1>
+          <p style="margin: 4px 0 0 0; font-size: 12px; color: #94a3b8;">
+            Direct Land Classifieds &bull; Buyer Inquiry Notification
+          </p>
         </div>
-        <p>View all inquiries in your <a href="${
-          process.env.NEXT_PUBLIC_APP_URL || ''
-        }/dashboard/seller">Seller Dashboard</a>.</p>
+
+        <div style="padding: 28px;">
+          <p style="font-size: 15px; margin: 0 0 16px 0; color: #0f172a;">
+            Dear <strong>${sellerName}</strong>,
+          </p>
+          <p style="font-size: 14px; margin: 0 0 20px 0; line-height: 1.5; color: #334155;">
+            A verified buyer, <strong>${buyerName}</strong>, has inquired about your listing <strong>${propertyTitle}</strong> on BhoomiMitra.
+          </p>
+
+          <!-- Buyer Message Box -->
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-left: 4px solid #FF9933; border-radius: 8px; padding: 16px 20px; margin: 20px 0;">
+            <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #c75e0a; margin-bottom: 6px;">
+              Buyer's Inquiry
+            </div>
+            <p style="margin: 0; font-size: 14px; line-height: 1.6; color: #1e293b; font-style: italic;">
+              &ldquo;${message}&rdquo;
+            </p>
+          </div>
+
+          <!-- Buyer Contact Card -->
+          <div style="background: #fff9f0; border: 1px solid #fed7aa; border-radius: 10px; padding: 18px 20px; margin: 20px 0;">
+            <div style="font-size: 12px; font-weight: 800; color: #7a3705; text-transform: uppercase; margin-bottom: 12px;">
+              Buyer Contact Details
+            </div>
+            <table style="width: 100%; font-size: 13px; border-collapse: collapse;">
+              <tr>
+                <td style="padding: 4px 0; color: #78350f; font-weight: 600; width: 120px;">Name:</td>
+                <td style="padding: 4px 0; color: #0f172a; font-weight: 700;">${buyerName}</td>
+              </tr>
+              ${
+                buyerPhone
+                  ? `<tr>
+                      <td style="padding: 4px 0; color: #78350f; font-weight: 600;">Mobile Number:</td>
+                      <td style="padding: 4px 0; color: #0f172a; font-weight: 700;">
+                        <a href="tel:${buyerPhone}" style="color: #c75e0a; text-decoration: none;">+91 ${buyerPhone}</a>
+                      </td>
+                    </tr>`
+                  : ''
+              }
+              ${
+                buyerEmail
+                  ? `<tr>
+                      <td style="padding: 4px 0; color: #78350f; font-weight: 600;">Email:</td>
+                      <td style="padding: 4px 0; color: #0f172a; font-weight: 700;">
+                        <a href="mailto:${buyerEmail}" style="color: #c75e0a; text-decoration: none;">${buyerEmail}</a>
+                      </td>
+                    </tr>`
+                  : ''
+              }
+            </table>
+          </div>
+
+          <!-- Action Buttons -->
+          <div style="margin: 28px 0 16px 0; text-align: center;">
+            ${
+              buyerPhone
+                ? `<a href="tel:${buyerPhone}" style="display: inline-block; background: #FF9933; color: #ffffff; padding: 12px 22px; border-radius: 8px; font-size: 13px; font-weight: 700; text-decoration: none; margin: 0 6px 8px 6px;">
+                    Call Buyer (+91 ${buyerPhone})
+                   </a>`
+                : ''
+            }
+            ${
+              buyerEmail
+                ? `<a href="mailto:${buyerEmail}?subject=Re: Inquiry regarding ${encodeURIComponent(propertyTitle)}" style="display: inline-block; background: #0f172a; color: #ffffff; padding: 12px 22px; border-radius: 8px; font-size: 13px; font-weight: 700; text-decoration: none; margin: 0 6px 8px 6px;">
+                    Reply by Email
+                   </a>`
+                : ''
+            }
+          </div>
+
+          <p style="font-size: 12px; color: #64748b; line-height: 1.5; margin-top: 24px;">
+            You can also track and update this inquiry's status from your
+            <a href="${appUrl}/dashboard/seller" style="color: #FF9933; font-weight: 600; text-decoration: none;">Seller Dashboard</a>.
+          </p>
+        </div>
+
+        <!-- Footer -->
+        <div style="background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 16px 28px; font-size: 11px; color: #94a3b8; text-align: center;">
+          BhoomiMitra &bull; India's Direct Land Marketplace &bull; No middleman commission
+        </div>
       </div>
     `,
   });

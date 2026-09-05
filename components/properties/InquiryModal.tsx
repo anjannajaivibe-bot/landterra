@@ -23,7 +23,8 @@ export function InquiryModal({
 }: InquiryModalProps) {
   const [message, setMessage] = useState('');
   const [phoneShared, setPhoneShared] = useState(false);
-  const [buyerPhone, setBuyerPhone] = useState(buyerUser?.phone || '');
+  const [buyerPhone, setBuyerPhone] = useState('');
+  const [buyerEmail, setBuyerEmail] = useState(buyerUser?.email || '');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
@@ -37,6 +38,39 @@ export function InquiryModal({
       return;
     }
 
+    if (message.trim().length < 10) {
+      setError('Message must be at least 10 characters.');
+      return;
+    }
+
+    let cleanPhone = buyerPhone.trim().replace(/\D/g, '');
+    if (cleanPhone.length === 12 && cleanPhone.startsWith('91')) {
+      cleanPhone = cleanPhone.slice(2);
+    } else if (cleanPhone.length === 11 && cleanPhone.startsWith('0')) {
+      cleanPhone = cleanPhone.slice(1);
+    }
+
+    if (!cleanPhone) {
+      setError('Please enter your 10-digit mobile number.');
+      return;
+    }
+
+    if (!/^[6-9]\d{9}$/.test(cleanPhone)) {
+      setError('Please enter a valid 10-digit Indian mobile number (e.g. 9876543210).');
+      return;
+    }
+
+    const cleanEmail = buyerEmail.trim();
+    if (!cleanEmail) {
+      setError('Please enter your contact email address.');
+      return;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+      setError('Please enter a valid email address.');
+      return;
+    }
+
     setIsSubmitting(true);
     setError('');
 
@@ -47,8 +81,9 @@ export function InquiryModal({
         body: JSON.stringify({
           propertyId: property._id,
           message: message.trim(),
-          phoneShared,
-          buyerPhone: phoneShared ? buyerPhone : undefined,
+          phoneShared: true,
+          buyerPhone: cleanPhone,
+          buyerEmail: cleanEmail,
         }),
       });
 
@@ -120,6 +155,63 @@ export function InquiryModal({
                 </div>
               </div>
 
+              {/* 1. Contact Information Section (First) */}
+              <div className="space-y-3 rounded-xl border border-slate-200 bg-slate-50/70 p-3.5">
+                <div>
+                  <h4 className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                    <Phone className="h-3.5 w-3.5 text-[#FF9933]" />
+                    <span>Your Contact Information</span>
+                  </h4>
+                  <p className="text-[10px] text-slate-500 mt-0.5">
+                    The landowner will use these details to contact you directly.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                      Email Address <span className="text-rose-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <Mail className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
+                      <input
+                        type="email"
+                        required
+                        value={buyerEmail}
+                        onChange={(e) => setBuyerEmail(e.target.value)}
+                        placeholder="name@example.com"
+                        className="w-full pl-9 pr-3 py-2 text-xs border border-slate-200 bg-white rounded-lg focus:ring-2 focus:ring-[#FF9933]/20 focus:border-[#FF9933]"
+                      />
+                    </div>
+                    <p className="text-[10px] text-slate-400 mt-1">
+                      Status &amp; reply updates
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                      Mobile Number <span className="text-rose-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <Phone className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
+                      <input
+                        type="tel"
+                        required
+                        maxLength={10}
+                        value={buyerPhone}
+                        onChange={(e) => setBuyerPhone(e.target.value.replace(/\D/g, ''))}
+                        placeholder="10-digit mobile"
+                        className="w-full pl-9 pr-3 py-2 text-xs border border-slate-200 bg-white rounded-lg focus:ring-2 focus:ring-[#FF9933]/20 focus:border-[#FF9933]"
+                      />
+                    </div>
+                    <p className="text-[10px] text-slate-400 mt-1">
+                      Landowner calls / WhatsApp
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* 2. Message Section */}
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
                   Your Message to the Landowner <span className="text-rose-500">*</span>
@@ -132,34 +224,6 @@ export function InquiryModal({
                   className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#FF9933]/20 focus:border-[#FF9933]"
                   required
                 />
-              </div>
-
-              <div className="space-y-2 pt-1 border-t border-slate-100">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-semibold text-slate-800 flex items-center gap-1.5 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={phoneShared}
-                      onChange={(e) => setPhoneShared(e.target.checked)}
-                      className="rounded accent-[#FF9933] focus:ring-[#FF9933]"
-                    />
-                    <span>Share direct phone number for quicker landowner callback</span>
-                  </label>
-                </div>
-
-                {phoneShared && (
-                  <div className="relative">
-                    <Phone className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
-                    <input
-                      type="tel"
-                      maxLength={10}
-                      value={buyerPhone}
-                      onChange={(e) => setBuyerPhone(e.target.value)}
-                      placeholder="10-digit mobile number (e.g. 9812345678)"
-                      className="w-full pl-9 pr-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#FF9933]/20 focus:border-[#FF9933]"
-                    />
-                  </div>
-                )}
               </div>
 
               {/* Action Buttons */}
