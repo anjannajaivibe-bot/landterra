@@ -1844,36 +1844,38 @@ function LocationRow({
 
 function PropertyPageSkeleton() {
   return (
-    <div className="animate-pulse">
-      <div className="mb-6 h-4 w-32 rounded bg-slate-200" />
+    <div>
+      <div className="mb-6 h-4 w-32 rounded-md shimmer" />
 
-      <div className="mb-6">
-        <div className="h-8 w-3/4 rounded bg-slate-200" />
-
-        <div className="mt-3 h-4 w-1/3 rounded bg-slate-200" />
+      <div className="mb-6 space-y-3">
+        <div className="h-8 w-3/4 max-w-xl rounded-xl shimmer" />
+        <div className="h-4 w-1/3 max-w-xs rounded-md shimmer" />
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-        <div className="aspect-[4/3] rounded-2xl bg-slate-200 lg:col-span-7" />
+        <div className="aspect-[4/3] rounded-3xl shimmer lg:col-span-7" />
 
-        <div className="rounded-2xl bg-white p-6 lg:col-span-5">
-          <div className="h-4 w-24 rounded bg-slate-200" />
-
-          <div className="mt-3 h-9 w-40 rounded bg-slate-200" />
-
-          <div className="mt-6 grid grid-cols-2 gap-3">
-            <div className="h-16 rounded bg-slate-100" />
-            <div className="h-16 rounded bg-slate-100" />
-            <div className="h-16 rounded bg-slate-100" />
-            <div className="h-16 rounded bg-slate-100" />
+        <div className="rounded-3xl border border-slate-200/90 bg-white p-6 lg:col-span-5 space-y-6">
+          <div className="space-y-2">
+            <div className="h-4 w-24 rounded-md shimmer" />
+            <div className="h-9 w-44 rounded-xl shimmer" />
           </div>
 
-          <div className="mt-6 h-12 rounded-xl bg-slate-200" />
+          <div className="grid grid-cols-2 gap-3">
+            <div className="h-16 rounded-2xl shimmer-light" />
+            <div className="h-16 rounded-2xl shimmer-light" />
+            <div className="h-16 rounded-2xl shimmer-light" />
+            <div className="h-16 rounded-2xl shimmer-light" />
+          </div>
+
+          <div className="h-12 rounded-xl shimmer w-full" />
+          <div className="h-12 rounded-xl shimmer w-full" />
         </div>
       </div>
     </div>
   );
 }
+
 
 /* ================================================================
    EXPORT

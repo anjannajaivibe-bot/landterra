@@ -35,6 +35,87 @@ import {
 import { IUser } from '@/types/user';
 import { IProperty } from '@/types/property';
 
+/* ================================================================
+   PROFILE PAGE SKELETON (Gray Boxes with Continuous Shimmer Wave)
+================================================================ */
+
+function ProfilePageSkeleton() {
+  return (
+    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900">
+      <Navbar />
+
+      <main className="max-w-5xl mx-auto py-10 px-4 sm:px-6 lg:px-8 w-full flex-1 space-y-8">
+        {/* 1. Header Profile Card Skeleton */}
+        <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-xs">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-16 rounded-2xl shimmer shrink-0" />
+
+              <div className="space-y-2">
+                <div className="h-7 w-48 rounded-lg shimmer" />
+                <div className="h-4 w-60 rounded-md shimmer" />
+                <div className="flex items-center gap-2 pt-1">
+                  <div className="h-6 w-32 rounded-full shimmer" />
+                  <div className="h-6 w-40 rounded-full shimmer" />
+                </div>
+              </div>
+            </div>
+
+            <div className="h-10 w-36 rounded-xl shimmer shrink-0" />
+          </div>
+        </div>
+
+        {/* 2. My Properties Card Skeleton */}
+        <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-xs space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl shimmer shrink-0" />
+              <div className="space-y-1.5">
+                <div className="h-5 w-56 rounded-md shimmer" />
+                <div className="h-3.5 w-72 rounded-md shimmer" />
+              </div>
+            </div>
+            <div className="h-4 w-28 rounded-md shimmer" />
+          </div>
+
+          <div className="divide-y divide-slate-100">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex items-start gap-3.5 min-w-0">
+                  <div className="w-16 h-16 rounded-xl shimmer shrink-0" />
+                  <div className="space-y-2 flex-1">
+                    <div className="h-4 w-56 sm:w-72 rounded-md shimmer" />
+                    <div className="h-3.5 w-40 rounded-md shimmer" />
+                    <div className="flex gap-2">
+                      <div className="h-5 w-20 rounded-md shimmer" />
+                      <div className="h-5 w-24 rounded-md shimmer" />
+                    </div>
+                  </div>
+                </div>
+                <div className="flex sm:flex-col items-center sm:items-end justify-between gap-2">
+                  <div className="h-5 w-24 rounded-md shimmer" />
+                  <div className="h-8 w-28 rounded-lg shimmer" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* 3. Quick Actions & Inquiries Card Skeleton */}
+        <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-xs space-y-4">
+          <div className="h-5 w-48 rounded-md shimmer" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="h-20 rounded-2xl shimmer-light" />
+            <div className="h-20 rounded-2xl shimmer-light" />
+          </div>
+        </div>
+      </main>
+
+      <Footer />
+    </div>
+  );
+}
+
 export default function ProfilePage() {
   const [user, setUser] = useState<Partial<IUser> | null>(null);
   const [loading, setLoading] = useState(true);
@@ -170,15 +251,7 @@ export default function ProfilePage() {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex flex-col bg-slate-50">
-        <Navbar />
-        <div className="max-w-4xl mx-auto py-24 px-4 text-center flex-1 flex justify-center items-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#FF9933]" />
-        </div>
-        <Footer />
-      </div>
-    );
+    return <ProfilePageSkeleton />;
   }
 
   if (!user) {
@@ -311,7 +384,27 @@ export default function ProfilePage() {
           </div>
 
           {loadingProperties ? (
-            <div className="py-8 text-center text-xs text-slate-400">Loading your listings...</div>
+            <div className="divide-y divide-slate-100">
+              {Array.from({ length: 2 }).map((_, i) => (
+                <div key={i} className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="flex items-start gap-3.5 min-w-0">
+                    <div className="w-16 h-16 rounded-xl shimmer shrink-0" />
+                    <div className="space-y-2 flex-1">
+                      <div className="h-4 w-56 sm:w-72 rounded-md shimmer" />
+                      <div className="h-3.5 w-40 rounded-md shimmer" />
+                      <div className="flex gap-2">
+                        <div className="h-5 w-20 rounded-md shimmer" />
+                        <div className="h-5 w-24 rounded-md shimmer" />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex sm:flex-col items-center sm:items-end justify-between gap-2">
+                    <div className="h-5 w-24 rounded-md shimmer" />
+                    <div className="h-8 w-28 rounded-lg shimmer" />
+                  </div>
+                </div>
+              ))}
+            </div>
           ) : myProperties.length === 0 ? (
             <div className="p-6 rounded-2xl bg-slate-50 border border-dashed border-slate-200 text-center space-y-3">
               <p className="text-xs font-semibold text-slate-600">

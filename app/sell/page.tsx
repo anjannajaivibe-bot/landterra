@@ -1241,15 +1241,7 @@ function SellPageForm() {
 
   // Loading state
   if (pageLoading) {
-    return (
-      <div className="min-h-screen flex flex-col bg-slate-50">
-        <Navbar />
-        <div className="max-w-4xl mx-auto py-20 px-4 text-center flex-1 flex justify-center items-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#FF9933]" />
-        </div>
-        <Footer />
-      </div>
-    );
+    return <SellPageSkeleton />;
   }
 
   // Auth Gate
@@ -3779,20 +3771,102 @@ function SellPageForm() {
   );
 }
 
+/* ================================================================
+   SELL PAGE SKELETON (Gray Boxes with Continuous Shimmer Wave)
+================================================================ */
+
+function SellPageSkeleton() {
+  return (
+    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900">
+      <Navbar />
+
+      <main className="flex-1">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-8">
+          {/* Header Skeleton */}
+          <div>
+            <div className="flex items-center justify-between gap-4 mb-3">
+              <div className="space-y-2">
+                <div className="h-3.5 w-28 rounded-md shimmer" />
+                <div className="h-8 w-64 sm:w-80 rounded-xl shimmer" />
+                <div className="h-4 w-72 sm:w-96 rounded-md shimmer" />
+              </div>
+
+              <div className="hidden sm:block h-10 w-44 rounded-xl shimmer" />
+            </div>
+
+            {/* Progress Bar Skeleton */}
+            <div className="h-1.5 w-full bg-slate-200 rounded-full overflow-hidden mt-6">
+              <div className="h-full w-1/6 shimmer" />
+            </div>
+          </div>
+
+          {/* Stepper Skeleton (7 steps) */}
+          <div className="grid grid-cols-7 gap-1.5">
+            {Array.from({ length: 7 }).map((_, index) => (
+              <div key={index} className="h-12 rounded-lg shimmer" />
+            ))}
+          </div>
+
+          {/* Form Card Skeleton */}
+          <div className="rounded-3xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs space-y-6">
+            {/* Step Title & Subtitle */}
+            <div className="space-y-2 pb-4 border-b border-slate-100">
+              <div className="h-6 w-56 rounded-lg shimmer" />
+              <div className="h-4 w-72 rounded-md shimmer" />
+            </div>
+
+            {/* Category Filter Tabs */}
+            <div className="h-11 rounded-2xl shimmer w-full" />
+
+            {/* Property Type Buttons Grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="h-16 rounded-xl shimmer" />
+              ))}
+            </div>
+
+            {/* Title Input Field */}
+            <div className="space-y-2 pt-2">
+              <div className="h-4 w-36 rounded-md shimmer" />
+              <div className="h-12 rounded-xl shimmer w-full" />
+            </div>
+
+            {/* Area & Price Row */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <div className="h-4 w-28 rounded-md shimmer" />
+                <div className="h-12 rounded-xl shimmer w-full" />
+              </div>
+              <div className="space-y-2">
+                <div className="h-4 w-28 rounded-md shimmer" />
+                <div className="h-12 rounded-xl shimmer w-full" />
+              </div>
+            </div>
+
+            {/* Description Textarea */}
+            <div className="space-y-2">
+              <div className="h-4 w-32 rounded-md shimmer" />
+              <div className="h-28 rounded-xl shimmer w-full" />
+            </div>
+
+            {/* Bottom Action Buttons */}
+            <div className="flex items-center justify-between pt-6 border-t border-slate-100">
+              <div className="h-11 w-28 rounded-xl shimmer" />
+              <div className="h-11 w-44 rounded-xl shimmer" />
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <Footer />
+    </div>
+  );
+}
+
 export default function SellPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="min-h-screen flex flex-col bg-slate-50">
-          <Navbar />
-          <div className="flex-1 flex items-center justify-center py-20">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#FF9933]" />
-          </div>
-          <Footer />
-        </div>
-      }
-    >
+    <Suspense fallback={<SellPageSkeleton />}>
       <SellPageForm />
     </Suspense>
   );
-}
+}
