@@ -45,6 +45,7 @@ import {
   Film,
   Play,
   Camera,
+  Save,
 } from 'lucide-react';
 
 interface UploadedImagePreview {
@@ -361,6 +362,18 @@ function SellPageForm() {
 
   const [isSubmitting, setIsSubmitting] =
     useState<boolean>(false);
+
+  const [isSavingDraft, setIsSavingDraft] =
+    useState<boolean>(false);
+
+  const [draftSavedSuccess, setDraftSavedSuccess] =
+    useState<boolean>(false);
+
+  const [draftSavedMessage, setDraftSavedMessage] =
+    useState<string | null>(null);
+
+  const [draftSavedTime, setDraftSavedTime] =
+    useState<string | null>(null);
 
   const [errorMessage, setErrorMessage] =
     useState<string>('');
@@ -846,7 +859,100 @@ function SellPageForm() {
                   mimeType: property.video.mimeType || 'video/webm',
                 });
               }
+
+              if (property.sellerDeclarationAccepted !== undefined) {
+                setTermsAccepted(Boolean(property.sellerDeclarationAccepted));
+              }
+              if (property.sellerPhone) setPhoneInput(property.sellerPhone);
+              if (property.sellerName) setSellerName(property.sellerName);
+              if (property.sellerEmail) setSellerEmail(property.sellerEmail);
+
+                // Step preservation from URL parameter or default for draft
+                const stepParam = searchParams.get('step');
+                if (stepParam && !isNaN(Number(stepParam))) {
+                  const parsed = Math.min(Math.max(1, parseInt(stepParam, 10)), 7);
+                  setCurrentStep(parsed);
+                } else if (property.paymentStatus === 'PENDING') {
+                  setCurrentStep(7);
+                }
+              }
             }
+        } else {
+          // Check local storage draft if no existing property in URL
+          try {
+            const localDraftStr = localStorage.getItem('landterra_sell_form_draft');
+            if (localDraftStr) {
+              const localDraft = JSON.parse(localDraftStr);
+              if (localDraft && typeof localDraft === 'object') {
+                if (localDraft.title) setTitle(localDraft.title);
+                if (localDraft.description) setDescription(localDraft.description);
+                if (localDraft.landAreaInput) setLandAreaInput(localDraft.landAreaInput);
+                if (localDraft.landAreaUnit) setLandAreaUnit(localDraft.landAreaUnit);
+                if (localDraft.landAreaYards) setLandAreaYards(localDraft.landAreaYards);
+                if (localDraft.pricePerYard) setPricePerYard(localDraft.pricePerYard);
+                if (localDraft.priceNegotiable !== undefined) setPriceNegotiable(localDraft.priceNegotiable);
+                if (localDraft.landType) setLandType(localDraft.landType);
+                if (localDraft.bhk) setBhk(localDraft.bhk);
+                if (localDraft.facing) setFacing(localDraft.facing);
+                if (localDraft.floorNumber) setFloorNumber(localDraft.floorNumber);
+                if (localDraft.totalFloors) setTotalFloors(localDraft.totalFloors);
+                if (localDraft.furnishingStatus) setFurnishingStatus(localDraft.furnishingStatus);
+                if (typeof localDraft.bathrooms === 'number') setBathrooms(localDraft.bathrooms);
+                if (typeof localDraft.balconies === 'number') setBalconies(localDraft.balconies);
+                if (localDraft.carpetAreaSqFt) setCarpetAreaSqFt(localDraft.carpetAreaSqFt);
+                if (localDraft.superBuiltUpAreaSqFt) setSuperBuiltUpAreaSqFt(localDraft.superBuiltUpAreaSqFt);
+                if (localDraft.boundaryWall) setBoundaryWall(localDraft.boundaryWall);
+                if (localDraft.cornerPlot !== undefined) setCornerPlot(localDraft.cornerPlot);
+                if (localDraft.gatedCommunity !== undefined) setGatedCommunity(localDraft.gatedCommunity);
+                if (Array.isArray(localDraft.selectedAmenities)) setSelectedAmenities(localDraft.selectedAmenities);
+                if (Array.isArray(localDraft.approvals)) setApprovals(localDraft.approvals);
+                if (Array.isArray(localDraft.waterSources)) setWaterSources(localDraft.waterSources);
+                if (localDraft.electricityPhase) setElectricityPhase(localDraft.electricityPhase);
+                if (localDraft.soilType) setSoilType(localDraft.soilType);
+                if (localDraft.plotWidthFt) setPlotWidthFt(localDraft.plotWidthFt);
+                if (localDraft.plotLengthFt) setPlotLengthFt(localDraft.plotLengthFt);
+                if (localDraft.villaType) setVillaType(localDraft.villaType);
+                if (localDraft.villaFloors) setVillaFloors(localDraft.villaFloors);
+                if (localDraft.vastuCompliant !== undefined) setVastuCompliant(localDraft.vastuCompliant);
+                if (Array.isArray(localDraft.additionalRooms)) setAdditionalRooms(localDraft.additionalRooms);
+                if (Array.isArray(localDraft.villaPrivateFeatures)) setVillaPrivateFeatures(localDraft.villaPrivateFeatures);
+                if (Array.isArray(localDraft.furnishingDetails)) setFurnishingDetails(localDraft.furnishingDetails);
+                if (localDraft.possessionStatus) setPossessionStatus(localDraft.possessionStatus);
+                if (localDraft.ageOfProperty) setAgeOfProperty(localDraft.ageOfProperty);
+                if (localDraft.commercialFitout) setCommercialFitout(localDraft.commercialFitout);
+                if (localDraft.commercialWashrooms) setCommercialWashrooms(localDraft.commercialWashrooms);
+                if (localDraft.powerLoadKva) setPowerLoadKva(localDraft.powerLoadKva);
+                if (Array.isArray(localDraft.suitableBusinesses)) setSuitableBusinesses(localDraft.suitableBusinesses);
+                if (localDraft.farmFencing) setFarmFencing(localDraft.farmFencing);
+                if (localDraft.plantations) setPlantations(localDraft.plantations);
+                if (localDraft.totalRooms) setTotalRooms(localDraft.totalRooms);
+                if (localDraft.eventLawnCapacity) setEventLawnCapacity(localDraft.eventLawnCapacity);
+                if (Array.isArray(localDraft.hospitalityFeatures)) setHospitalityFeatures(localDraft.hospitalityFeatures);
+                if (localDraft.monthlyRent) setMonthlyRent(localDraft.monthlyRent);
+                if (localDraft.securityDepositMonths) setSecurityDepositMonths(localDraft.securityDepositMonths);
+                if (localDraft.leaseLockInPeriod) setLeaseLockInPeriod(localDraft.leaseLockInPeriod);
+                if (localDraft.maintenanceCharges) setMaintenanceCharges(localDraft.maintenanceCharges);
+                if (localDraft.roadAccess) setRoadAccess(localDraft.roadAccess);
+                if (localDraft.landmarks) setLandmarks(localDraft.landmarks);
+                if (localDraft.address) setAddress(localDraft.address);
+                if (localDraft.city) setCity(localDraft.city);
+                if (localDraft.state) setState(localDraft.state);
+                if (localDraft.pincode) setPincode(localDraft.pincode);
+                if (localDraft.googleMapsShareLink) setGoogleMapsShareLink(localDraft.googleMapsShareLink);
+                if (localDraft.latitude) setLatitude(localDraft.latitude);
+                if (localDraft.longitude) setLongitude(localDraft.longitude);
+                if (localDraft.sellerType) setSellerType(localDraft.sellerType);
+                if (Array.isArray(localDraft.images) && localDraft.images.length > 0) setImages(localDraft.images);
+                if (localDraft.video) setVideo(localDraft.video);
+                if (Array.isArray(localDraft.documents) && localDraft.documents.length > 0) setDocuments(localDraft.documents);
+                if (localDraft.termsAccepted !== undefined) setTermsAccepted(localDraft.termsAccepted);
+                if (typeof localDraft.currentStep === 'number' && localDraft.currentStep >= 1 && localDraft.currentStep <= 7) {
+                  setCurrentStep(localDraft.currentStep);
+                }
+              }
+            }
+          } catch (e) {
+            console.warn('Could not restore local draft:', e);
           }
         }
       } catch (err) {
@@ -858,6 +964,178 @@ function SellPageForm() {
 
     init();
   }, [propertyIdParam]);
+
+  // Helper to sync current step into browser URL without reloading (deferred outside React render cycle)
+  const syncStepToUrl = (step: number) => {
+    if (typeof window === 'undefined') return;
+    setTimeout(() => {
+      try {
+        const url = new URL(window.location.href);
+        if (url.searchParams.get('step') !== String(step)) {
+          url.searchParams.set('step', String(step));
+          window.history.replaceState(null, '', url.toString());
+        }
+      } catch {}
+    }, 0);
+  };
+
+  // Local storage auto-save to prevent data loss on accidental page refreshes
+  useEffect(() => {
+    if (pageLoading || existingPropertyId) return;
+    if (!title && !landAreaInput && images.length === 0) return;
+
+    const timeout = setTimeout(() => {
+      try {
+        const draftData = {
+          title,
+          description,
+          landAreaInput,
+          landAreaUnit,
+          landAreaYards,
+          pricePerYard,
+          priceNegotiable,
+          landType,
+          bhk,
+          facing,
+          floorNumber,
+          totalFloors,
+          furnishingStatus,
+          bathrooms,
+          balconies,
+          carpetAreaSqFt,
+          superBuiltUpAreaSqFt,
+          boundaryWall,
+          cornerPlot,
+          gatedCommunity,
+          selectedAmenities,
+          approvals,
+          waterSources,
+          electricityPhase,
+          soilType,
+          plotWidthFt,
+          plotLengthFt,
+          villaType,
+          villaFloors,
+          vastuCompliant,
+          additionalRooms,
+          villaPrivateFeatures,
+          furnishingDetails,
+          possessionStatus,
+          ageOfProperty,
+          commercialFitout,
+          commercialWashrooms,
+          powerLoadKva,
+          suitableBusinesses,
+          farmFencing,
+          plantations,
+          totalRooms,
+          eventLawnCapacity,
+          hospitalityFeatures,
+          monthlyRent,
+          securityDepositMonths,
+          leaseLockInPeriod,
+          maintenanceCharges,
+          roadAccess,
+          landmarks,
+          address,
+          city,
+          state,
+          pincode,
+          googleMapsShareLink,
+          latitude,
+          longitude,
+          approximateLocation,
+          governmentRegistrationId,
+          sellerName,
+          phoneInput,
+          sellerEmail,
+          sellerType,
+          images,
+          video,
+          documents,
+          currentStep,
+          termsAccepted,
+          savedAt: Date.now(),
+        };
+        localStorage.setItem('landterra_sell_form_draft', JSON.stringify(draftData));
+      } catch (err) {
+        console.warn('Failed to auto-save local draft:', err);
+      }
+    }, 600);
+
+    return () => clearTimeout(timeout);
+  }, [
+    pageLoading,
+    existingPropertyId,
+    title,
+    description,
+    landAreaInput,
+    landAreaUnit,
+    landAreaYards,
+    pricePerYard,
+    priceNegotiable,
+    landType,
+    bhk,
+    facing,
+    floorNumber,
+    totalFloors,
+    furnishingStatus,
+    bathrooms,
+    balconies,
+    carpetAreaSqFt,
+    superBuiltUpAreaSqFt,
+    boundaryWall,
+    cornerPlot,
+    gatedCommunity,
+    selectedAmenities,
+    approvals,
+    waterSources,
+    electricityPhase,
+    soilType,
+    plotWidthFt,
+    plotLengthFt,
+    villaType,
+    villaFloors,
+    vastuCompliant,
+    additionalRooms,
+    villaPrivateFeatures,
+    furnishingDetails,
+    possessionStatus,
+    ageOfProperty,
+    commercialFitout,
+    commercialWashrooms,
+    powerLoadKva,
+    suitableBusinesses,
+    farmFencing,
+    plantations,
+    totalRooms,
+    eventLawnCapacity,
+    hospitalityFeatures,
+    monthlyRent,
+    securityDepositMonths,
+    leaseLockInPeriod,
+    maintenanceCharges,
+    roadAccess,
+    landmarks,
+    address,
+    city,
+    state,
+    pincode,
+    googleMapsShareLink,
+    latitude,
+    longitude,
+    approximateLocation,
+    governmentRegistrationId,
+    sellerName,
+    phoneInput,
+    sellerEmail,
+    sellerType,
+    images,
+    video,
+    documents,
+    currentStep,
+    termsAccepted,
+  ]);
 
   // Phone OTP handlers
   const handleSendOtp = async () => {
@@ -1009,13 +1287,17 @@ function SellPageForm() {
 
   const handleNext = () => {
     if (validateStep(currentStep)) {
-      setCurrentStep((prev) => Math.min(prev + 1, 7));
+      const next = Math.min(currentStep + 1, 7);
+      setCurrentStep(next);
+      syncStepToUrl(next);
     }
   };
 
   const handlePrev = () => {
     setErrorMessage('');
-    setCurrentStep((prev) => Math.max(prev - 1, 1));
+    const prevStep = Math.max(currentStep - 1, 1);
+    setCurrentStep(prevStep);
+    syncStepToUrl(prevStep);
   };
 
   // Image Upload with Client-Side Compression
@@ -1195,6 +1477,19 @@ function SellPageForm() {
       const processData = await processRes.json();
       const processedFile = processData.file;
 
+      // If replacing an existing video, delete previous video from Cloudflare R2 and DB
+      if (video?.objectKey && video.objectKey !== processedFile.objectKey) {
+        fetch('/api/uploads/delete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            objectKey: video.objectKey,
+            propertyId: existingPropertyId || undefined,
+            type: 'video',
+          }),
+        }).catch((err) => console.warn('Failed to clean up replaced video from storage:', err));
+      }
+
       setVideo({
         secureUrl: processedFile.secureUrl,
         objectKey: processedFile.objectKey,
@@ -1227,6 +1522,83 @@ function SellPageForm() {
     event.target.value = '';
     if (!file) return;
     await uploadVideoFile(file);
+  };
+
+  // Automatically delete video from Cloudflare R2 and DB when removed
+  const handleRemoveVideo = async () => {
+    if (!video) return;
+    const oldKey = video.objectKey;
+    setVideo(null);
+
+    if (oldKey) {
+      try {
+        await fetch('/api/uploads/delete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            objectKey: oldKey,
+            propertyId: existingPropertyId || undefined,
+            type: 'video',
+          }),
+        });
+      } catch (err) {
+        console.warn('Failed to delete video from storage:', err);
+      }
+    }
+  };
+
+  // Automatically delete image from Cloudflare R2 and DB when removed
+  const handleRemoveImage = async (index: number) => {
+    const targetImage = images[index];
+    if (!targetImage) return;
+
+    setImages((prev) => {
+      const remaining = prev.filter((_, itemIndex) => itemIndex !== index);
+      if (remaining.length > 0 && !remaining.some((item) => item.isPrimary)) {
+        remaining[0] = { ...remaining[0], isPrimary: true };
+      }
+      return remaining;
+    });
+
+    if (targetImage.objectKey) {
+      try {
+        await fetch('/api/uploads/delete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            objectKey: targetImage.objectKey,
+            propertyId: existingPropertyId || undefined,
+            type: 'image',
+          }),
+        });
+      } catch (err) {
+        console.warn('Failed to delete image from storage:', err);
+      }
+    }
+  };
+
+  // Automatically delete document from Cloudflare R2 and DB when removed
+  const handleRemoveDoc = async (index: number) => {
+    const targetDoc = documents[index];
+    if (!targetDoc) return;
+
+    setDocuments((prev) => prev.filter((_, itemIndex) => itemIndex !== index));
+
+    if (targetDoc.objectKey) {
+      try {
+        await fetch('/api/uploads/delete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            objectKey: targetDoc.objectKey,
+            propertyId: existingPropertyId || undefined,
+            type: 'document',
+          }),
+        });
+      } catch (err) {
+        console.warn('Failed to delete document from storage:', err);
+      }
+    }
   };
 
   // Unified Media Upload (Upload photos & video in one go)
@@ -1380,6 +1752,254 @@ function SellPageForm() {
     }
   };
 
+  // Reusable Payload Constructor
+  const constructPropertyPayload = () => {
+    return {
+      title,
+      description,
+      landAreaYards: Number(landAreaYards.toFixed(4)),
+      pricePerYard: Number(pricePerYard),
+      priceNegotiable,
+      landType,
+      propertyType: landType,
+      bhk: [
+        'FLAT',
+        'INDEPENDENT_HOUSE',
+        'VILLA',
+        'HOUSE_VILLA',
+        'TOWNHOUSE',
+        'DUPLEX',
+        'PENTHOUSE',
+        'SERVICE_APARTMENT',
+        'RESIDENTIAL_RENTAL',
+        'COLIVING_PG',
+        'VACATION_RENTAL_AIRBNB',
+      ].includes(landType)
+        ? bhk
+        : undefined,
+      facing,
+      floorNumber: [
+        'FLAT',
+        'PENTHOUSE',
+        'DUPLEX',
+        'OFFICE_SPACE',
+        'COWORKING_SPACE',
+        'SERVICE_APARTMENT',
+      ].includes(landType)
+        ? floorNumber
+        : undefined,
+      totalFloors: totalFloors ? Number(totalFloors) : undefined,
+      furnishingStatus,
+      bathrooms: Number(bathrooms),
+      balconies: Number(balconies),
+      carpetAreaSqFt: carpetAreaSqFt ? Number(carpetAreaSqFt) : undefined,
+      superBuiltUpAreaSqFt: superBuiltUpAreaSqFt ? Number(superBuiltUpAreaSqFt) : undefined,
+      boundaryWall,
+      cornerPlot: Boolean(cornerPlot),
+      gatedCommunity: Boolean(gatedCommunity),
+      amenities: Array.from(new Set([...selectedAmenities, ...villaPrivateFeatures, ...additionalRooms])),
+      approvals,
+      waterSource: waterSources,
+      electricityPhase,
+      soilType,
+      propertyAttributes: {
+        bhk: bhk === 'NOT_SPECIFIED' ? undefined : bhk,
+        facing: facing === 'NOT_SPECIFIED' ? undefined : facing,
+        floorNumber,
+        totalFloors,
+        furnishingStatus: furnishingStatus === 'NOT_SPECIFIED' ? undefined : furnishingStatus,
+        bathrooms: bathrooms > 0 ? bathrooms : undefined,
+        balconies: balconies >= 0 ? balconies : undefined,
+        carpetAreaSqFt,
+        superBuiltUpAreaSqFt,
+        parkingSlots: parkingSlots === 'NOT_SPECIFIED' ? undefined : parkingSlots,
+        plotLengthFt,
+        plotWidthFt,
+        boundaryWall,
+        cornerPlot,
+        gatedCommunity,
+        approvals,
+        villaType: villaType === 'NOT_SPECIFIED' ? undefined : villaType,
+        villaFloors: villaFloors === 'NOT_SPECIFIED' ? undefined : villaFloors,
+        vastuCompliant: Boolean(vastuCompliant),
+        additionalRooms,
+        villaPrivateFeatures,
+        furnishingDetails,
+        possessionStatus: possessionStatus === 'NOT_SPECIFIED' ? undefined : possessionStatus,
+        ageOfProperty: ageOfProperty === 'NOT_SPECIFIED' ? undefined : ageOfProperty,
+        commercialFitout,
+        commercialWashrooms,
+        powerLoadKva,
+        suitableBusinesses,
+        soilType,
+        waterSources,
+        electricityPhase,
+        farmFencing,
+        plantations,
+        totalRooms,
+        eventLawnCapacity,
+        hospitalityFeatures,
+        monthlyRent,
+        securityDepositMonths,
+        leaseLockInPeriod,
+        maintenanceCharges,
+        amenities: Array.from(new Set([...selectedAmenities, ...villaPrivateFeatures, ...additionalRooms])),
+      },
+      roadAccess,
+      nearbyLandmarks: landmarks
+        ? landmarks
+          .split(',')
+          .map((l) => l.trim())
+          .filter(Boolean)
+        : [],
+      location: {
+        address,
+        city,
+        state,
+        pincode,
+      },
+      googleMapsShareLink,
+      latitude,
+      longitude,
+      approximateLocation,
+      governmentRegistrationId,
+      sellerName,
+      sellerPhone: (sellerPhone || phoneInput || '')
+        .replace(/^\+91/, '')
+        .replace(/\D/g, '')
+        .slice(-10),
+      sellerEmail,
+      sellerType,
+      sellerDeclarationAccepted: Boolean(termsAccepted),
+      images: images.map((image, index) => ({
+        objectKey: image.objectKey,
+        secureUrl: image.secureUrl,
+        fileName: image.fileName,
+        mimeType: image.mimeType,
+        size: image.size,
+        isPrimary: image.isPrimary,
+        sortOrder: index,
+      })),
+      video: video
+        ? {
+            objectKey: video.objectKey,
+            secureUrl: video.secureUrl,
+            fileName: video.fileName,
+            mimeType: video.mimeType || 'video/webm',
+            size: video.size,
+          }
+        : undefined,
+      documents: documents.map((document) => ({
+        documentType: document.documentType,
+        objectKey: document.objectKey,
+        fileName: document.fileName,
+        mimeType: 'application/pdf',
+        size: document.size,
+      })),
+    };
+  };
+
+  // Save Draft to Database (without proceeding to payment)
+  const handleSaveDraft = async () => {
+    if (!Number.isFinite(landAreaYards) || landAreaYards < 1) {
+      setErrorMessage('Please enter a valid land area (minimum 1 sq. yard) before saving draft.');
+      setCurrentStep(1);
+      return;
+    }
+
+    if (!title || title.trim().length < 6) {
+      setErrorMessage('Please enter a listing title (at least 6 characters) before saving draft.');
+      setCurrentStep(1);
+      return;
+    }
+
+    if (images.length === 0) {
+      setErrorMessage('Please upload at least 1 property photograph before saving draft.');
+      setCurrentStep(5);
+      return;
+    }
+
+    setIsSavingDraft(true);
+    setErrorMessage('');
+    setDraftSavedMessage(null);
+
+    try {
+      const payload = constructPropertyPayload();
+
+      let response: Response;
+      if (existingPropertyId) {
+        response = await fetch(`/api/properties/${existingPropertyId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+      } else {
+        response = await fetch('/api/properties', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+      }
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        if (data.code === 'PHONE_VERIFICATION_REQUIRED') {
+          setErrorMessage('Phone verification is required before listing. Please verify your mobile number.');
+        } else {
+          const detailMsg = Array.isArray(data.details)
+            ? data.details.map((d: any) => `${d.path?.join('.') || 'field'}: ${d.message || 'invalid'}`).join('; ')
+            : '';
+          throw new Error(data.error || detailMsg || 'Failed to save listing draft');
+        }
+        return;
+      }
+
+      const savedProperty =
+        data.property ||
+        (existingPropertyId ? { ...payload, _id: existingPropertyId } : null);
+
+      if (savedProperty?._id) {
+        setExistingPropertyId(savedProperty._id);
+        setCreatedProperty(savedProperty);
+        if (savedProperty.paymentStatus) {
+          setExistingPaymentStatus(savedProperty.paymentStatus);
+        }
+
+        // Update URL to ensure refresh never loses draft data
+        setTimeout(() => {
+          try {
+            const newUrl = new URL(window.location.href);
+            newUrl.searchParams.set('edit', savedProperty._id);
+            newUrl.searchParams.set('step', String(currentStep));
+            window.history.replaceState(null, '', newUrl.toString());
+          } catch {}
+        }, 0);
+      }
+
+      // Clear local storage draft since it is now safely stored in the database
+      try {
+        localStorage.removeItem('landterra_sell_form_draft');
+      } catch {}
+
+      const timeStr = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+      setDraftSavedTime(timeStr);
+      setDraftSavedSuccess(true);
+      setDraftSavedMessage(
+        `Draft saved successfully at ${timeStr}! All property details, photos, and video are securely stored. You can safely refresh the page or proceed to pay anytime.`
+      );
+
+      setTimeout(() => {
+        setDraftSavedSuccess(false);
+      }, 5000);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Error saving listing draft';
+      setErrorMessage(message);
+    } finally {
+      setIsSavingDraft(false);
+    }
+  };
+
   // Final Submit
   const handleFinalSubmit = async () => {
     if (!termsAccepted) {
@@ -1405,149 +2025,7 @@ function SellPageForm() {
     setErrorMessage('');
 
     try {
-      const payload = {
-        title,
-        description,
-        landAreaYards: Number(landAreaYards.toFixed(4)),
-        pricePerYard: Number(pricePerYard),
-        priceNegotiable,
-        landType,
-        propertyType: landType,
-        bhk: [
-          'FLAT',
-          'INDEPENDENT_HOUSE',
-          'VILLA',
-          'HOUSE_VILLA',
-          'TOWNHOUSE',
-          'DUPLEX',
-          'PENTHOUSE',
-          'SERVICE_APARTMENT',
-          'RESIDENTIAL_RENTAL',
-          'COLIVING_PG',
-          'VACATION_RENTAL_AIRBNB',
-        ].includes(landType)
-          ? bhk
-          : undefined,
-        facing,
-        floorNumber: [
-          'FLAT',
-          'PENTHOUSE',
-          'DUPLEX',
-          'OFFICE_SPACE',
-          'COWORKING_SPACE',
-          'SERVICE_APARTMENT',
-        ].includes(landType)
-          ? floorNumber
-          : undefined,
-        totalFloors: totalFloors ? Number(totalFloors) : undefined,
-        furnishingStatus,
-        bathrooms: Number(bathrooms),
-        balconies: Number(balconies),
-        carpetAreaSqFt: carpetAreaSqFt ? Number(carpetAreaSqFt) : undefined,
-        superBuiltUpAreaSqFt: superBuiltUpAreaSqFt ? Number(superBuiltUpAreaSqFt) : undefined,
-        boundaryWall,
-        cornerPlot: Boolean(cornerPlot),
-        gatedCommunity: Boolean(gatedCommunity),
-        amenities: Array.from(new Set([...selectedAmenities, ...villaPrivateFeatures, ...additionalRooms])),
-        approvals,
-        waterSource: waterSources,
-        electricityPhase,
-        soilType,
-        propertyAttributes: {
-          bhk: bhk === 'NOT_SPECIFIED' ? undefined : bhk,
-          facing: facing === 'NOT_SPECIFIED' ? undefined : facing,
-          floorNumber,
-          totalFloors,
-          furnishingStatus: furnishingStatus === 'NOT_SPECIFIED' ? undefined : furnishingStatus,
-          bathrooms: bathrooms > 0 ? bathrooms : undefined,
-          balconies: balconies >= 0 ? balconies : undefined,
-          carpetAreaSqFt,
-          superBuiltUpAreaSqFt,
-          parkingSlots: parkingSlots === 'NOT_SPECIFIED' ? undefined : parkingSlots,
-          plotLengthFt,
-          plotWidthFt,
-          boundaryWall,
-          cornerPlot,
-          gatedCommunity,
-          approvals,
-          villaType: villaType === 'NOT_SPECIFIED' ? undefined : villaType,
-          villaFloors: villaFloors === 'NOT_SPECIFIED' ? undefined : villaFloors,
-          vastuCompliant: Boolean(vastuCompliant),
-          additionalRooms,
-          villaPrivateFeatures,
-          furnishingDetails,
-          possessionStatus: possessionStatus === 'NOT_SPECIFIED' ? undefined : possessionStatus,
-          ageOfProperty: ageOfProperty === 'NOT_SPECIFIED' ? undefined : ageOfProperty,
-          commercialFitout,
-          commercialWashrooms,
-          powerLoadKva,
-          suitableBusinesses,
-          soilType,
-          waterSources,
-          electricityPhase,
-          farmFencing,
-          plantations,
-          totalRooms,
-          eventLawnCapacity,
-          hospitalityFeatures,
-          monthlyRent,
-          securityDepositMonths,
-          leaseLockInPeriod,
-          maintenanceCharges,
-          amenities: Array.from(new Set([...selectedAmenities, ...villaPrivateFeatures, ...additionalRooms])),
-        },
-        roadAccess,
-        nearbyLandmarks: landmarks
-          ? landmarks
-            .split(',')
-            .map((l) => l.trim())
-            .filter(Boolean)
-          : [],
-        location: {
-          address,
-          city,
-          state,
-          pincode,
-        },
-        googleMapsShareLink,
-        latitude,
-        longitude,
-        approximateLocation,
-        governmentRegistrationId,
-        sellerName,
-        sellerPhone: (sellerPhone || phoneInput || '')
-          .replace(/^\+91/, '')
-          .replace(/\D/g, '')
-          .slice(-10),
-        sellerEmail,
-        sellerType,
-        sellerDeclarationAccepted: Boolean(termsAccepted),
-        images: images.map((image, index) => ({
-          objectKey: image.objectKey,
-          secureUrl: image.secureUrl,
-          fileName: image.fileName,
-          mimeType: image.mimeType,
-          size: image.size,
-          isPrimary: image.isPrimary,
-          sortOrder: index,
-        })),
-        video: video
-          ? {
-              objectKey: video.objectKey,
-              secureUrl: video.secureUrl,
-              fileName: video.fileName,
-              mimeType: video.mimeType || 'video/webm',
-              size: video.size,
-            }
-          : undefined,
-        documents: documents.map((document) => ({
-          documentType: document.documentType,
-          objectKey: document.objectKey,
-          fileName: document.fileName,
-          mimeType: 'application/pdf',
-          size: document.size,
-        })),
-      };
+      const payload = constructPropertyPayload();
 
       let response: Response;
 
@@ -1585,6 +2063,28 @@ function SellPageForm() {
       const savedProperty =
         data.property ||
         (existingPropertyId ? { ...payload, _id: existingPropertyId } : null);
+
+      if (savedProperty?._id) {
+        setExistingPropertyId(savedProperty._id);
+        if (savedProperty.paymentStatus) {
+          setExistingPaymentStatus(savedProperty.paymentStatus);
+        }
+
+        // Update URL so refreshing preserves draft and step
+        setTimeout(() => {
+          try {
+            const newUrl = new URL(window.location.href);
+            newUrl.searchParams.set('edit', savedProperty._id);
+            newUrl.searchParams.set('step', '7');
+            window.history.replaceState(null, '', newUrl.toString());
+          } catch {}
+        }, 0);
+      }
+
+      // Clear local storage draft since it is now in database
+      try {
+        localStorage.removeItem('landterra_sell_form_draft');
+      } catch {}
 
       if (existingPropertyId && existingPaymentStatus === 'PAID') {
         setIsUpdateSuccess(true);
@@ -1838,11 +2338,25 @@ function SellPageForm() {
                 </p>
               </div>
 
-              <div className="hidden sm:flex items-center gap-2 px-3 py-2 rounded-xl bg-white border border-slate-200 shadow-xs">
-                <ShieldCheck className="w-4 h-4 text-[#FF9933]" />
-                <span className="text-[11px] font-semibold text-slate-600">
-                  Direct Seller Listing
-                </span>
+              <div className="flex items-center gap-2">
+                {draftSavedTime ? (
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-semibold shadow-xs animate-in fade-in">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>Saved at {draftSavedTime}</span>
+                  </div>
+                ) : existingPropertyId ? (
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-[11px] font-semibold shadow-xs">
+                    <Save className="w-3.5 h-3.5 text-amber-600" />
+                    <span>Draft in Progress</span>
+                  </div>
+                ) : null}
+
+                <div className="hidden sm:flex items-center gap-2 px-3 py-2 rounded-xl bg-white border border-slate-200 shadow-xs">
+                  <ShieldCheck className="w-4 h-4 text-[#FF9933]" />
+                  <span className="text-[11px] font-semibold text-slate-600">
+                    Direct Seller Listing
+                  </span>
+                </div>
               </div>
             </div>
 
@@ -1877,6 +2391,7 @@ function SellPageForm() {
                   onClick={() => {
                     if (completed) {
                       setCurrentStep(step);
+                      syncStepToUrl(step);
                       setErrorMessage('');
                     }
                   }}
@@ -4346,7 +4861,7 @@ function SellPageForm() {
                             </label>
                             <button
                               type="button"
-                              onClick={() => setVideo(null)}
+                              onClick={handleRemoveVideo}
                               className="px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold transition-colors flex items-center gap-1 cursor-pointer"
                               title="Remove Video"
                             >
@@ -4420,15 +4935,7 @@ function SellPageForm() {
                             </div>
                             <button
                               type="button"
-                              onClick={() =>
-                                setImages((prev) => {
-                                  const remaining = prev.filter((_, itemIndex) => itemIndex !== index);
-                                  if (remaining.length > 0 && !remaining.some((item) => item.isPrimary)) {
-                                    remaining[0] = { ...remaining[0], isPrimary: true };
-                                  }
-                                  return remaining;
-                                })
-                              }
+                              onClick={() => handleRemoveImage(index)}
                               className="absolute right-2 top-2 w-7 h-7 rounded-full bg-black/65 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-rose-600 cursor-pointer"
                               aria-label="Remove image"
                             >
@@ -4535,11 +5042,7 @@ function SellPageForm() {
                         </div>
                         <button
                           type="button"
-                          onClick={() =>
-                            setDocuments((prev) =>
-                              prev.filter((_, itemIndex) => itemIndex !== index),
-                            )
-                          }
+                          onClick={() => handleRemoveDoc(index)}
                           className="w-8 h-8 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 flex items-center justify-center shrink-0 cursor-pointer"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -4798,13 +5301,37 @@ function SellPageForm() {
                     <ShieldCheck className="w-4 h-4 text-blue-700 shrink-0 mt-0.5" />
                     <div>
                       <p className="text-xs font-bold text-blue-950">
-                        Your listing draft is permanently saved
+                        {existingPropertyId ? 'Draft Saved in Your Account' : 'Save Draft & Resume Anytime'}
                       </p>
                       <p className="text-[10px] text-blue-900/80 mt-1 leading-relaxed">
-                        If you close the payment modal or payment fails, your property details, photographs, and documents remain safely saved as a draft. You can resume anytime from your Seller Dashboard.
+                        Use the <strong>Save Draft</strong> button below to save all your entered details, photographs, and video directly to your account. Your work will never be lost even if you refresh or leave the page.
                       </p>
                     </div>
                   </div>
+                </div>
+              </div>
+            )}
+
+            {/* Draft Saved Banner */}
+            {draftSavedMessage && (
+              <div className="mx-5 sm:mx-8 mb-4 rounded-xl bg-emerald-50 border border-emerald-200 p-4 shadow-xs animate-in fade-in">
+                <div className="flex items-start gap-3">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
+                  <div className="flex-1">
+                    <p className="text-xs font-bold text-emerald-950">
+                      Listing Draft Saved to Your Account
+                    </p>
+                    <p className="text-[11px] text-emerald-800/90 mt-0.5 leading-relaxed">
+                      {draftSavedMessage}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setDraftSavedMessage(null)}
+                    className="text-xs font-semibold text-emerald-700 hover:text-emerald-950 cursor-pointer"
+                  >
+                    Dismiss
+                  </button>
                 </div>
               </div>
             )}
@@ -4818,8 +5345,8 @@ function SellPageForm() {
                     ? () => router.push('/dashboard/seller')
                     : handlePrev
                 }
-                disabled={isSubmitting}
-                className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 hover:bg-white border border-transparent hover:border-slate-200 transition-colors cursor-pointer"
+                disabled={isSubmitting || isSavingDraft}
+                className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 hover:bg-white border border-transparent hover:border-slate-200 transition-colors cursor-pointer disabled:opacity-50"
               >
                 <ArrowLeft className="w-4 h-4" />
                 <span>{currentStep === 1 ? 'Exit' : 'Back'}</span>
@@ -4830,7 +5357,7 @@ function SellPageForm() {
                   type="button"
                   onClick={handleNext}
                   disabled={
-                    isSubmitting || isUploadingImage || isUploadingDoc
+                    isSubmitting || isSavingDraft || isUploadingImage || isUploadingDoc
                   }
                   className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-[#FF9933] hover:bg-[#f07d12] text-white text-xs font-bold transition-colors shadow-sm disabled:opacity-50 cursor-pointer"
                 >
@@ -4838,34 +5365,68 @@ function SellPageForm() {
                   <ArrowRight className="w-4 h-4" />
                 </button>
               ) : (
-                <button
-                  type="button"
-                  onClick={handleFinalSubmit}
-                  disabled={
-                    isSubmitting ||
-                    !termsAccepted ||
-                    isUploadingImage ||
-                    isUploadingDoc
-                  }
-                  className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-[#FF9933] hover:bg-[#f07d12] text-white text-xs font-bold transition-colors shadow-sm disabled:opacity-50 cursor-pointer"
-                >
-                  {existingPropertyId && existingPaymentStatus === 'PAID' ? (
-                    <CheckCircle2 className="w-4 h-4" />
-                  ) : (
-                    <CreditCard className="w-4 h-4" />
-                  )}
-                  <span>
-                    {isSubmitting
-                      ? 'Saving Changes...'
-                      : isUpdateSuccess
-                        ? 'Listing Updated Successfully!'
-                        : existingPropertyId && existingPaymentStatus === 'PAID'
-                          ? 'Save & Update Property'
-                          : `Proceed to Pay ₹${listingFeeAmount.toLocaleString(
-                            'en-IN',
-                          )}`}
-                  </span>
-                </button>
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                  {/* Save Draft Button alongside Proceed to Pay */}
+                  <button
+                    type="button"
+                    onClick={handleSaveDraft}
+                    disabled={
+                      isSubmitting ||
+                      isSavingDraft ||
+                      isUploadingImage ||
+                      isUploadingDoc
+                    }
+                    className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-white hover:bg-slate-50 text-slate-800 border-2 border-slate-200 hover:border-[#FF9933] text-xs font-bold transition-all shadow-xs disabled:opacity-50 cursor-pointer"
+                  >
+                    {isSavingDraft ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin text-[#FF9933]" />
+                        <span>Saving Draft...</span>
+                      </>
+                    ) : draftSavedSuccess ? (
+                      <>
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                        <span className="text-emerald-700 font-extrabold">Draft Saved!</span>
+                      </>
+                    ) : (
+                      <>
+                        <Save className="w-4 h-4 text-slate-600" />
+                        <span>Save Draft</span>
+                      </>
+                    )}
+                  </button>
+
+                  {/* Proceed to Pay Button (or Save & Update Property if already paid) */}
+                  <button
+                    type="button"
+                    onClick={handleFinalSubmit}
+                    disabled={
+                      isSubmitting ||
+                      isSavingDraft ||
+                      !termsAccepted ||
+                      isUploadingImage ||
+                      isUploadingDoc
+                    }
+                    className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-[#FF9933] hover:bg-[#f07d12] text-white text-xs font-bold transition-colors shadow-sm disabled:opacity-50 cursor-pointer"
+                  >
+                    {existingPropertyId && existingPaymentStatus === 'PAID' ? (
+                      <CheckCircle2 className="w-4 h-4" />
+                    ) : (
+                      <CreditCard className="w-4 h-4" />
+                    )}
+                    <span>
+                      {isSubmitting
+                        ? 'Saving Changes...'
+                        : isUpdateSuccess
+                          ? 'Listing Updated Successfully!'
+                          : existingPropertyId && existingPaymentStatus === 'PAID'
+                            ? 'Save & Update Property'
+                            : `Proceed to Pay ₹${listingFeeAmount.toLocaleString(
+                              'en-IN',
+                            )}`}
+                    </span>
+                  </button>
+                </div>
               )}
             </div>
           </div>

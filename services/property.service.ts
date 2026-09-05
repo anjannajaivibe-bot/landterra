@@ -12,6 +12,8 @@ import {
   calculateAuthoritativeFees,
 } from '@/lib/validation/property';
 
+import { deleteFilesFromStorage } from '@/services/upload.service';
+
 /* ================================================================
    TYPES
 ================================================================ */
@@ -1193,17 +1195,56 @@ export async function updateProperty(
     return null;
   }
 
+  // Automatically delete any removed media files from Cloudflare R2
+  const orphanedKeys: string[] = [];
+
+  // 1. Removed images
+  if (Array.isArray(incoming.images) && Array.isArray(existing.images)) {
+    const newImageKeys = new Set(
+      (incoming.images as any[]).map((img) => img?.objectKey).filter(Boolean)
+    );
+    for (const oldImg of existing.images) {
+      if (oldImg?.objectKey && !newImageKeys.has(oldImg.objectKey)) {
+        orphanedKeys.push(oldImg.objectKey);
+      }
+    }
+  }
+
+  // 2. Replaced or removed video
+  if ('video' in incoming && existing.video?.objectKey) {
+    const newVideoKey = (incoming.video as any)?.objectKey;
+    if (newVideoKey !== existing.video.objectKey) {
+      orphanedKeys.push(existing.video.objectKey);
+    }
+  }
+
+  // 3. Removed documents
+  if (Array.isArray(incoming.documents) && Array.isArray(existing.documents)) {
+    const newDocKeys = new Set(
+      (incoming.documents as any[]).map((doc) => doc?.objectKey).filter(Boolean)
+    );
+    for (const oldDoc of existing.documents) {
+      if (oldDoc?.objectKey && !newDocKeys.has(oldDoc.objectKey)) {
+        orphanedKeys.push(oldDoc.objectKey);
+      }
+    }
+  }
+
+  if (orphanedKeys.length > 0) {
+    deleteFilesFromStorage(orphanedKeys).catch((err) => {
+      console.warn('Failed to delete orphaned media from R2 on property update:', err);
+    });
+  }
+
   return updated as unknown as IProperty;
 }
 
 /* ================================================================
-   SOFT DELETE PROPERTY
+   DELETE PROPERTY
 ================================================================ */
 
 /**
- * Soft delete.
- *
- * NEVER physically delete marketplace property records.
+ * Permanently delete property and purge all associated media from Cloudflare R2.
  */
 export async function deleteProperty(
   id: string,
@@ -1222,6 +1263,36 @@ export async function deleteProperty(
     return false;
   }
 
+  // 1. Fetch property to identify all associated media keys
+  const property = await PropertyModel.findById(id).lean();
+  if (!property) {
+    return false;
+  }
+
+  // 2. Collect all R2 keys (images, video, documents)
+  const keysToDelete: string[] = [];
+  if (Array.isArray(property.images)) {
+    for (const img of property.images) {
+      if (img?.objectKey) keysToDelete.push(img.objectKey);
+    }
+  }
+  if (property.video?.objectKey) {
+    keysToDelete.push(property.video.objectKey);
+  }
+  if (Array.isArray(property.documents)) {
+    for (const doc of property.documents) {
+      if (doc?.objectKey) keysToDelete.push(doc.objectKey);
+    }
+  }
+
+  // 3. Purge all media from Cloudflare R2
+  if (keysToDelete.length > 0) {
+    await deleteFilesFromStorage(keysToDelete).catch((err) => {
+      console.warn('Failed to delete media files from R2 during property deletion:', err);
+    });
+  }
+
+  // 4. Delete property document from MongoDB
   const result =
     await PropertyModel.deleteOne({ _id: id });
 

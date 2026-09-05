@@ -141,6 +141,9 @@ function toPublicProperty(
     images:
       property.images,
 
+    video:
+      property.video,
+
     publishedAt:
       property.publishedAt,
 

@@ -42,6 +42,7 @@ import {
   Video,
   Play,
   Film,
+  Maximize2,
   X,
 } from 'lucide-react';
 
@@ -165,6 +166,7 @@ function PropertyDetailsContent() {
 
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [activeMediaTab, setActiveMediaTab] = useState<'PHOTOS' | 'VIDEO'>('PHOTOS');
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
 
   const [favorite, setFavorite] = useState(false);
   const [favoriteLoading, setFavoriteLoading] = useState(false);
@@ -571,6 +573,38 @@ function PropertyDetailsContent() {
       current === images.length - 1 ? 0 : current + 1,
     );
   };
+
+  /* Keyboard navigation and scroll lock for Lightbox */
+  useEffect(() => {
+    if (!isLightboxOpen) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsLightboxOpen(false);
+      } else if (e.key === 'ArrowLeft') {
+        if (activeMediaTab === 'PHOTOS' && images.length > 1) {
+          setActiveImageIndex((current) =>
+            current === 0 ? images.length - 1 : current - 1,
+          );
+        }
+      } else if (e.key === 'ArrowRight') {
+        if (activeMediaTab === 'PHOTOS' && images.length > 1) {
+          setActiveImageIndex((current) =>
+            current === images.length - 1 ? 0 : current + 1,
+          );
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [isLightboxOpen, activeMediaTab, images.length]);
 
   /* ================================================================
      INQUIRY
@@ -1092,19 +1126,47 @@ function PropertyDetailsContent() {
                       preload="metadata"
                       className="w-full h-full object-contain"
                     />
+                    <button
+                      type="button"
+                      onClick={() => setIsLightboxOpen(true)}
+                      className="absolute bottom-3 right-3 z-10 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-black/60 hover:bg-black/80 text-white text-xs font-bold backdrop-blur-md transition-all shadow-md cursor-pointer hover:scale-105"
+                      title="Expand video to fullscreen"
+                    >
+                      <Maximize2 className="w-3.5 h-3.5" />
+                      <span className="hidden sm:inline">Maximize</span>
+                    </button>
                   </div>
                 ) : activeImage?.secureUrl ? (
-                  <Image
-                    src={activeImage.secureUrl}
-                    alt={
-                      activeImage.fileName ||
-                      property.title
-                    }
-                    fill
-                    sizes="(max-width: 1024px) 100vw, 58vw"
-                    className="object-cover"
-                    priority
-                  />
+                  <div
+                    onClick={() => setIsLightboxOpen(true)}
+                    className="relative w-full h-full cursor-zoom-in group"
+                    title="Click to maximize image"
+                  >
+                    <Image
+                      src={activeImage.secureUrl}
+                      alt={
+                        activeImage.fileName ||
+                        property.title
+                      }
+                      fill
+                      sizes="(max-width: 1024px) 100vw, 58vw"
+                      className="object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+                      priority
+                    />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors pointer-events-none" />
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setIsLightboxOpen(true);
+                      }}
+                      className="absolute bottom-3 right-3 z-10 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-black/60 hover:bg-black/80 text-white text-xs font-bold backdrop-blur-md transition-all shadow-md cursor-pointer hover:scale-105"
+                      title="Click to maximize image"
+                    >
+                      <Maximize2 className="w-3.5 h-3.5" />
+                      <span className="hidden sm:inline">Click to Maximize</span>
+                    </button>
+                  </div>
                 ) : (
                   <div className="flex h-full items-center justify-center bg-slate-100">
                     <div className="text-center">
@@ -2375,6 +2437,171 @@ function PropertyDetailsContent() {
           isOpen={reportModalOpen}
           onClose={() => setReportModalOpen(false)}
         />
+      )}
+
+      {/* ================================================================
+          FULLSCREEN LIGHTBOX / MAXIMIZE MEDIA MODAL
+      ================================================================= */}
+      {isLightboxOpen && property && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 flex flex-col justify-between bg-black/95 backdrop-blur-xl animate-in fade-in duration-200"
+          onClick={() => setIsLightboxOpen(false)}
+        >
+          {/* Top Bar */}
+          <div
+            className="flex items-center justify-between p-4 sm:p-5 z-20 text-white"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-3">
+              <span className="px-3 py-1 rounded-full bg-white/10 text-white text-xs font-bold backdrop-blur">
+                {activeMediaTab === 'VIDEO'
+                  ? 'Video Tour'
+                  : `Photo ${activeImageIndex + 1} of ${images.length}`}
+              </span>
+              <h3 className="text-sm font-semibold text-slate-200 hidden md:block truncate max-w-md">
+                {property.title}
+              </h3>
+            </div>
+
+            {/* Media tab switcher inside lightbox */}
+            <div className="flex items-center gap-2">
+              {property.video?.secureUrl && (
+                <div className="flex items-center gap-1 rounded-xl bg-white/10 p-1 backdrop-blur text-white text-xs font-bold">
+                  <button
+                    type="button"
+                    onClick={() => setActiveMediaTab('PHOTOS')}
+                    className={`flex items-center gap-1 px-3 py-1 rounded-lg transition-colors cursor-pointer ${
+                      activeMediaTab === 'PHOTOS' ? 'bg-[#FF9933] text-white' : 'text-slate-300 hover:text-white'
+                    }`}
+                  >
+                    <ImageIcon className="w-3.5 h-3.5" />
+                    <span>Photos</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveMediaTab('VIDEO')}
+                    className={`flex items-center gap-1 px-3 py-1 rounded-lg transition-colors cursor-pointer ${
+                      activeMediaTab === 'VIDEO' ? 'bg-[#FF9933] text-white' : 'text-slate-300 hover:text-white'
+                    }`}
+                  >
+                    <Play className="w-3.5 h-3.5 fill-current" />
+                    <span>Video</span>
+                  </button>
+                </div>
+              )}
+
+              <button
+                type="button"
+                onClick={() => setIsLightboxOpen(false)}
+                aria-label="Close fullscreen view"
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+
+          {/* Main Stage */}
+          <div
+            className="relative flex-1 flex items-center justify-center p-2 sm:p-6 overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {activeMediaTab === 'VIDEO' && property.video?.secureUrl ? (
+              <div className="relative w-full max-w-5xl h-full max-h-[80vh] flex items-center justify-center">
+                <video
+                  src={property.video.secureUrl}
+                  controls
+                  autoPlay
+                  playsInline
+                  className="w-full h-full max-h-[80vh] object-contain rounded-xl shadow-2xl"
+                />
+              </div>
+            ) : activeImage?.secureUrl ? (
+              <div className="relative w-full h-full max-h-[82vh] flex items-center justify-center">
+                <Image
+                  src={activeImage.secureUrl}
+                  alt={activeImage.fileName || property.title}
+                  fill
+                  sizes="100vw"
+                  className="object-contain"
+                  priority
+                />
+              </div>
+            ) : null}
+
+            {/* Previous / Next Arrows in Lightbox */}
+            {activeMediaTab === 'PHOTOS' && images.length > 1 && (
+              <>
+                <button
+                  type="button"
+                  onClick={previousImage}
+                  aria-label="Previous image"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 flex h-12 w-12 items-center justify-center rounded-full bg-black/60 hover:bg-black/90 text-white border border-white/20 backdrop-blur-md transition-transform hover:scale-110 cursor-pointer shadow-xl"
+                >
+                  <ChevronLeft className="w-6 h-6" />
+                </button>
+                <button
+                  type="button"
+                  onClick={nextImage}
+                  aria-label="Next image"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 flex h-12 w-12 items-center justify-center rounded-full bg-black/60 hover:bg-black/90 text-white border border-white/20 backdrop-blur-md transition-transform hover:scale-110 cursor-pointer shadow-xl"
+                >
+                  <ChevronRight className="w-6 h-6" />
+                </button>
+              </>
+            )}
+          </div>
+
+          {/* Bottom Thumbnails Ribbon in Lightbox */}
+          <div
+            className="p-4 z-20 flex justify-center overflow-x-auto gap-2 max-w-full bg-black/40 backdrop-blur-md"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {images.map((image, idx) => (
+              <button
+                type="button"
+                key={image._id || image.objectKey || idx}
+                onClick={() => {
+                  setActiveImageIndex(idx);
+                  setActiveMediaTab('PHOTOS');
+                }}
+                className={`relative h-14 w-20 shrink-0 overflow-hidden rounded-lg border-2 transition-all cursor-pointer ${
+                  activeMediaTab === 'PHOTOS' && activeImageIndex === idx
+                    ? 'border-[#FF9933] scale-105 shadow-md'
+                    : 'border-white/20 opacity-60 hover:opacity-100'
+                }`}
+              >
+                <Image
+                  src={image.secureUrl}
+                  alt=""
+                  fill
+                  sizes="80px"
+                  className="object-cover"
+                />
+              </button>
+            ))}
+
+            {property.video?.secureUrl && (
+              <button
+                type="button"
+                onClick={() => setActiveMediaTab('VIDEO')}
+                className={`relative h-14 w-20 shrink-0 overflow-hidden rounded-lg border-2 bg-slate-900 flex flex-col items-center justify-center text-white transition-all cursor-pointer ${
+                  activeMediaTab === 'VIDEO'
+                    ? 'border-[#FF9933] scale-105 shadow-md'
+                    : 'border-white/20 opacity-60 hover:opacity-100'
+                }`}
+                title="Watch Video"
+              >
+                <div className="w-6 h-6 rounded-full bg-[#FF9933] text-white flex items-center justify-center mb-0.5">
+                  <Play className="w-3 h-3 fill-current ml-0.5" />
+                </div>
+                <span className="text-[8px] font-bold uppercase tracking-wider">Video</span>
+              </button>
+            )}
+          </div>
+        </div>
       )}
 
       <Footer />

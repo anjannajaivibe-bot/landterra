@@ -6,7 +6,12 @@ import {
   R2_BUCKET_NAME,
   R2_PUBLIC_URL,
 } from '@/lib/r2/client';
-import { PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
+import {
+  PutObjectCommand,
+  GetObjectCommand,
+  DeleteObjectCommand,
+  DeleteObjectsCommand,
+} from '@aws-sdk/client-s3';
 
 export interface UploadResult {
   objectKey: string;
@@ -154,7 +159,7 @@ export async function downloadFileFromStorage(objectKey: string): Promise<Buffer
  */
 export async function deleteFileFromStorage(objectKey: string): Promise<boolean> {
   const client = getR2Client();
-  if (!client) return false;
+  if (!client || !objectKey) return false;
   try {
     await client.send(
       new DeleteObjectCommand({
@@ -166,5 +171,34 @@ export async function deleteFileFromStorage(objectKey: string): Promise<boolean>
   } catch (err) {
     console.warn('Failed to delete file from storage:', objectKey, err);
     return false;
+  }
+}
+
+/**
+ * Bulk delete files from Cloudflare R2
+ */
+export async function deleteFilesFromStorage(objectKeys: string[]): Promise<boolean> {
+  if (!objectKeys || objectKeys.length === 0) return true;
+  const client = getR2Client();
+  if (!client) return false;
+
+  const validKeys = objectKeys.filter((k) => typeof k === 'string' && k.trim().length > 0);
+  if (validKeys.length === 0) return true;
+
+  try {
+    await client.send(
+      new DeleteObjectsCommand({
+        Bucket: R2_BUCKET_NAME,
+        Delete: {
+          Objects: validKeys.map((Key) => ({ Key })),
+          Quiet: true,
+        },
+      })
+    );
+    return true;
+  } catch (err) {
+    console.warn('Bulk delete failed, falling back to individual deletes:', err);
+    await Promise.allSettled(validKeys.map((key) => deleteFileFromStorage(key)));
+    return true;
   }
 }
