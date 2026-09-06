@@ -1,5 +1,6 @@
 import {
   IProperty,
+  IPublicProperty,
   PropertyFilterParams,
   PaginatedResponse,
 } from '@/types/property';
@@ -21,6 +22,132 @@ import { deleteFilesFromStorage } from '@/services/upload.service';
 type PropertyUpdateInput =
   Partial<IProperty> &
   Record<string, unknown>;
+
+/* ================================================================
+   PUBLIC MARKETPLACE PROJECTION & SERIALIZER
+================================================================ */
+
+/**
+ * MongoDB projection for public marketplace listing queries.
+ *
+ * Excludes sensitive seller contact details (sellerPhone, sellerEmail),
+ * sellerName, sellerId, private documents, internal admin verification
+ * tracking, internal upload objectKeys, and billing metadata.
+ */
+export const PUBLIC_PROPERTY_PROJECTION = {
+  _id: 1,
+  title: 1,
+  description: 1,
+  landAreaYards: 1,
+  pricePerYard: 1,
+  totalPrice: 1,
+  priceNegotiable: 1,
+  landType: 1,
+  propertyType: 1,
+  bhk: 1,
+  facing: 1,
+  floorNumber: 1,
+  totalFloors: 1,
+  furnishingStatus: 1,
+  bathrooms: 1,
+  balconies: 1,
+  carpetAreaSqFt: 1,
+  superBuiltUpAreaSqFt: 1,
+  boundaryWall: 1,
+  cornerPlot: 1,
+  gatedCommunity: 1,
+  amenities: 1,
+  approvals: 1,
+  waterSource: 1,
+  electricityPhase: 1,
+  soilType: 1,
+  propertyAttributes: 1,
+  roadAccess: 1,
+  nearbyLandmarks: 1,
+  location: 1,
+  approximateLocation: 1,
+  verificationStatus: 1,
+  listingStatus: 1,
+  sellerType: 1,
+  'images._id': 1,
+  'images.secureUrl': 1,
+  'images.isPrimary': 1,
+  'images.sortOrder': 1,
+  'video.secureUrl': 1,
+  'video.thumbnailUrl': 1,
+  'video.duration': 1,
+  publishedAt: 1,
+  createdAt: 1,
+  updatedAt: 1,
+  viewsCount: 1,
+} as const;
+
+/**
+ * Defense-in-depth serializer for public marketplace listing items.
+ * Ensures the returned shape strictly adheres to IPublicProperty and
+ * strips any inadvertent sensitive or private fields.
+ */
+export function toPublicPropertyListItem(
+  doc: any,
+): IProperty {
+  const publicItem: IPublicProperty = {
+    _id: String(doc._id),
+    title: doc.title,
+    description: doc.description,
+    landAreaYards: doc.landAreaYards,
+    pricePerYard: doc.pricePerYard,
+    totalPrice: doc.totalPrice,
+    priceNegotiable: doc.priceNegotiable,
+    landType: doc.landType,
+    propertyType: doc.propertyType,
+    bhk: doc.bhk,
+    facing: doc.facing,
+    floorNumber: doc.floorNumber,
+    totalFloors: doc.totalFloors,
+    furnishingStatus: doc.furnishingStatus,
+    bathrooms: doc.bathrooms,
+    balconies: doc.balconies,
+    carpetAreaSqFt: doc.carpetAreaSqFt,
+    superBuiltUpAreaSqFt: doc.superBuiltUpAreaSqFt,
+    boundaryWall: doc.boundaryWall,
+    cornerPlot: doc.cornerPlot,
+    gatedCommunity: doc.gatedCommunity,
+    amenities: doc.amenities,
+    approvals: doc.approvals,
+    waterSource: doc.waterSource,
+    electricityPhase: doc.electricityPhase,
+    soilType: doc.soilType,
+    propertyAttributes: doc.propertyAttributes,
+    roadAccess: doc.roadAccess,
+    nearbyLandmarks: doc.nearbyLandmarks,
+    location: doc.location,
+    approximateLocation: doc.approximateLocation,
+    verificationStatus: doc.verificationStatus,
+    listingStatus: doc.listingStatus,
+    sellerType: doc.sellerType,
+    images: Array.isArray(doc.images)
+      ? doc.images.map((img: any) => ({
+          _id: img._id ? String(img._id) : undefined,
+          secureUrl: img.secureUrl,
+          isPrimary: Boolean(img.isPrimary),
+          sortOrder: typeof img.sortOrder === 'number' ? img.sortOrder : 0,
+        }))
+      : [],
+    video: doc.video
+      ? {
+          secureUrl: doc.video.secureUrl,
+          thumbnailUrl: doc.video.thumbnailUrl,
+          duration: doc.video.duration,
+        }
+      : undefined,
+    publishedAt: doc.publishedAt,
+    createdAt: doc.createdAt,
+    updatedAt: doc.updatedAt,
+    viewsCount: doc.viewsCount,
+  };
+
+  return publicItem as unknown as IProperty;
+}
 
 /* ================================================================
    HELPERS
@@ -225,6 +352,16 @@ export async function getProperties(
       } else {
         query.listingStatus = { $ne: 'DELETED' };
       }
+    } else if (params.isAdmin) {
+      if (
+        params.listingStatus &&
+        params.listingStatus !== 'ALL'
+      ) {
+        query.listingStatus =
+          params.listingStatus;
+      } else {
+        query.listingStatus = { $ne: 'DELETED' };
+      }
     } else {
       /*
        * Public marketplace:
@@ -243,7 +380,7 @@ export async function getProperties(
      * Sellers may inspect their own properties by verificationStatus.
      */
 
-    if (params.sellerId && params.verificationStatus && params.verificationStatus !== 'ALL') {
+    if ((params.sellerId || params.isAdmin) && params.verificationStatus && params.verificationStatus !== 'ALL') {
       query.verificationStatus = params.verificationStatus;
     }
 
@@ -646,12 +783,21 @@ export async function getProperties(
       }
     );
 
+    const isPublicQuery =
+      params.publicOnly !== false &&
+      !params.sellerId &&
+      !params.isAdmin;
+
+    const findQuery = PropertyModel.find(query);
+    if (isPublicQuery) {
+      findQuery.select(PUBLIC_PROPERTY_PROJECTION);
+    }
+
     const [
       docs,
       total,
     ] = await Promise.all([
-      PropertyModel
-        .find(query)
+      findQuery
         .sort(sort)
         .skip(skip)
         .limit(limit)
@@ -662,9 +808,12 @@ export async function getProperties(
       ),
     ]);
 
+    const sanitizedDocs = isPublicQuery
+      ? docs.map(toPublicPropertyListItem)
+      : (docs as unknown as IProperty[]);
+
     return {
-      data:
-        docs as unknown as IProperty[],
+      data: sanitizedDocs,
 
       total,
 

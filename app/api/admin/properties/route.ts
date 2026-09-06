@@ -19,6 +19,7 @@ export async function GET(req: NextRequest) {
       page,
       limit,
       sortBy: 'newest',
+      isAdmin: true,
     });
 
     return NextResponse.json(result);

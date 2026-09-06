@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
   if (adminUser instanceof NextResponse) return adminUser;
 
   try {
-    const allProps = await getProperties({ limit: 1000, listingStatus: 'ALL' });
+    const allProps = await getProperties({ limit: 1000, listingStatus: 'ALL', isAdmin: true });
     const payments = await getAllPayments(100);
     const reports = await getAllReports();
 

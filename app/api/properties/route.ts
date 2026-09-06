@@ -224,6 +224,8 @@ export async function GET(
 
       verificationStatus:
         undefined,
+
+      publicOnly: !isSellerOnly,
     };
 
     /*

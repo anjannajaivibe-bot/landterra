@@ -96,16 +96,16 @@ export interface IPropertyImage {
     * R2 object key.
     * Never expose this directly to an unauthenticated client.
     */
-   objectKey: string;
+   objectKey?: string;
 
    /**
     * Public CDN/R2 URL for property images.
     */
    secureUrl: string;
 
-   fileName: string;
-   mimeType: string;
-   size: number;
+   fileName?: string;
+   mimeType?: string;
+   size?: number;
 
    isPrimary: boolean;
    sortOrder: number;
@@ -118,11 +118,11 @@ export interface IPropertyImage {
 ================================================================ */
 
 export interface IPropertyVideo {
-   objectKey: string;
+   objectKey?: string;
    secureUrl: string;
-   fileName: string;
-   mimeType: string;
-   size: number;
+   fileName?: string;
+   mimeType?: string;
+   size?: number;
    duration?: number;
    thumbnailUrl?: string;
    createdAt?: string | Date;
@@ -410,6 +410,8 @@ export interface IPublicProperty {
 
    landType: LandType;
 
+   sellerType?: SellerType;
+
    propertyType?: string;
 
    bhk?: string;
@@ -550,6 +552,9 @@ export interface PropertyFilterParams {
    verificationStatus?:
    | VerificationStatus
    | 'ALL';
+
+   publicOnly?: boolean;
+   isAdmin?: boolean;
 }
 
 /* ================================================================
