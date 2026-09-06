@@ -8,6 +8,20 @@ import { notifySellerInquiry } from '@/services/email.service';
 import { createAuditLog } from '@/services/audit.service';
 
 // ============================================================================
+// ERROR CLASSES
+// ============================================================================
+
+export class InquiryBusinessError extends Error {
+  status: number;
+
+  constructor(message: string, status = 400) {
+    super(message);
+    this.name = 'InquiryBusinessError';
+    this.status = status;
+  }
+}
+
+// ============================================================================
 // INQUIRY METHODS (Strict MongoDB Persistence)
 // ============================================================================
 
@@ -273,15 +287,15 @@ export async function recordBuyerCallAction(data: {
 }> {
   const property = await getPropertyById(data.propertyId);
   if (!property) {
-    throw new Error('Property not found');
+    throw new InquiryBusinessError('Property not found', 404);
   }
 
   if (property.listingStatus !== 'PUBLISHED' && property.listingStatus !== 'EXPIRING_SOON') {
-    throw new Error('This listing is currently in draft and is not open for direct calls.');
+    throw new InquiryBusinessError('This listing is not available for direct calls.', 403);
   }
 
   if (property.sellerId === data.buyerId) {
-    throw new Error('You cannot record a call action on your own property listing.');
+    throw new InquiryBusinessError('You cannot record a call action on your own property listing.', 403);
   }
 
   await connectToDatabase();
@@ -340,7 +354,7 @@ export async function recordBuyerCallAction(data: {
   });
 
   if (!property.sellerPhone) {
-    throw new Error('Seller phone number is not available for this listing.');
+    throw new InquiryBusinessError('Seller phone number is not available for this listing.', 404);
   }
 
   const sellerPhone = property.sellerPhone;
