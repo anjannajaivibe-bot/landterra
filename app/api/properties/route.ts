@@ -11,6 +11,7 @@ import {
   getProperties,
   createProperty,
   DuplicatePropertyError,
+  SellerListingLimitError,
 } from '@/services/property.service';
 
 import {
@@ -405,9 +406,8 @@ export async function POST(
          */
 
         sellerPhone:
-          authUser.isPhoneVerified
-            ? authUser.phone
-            : undefined,
+          authUser.phone ||
+          undefined,
 
         sellerType:
           authUser.sellerType ||
@@ -450,6 +450,17 @@ export async function POST(
         },
         {
           status: 400,
+        },
+      );
+    }
+
+    if (error instanceof SellerListingLimitError) {
+      return NextResponse.json(
+        {
+          error: error.message,
+        },
+        {
+          status: 403,
         },
       );
     }

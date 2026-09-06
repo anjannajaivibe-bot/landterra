@@ -929,6 +929,17 @@ export async function syncExpiredProperties(): Promise<{
    CREATE PROPERTY
 ================================================================ */
 
+export class SellerListingLimitError extends Error {
+  public status = 403;
+
+  constructor(
+    message = 'You have reached the maximum allowed limit of 2 listings for this account, phone, or email. Please manage or delete an existing listing before creating a new one.'
+  ) {
+    super(message);
+    this.name = 'SellerListingLimitError';
+  }
+}
+
 export class DuplicatePropertyError extends Error {
   public status = 409;
   public duplicateId?: string;
@@ -987,24 +998,108 @@ export async function createProperty(
   await connectToDatabase();
 
   /*
-   * Duplicate Listing Guard (B-6).
-   * Prevents spam or accidental re-submission of identical properties by the same seller.
+   * ------------------------------------------------------------
+   * SELLER LISTING LIMIT & CONTENT-LEVEL DUPLICATE GUARD (B-6)
+   * ------------------------------------------------------------
+   * 1. Strictly scoped to the SAME seller: matched across sellerId,
+   *    sellerEmail, or phone number to prevent multi-account evasion.
+   *    Different users listing properties in the same area/pincode
+   *    are NEVER blocked.
+   * 2. Limit: A seller may have at most 2 active listings
+   *    (DRAFT, PAYMENT_PENDING, PUBLISHED, or EXPIRING_SOON).
+   * 3. Deep Duplicate Detection: If a seller lists the same property
+   *    again, detect it by checking for identical documents, images,
+   *    videos, or exact matching title + land area + pincode.
    */
-  if (data.sellerId && data.title && data.location?.pincode) {
-    const normalizedTitle = String(data.title).trim();
-    const existingDuplicate = await PropertyModel.findOne({
-      sellerId: data.sellerId,
-      landAreaYards,
-      'location.pincode': String(data.location.pincode).trim(),
+  if (data.sellerId) {
+    const sellerConditions: any[] = [{ sellerId: data.sellerId }];
+
+    if (data.sellerEmail && typeof data.sellerEmail === 'string' && data.sellerEmail.trim()) {
+      sellerConditions.push({ sellerEmail: data.sellerEmail.trim().toLowerCase() });
+    }
+
+    if (data.sellerPhone && typeof data.sellerPhone === 'string' && data.sellerPhone.trim()) {
+      const cleanPhone = data.sellerPhone.replace(/\D/g, '');
+      if (cleanPhone.length >= 10) {
+        sellerConditions.push({ sellerPhone: { $regex: cleanPhone.slice(-10) } });
+      }
+    }
+
+    const existingSellerProperties = await PropertyModel.find({
+      $or: sellerConditions,
       listingStatus: { $in: ['DRAFT', 'PAYMENT_PENDING', 'PUBLISHED', 'EXPIRING_SOON'] },
-      title: { $regex: new RegExp(`^${normalizedTitle.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') },
     }).lean();
 
-    if (existingDuplicate) {
-      throw new DuplicatePropertyError(
-        'You already have an active or draft listing with this title, area, and pincode. Please update your existing listing instead of creating a duplicate.',
-        String(existingDuplicate._id)
+    // Rule 1: Max 2 active/draft listings per seller
+    if (existingSellerProperties.length >= 2) {
+      throw new SellerListingLimitError(
+        'You have reached the maximum allowed limit of 2 active or draft listings for your account, email, or phone number. Please manage or remove an existing listing before creating a new one.'
       );
+    }
+
+    // Rule 2: Deep content-level duplicate detection for the same seller
+    const newDocKeys = new Set(
+      (data.documents || []).map((d: any) => d?.objectKey).filter(Boolean)
+    );
+    const newImageKeys = new Set(
+      (data.images || []).map((img: any) => img?.objectKey).filter(Boolean)
+    );
+    const newVideoKey = data.video?.objectKey;
+    const normalizedNewTitle = String(data.title || '').trim().toLowerCase();
+    const newPincode = String(data.location?.pincode || '').trim();
+
+    for (const existing of existingSellerProperties) {
+      // Check 2a: Matching uploaded documents (e.g. same deed, 7/12, tax receipt)
+      if (Array.isArray(existing.documents) && newDocKeys.size > 0) {
+        for (const doc of existing.documents) {
+          if (doc?.objectKey && newDocKeys.has(doc.objectKey)) {
+            throw new DuplicatePropertyError(
+              'This listing contains documents identical to an existing property in your account. Please update your existing listing instead of submitting duplicates.',
+              String(existing._id)
+            );
+          }
+        }
+      }
+
+      // Check 2b: Matching uploaded images
+      if (Array.isArray(existing.images) && newImageKeys.size > 0) {
+        let matchingImagesCount = 0;
+        for (const img of existing.images) {
+          if (img?.objectKey && newImageKeys.has(img.objectKey)) {
+            matchingImagesCount++;
+          }
+        }
+        if (matchingImagesCount > 0) {
+          throw new DuplicatePropertyError(
+            'This listing contains photos identical to an existing property in your account. Please update your existing listing instead of submitting duplicates.',
+            String(existing._id)
+          );
+        }
+      }
+
+      // Check 2c: Matching video
+      if (existing.video?.objectKey && newVideoKey && existing.video.objectKey === newVideoKey) {
+        throw new DuplicatePropertyError(
+          'This listing contains a video identical to an existing property in your account. Please update your existing listing instead of submitting duplicates.',
+          String(existing._id)
+        );
+      }
+
+      // Check 2d: Matching title + land area + pincode
+      const existingTitle = String(existing.title || '').trim().toLowerCase();
+      const existingPincode = String(existing.location?.pincode || '').trim();
+      if (
+        normalizedNewTitle &&
+        existingTitle === normalizedNewTitle &&
+        existing.landAreaYards === landAreaYards &&
+        newPincode &&
+        existingPincode === newPincode
+      ) {
+        throw new DuplicatePropertyError(
+          'You already have an active listing with this exact title, area, and pincode. Please update your existing listing instead of creating a duplicate.',
+          String(existing._id)
+        );
+      }
     }
   }
 
