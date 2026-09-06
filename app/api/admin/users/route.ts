@@ -10,15 +10,22 @@ export async function GET(req: NextRequest) {
 
   try {
     const conn = await connectToDatabase();
-    if (conn) {
-      const dbUsers = await UserModel.find({}).sort({ createdAt: -1 }).lean();
-      return NextResponse.json({ users: dbUsers });
+    if (!conn) {
+      return NextResponse.json(
+        { error: 'Database service is temporarily unavailable. Please try again shortly.' },
+        { status: 503 }
+      );
     }
+
+    const dbUsers = await UserModel.find({}).sort({ createdAt: -1 }).lean();
+    return NextResponse.json({ users: dbUsers });
   } catch (error) {
     console.error('Error fetching admin users:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch users due to an unexpected server error.' },
+      { status: 500 }
+    );
   }
-
-  return NextResponse.json({ users: [] });
 }
 
 export async function PATCH(req: NextRequest) {

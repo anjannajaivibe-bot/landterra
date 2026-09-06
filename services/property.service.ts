@@ -768,20 +768,12 @@ export async function getProperties(
 
     /*
      * ------------------------------------------------------------
-     * DATABASE & LAZY SUBSCRIPTION EXPIRY SYNC
+     * DATABASE & SUBSCRIPTION EXPIRY SYNC
      * ------------------------------------------------------------
      */
 
-    // Lazily sync properties whose subscriptions have passed expiry
-    await PropertyModel.updateMany(
-      {
-        listingStatus: 'PUBLISHED',
-        subscriptionExpiresAt: { $lte: new Date() },
-      },
-      {
-        $set: { listingStatus: 'EXPIRED', updatedAt: new Date() },
-      }
-    );
+    // Proactively sync properties whose subscriptions have passed expiry
+    await syncExpiredProperties();
 
     const isPublicQuery =
       params.publicOnly !== false &&
@@ -874,12 +866,12 @@ export async function getPropertyById(
     }
 
     /*
-     * Lazy subscription expiration handling.
-     * When a published property has passed its subscription expiry date,
-     * safely transition its state to EXPIRED.
+     * Proactive subscription expiration handling on deep-link fetch (B-5).
+     * When a PUBLISHED or EXPIRING_SOON property has passed its subscription expiry date,
+     * immediately transition its state to EXPIRED in the database and in the returned object.
      */
     if (
-      doc.listingStatus === 'PUBLISHED' &&
+      (doc.listingStatus === 'PUBLISHED' || doc.listingStatus === 'EXPIRING_SOON') &&
       doc.subscriptionExpiresAt &&
       new Date(doc.subscriptionExpiresAt).getTime() <= Date.now()
     ) {
@@ -904,8 +896,49 @@ export async function getPropertyById(
 }
 
 /* ================================================================
+   SUBSCRIPTION EXPIRY SYNCHRONIZATION (B-5)
+================================================================ */
+
+/**
+ * Proactively marks all properties whose subscription has expired as 'EXPIRED'.
+ * Transitions both PUBLISHED and EXPIRING_SOON listings whose subscriptionExpiresAt <= now.
+ */
+export async function syncExpiredProperties(): Promise<{
+  matchedCount: number;
+  modifiedCount: number;
+}> {
+  await connectToDatabase();
+  const now = new Date();
+  const result = await PropertyModel.updateMany(
+    {
+      listingStatus: { $in: ['PUBLISHED', 'EXPIRING_SOON'] },
+      subscriptionExpiresAt: { $lte: now },
+    },
+    {
+      $set: { listingStatus: 'EXPIRED', updatedAt: now },
+    }
+  );
+
+  return {
+    matchedCount: result.matchedCount,
+    modifiedCount: result.modifiedCount,
+  };
+}
+
+/* ================================================================
    CREATE PROPERTY
 ================================================================ */
+
+export class DuplicatePropertyError extends Error {
+  public status = 409;
+  public duplicateId?: string;
+
+  constructor(message = 'You already have an active listing for this property.', duplicateId?: string) {
+    super(message);
+    this.name = 'DuplicatePropertyError';
+    this.duplicateId = duplicateId;
+  }
+}
 
 /**
  * Create a new property listing.
@@ -950,6 +983,30 @@ export async function createProperty(
       area,
       price,
     );
+
+  await connectToDatabase();
+
+  /*
+   * Duplicate Listing Guard (B-6).
+   * Prevents spam or accidental re-submission of identical properties by the same seller.
+   */
+  if (data.sellerId && data.title && data.location?.pincode) {
+    const normalizedTitle = String(data.title).trim();
+    const existingDuplicate = await PropertyModel.findOne({
+      sellerId: data.sellerId,
+      landAreaYards,
+      'location.pincode': String(data.location.pincode).trim(),
+      listingStatus: { $in: ['DRAFT', 'PAYMENT_PENDING', 'PUBLISHED', 'EXPIRING_SOON'] },
+      title: { $regex: new RegExp(`^${normalizedTitle.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') },
+    }).lean();
+
+    if (existingDuplicate) {
+      throw new DuplicatePropertyError(
+        'You already have an active or draft listing with this title, area, and pincode. Please update your existing listing instead of creating a duplicate.',
+        String(existingDuplicate._id)
+      );
+    }
+  }
 
   /*
    * Images.

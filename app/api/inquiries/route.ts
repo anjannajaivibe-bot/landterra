@@ -1,7 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/security/auth';
+import { checkRateLimit } from '@/lib/security/rate-limit';
 import { CreateInquirySchema } from '@/lib/validation/payment';
 import { createInquiry, getInquiriesForSeller, getInquiriesForBuyer, updateInquiryStatus } from '@/services/inquiry.service';
+
+const USER_INQUIRY_LIMIT = 15;
+const USER_INQUIRY_WINDOW_MS = 10 * 60 * 1000; // 10 minutes
+
+const IP_INQUIRY_LIMIT = 30;
+const IP_INQUIRY_WINDOW_MS = 10 * 60 * 1000; // 10 minutes
 
 export async function GET(req: NextRequest) {
   const authUser = await requireAuth(req);
@@ -27,6 +34,53 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   const authUser = await requireAuth(req);
   if (authUser instanceof NextResponse) return authUser;
+
+  // Rate Limiting (Brute Force / Spam Protection)
+  const forwarded = req.headers.get('x-forwarded-for');
+  const realIp = req.headers.get('x-real-ip');
+  const ipAddress = forwarded
+    ? forwarded.split(',')[0].trim()
+    : realIp || '127.0.0.1';
+
+  const userRate = await checkRateLimit(
+    `inquiry-user:${authUser.id}`,
+    USER_INQUIRY_LIMIT,
+    USER_INQUIRY_WINDOW_MS,
+  );
+  if (!userRate.allowed) {
+    return NextResponse.json(
+      {
+        error:
+          'Too many inquiries submitted. Please wait a few minutes before contacting more landowners.',
+      },
+      {
+        status: 429,
+        headers: {
+          'Retry-After': '600',
+        },
+      },
+    );
+  }
+
+  const ipRate = await checkRateLimit(
+    `inquiry-ip:${ipAddress}`,
+    IP_INQUIRY_LIMIT,
+    IP_INQUIRY_WINDOW_MS,
+  );
+  if (!ipRate.allowed) {
+    return NextResponse.json(
+      {
+        error:
+          'Too many inquiries submitted from this network. Please wait a few minutes.',
+      },
+      {
+        status: 429,
+        headers: {
+          'Retry-After': '600',
+        },
+      },
+    );
+  }
 
   try {
     const body = await req.json();

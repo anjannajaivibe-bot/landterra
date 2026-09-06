@@ -10,6 +10,7 @@ import {
 import {
   getProperties,
   createProperty,
+  DuplicatePropertyError,
 } from '@/services/property.service';
 
 import {
@@ -87,7 +88,7 @@ export async function GET(
 
   const {
     allowed,
-  } = checkRateLimit(ip, 120);
+  } = await checkRateLimit(ip, 120);
 
   if (!allowed) {
     return NextResponse.json(
@@ -327,6 +328,52 @@ export async function POST(
         body,
       );
 
+    /* ----------------------------------------------------------------
+     * E-1: Server-side media size enforcement.
+     *
+     * Presigned PUT URLs issued by /api/uploads/presigned-url do not
+     * enforce ContentLength at the R2 level. A client can therefore
+     * upload an arbitrarily large file. We re-validate the `size`
+     * fields that each upload ticket stamped on the file objects here
+     * — before any database write — so oversized media can never be
+     * committed to a property record.
+     * ---------------------------------------------------------------- */
+
+    const MAX_IMAGE_BYTES  = 900 * 1024;          // 900 KB
+    const MAX_VIDEO_BYTES  = 50 * 1024 * 1024;    // 50 MB
+    const MAX_DOC_BYTES    = 25 * 1024 * 1024;    // 25 MB
+
+    for (const img of validatedData.images ?? []) {
+      if (img.size > MAX_IMAGE_BYTES) {
+        return NextResponse.json(
+          {
+            error: `Image "${img.fileName}" exceeds the 900 KB limit (uploaded ${Math.round(img.size / 1024)} KB). Please re-upload a smaller image.`,
+          },
+          { status: 400 },
+        );
+      }
+    }
+
+    if (validatedData.video && validatedData.video.size > MAX_VIDEO_BYTES) {
+      return NextResponse.json(
+        {
+          error: `Video "${validatedData.video.fileName}" exceeds the 50 MB limit (uploaded ${Math.round(validatedData.video.size / (1024 * 1024))} MB). Please re-upload a shorter or smaller clip.`,
+        },
+        { status: 400 },
+      );
+    }
+
+    for (const doc of validatedData.documents ?? []) {
+      if (doc.size > MAX_DOC_BYTES) {
+        return NextResponse.json(
+          {
+            error: `Document "${doc.fileName}" exceeds the 25 MB limit (uploaded ${Math.round(doc.size / (1024 * 1024))} MB). Please re-upload a smaller document.`,
+          },
+          { status: 400 },
+        );
+      }
+    }
+
     /*
      * IMPORTANT:
      *
@@ -403,6 +450,18 @@ export async function POST(
         },
         {
           status: 400,
+        },
+      );
+    }
+
+    if (error instanceof DuplicatePropertyError) {
+      return NextResponse.json(
+        {
+          error: error.message,
+          duplicateId: error.duplicateId,
+        },
+        {
+          status: 409,
         },
       );
     }

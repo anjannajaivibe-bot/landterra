@@ -43,7 +43,7 @@ export async function POST(
     : realIp || '127.0.0.1';
 
   // 3a. Primary Authenticated-User Rate Limit
-  const userRate = checkRateLimit(
+  const userRate = await checkRateLimit(
     `call-user:${authUser.id}`,
     USER_CONTACT_LIMIT,
     USER_CONTACT_WINDOW_MS,
@@ -64,7 +64,7 @@ export async function POST(
   }
 
   // 3b. Secondary IP-Based Rate Limit
-  const ipRate = checkRateLimit(
+  const ipRate = await checkRateLimit(
     `call-ip:${ipAddress}`,
     IP_CONTACT_LIMIT,
     IP_CONTACT_WINDOW_MS,

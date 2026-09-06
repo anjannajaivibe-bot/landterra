@@ -227,7 +227,7 @@ async function resolveMapLink(rawUrl: string, req: NextRequest): Promise<NextRes
     req.headers.get('x-real-ip') ||
     '127.0.0.1';
 
-  const { allowed } = checkRateLimit(`map-resolve:${ip}`, 30, 60000);
+  const { allowed } = await checkRateLimit(`map-resolve:${ip}`, 30, 60000);
   if (!allowed) {
     return NextResponse.json(
       { success: false, error: 'Too many requests. Please slow down.' },

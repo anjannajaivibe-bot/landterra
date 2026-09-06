@@ -11,7 +11,11 @@ import {
   GetObjectCommand,
   DeleteObjectCommand,
   DeleteObjectsCommand,
+  ListObjectsV2Command,
+  ListObjectsV2CommandInput,
 } from '@aws-sdk/client-s3';
+import { connectToDatabase } from '@/lib/db/mongodb';
+import { PropertyModel } from '@/models/Property';
 
 export interface UploadResult {
   objectKey: string;
@@ -201,4 +205,146 @@ export async function deleteFilesFromStorage(objectKeys: string[]): Promise<bool
     await Promise.allSettled(validKeys.map((key) => deleteFileFromStorage(key)));
     return true;
   }
+}
+
+/* ================================================================
+   ORPHANED R2 UPLOADS CLEANUP (B-2)
+================================================================ */
+
+export interface CleanupOrphanedUploadsOptions {
+  olderThanHours?: number; // default 24 hours
+  prefix?: string;         // default 'properties/'
+  dryRun?: boolean;        // default false
+  maxKeys?: number;        // default 5000
+}
+
+export interface CleanupResult {
+  totalScanned: number;
+  olderThanCutoffCount: number;
+  referencedCount: number;
+  orphanedCount: number;
+  deletedCount: number;
+  orphanedKeys: string[];
+  dryRun: boolean;
+  message: string;
+}
+
+/**
+ * Scan R2 storage for files not referenced by any MongoDB property document.
+ * Files created within the cutoff window (default 24 hours) are preserved to
+ * avoid deleting active in-flight user uploads before the property form is submitted.
+ */
+export async function cleanupOrphanedUploads(
+  options: CleanupOrphanedUploadsOptions = {}
+): Promise<CleanupResult> {
+  const {
+    olderThanHours = 24,
+    prefix = 'properties/',
+    dryRun = false,
+    maxKeys = 5000,
+  } = options;
+
+  if (!isR2Configured()) {
+    return {
+      totalScanned: 0,
+      olderThanCutoffCount: 0,
+      referencedCount: 0,
+      orphanedCount: 0,
+      deletedCount: 0,
+      orphanedKeys: [],
+      dryRun,
+      message: 'Cloudflare R2 is not configured.',
+    };
+  }
+
+  const client = getR2Client();
+  if (!client) {
+    throw new Error('Cloudflare R2 client initialization failed.');
+  }
+
+  // 1. Gather all referenced objectKeys across all MongoDB properties
+  await connectToDatabase();
+  const properties = await PropertyModel.find(
+    {},
+    { 'images.objectKey': 1, 'video.objectKey': 1, 'documents.objectKey': 1 }
+  ).lean();
+
+  const referencedKeys = new Set<string>();
+  for (const p of properties) {
+    if (Array.isArray(p.images)) {
+      for (const img of p.images) {
+        if (img?.objectKey && typeof img.objectKey === 'string') {
+          referencedKeys.add(img.objectKey.trim());
+        }
+      }
+    }
+    if (p.video?.objectKey && typeof p.video.objectKey === 'string') {
+      referencedKeys.add(p.video.objectKey.trim());
+    }
+    if (Array.isArray(p.documents)) {
+      for (const doc of p.documents) {
+        if (doc?.objectKey && typeof doc.objectKey === 'string') {
+          referencedKeys.add(doc.objectKey.trim());
+        }
+      }
+    }
+  }
+
+  // 2. Scan R2 bucket for objects older than cutoff
+  const cutoffTime = Date.now() - olderThanHours * 60 * 60 * 1000;
+  let continuationToken: string | undefined = undefined;
+  const orphanedKeys: string[] = [];
+  let totalScanned = 0;
+  let olderThanCutoffCount = 0;
+
+  do {
+    const listParams: ListObjectsV2CommandInput = {
+      Bucket: R2_BUCKET_NAME,
+      Prefix: prefix,
+      ContinuationToken: continuationToken,
+      MaxKeys: Math.min(maxKeys - totalScanned, 1000),
+    };
+
+    const listRes = await client.send(new ListObjectsV2Command(listParams));
+
+    if (listRes.Contents) {
+      for (const item of listRes.Contents) {
+        if (!item.Key) continue;
+        totalScanned++;
+        const lastModified = item.LastModified ? item.LastModified.getTime() : 0;
+        if (lastModified < cutoffTime) {
+          olderThanCutoffCount++;
+          if (!referencedKeys.has(item.Key)) {
+            orphanedKeys.push(item.Key);
+          }
+        }
+      }
+    }
+
+    continuationToken = listRes.IsTruncated ? listRes.NextContinuationToken : undefined;
+  } while (continuationToken && totalScanned < maxKeys);
+
+  // 3. Delete orphaned objects if not a dry run
+  let deletedCount = 0;
+  if (!dryRun && orphanedKeys.length > 0) {
+    const batchSize = 500;
+    for (let i = 0; i < orphanedKeys.length; i += batchSize) {
+      const batch = orphanedKeys.slice(i, i + batchSize);
+      await deleteFilesFromStorage(batch);
+      deletedCount += batch.length;
+    }
+  }
+
+  return {
+    totalScanned,
+    olderThanCutoffCount,
+    referencedCount: referencedKeys.size,
+    orphanedCount: orphanedKeys.length,
+    deletedCount: dryRun ? 0 : deletedCount,
+    orphanedKeys: orphanedKeys.slice(0, 50),
+    dryRun,
+    message: dryRun
+      ? `Dry run complete. Found ${orphanedKeys.length} orphaned objects older than ${olderThanHours} hours.`
+      : `Cleaned up ${deletedCount} orphaned objects from R2 storage.`,
+  };
 }

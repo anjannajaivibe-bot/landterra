@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
     }
 
     const isImage = ALLOWED_IMAGE_TYPES.has(mimeType);
-    const isVideo = ALLOWED_VIDEO_TYPES.has(mimeType) || mimeType.startsWith('video/');
+    const isVideo = ALLOWED_VIDEO_TYPES.has(mimeType);
     const isDocument = ALLOWED_DOCUMENT_TYPES.has(mimeType);
 
     if (!isImage && !isVideo && !isDocument) {

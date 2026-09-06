@@ -1,47 +1,98 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireRole } from '@/lib/security/auth';
-import { getProperties } from '@/services/property.service';
-import { getAllPayments } from '@/services/payment.service';
-import { getAllReports } from '@/services/inquiry.service';
-import { UserModel } from '@/models/User';
 import { connectToDatabase } from '@/lib/db/mongodb';
+import { PropertyModel } from '@/models/Property';
+import { PaymentModel } from '@/models/Payment';
+import { ReportModel } from '@/models/Inquiry';
+import { UserModel } from '@/models/User';
 
+export const dynamic = 'force-dynamic';
+
+/**
+ * Admin Stats API
+ * Fixes D-2: High-efficiency MongoDB aggregation pipelines replacing in-memory 1,000 doc filtering.
+ * Fixes G-5: Explicit HTTP 503 response if MongoDB connection is unavailable.
+ */
 export async function GET(req: NextRequest) {
   const adminUser = await requireRole(req, ['ADMIN']);
   if (adminUser instanceof NextResponse) return adminUser;
 
   try {
-    const allProps = await getProperties({ limit: 1000, listingStatus: 'ALL', isAdmin: true });
-    const payments = await getAllPayments(100);
-    const reports = await getAllReports();
-
-    let totalUsers = 0;
-    let totalSellers = 0;
-    let totalBuyers = 0;
-
-    try {
-      const conn = await connectToDatabase();
-      if (conn) {
-        totalUsers = await UserModel.countDocuments({});
-        totalSellers = await UserModel.countDocuments({ role: 'SELLER' });
-        totalBuyers = await UserModel.countDocuments({ role: 'BUYER' });
-      }
-    } catch (e) {
-      console.error('Error counting users:', e);
+    const conn = await connectToDatabase();
+    if (!conn) {
+      return NextResponse.json(
+        { error: 'Database service is temporarily unavailable. Please try again shortly.' },
+        { status: 503 }
+      );
     }
 
-    const properties = allProps.data;
-    const totalProperties = properties.length;
-    const publishedProperties = properties.filter((p) => p.listingStatus === 'PUBLISHED').length;
-    const pendingProperties = properties.filter((p) => p.verificationStatus === 'PENDING').length;
-    const verifiedProperties = properties.filter((p) => p.verificationStatus === 'VERIFIED').length;
-    const rejectedProperties = properties.filter((p) => p.verificationStatus === 'REJECTED').length;
+    const [
+      propertyStatsResult,
+      paymentStatsResult,
+      totalReportsCount,
+      pendingReportsCount,
+      totalUsers,
+      totalSellers,
+      totalBuyers,
+    ] = await Promise.all([
+      // 1. Property counts aggregated by status in a single pass
+      PropertyModel.aggregate([
+        {
+          $facet: {
+            total: [{ $count: 'count' }],
+            published: [
+              { $match: { listingStatus: 'PUBLISHED' } },
+              { $count: 'count' },
+            ],
+            pending: [
+              { $match: { verificationStatus: 'PENDING' } },
+              { $count: 'count' },
+            ],
+            verified: [
+              { $match: { verificationStatus: 'VERIFIED' } },
+              { $count: 'count' },
+            ],
+            rejected: [
+              { $match: { verificationStatus: 'REJECTED' } },
+              { $count: 'count' },
+            ],
+          },
+        },
+      ]),
 
-    const totalPublishingFees = payments
-      .filter((p) => p.paymentStatus === 'PAID')
-      .reduce((sum, p) => sum + (p.amount || 0), 0);
+      // 2. Financial totals calculated across ALL payments
+      PaymentModel.aggregate([
+        {
+          $facet: {
+            totalCount: [{ $count: 'count' }],
+            paidTotal: [
+              { $match: { paymentStatus: 'PAID' } },
+              { $group: { _id: null, totalAmount: { $sum: '$amount' } } },
+            ],
+          },
+        },
+      ]),
 
-    const pendingReports = reports.filter((r) => r.status === 'PENDING').length;
+      // 3. Reports count
+      ReportModel.countDocuments({}),
+      ReportModel.countDocuments({ status: 'PENDING' }),
+
+      // 4. User counts by role
+      UserModel.countDocuments({}),
+      UserModel.countDocuments({ role: 'SELLER' }),
+      UserModel.countDocuments({ role: 'BUYER' }),
+    ]);
+
+    const propStats = propertyStatsResult?.[0];
+    const totalProperties = propStats?.total?.[0]?.count || 0;
+    const publishedProperties = propStats?.published?.[0]?.count || 0;
+    const pendingProperties = propStats?.pending?.[0]?.count || 0;
+    const verifiedProperties = propStats?.verified?.[0]?.count || 0;
+    const rejectedProperties = propStats?.rejected?.[0]?.count || 0;
+
+    const payStats = paymentStatsResult?.[0];
+    const totalPaymentsCount = payStats?.totalCount?.[0]?.count || 0;
+    const totalPublishingFees = payStats?.paidTotal?.[0]?.totalAmount || 0;
 
     return NextResponse.json({
       metrics: {
@@ -51,9 +102,9 @@ export async function GET(req: NextRequest) {
         verifiedProperties,
         rejectedProperties,
         totalPublishingFees,
-        totalPaymentsCount: payments.length,
-        totalReportsCount: reports.length,
-        pendingReportsCount: pendingReports,
+        totalPaymentsCount,
+        totalReportsCount,
+        pendingReportsCount,
         totalUsers,
         totalSellers,
         totalBuyers,
@@ -61,6 +112,7 @@ export async function GET(req: NextRequest) {
     });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Failed to fetch admin stats';
+    console.error('[admin:stats] Aggregation query failed:', err);
     return NextResponse.json({ error: msg }, { status: 500 });
   }
 }
