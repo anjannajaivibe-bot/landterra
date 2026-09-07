@@ -30,6 +30,10 @@ import {
   getPlatformSettings,
 } from '@/services/settings.service';
 
+import {
+  verifyCloudflareTurnstile,
+} from '@/lib/security/cloudflare-turnstile';
+
 /* ================================================================
    HELPERS
 ================================================================ */
@@ -323,6 +327,29 @@ export async function POST(
 
     const body =
       await req.json();
+
+    /*
+     * Cloudflare Turnstile Human Verification Gate
+     * Protects the marketplace from automated scrapers, bots and spam listings.
+     */
+    const forwardedFor = req.headers.get('x-forwarded-for');
+    const ip = forwardedFor?.split(',')[0]?.trim() || req.headers.get('x-real-ip') || '127.0.0.1';
+    const turnstileToken = (body as { turnstileToken?: string })?.turnstileToken || req.headers.get('x-turnstile-token') || req.headers.get('cf-turnstile-token');
+
+    const turnstileResult = await verifyCloudflareTurnstile(turnstileToken, ip);
+    if (!turnstileResult.success) {
+      return NextResponse.json(
+        {
+          error:
+            turnstileResult.error ||
+            'Human verification required to list a property. Please complete the security check.',
+          code: 'TURNSTILE_REQUIRED',
+        },
+        {
+          status: 403,
+        },
+      );
+    }
 
     const validatedData =
       CreatePropertySchema.parse(

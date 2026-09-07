@@ -3,7 +3,7 @@ import { IProperty } from '@/types/property';
 import { InquiryModel, FavoriteModel, ReportModel } from '@/models/Inquiry';
 import { PropertyModel } from '@/models/Property';
 import { connectToDatabase } from '@/lib/db/mongodb';
-import { getPropertyById, updateProperty } from '@/services/property.service';
+import { getPropertyById, updateProperty, PUBLIC_PROPERTY_PROJECTION } from '@/services/property.service';
 import { notifySellerInquiry } from '@/services/email.service';
 import { createAuditLog } from '@/services/audit.service';
 
@@ -184,11 +184,12 @@ export async function getFavoritePropertiesForUser(userId: string): Promise<{
     return { favoriteIds: [], properties: [] };
   }
 
-  // Fetch actual valid properties from MongoDB, excluding deleted or missing records
+  // Fetch actual valid properties from MongoDB: strictly public and published listings only
   const propertyDocs = await PropertyModel.find({
     _id: { $in: favIds },
-    listingStatus: { $ne: 'DELETED' },
+    listingStatus: { $in: ['PUBLISHED', 'EXPIRING_SOON'] },
   })
+    .select(PUBLIC_PROPERTY_PROJECTION)
     .sort({ createdAt: -1 })
     .lean();
 

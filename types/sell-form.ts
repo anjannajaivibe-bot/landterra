@@ -207,6 +207,10 @@ export interface SellFormState {
 
   // Step 7: Terms & Payment
   termsAccepted: boolean;
+  turnstileToken: string | null;
+
+  // Entry Gate: Human Verification (front door, before Step 1)
+  humanVerified: boolean;
 }
 
 export interface SellFormActions {
@@ -335,6 +339,8 @@ export interface SellFormActions {
 
   // Step 7 Handlers
   setTermsAccepted: (val: boolean) => void;
+  setTurnstileToken: (val: string | null) => void;
+  setHumanVerified: (val: boolean) => void;
   handleSaveDraft: () => Promise<void>;
   handleProceedToPayment: () => Promise<void>;
   handlePaymentSuccess: () => void;

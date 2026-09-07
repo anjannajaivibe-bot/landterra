@@ -317,8 +317,12 @@ export function useSellForm(): UseSellFormReturn {
   const [documents, setDocuments] = useState<UploadedDocPreview[]>([]);
   const [isUploadingDoc, setIsUploadingDoc] = useState<boolean>(false);
 
-  // Step 7: Terms
+  // Step 7: Terms & Security Check
   const [termsAccepted, setTermsAccepted] = useState<boolean>(false);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+
+  // Entry Gate: Human Verification (front door — verified before Step 1 renders)
+  const [humanVerified, setHumanVerified] = useState<boolean>(false);
 
   // Helpers
   const toggleItem = useCallback(
@@ -529,7 +533,9 @@ export function useSellForm(): UseSellFormReturn {
             if (propRes.ok) {
               const propData = await propRes.json();
               const property = propData.property;
-              if (property) {
+
+              // Enforce strict account isolation: Only the owner or platform admin can edit a listing
+              if (property && (propData.isOwner || propData.isAdmin)) {
                 setExistingPropertyId(property._id);
                 if (property.paymentStatus) {
                   setExistingPaymentStatus(property.paymentStatus);
@@ -660,7 +666,13 @@ export function useSellForm(): UseSellFormReturn {
                 } else if (property.paymentStatus === 'PENDING') {
                   setCurrentStep(7);
                 }
+              } else {
+                setErrorMessage('You do not have permission to edit this listing. Users can only manage their own properties.');
+                setExistingPropertyId(null);
               }
+            } else {
+              setErrorMessage('Listing not found or you do not have permission to access it.');
+              setExistingPropertyId(null);
             }
           } catch (e) {
             console.warn('Failed to load property from ID:', e);
@@ -1528,6 +1540,7 @@ export function useSellForm(): UseSellFormReturn {
       sellerEmail,
       sellerType,
       sellerDeclarationAccepted: Boolean(termsAccepted),
+      turnstileToken: turnstileToken || undefined,
       images: images.map((image, index) => ({
         objectKey: image.objectKey,
         secureUrl: image.secureUrl,
@@ -1662,6 +1675,8 @@ export function useSellForm(): UseSellFormReturn {
       setErrorMessage('You must accept the listing terms and publishing declaration.');
       return;
     }
+
+    // (Human verification is done at page entry — no re-check needed here)
 
     if (!Number.isFinite(landAreaYards) || landAreaYards < 1) {
       setErrorMessage('Please enter a valid land area (minimum 1 sq. yard).');
@@ -1870,6 +1885,8 @@ export function useSellForm(): UseSellFormReturn {
       documents,
       isUploadingDoc,
       termsAccepted,
+      turnstileToken,
+      humanVerified,
     },
     actions: {
       setCurrentStep,
@@ -1962,6 +1979,8 @@ export function useSellForm(): UseSellFormReturn {
       handleDocumentUpload,
       handleRemoveDocument,
       setTermsAccepted,
+      setTurnstileToken,
+      setHumanVerified,
       handleSaveDraft,
       handleProceedToPayment,
       handlePaymentSuccess,

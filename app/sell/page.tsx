@@ -14,6 +14,7 @@ import { Step4Records } from '@/components/sell/steps/Step4Records';
 import { Step5MediaUpload } from '@/components/sell/steps/Step5MediaUpload';
 import { Step6Documents } from '@/components/sell/steps/Step6Documents';
 import { Step7ReviewPayment } from '@/components/sell/steps/Step7ReviewPayment';
+import { CloudflareTurnstile } from '@/components/security/CloudflareTurnstile';
 import {
   ShieldCheck,
   CheckCircle2,
@@ -63,6 +64,8 @@ function SellPageForm() {
     otpMessage,
     testOtpNotice,
     termsAccepted,
+    turnstileToken,
+    humanVerified,
     isUploadingImage,
     isUploadingDoc,
   } = state;
@@ -83,6 +86,7 @@ function SellPageForm() {
     handleSaveDraft,
     handleProceedToPayment,
     handlePaymentSuccess,
+    setHumanVerified,
   } = actions;
 
   // Loading state
@@ -288,6 +292,50 @@ function SellPageForm() {
           </div>
         </div>
 
+        <Footer />
+      </div>
+    );
+  }
+
+  // ── Cloudflare Turnstile Entry Gate ──
+  // After login + phone OTP, before Step 1 renders.
+  // Skip if this is an existing draft being edited.
+  if (!humanVerified && !existingPropertyId) {
+    return (
+      <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900">
+        <Navbar />
+        <div className="max-w-lg mx-auto px-4 py-20 flex-1 flex flex-col justify-center">
+          <div className="bg-white rounded-3xl border border-slate-200 p-8 shadow-xl text-center space-y-6">
+            {/* Icon */}
+            <div className="w-16 h-16 rounded-2xl bg-[#fff1dc] text-[#c75e0a] flex items-center justify-center mx-auto">
+              <ShieldCheck className="w-8 h-8" />
+            </div>
+
+            <div className="space-y-2">
+              <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
+                Quick Security Check
+              </h1>
+              <p className="text-xs text-slate-500 leading-relaxed max-w-sm mx-auto">
+                To protect sellers and buyers from bots and spam listings, please complete the security check below before accessing the listing form.
+              </p>
+            </div>
+
+            {/* Turnstile widget — centred */}
+            <div className="flex justify-center pt-2">
+              <CloudflareTurnstile
+                action="sell_entry"
+                onSuccess={() => setHumanVerified(true)}
+                onError={() => setHumanVerified(false)}
+                onExpire={() => setHumanVerified(false)}
+              />
+            </div>
+
+            <div className="pt-2 border-t border-slate-100 flex items-center justify-center gap-2 text-[11px] text-slate-400">
+              <ShieldCheck className="w-3.5 h-3.5 text-[#FF9933]" />
+              <span>Verified by Cloudflare Turnstile — Zero Brokerage Platform</span>
+            </div>
+          </div>
+        </div>
         <Footer />
       </div>
     );

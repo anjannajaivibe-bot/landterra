@@ -128,6 +128,7 @@ export const CreatePropertySchema = z.object({
   video: PropertyVideoInputSchema.optional().nullable(),
   documents: z.array(PropertyDocumentInputSchema).optional().default([]),
   sellerDeclarationAccepted: z.preprocess((val) => val === true || val === 'true' || val === 1, z.boolean()).default(true),
+  turnstileToken: z.string().optional(),
 });
 
 export const UpdatePropertySchema = CreatePropertySchema.partial();

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/security/auth';
 import { checkRateLimit } from '@/lib/security/rate-limit';
+import { verifyCloudflareTurnstile } from '@/lib/security/cloudflare-turnstile';
 import {
   recordBuyerCallAction,
   InquiryBusinessError,
@@ -35,12 +36,28 @@ export async function POST(
     );
   }
 
-  // 3. Apply Rate Limits (before fetching or revealing property data)
+  // 3. Extract IP and verify Cloudflare Turnstile Human Verification Token
   const forwarded = req.headers.get('x-forwarded-for');
   const realIp = req.headers.get('x-real-ip');
   const ipAddress = forwarded
     ? forwarded.split(',')[0].trim()
     : realIp || '127.0.0.1';
+
+  const body = await req.json().catch(() => ({}));
+  const turnstileToken = body?.turnstileToken || req.headers.get('cf-turnstile-token');
+
+  const turnstileResult = await verifyCloudflareTurnstile(turnstileToken, ipAddress);
+  if (!turnstileResult.success) {
+    return NextResponse.json(
+      {
+        error:
+          turnstileResult.error ||
+          'Human verification required before contacting seller. Please complete the Cloudflare security check.',
+        code: 'TURNSTILE_REQUIRED',
+      },
+      { status: 403 }
+    );
+  }
 
   // 3a. Primary Authenticated-User Rate Limit
   const userRate = await checkRateLimit(

@@ -52,6 +52,7 @@ import { Footer } from '@/components/layout/Footer';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { ReportModal } from '@/components/properties/ReportModal';
 import { DueDiligenceChecklist } from '@/components/legal/DueDiligenceChecklist';
+import { CloudflareTurnstile } from '@/components/security/CloudflareTurnstile';
 import { SHIMMER_BLUR_DATA_URL } from '@/lib/utils';
 
 import { IProperty } from '@/types/property';
@@ -393,7 +394,14 @@ function PropertyDetailsContent() {
     isListingOwner || (user && property && user.id === property.sellerId),
   );
 
+  // isDraft must ONLY be shown to the listing owner or platform admin.
+  // Non-owners and visitors must never see draft banners, payment prompts,
+  // or "Pay to Publish" CTAs — even if the paymentStatus field leaks through
+  // the public serializer. The API already blocks non-owners from seeing
+  // DRAFT/PAYMENT_PENDING listings; this guard handles edge cases where
+  // a PUBLISHED listing has an unpaid paymentStatus (e.g. admin previews).
   const isDraft = Boolean(
+    isOwner &&
     property &&
     (property.listingStatus === 'DRAFT' ||
       property.listingStatus === 'PAYMENT_PENDING' ||
@@ -767,10 +775,10 @@ function PropertyDetailsContent() {
   };
 
   /* ================================================================
-     CALL SELLER ACTION (Database Recorded)
+     CALL SELLER ACTION (Cloudflare Turnstile Verified & Database Recorded)
   ================================================================= */
 
-  const initiateCallSeller = async () => {
+  const initiateCallSeller = () => {
     if (!property) return;
 
     if (isOwner) {
@@ -790,6 +798,23 @@ function PropertyDetailsContent() {
       return;
     }
 
+    setCallError('');
+    setCallCopied(false);
+    setCallModalOpen(true);
+
+    // If seller details were already unlocked previously, trigger tel prompt on mobile
+    if (
+      sellerCallData?.sellerPhone &&
+      typeof window !== 'undefined' &&
+      /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)
+    ) {
+      window.location.href = `tel:${sellerCallData.sellerPhone}`;
+    }
+  };
+
+  const verifyAndFetchCallData = async (turnstileToken: string) => {
+    if (!property) return;
+
     setCallLoading(true);
     setCallError('');
     setCallCopied(false);
@@ -799,13 +824,17 @@ function PropertyDetailsContent() {
         `/api/properties/${encodeURIComponent(property._id)}/call`,
         {
           method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ turnstileToken }),
         },
       );
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to initiate phone call.');
+        throw new Error(data.error || 'Human verification failed or contact limit reached.');
       }
 
       const phone = data.sellerPhone || property.sellerPhone;
@@ -814,13 +843,13 @@ function PropertyDetailsContent() {
         throw new Error('Seller contact phone number is not available for this listing.');
       }
 
-      setSellerCallData({
+      const contactDetails = {
         sellerName: data.sellerName || property.sellerName || 'Landowner',
         sellerPhone: phone,
         sellerEmail: data.sellerEmail || property.sellerEmail,
-      });
+      };
 
-      setCallModalOpen(true);
+      setSellerCallData(contactDetails);
 
       // If mobile device, automatically trigger tel: prompt
       if (
@@ -831,9 +860,8 @@ function PropertyDetailsContent() {
       }
     } catch (err: unknown) {
       const msg =
-        err instanceof Error ? err.message : 'Unable to initiate call.';
+        err instanceof Error ? err.message : 'Unable to retrieve contact details.';
       setCallError(msg);
-      setCallModalOpen(true);
     } finally {
       setCallLoading(false);
     }
@@ -2440,15 +2468,15 @@ function PropertyDetailsContent() {
             </div>
 
             {callError ? (
-              <div className="rounded-xl bg-rose-50 border border-rose-100 p-4 text-xs text-rose-800 space-y-2">
-                <p className="font-bold">Unable to initiate call</p>
+              <div className="rounded-xl bg-rose-50 border border-rose-100 p-4 text-xs text-rose-800 space-y-3">
+                <p className="font-bold">Unable to retrieve contact</p>
                 <p>{callError}</p>
                 <button
                   type="button"
-                  onClick={() => setCallModalOpen(false)}
-                  className="mt-2 w-full rounded-lg bg-rose-600 px-3 py-2 text-white font-bold text-xs"
+                  onClick={() => setCallError('')}
+                  className="w-full rounded-lg bg-rose-600 px-3 py-2 text-white font-bold text-xs hover:bg-rose-700 cursor-pointer transition-colors"
                 >
-                  Close
+                  Try Again
                 </button>
               </div>
             ) : sellerCallData ? (
@@ -2507,13 +2535,25 @@ function PropertyDetailsContent() {
                 </div>
 
                 <div className="space-y-2 pt-1">
-                  <a
-                    href={`tel:${sellerCallData.sellerPhone}`}
-                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#FF9933] hover:bg-[#f07d12] px-4 py-3.5 text-xs font-black text-white shadow-md transition-all cursor-pointer"
-                  >
-                    <Phone className="h-4 w-4" />
-                    <span>Call Now ({sellerCallData.sellerPhone})</span>
-                  </a>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <a
+                      href={`tel:${sellerCallData.sellerPhone}`}
+                      className="flex items-center justify-center gap-2 rounded-xl bg-[#FF9933] hover:bg-[#f07d12] px-4 py-3.5 text-xs font-black text-white shadow-sm transition-all cursor-pointer"
+                    >
+                      <Phone className="h-4 w-4" />
+                      <span>Call Now</span>
+                    </a>
+
+                    <a
+                      href={`https://api.whatsapp.com/send?phone=91${sellerCallData.sellerPhone.replace(/\D/g, '').slice(-10)}&text=${encodeURIComponent(`Hi ${sellerCallData.sellerName || ''}, I am interested in your property listing on BhoomiMitra: ${property.title}`)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center gap-2 rounded-xl bg-[#25D366] hover:bg-[#20bd5a] px-4 py-3.5 text-xs font-black text-white shadow-sm transition-all cursor-pointer"
+                    >
+                      <MessageSquare className="h-4 w-4" />
+                      <span>WhatsApp</span>
+                    </a>
+                  </div>
 
                   <button
                     type="button"
@@ -2523,7 +2563,7 @@ function PropertyDetailsContent() {
                     }}
                     className="flex w-full items-center justify-center gap-2 rounded-xl bg-slate-100 hover:bg-slate-200 px-4 py-2.5 text-xs font-bold text-slate-700 transition-colors cursor-pointer"
                   >
-                    <MessageSquare className="h-3.5 w-3.5" />
+                    <Mail className="h-3.5 w-3.5" />
                     <span>Or Send Written Message</span>
                   </button>
                 </div>
@@ -2531,11 +2571,47 @@ function PropertyDetailsContent() {
                 <div className="rounded-xl bg-[#fff9f0] border border-[#FF9933]/25 p-3 text-[11px] text-[#7a3705] flex items-start gap-2.5">
                   <ShieldCheck className="h-4 w-4 text-[#FF9933] shrink-0 mt-0.5" />
                   <p className="leading-relaxed">
-                    <strong>Buyer Protection:</strong> This call connection was logged with your verified account (<code className="font-semibold text-[#c75e0a]">{user?.email}</code>) to ensure safe marketplace communications.
+                    <strong>Direct Connection:</strong> Logged with your verified account (<code className="font-semibold text-[#c75e0a]">{user?.email}</code>) for safe marketplace communications.
                   </p>
                 </div>
               </div>
-            ) : null}
+            ) : (
+              <div className="space-y-4 py-1">
+                <div className="rounded-2xl bg-[#fffbf5] border border-[#FF9933]/30 p-4 text-center space-y-2">
+                  <div className="w-12 h-12 rounded-2xl bg-[#fff1dc] text-[#c75e0a] flex items-center justify-center mx-auto">
+                    <ShieldCheck className="w-6 h-6 text-[#FF9933]" />
+                  </div>
+                  <h4 className="text-sm font-extrabold text-slate-900">
+                    Security Verification
+                  </h4>
+                  <p className="text-xs text-slate-600 leading-relaxed max-w-sm mx-auto">
+                    Please complete this quick security verification to view landowner contact details.
+                  </p>
+                </div>
+
+                {callLoading ? (
+                  <div className="flex flex-col items-center justify-center py-6 space-y-2.5">
+                    <Loader2 className="w-8 h-8 animate-spin text-[#FF9933]" />
+                    <p className="text-xs font-bold text-slate-700">
+                      Retrieving landowner contact...
+                    </p>
+                  </div>
+                ) : (
+                  <div className="flex justify-center py-2">
+                    <CloudflareTurnstile
+                      action="call_seller"
+                      onSuccess={verifyAndFetchCallData}
+                      onError={() => {
+                        setCallError('Security verification failed. Please try again.');
+                      }}
+                      onExpire={() => {
+                        setCallError('Verification expired. Please retry.');
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       )}
