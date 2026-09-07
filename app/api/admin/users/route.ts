@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireRole } from '@/lib/security/auth';
 import { UserModel } from '@/models/User';
+import { PropertyModel } from '@/models/Property';
 import { connectToDatabase } from '@/lib/db/mongodb';
 import { createAuditLog } from '@/services/audit.service';
 
@@ -18,7 +19,35 @@ export async function GET(req: NextRequest) {
     }
 
     const dbUsers = await UserModel.find({}).sort({ createdAt: -1 }).lean();
-    return NextResponse.json({ users: dbUsers });
+
+    // Aggregate property counts per sellerId
+    const propertyCounts = await PropertyModel.aggregate([
+      {
+        $group: {
+          _id: '$sellerId',
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+
+    const countMap: Record<string, number> = {};
+    propertyCounts.forEach((pc: { _id: unknown; count: number }) => {
+      if (pc._id) {
+        countMap[String(pc._id).toLowerCase()] = pc.count;
+      }
+    });
+
+    const enrichedUsers = dbUsers.map((user: any) => {
+      const uid = String(user._id).toLowerCase();
+      const email = user.email ? String(user.email).toLowerCase() : '';
+      const propertiesCount = (countMap[uid] || 0) + (email && email !== uid ? (countMap[email] || 0) : 0);
+      return {
+        ...user,
+        propertiesCount,
+      };
+    });
+
+    return NextResponse.json({ users: enrichedUsers });
   } catch (error) {
     console.error('Error fetching admin users:', error);
     return NextResponse.json(

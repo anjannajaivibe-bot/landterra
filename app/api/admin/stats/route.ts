@@ -31,9 +31,9 @@ export async function GET(req: NextRequest) {
       paymentStatsResult,
       totalReportsCount,
       pendingReportsCount,
-      totalUsers,
-      totalSellers,
-      totalBuyers,
+      totalUsersResult,
+      distinctSellersResult,
+      totalAdminsResult,
     ] = await Promise.all([
       // 1. Property counts aggregated by status in a single pass
       PropertyModel.aggregate([
@@ -77,11 +77,18 @@ export async function GET(req: NextRequest) {
       ReportModel.countDocuments({}),
       ReportModel.countDocuments({ status: 'PENDING' }),
 
-      // 4. User counts by role
+      // 4. User counts by dynamic listing criteria
       UserModel.countDocuments({}),
-      UserModel.countDocuments({ role: 'SELLER' }),
-      UserModel.countDocuments({ role: 'BUYER' }),
+      PropertyModel.distinct('sellerId'),
+      UserModel.countDocuments({ role: 'ADMIN' }),
     ]);
+
+    const totalUsers = totalUsersResult || 0;
+    const totalSellers = Array.isArray(distinctSellersResult)
+      ? distinctSellersResult.filter(Boolean).length
+      : 0;
+    const totalAdmins = totalAdminsResult || 0;
+    const totalBuyers = Math.max(0, totalUsers - totalSellers - totalAdmins);
 
     const propStats = propertyStatsResult?.[0];
     const totalProperties = propStats?.total?.[0]?.count || 0;

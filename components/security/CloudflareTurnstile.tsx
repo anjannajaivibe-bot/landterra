@@ -56,12 +56,7 @@ export function CloudflareTurnstile({
     onExpireRef.current = onExpire;
   }, [onSuccess, onError, onExpire]);
 
-  const [scriptLoaded, setScriptLoaded] = useState(() => {
-    if (typeof window !== 'undefined' && Boolean(window.turnstile)) {
-      return true;
-    }
-    return false;
-  });
+  const [scriptLoaded, setScriptLoaded] = useState(() => typeof window !== 'undefined' && Boolean(window.turnstile));
   const [scriptError, setScriptError] = useState(false);
 
   const siteKey =
@@ -72,9 +67,8 @@ export function CloudflareTurnstile({
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    // Already loaded — set state immediately
+    // Already loaded
     if (window.turnstile) {
-      setScriptLoaded(true);
       return;
     }
 
@@ -83,10 +77,6 @@ export function CloudflareTurnstile({
       'script[src*="challenges.cloudflare.com/turnstile"]'
     );
     if (existingScript) {
-      if (window.turnstile) {
-        setScriptLoaded(true);
-        return;
-      }
       const handleLoad = () => setScriptLoaded(true);
       const handleError = () => setScriptError(true);
       existingScript.addEventListener('load', handleLoad);
