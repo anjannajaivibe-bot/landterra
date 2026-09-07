@@ -66,6 +66,9 @@ export const PUBLIC_PROPERTY_PROJECTION = {
   roadAccess: 1,
   nearbyLandmarks: 1,
   location: 1,
+  latitude: 1,
+  longitude: 1,
+  locationCoordinates: 1,
   approximateLocation: 1,
   verificationStatus: 1,
   listingStatus: 1,
@@ -122,6 +125,9 @@ export function toPublicPropertyListItem(
     roadAccess: doc.roadAccess,
     nearbyLandmarks: doc.nearbyLandmarks,
     location: doc.location,
+    latitude: doc.latitude,
+    longitude: doc.longitude,
+    locationCoordinates: doc.locationCoordinates,
     approximateLocation: doc.approximateLocation,
     verificationStatus: doc.verificationStatus,
     listingStatus: doc.listingStatus,
@@ -555,6 +561,46 @@ export async function getProperties(
 
     /*
      * ------------------------------------------------------------
+     * GEOSPATIAL SEARCH (RADIUS & PROXIMITY)
+     * ------------------------------------------------------------
+     */
+    let hasNearQuery = false;
+    if (
+      params.nearLat !== undefined &&
+      params.nearLng !== undefined &&
+      Number.isFinite(Number(params.nearLat)) &&
+      Number.isFinite(Number(params.nearLng))
+    ) {
+      const lat = Number(params.nearLat);
+      const lng = Number(params.nearLng);
+      const radiusKm = Number(params.radiusKm) > 0 ? Number(params.radiusKm) : 25;
+
+      // If user requested a custom non-default sort (e.g. price_asc, area_desc),
+      // use $geoWithin with $centerSphere to allow compound MongoDB sort.
+      if (params.sortBy && params.sortBy !== 'newest') {
+        const radians = radiusKm / 6378.1;
+        query.locationCoordinates = {
+          $geoWithin: {
+            $centerSphere: [[lng, lat], radians],
+          },
+        };
+      } else {
+        // Proximity search using $near and 2dsphere index (maxDistance in meters)
+        query.locationCoordinates = {
+          $near: {
+            $geometry: {
+              type: 'Point',
+              coordinates: [lng, lat],
+            },
+            $maxDistance: radiusKm * 1000,
+          },
+        };
+        hasNearQuery = true;
+      }
+    }
+
+    /*
+     * ------------------------------------------------------------
      * PRICE
      * ------------------------------------------------------------
      */
@@ -786,18 +832,37 @@ export async function getProperties(
       findQuery.select(PUBLIC_PROPERTY_PROJECTION);
     }
 
+    // MongoDB countDocuments does not allow $near (which is a sorting operator).
+    // Use $geoWithin with $centerSphere for the count query.
+    const countQuery = { ...query };
+    if (hasNearQuery && params.nearLat !== undefined && params.nearLng !== undefined) {
+      const lat = Number(params.nearLat);
+      const lng = Number(params.nearLng);
+      const radiusKm = Number(params.radiusKm) > 0 ? Number(params.radiusKm) : 25;
+      countQuery.locationCoordinates = {
+        $geoWithin: {
+          $centerSphere: [[lng, lat], radiusKm / 6378.1],
+        },
+      };
+    }
+
     const [
       docs,
       total,
     ] = await Promise.all([
-      findQuery
-        .sort(sort)
-        .skip(skip)
-        .limit(limit)
-        .lean(),
+      hasNearQuery
+        ? findQuery
+            .skip(skip)
+            .limit(limit)
+            .lean()
+        : findQuery
+            .sort(sort)
+            .skip(skip)
+            .limit(limit)
+            .lean(),
 
       PropertyModel.countDocuments(
-        query,
+        countQuery,
       ),
     ]);
 
@@ -1360,6 +1425,14 @@ export async function createProperty(
     longitude:
       data.longitude,
 
+    locationCoordinates:
+      typeof data.longitude === 'number' && typeof data.latitude === 'number' && !isNaN(data.longitude) && !isNaN(data.latitude)
+        ? {
+            type: 'Point' as const,
+            coordinates: [data.longitude, data.latitude] as [number, number],
+          }
+        : undefined,
+
     approximateLocation:
       Boolean(
         data.approximateLocation,
@@ -1529,6 +1602,18 @@ export async function updateProperty(
    */
   if (existing.listingStatus === 'PUBLISHED') {
     propertyUpdates.listingStatus = 'PUBLISHED';
+  }
+
+  if (
+    typeof propertyUpdates.longitude === 'number' &&
+    typeof propertyUpdates.latitude === 'number' &&
+    !isNaN(propertyUpdates.longitude) &&
+    !isNaN(propertyUpdates.latitude)
+  ) {
+    propertyUpdates.locationCoordinates = {
+      type: 'Point',
+      coordinates: [propertyUpdates.longitude, propertyUpdates.latitude],
+    };
   }
 
   /*

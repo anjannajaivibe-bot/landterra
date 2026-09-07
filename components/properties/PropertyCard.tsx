@@ -29,6 +29,7 @@ interface PropertyCardProps {
     isFavorite: boolean,
   ) => void;
   onRequireLogin?: () => void;
+  priority?: boolean;
 }
 
 /* ================================================================
@@ -153,6 +154,7 @@ export function PropertyCard({
   initialFavorite = false,
   onFavoriteToggle,
   onRequireLogin,
+  priority = false,
 }: PropertyCardProps) {
   const [isFavorite, setIsFavorite] = useState(initialFavorite);
   const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
@@ -251,10 +253,11 @@ export function PropertyCard({
               src={primaryImage}
               alt={property.title}
               fill
+              priority={priority}
               placeholder="blur"
               blurDataURL={SHIMMER_BLUR_DATA_URL}
               className="object-cover transition-transform duration-500 group-hover:scale-[1.04]"
-              sizes="(max-width: 768px) 100vw, 380px"
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 340px, 380px"
               referrerPolicy="no-referrer"
             />
           ) : (
@@ -288,8 +291,8 @@ export function PropertyCard({
               : 'Save property'
           }
           className={`absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full border shadow-sm backdrop-blur transition-all cursor-pointer ${isFavorite
-              ? 'border-rose-200 bg-white text-rose-500'
-              : 'border-white/60 bg-white/90 text-slate-700 hover:bg-white hover:text-rose-500'
+            ? 'border-rose-200 bg-white text-rose-500'
+            : 'border-white/60 bg-white/90 text-slate-700 hover:bg-white hover:text-rose-500'
             }`}
         >
           {isTogglingFavorite ? (

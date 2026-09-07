@@ -118,6 +118,16 @@ const PropertySchema = new Schema<IProperty>(
     googleMapsShareLink: { type: String },
     latitude: { type: Number },
     longitude: { type: Number },
+    locationCoordinates: {
+      type: {
+        type: String,
+        enum: ['Point'],
+        default: 'Point',
+      },
+      coordinates: {
+        type: [Number],
+      },
+    },
     approximateLocation: { type: Boolean, default: false },
     governmentRegistrationId: { type: String, trim: true, index: true, required: false },
     verificationStatus: {
@@ -170,6 +180,22 @@ PropertySchema.index({ listingStatus: 1, landAreaYards: 1, totalPrice: 1 });
 PropertySchema.index({ sellerId: 1, listingStatus: 1 });
 PropertySchema.index({ 'location.pincode': 1, listingStatus: 1 });
 PropertySchema.index({ createdAt: -1 });
+PropertySchema.index({ locationCoordinates: '2dsphere' });
+
+// Auto-synchronize GeoJSON coordinates from latitude and longitude
+PropertySchema.pre('save', function () {
+  if (
+    typeof this.longitude === 'number' &&
+    typeof this.latitude === 'number' &&
+    !isNaN(this.longitude) &&
+    !isNaN(this.latitude)
+  ) {
+    this.locationCoordinates = {
+      type: 'Point',
+      coordinates: [this.longitude, this.latitude],
+    };
+  }
+});
 
 if (process.env.NODE_ENV !== 'production' && mongoose.models.Property) {
   mongoose.deleteModel('Property');

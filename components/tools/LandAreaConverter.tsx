@@ -160,8 +160,8 @@ export function LandAreaConverter() {
                 key={u.key}
                 onClick={() => setSelectedUnit(u.key)}
                 className={`p-3.5 rounded-2xl border transition-all cursor-pointer ${isSelected
-                    ? 'border-[#FF9933] bg-[#fffbf5] shadow-xs ring-2 ring-[#FF9933]/20'
-                    : 'border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300'
+                  ? 'border-[#FF9933] bg-[#fffbf5] shadow-xs ring-2 ring-[#FF9933]/20'
+                  : 'border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300'
                   }`}
               >
                 <div className="flex items-center justify-between text-[11px] font-bold text-slate-500">

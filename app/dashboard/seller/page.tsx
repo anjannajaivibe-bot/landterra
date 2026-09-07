@@ -30,6 +30,7 @@ import {
   LandPlot,
   Phone,
   MessageCircle,
+  Eye,
 } from 'lucide-react';
 
 export default function SellerDashboardPage() {
@@ -173,6 +174,8 @@ export default function SellerDashboardPage() {
   ).length;
   const expiredCount = properties.filter((p) => p.listingStatus === 'EXPIRED').length;
   const totalInquiriesCount = inquiries.length;
+  const totalViewsCount = properties.reduce((sum, p) => sum + (p.viewsCount || 0), 0);
+  const totalPhoneUnlocksCount = properties.reduce((sum, p) => sum + (p.inquiriesCount || 0), 0);
   const totalFeesPaid = payments
     .filter((p) => p.paymentStatus === 'PAID')
     .reduce((sum, p) => sum + p.amount, 0);
@@ -225,7 +228,7 @@ export default function SellerDashboardPage() {
       {/* Main Container */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 space-y-6 w-full">
         {/* KPI Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
           <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
             <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-1">
               Total Listings
@@ -241,6 +244,22 @@ export default function SellerDashboardPage() {
           </div>
 
           <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
+            <span className="text-[11px] font-bold text-blue-700 uppercase tracking-wider block mb-1 flex items-center gap-1">
+              <Eye className="w-3 h-3 text-blue-600" />
+              <span>Property Views</span>
+            </span>
+            <span className="text-2xl font-extrabold text-blue-800">{totalViewsCount.toLocaleString('en-IN')}</span>
+          </div>
+
+          <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
+            <span className="text-[11px] font-bold text-emerald-700 uppercase tracking-wider block mb-1 flex items-center gap-1">
+              <Phone className="w-3 h-3 text-emerald-600" />
+              <span>Phone Unlocks</span>
+            </span>
+            <span className="text-2xl font-extrabold text-emerald-800">{totalPhoneUnlocksCount}</span>
+          </div>
+
+          <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
             <span className="text-[11px] font-bold text-amber-700 uppercase tracking-wider block mb-1">
               Payment Pending
             </span>
@@ -248,13 +267,6 @@ export default function SellerDashboardPage() {
           </div>
 
           <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
-            <span className="text-[11px] font-bold text-blue-700 uppercase tracking-wider block mb-1">
-              Inactive / Processing
-            </span>
-            <span className="text-2xl font-extrabold text-blue-700">{pendingCount}</span>
-          </div>
-
-          <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs col-span-2 lg:col-span-1">
             <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-1">
               Buyer Inquiries
             </span>
@@ -427,6 +439,42 @@ export default function SellerDashboardPage() {
                                   </span>
                                 </p>
                               )}
+
+                              {/* Listing Performance Analytics Bar */}
+                              <div className="flex flex-wrap items-center gap-2 pt-1.5">
+                                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 border border-slate-200/80 text-[11px] font-bold text-slate-700">
+                                  <Eye className="w-3 h-3 text-blue-600" />
+                                  <span>{prop.viewsCount || 0} views this week</span>
+                                </div>
+
+                                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 border border-slate-200/80 text-[11px] font-bold text-slate-700">
+                                  <Phone className="w-3 h-3 text-emerald-600" />
+                                  <span>{prop.inquiriesCount || 0} buyers unlocked phone</span>
+                                </div>
+
+                                {isPublished && prop.subscriptionExpiresAt && (() => {
+                                  const diffMs = new Date(prop.subscriptionExpiresAt).getTime() - Date.now();
+                                  const daysLeft = Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
+                                  return (
+                                    <div
+                                      className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold ${
+                                        daysLeft <= 3
+                                          ? 'bg-rose-50 border border-rose-200 text-rose-700'
+                                          : daysLeft <= 7
+                                          ? 'bg-amber-50 border border-amber-200 text-amber-800'
+                                          : 'bg-[#fff1dc] border border-[#FF9933]/30 text-[#c75e0a]'
+                                      }`}
+                                    >
+                                      <Clock className="w-3 h-3 text-[#FF9933]" />
+                                      <span>
+                                        {daysLeft > 0
+                                          ? `Listing active for ${daysLeft} more day${daysLeft === 1 ? '' : 's'}`
+                                          : 'Listing expired'}
+                                      </span>
+                                    </div>
+                                  );
+                                })()}
+                              </div>
 
                               {isUnpaid && (
                                 <p className="text-[11px] text-amber-700 font-medium">

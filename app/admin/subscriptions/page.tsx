@@ -12,6 +12,7 @@ import {
   Loader2,
   Hourglass,
   RotateCcw,
+  Download,
 } from 'lucide-react';
 
 import { IProperty } from '@/types/property';
@@ -117,6 +118,52 @@ export default function AdminSubscriptionsPage() {
     return { total: subscriptionItems.length, active, expiringSoon, expired };
   }, [subscriptionItems]);
 
+  const exportToCSV = () => {
+    if (filteredItems.length === 0) return;
+
+    const headers = [
+      'Property ID',
+      'Property Title',
+      'Seller Name',
+      'City',
+      'Status',
+      'Days Left',
+      'Started Date',
+      'Expiry Date',
+      'Monthly Fee (INR)',
+    ];
+
+    const rows = filteredItems.map((item) => [
+      item.property._id || 'N/A',
+      `"${(item.property.title || '').replace(/"/g, '""')}"`,
+      `"${(item.property.sellerName || 'Direct Landowner').replace(/"/g, '""')}"`,
+      item.property.location?.city || 'N/A',
+      item.status,
+      item.daysLeft !== null ? item.daysLeft : 'N/A',
+      item.property.subscriptionStartedAt
+        ? new Date(item.property.subscriptionStartedAt).toLocaleString('en-IN')
+        : '',
+      item.property.subscriptionExpiresAt
+        ? new Date(item.property.subscriptionExpiresAt).toLocaleString('en-IN')
+        : '',
+      item.property.publishingFee || item.property.monthlyListingFee || 0,
+    ]);
+
+    const csvContent = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute(
+      'download',
+      `landterra-subscriptions-${new Date().toISOString().slice(0, 10)}.csv`
+    );
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
       {/* Section Header with Dedicated Refresh */}
@@ -190,21 +237,34 @@ export default function AdminSubscriptionsPage() {
           />
         </div>
 
-        <div className="flex gap-1.5 overflow-x-auto w-full sm:w-auto pb-1">
-          {(['ALL', 'ACTIVE', 'EXPIRING_SOON', 'EXPIRED'] as const).map((type) => (
-            <button
-              key={type}
-              type="button"
-              onClick={() => setFilterType(type)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors shrink-0 ${
-                filterType === type
-                  ? 'bg-emerald-600 text-white shadow-xs'
-                  : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white'
-              }`}
-            >
-              {type.replace(/_/g, ' ')}
-            </button>
-          ))}
+        <div className="flex items-center gap-2 overflow-x-auto w-full sm:w-auto pb-1">
+          <div className="flex gap-1.5 shrink-0">
+            {(['ALL', 'ACTIVE', 'EXPIRING_SOON', 'EXPIRED'] as const).map((type) => (
+              <button
+                key={type}
+                type="button"
+                onClick={() => setFilterType(type)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors shrink-0 ${
+                  filterType === type
+                    ? 'bg-emerald-600 text-white shadow-xs'
+                    : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white'
+                }`}
+              >
+                {type.replace(/_/g, ' ')}
+              </button>
+            ))}
+          </div>
+
+          <button
+            type="button"
+            onClick={exportToCSV}
+            disabled={filteredItems.length === 0}
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold border border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
+            title="Export filtered subscriptions to CSV"
+          >
+            <Download className="w-3.5 h-3.5 text-emerald-400" />
+            <span>Export CSV</span>
+          </button>
         </div>
       </div>
 

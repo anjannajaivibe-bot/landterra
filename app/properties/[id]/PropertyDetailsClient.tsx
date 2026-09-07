@@ -10,13 +10,10 @@ import React, {
 } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
 import {
   ArrowLeft,
-  BadgeCheck,
   CalendarDays,
   Check,
-  CheckCircle2,
   ChevronLeft,
   ChevronRight,
   Copy,
@@ -24,8 +21,6 @@ import {
   ExternalLink,
   Flag,
   Heart,
-  ImageIcon,
-  Info,
   LandPlot,
   LayoutDashboard,
   Loader2,
@@ -33,27 +28,22 @@ import {
   MapPin,
   MessageSquare,
   Phone,
-  Search,
   Share2,
   ShieldCheck,
-  Sparkles,
   Tag,
   UserRound,
-  Home,
-  Video,
-  Play,
-  Film,
-  Maximize2,
-  X,
 } from 'lucide-react';
 
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { AuthModal } from '@/components/auth/AuthModal';
+import { InquiryModal } from '@/components/properties/InquiryModal';
 import { ReportModal } from '@/components/properties/ReportModal';
-import { DueDiligenceChecklist } from '@/components/legal/DueDiligenceChecklist';
-import { CloudflareTurnstile } from '@/components/security/CloudflareTurnstile';
-import { SHIMMER_BLUR_DATA_URL } from '@/lib/utils';
+import { CallSellerModal } from '@/components/properties/CallSellerModal';
+import { GalleryCarousel } from '@/components/properties/GalleryCarousel';
+import { LocationSection } from '@/components/properties/LocationSection';
+import { PropertySpecifications } from '@/components/properties/PropertySpecifications';
+import { DueDiligenceCard } from '@/components/properties/DueDiligenceCard';
 
 import { IProperty } from '@/types/property';
 
@@ -63,7 +53,6 @@ import { IProperty } from '@/types/property';
 
 function formatIndianCurrency(value: number) {
   if (!Number.isFinite(value)) return 'Price on request';
-
   return `₹${value.toLocaleString('en-IN')}`;
 }
 
@@ -71,44 +60,31 @@ function formatCompactCurrency(value: number) {
   if (!Number.isFinite(value)) return 'Price on request';
 
   if (value >= 10000000) {
-    const crores = value / 10000000;
-
-    return `₹${crores.toFixed(
-      Number.isInteger(crores) ? 0 : 1,
-    )} Cr`;
+    const cr = value / 10000000;
+    return `₹${cr.toFixed(cr >= 10 ? 1 : 2)} Cr`;
   }
 
   if (value >= 100000) {
-    const lakhs = value / 100000;
-
-    return `₹${lakhs.toFixed(
-      Number.isInteger(lakhs) ? 0 : 1,
-    )} L`;
+    const lk = value / 100000;
+    return `₹${lk.toFixed(lk >= 10 ? 1 : 2)} Lakh`;
   }
 
   return formatIndianCurrency(value);
 }
 
 function formatArea(value: number) {
-  if (!Number.isFinite(value)) return '—';
-
-  return `${value.toLocaleString('en-IN')} sq. yd`;
+  if (!Number.isFinite(value)) return 'Area on request';
+  return `${value.toLocaleString('en-IN')} sq. yards`;
 }
 
 function formatLandType(value?: string) {
   if (!value) return 'Land';
-
-  return value
-    .replace(/_/g, ' ')
-    .toLowerCase()
-    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+  return value.replace(/_/g, ' ');
 }
 
 function formatDate(value?: string | Date) {
   if (!value) return null;
-
   const date = new Date(value);
-
   if (Number.isNaN(date.getTime())) return null;
 
   return date.toLocaleDateString('en-IN', {
@@ -118,11 +94,33 @@ function formatDate(value?: string | Date) {
   });
 }
 
+function Fact({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-xl bg-slate-50 p-3">
+      <p className="text-[9px] font-bold uppercase tracking-wider text-slate-400">{label}</p>
+      <p className="mt-1 line-clamp-2 text-xs font-bold text-slate-800">{value}</p>
+    </div>
+  );
+}
+
+function InfoCard({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-xl border border-slate-100 bg-slate-50 p-4">
+      <p className="text-[9px] font-bold uppercase tracking-wider text-slate-400">{label}</p>
+      <p className="mt-1.5 text-sm font-black text-slate-900">{value}</p>
+    </div>
+  );
+}
+
 /* ================================================================
-   MAIN PAGE
+   MAIN PAGE CONTENT
 ================================================================ */
 
-function PropertyDetailsContent() {
+function PropertyDetailsContent({
+  initialProperty,
+}: {
+  initialProperty?: IProperty | null;
+}) {
   const params = useParams();
   const router = useRouter();
 
@@ -133,43 +131,15 @@ function PropertyDetailsContent() {
         ? params.id[0]
         : '';
 
-  /* ---------------------------------------------------------------
-     PROPERTY
-  --------------------------------------------------------------- */
-
-  const [property, setProperty] = useState<IProperty | null>(
-    null,
-  );
-
-  const [loading, setLoading] = useState(true);
+  const [property, setProperty] = useState<IProperty | null>(initialProperty || null);
+  const [loading, setLoading] = useState(!initialProperty);
   const [error, setError] = useState('');
-
-  /* ---------------------------------------------------------------
-     SESSION / AUTH
-  --------------------------------------------------------------- */
 
   const [user, setUser] = useState<any>(null);
   const [sessionLoading, setSessionLoading] = useState(true);
 
   const [authModalOpen, setAuthModalOpen] = useState(false);
-
-  /*
-   * The page intentionally lets the visitor reach the property
-   * page before authentication.
-   *
-   * Authentication is required when protected property information
-   * or buyer actions are requested.
-   */
-  const [showProtectedInformation, setShowProtectedInformation] =
-    useState(false);
-
-  /* ---------------------------------------------------------------
-     UI STATE
-  --------------------------------------------------------------- */
-
-  const [activeImageIndex, setActiveImageIndex] = useState(0);
-  const [activeMediaTab, setActiveMediaTab] = useState<'PHOTOS' | 'VIDEO'>('PHOTOS');
-  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+  const [showProtectedInformation, setShowProtectedInformation] = useState(false);
 
   const [favorite, setFavorite] = useState(false);
   const [favoriteLoading, setFavoriteLoading] = useState(false);
@@ -180,13 +150,6 @@ function PropertyDetailsContent() {
   const shareMenuRef = useRef<HTMLDivElement>(null);
 
   const [inquiryOpen, setInquiryOpen] = useState(false);
-  const [inquiryMessage, setInquiryMessage] = useState('');
-  const [inquiryPhone, setInquiryPhone] = useState('');
-  const [inquiryEmail, setInquiryEmail] = useState('');
-  const [sharePhone, setSharePhone] = useState(true);
-  const [inquirySending, setInquirySending] = useState(false);
-  const [inquirySuccess, setInquirySuccess] = useState(false);
-  const [inquiryError, setInquiryError] = useState('');
   const [reportModalOpen, setReportModalOpen] = useState(false);
   const [reloadCount, setReloadCount] = useState(0);
   const [isListingOwner, setIsListingOwner] = useState(false);
@@ -194,7 +157,6 @@ function PropertyDetailsContent() {
   /* Call Seller State */
   const [callModalOpen, setCallModalOpen] = useState(false);
   const [callLoading, setCallLoading] = useState(false);
-  const [callCopied, setCallCopied] = useState(false);
   const [sellerCallData, setSellerCallData] = useState<{
     sellerName: string;
     sellerPhone: string;
@@ -202,57 +164,39 @@ function PropertyDetailsContent() {
   } | null>(null);
   const [callError, setCallError] = useState('');
 
-  /* ================================================================
-     LOAD SESSION
-  ================================================================= */
-
+  /* Load Session */
   useEffect(() => {
     let cancelled = false;
-
     const load = async () => {
       try {
-        const response = await fetch('/api/auth/session', {
-          cache: 'no-store',
-        });
-
+        const response = await fetch('/api/auth/session', { cache: 'no-store' });
         if (!response.ok) {
-          if (!cancelled) {
-            setUser(null);
-          }
+          if (!cancelled) setUser(null);
           return;
         }
-
         const data = await response.json();
-
-        if (!cancelled) {
-          setUser(data?.session?.user || null);
-        }
+        if (!cancelled) setUser(data?.session?.user || null);
       } catch {
-        if (!cancelled) {
-          setUser(null);
-        }
+        if (!cancelled) setUser(null);
       } finally {
-        if (!cancelled) {
-          setSessionLoading(false);
-        }
+        if (!cancelled) setSessionLoading(false);
       }
     };
-
     load();
-
     return () => {
       cancelled = true;
     };
   }, []);
 
-  /* ================================================================
-     LOAD PROPERTY
-  ================================================================= */
-
+  /* Load Property (Hydrates or refetches if reload triggered) */
   useEffect(() => {
     let cancelled = false;
-
     const load = async () => {
+      // If initialProperty is already provided via SSR and no reload was requested, skip duplicate network call
+      if (initialProperty && reloadCount === 0) {
+        return;
+      }
+
       if (!propertyId) {
         setLoading(false);
         setError('Invalid property listing.');
@@ -260,12 +204,9 @@ function PropertyDetailsContent() {
       }
 
       try {
-        const response = await fetch(
-          `/api/properties/${encodeURIComponent(propertyId)}`,
-          {
-            cache: 'no-store',
-          },
-        );
+        const response = await fetch(`/api/properties/${encodeURIComponent(propertyId)}`, {
+          cache: 'no-store',
+        });
 
         if (response.status === 404) {
           const errData = await response.json().catch(() => null);
@@ -273,7 +214,7 @@ function PropertyDetailsContent() {
             setProperty(null);
             setError(
               errData?.error ||
-              'This land listing could not be found or has not been published yet.',
+                'This land listing could not be found or has not been published yet.',
             );
           }
           return;
@@ -284,11 +225,7 @@ function PropertyDetailsContent() {
         }
 
         const data = await response.json();
-
-        const loadedProperty =
-          data?.data ||
-          data?.property ||
-          data;
+        const loadedProperty = data?.data || data?.property || data;
 
         if (!loadedProperty?._id) {
           throw new Error('Invalid property response.');
@@ -306,13 +243,11 @@ function PropertyDetailsContent() {
         }
       } catch (err) {
         if (cancelled) return;
-
         console.error('Property loading error:', err);
-
-        setProperty(null);
-        setError(
-          'We could not load this property right now. Please try again.',
-        );
+        if (!initialProperty) {
+          setProperty(null);
+          setError('We could not load this property right now. Please try again.');
+        }
       } finally {
         if (!cancelled) {
           setLoading(false);
@@ -321,16 +256,12 @@ function PropertyDetailsContent() {
     };
 
     load();
-
     return () => {
       cancelled = true;
     };
-  }, [propertyId, reloadCount]);
+  }, [propertyId, reloadCount, initialProperty]);
 
-  /* ================================================================
-     FAVORITE STATUS SYNC
-  ================================================================= */
-
+  /* Sync Favorites */
   useEffect(() => {
     let cancelled = false;
     if (!user || !propertyId) return;
@@ -342,190 +273,20 @@ function PropertyDetailsContent() {
           setFavorite(data.favorites.includes(propertyId));
         }
       })
-      .catch(() => { });
+      .catch(() => {});
 
     return () => {
       cancelled = true;
     };
   }, [user, propertyId]);
 
-  /* ================================================================
-     PROPERTY DERIVED DATA
-  ================================================================= */
-
-  const images = useMemo(() => {
-    if (!property?.images?.length) {
-      return [];
-    }
-
-    return [...property.images].sort(
-      (a, b) => a.sortOrder - b.sortOrder,
-    );
-  }, [property]);
-
-  const activeImage = images[activeImageIndex];
-
-  const locationText = useMemo(() => {
-    if (!property) return '';
-
-    const parts = [
-      property.location?.city,
-      property.location?.district,
-      property.location?.state,
-    ].filter(Boolean);
-
-    return parts.join(', ');
-  }, [property]);
-
-  const verificationLabel =
-    property?.verificationStatus === 'VERIFIED'
-      ? 'Direct Classified'
-      : property?.verificationStatus === 'PENDING'
-        ? 'Draft'
-        : property?.verificationStatus === 'VERIFICATION_REQUIRED'
-          ? 'Information needed'
-          : property?.verificationStatus === 'REJECTED'
-            ? 'Suspended'
-            : 'Direct Classified';
-
-  const publishedDate = formatDate(property?.publishedAt);
-
-  const isOwner = Boolean(
-    isListingOwner || (user && property && user.id === property.sellerId),
-  );
-
-  // isDraft must ONLY be shown to the listing owner or platform admin.
-  // Non-owners and visitors must never see draft banners, payment prompts,
-  // or "Pay to Publish" CTAs — even if the paymentStatus field leaks through
-  // the public serializer. The API already blocks non-owners from seeing
-  // DRAFT/PAYMENT_PENDING listings; this guard handles edge cases where
-  // a PUBLISHED listing has an unpaid paymentStatus (e.g. admin previews).
-  const isDraft = Boolean(
-    isOwner &&
-    property &&
-    (property.listingStatus === 'DRAFT' ||
-      property.listingStatus === 'PAYMENT_PENDING' ||
-      property.listingStatus === 'PENDING_VERIFICATION' ||
-      property.paymentStatus !== 'PAID'),
-  );
-
-  /* ================================================================
-     SEO SCHEMA (JSON-LD)
-  ================================================================= */
-
-  const jsonLd = useMemo(() => {
-    if (!property) return null;
-
-    return {
-      '@context': 'https://schema.org',
-      '@type': 'RealEstateListing',
-      name: property.title,
-      description: property.description,
-      datePosted: property.publishedAt || (property as any).createdAt,
-      offers: {
-        '@type': 'Offer',
-        price: property.totalPrice,
-        priceCurrency: 'INR',
-        availability:
-          property.listingStatus === 'PUBLISHED'
-            ? 'https://schema.org/InStock'
-            : 'https://schema.org/OutOfStock',
-      },
-      contentLocation: {
-        '@type': 'Place',
-        name: `${property.location?.city || ''}, ${property.location?.state || ''}`.trim(),
-        address: {
-          '@type': 'PostalAddress',
-          streetAddress: property.location?.address,
-          addressLocality: property.location?.city,
-          addressRegion: property.location?.state,
-          postalCode: property.location?.pincode,
-          addressCountry: 'IN',
-        },
-        geo:
-          property.latitude && property.longitude
-            ? {
-              '@type': 'GeoCoordinates',
-              latitude: property.latitude,
-              longitude: property.longitude,
-            }
-            : undefined,
-      },
-      image: property.images?.map((img) => img.secureUrl).filter(Boolean),
-    };
-  }, [property]);
-
-  const requireLoginForProtectedInformation = () => {
-    if (user) {
-      setShowProtectedInformation(true);
-      return true;
-    }
-
-    setAuthModalOpen(true);
-    return false;
-  };
-
-  /* ================================================================
-     FAVORITE
-  ================================================================= */
-
-  const toggleFavorite = async () => {
-    if (!property) return;
-
-    if (!user) {
-      setAuthModalOpen(true);
-      return;
-    }
-
-    setFavoriteLoading(true);
-
-    try {
-      const response = await fetch('/api/favorites', {
-        method: favorite ? 'DELETE' : 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          propertyId: property._id,
-        }),
-      });
-
-      if (response.status === 401) {
-        setAuthModalOpen(true);
-        return;
-      }
-
-      if (!response.ok) {
-        throw new Error('Favorite action failed.');
-      }
-
-      const data = await response.json().catch(() => null);
-      if (typeof data?.isFavorite === 'boolean') {
-        setFavorite(data.isFavorite);
-      } else {
-        setFavorite((current) => !current);
-      }
-    } catch (err) {
-      console.error('Favorite error:', err);
-    } finally {
-      setFavoriteLoading(false);
-    }
-  };
-
-  /* ================================================================
-     SHARE (Copy Link & WhatsApp)
-  ================================================================= */
-
+  /* Close share menu on outside click */
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (
-        shareMenuRef.current &&
-        !shareMenuRef.current.contains(event.target as Node)
-      ) {
+      if (shareMenuRef.current && !shareMenuRef.current.contains(event.target as Node)) {
         setShareMenuOpen(false);
       }
     }
-
     if (shareMenuOpen) {
       document.addEventListener('mousedown', handleClickOutside);
     }
@@ -534,275 +295,109 @@ function PropertyDetailsContent() {
     };
   }, [shareMenuOpen]);
 
-  const handleShareButtonClick = () => {
-    if (!property) return;
-    if (isDraft) {
-      setShareMessage('Draft listings cannot be shared publicly. Please publish this listing first.');
-      window.setTimeout(() => setShareMessage(''), 4000);
+  const toggleFavorite = async () => {
+    if (!user) {
+      setAuthModalOpen(true);
       return;
     }
-    setShareMenuOpen((prev) => !prev);
+    if (!propertyId || favoriteLoading) return;
+
+    setFavoriteLoading(true);
+    const prev = favorite;
+    setFavorite(!prev);
+
+    try {
+      const res = await fetch('/api/favorites', {
+        method: prev ? 'DELETE' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ propertyId }),
+      });
+      if (!res.ok) setFavorite(prev);
+    } catch {
+      setFavorite(prev);
+    } finally {
+      setFavoriteLoading(false);
+    }
   };
 
-  const handleCopyLink = async () => {
-    try {
-      const url = typeof window !== 'undefined' ? window.location.href : '';
-      await navigator.clipboard.writeText(url);
+  const handleCopyLink = () => {
+    if (typeof window !== 'undefined') {
+      navigator.clipboard.writeText(window.location.href);
       setCopiedLink(true);
-      window.setTimeout(() => {
-        setCopiedLink(false);
-      }, 2500);
-    } catch (err) {
-      console.error('Failed to copy link:', err);
+      setTimeout(() => setCopiedLink(false), 2000);
+      setShareMenuOpen(false);
     }
   };
 
   const handleShareWhatsApp = () => {
-    if (!property) return;
-    const url = typeof window !== 'undefined' ? window.location.href : '';
-    const formattedPrice = formatCompactCurrency(property.totalPrice);
-    const locationParts = [
-      property.location?.address,
-      property.location?.city,
-      property.location?.state,
-    ].filter(Boolean);
-    const locationStr = locationParts.length > 0 ? locationParts.join(', ') : 'India';
-    const landType = formatLandType(property.landType);
-
-    const messageLines = [
-      `🏡 *${property.title}*`,
-      `━━━━━━━━━━━━━━━━━━━━`,
-      `🏷️ *Type:* ${landType}`,
-      `📍 *Location:* ${locationStr}`,
-      `💰 *Price:* ${formattedPrice} (₹${property.pricePerYard.toLocaleString('en-IN')}/sq.yd)`,
-      `📐 *Area:* ${property.landAreaYards.toLocaleString('en-IN')} sq. yards`,
-      ...(property.roadAccess ? [`🛣️ *Road Access:* ${property.roadAccess}`] : []),
-      ``,
-      `🤝 *Direct Landowner Listing — 0% Brokerage*`,
-      `🔗 View details & contact landowner directly:`,
-      url,
-    ];
-
-    const message = messageLines.join('\n');
-    const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
-    setShareMenuOpen(false);
-  };
-
-  /* ================================================================
-     REPORT LISTING
-  ================================================================= */
-
-  const openReportModal = () => {
-    if (!user) {
-      setAuthModalOpen(true);
-      return;
+    if (typeof window !== 'undefined' && property) {
+      const text = `Check out this land listing on BhoomiMitra: ${property.title} - ${window.location.href}`;
+      window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
+      setShareMenuOpen(false);
     }
-    setReportModalOpen(true);
   };
 
-  /* ================================================================
-     IMAGE NAVIGATION
-  ================================================================= */
+  const handleShareTwitter = () => {
+    if (typeof window !== 'undefined' && property) {
+      const text = `Check out this land listing on BhoomiMitra: ${property.title}`;
+      window.open(
+        `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(window.location.href)}`,
+        '_blank',
+      );
+      setShareMenuOpen(false);
+    }
+  };
 
-  const previousImage = () => {
-    if (!images.length) return;
-
-    setActiveImageIndex((current) =>
-      current === 0 ? images.length - 1 : current - 1,
+  const isOwner = useMemo(() => {
+    if (isListingOwner) return true;
+    if (!user || !property) return false;
+    return (
+      (property.sellerId && String(property.sellerId) === String(user.id)) ||
+      (property.sellerEmail && property.sellerEmail.toLowerCase() === user.email?.toLowerCase())
     );
-  };
+  }, [isListingOwner, user, property]);
 
-  const nextImage = () => {
-    if (!images.length) return;
-
-    setActiveImageIndex((current) =>
-      current === images.length - 1 ? 0 : current + 1,
-    );
-  };
-
-  /* Keyboard navigation and scroll lock for Lightbox */
-  useEffect(() => {
-    if (!isLightboxOpen) return;
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setIsLightboxOpen(false);
-      } else if (e.key === 'ArrowLeft') {
-        if (activeMediaTab === 'PHOTOS' && images.length > 1) {
-          setActiveImageIndex((current) =>
-            current === 0 ? images.length - 1 : current - 1,
-          );
-        }
-      } else if (e.key === 'ArrowRight') {
-        if (activeMediaTab === 'PHOTOS' && images.length > 1) {
-          setActiveImageIndex((current) =>
-            current === images.length - 1 ? 0 : current + 1,
-          );
-        }
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    const originalOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      document.body.style.overflow = originalOverflow;
-    };
-  }, [isLightboxOpen, activeMediaTab, images.length]);
-
-  /* ================================================================
-     INQUIRY
-  ================================================================= */
+  const isDraft = property?.listingStatus === 'DRAFT' || property?.listingStatus === 'PAYMENT_PENDING';
 
   const openInquiry = () => {
     if (!property) return;
-
     if (isOwner) {
       setShareMessage('You are the owner of this listing.');
-      window.setTimeout(() => setShareMessage(''), 3000);
+      setTimeout(() => setShareMessage(''), 3000);
       return;
     }
-
     if (isDraft) {
       setShareMessage('Draft listings cannot receive inquiries until published.');
-      window.setTimeout(() => setShareMessage(''), 4000);
+      setTimeout(() => setShareMessage(''), 4000);
       return;
     }
-
     if (!user) {
       setAuthModalOpen(true);
       return;
     }
-
-    setInquiryError('');
-    setInquirySuccess(false);
-    setInquiryPhone(''); // Empty by default - manual entry
-    setInquiryEmail(user?.email || ''); // Default to signed-in email
     setInquiryOpen(true);
   };
 
-  const sendInquiry = async () => {
-    if (!property) return;
-
-    const trimmedMsg = inquiryMessage.trim();
-    if (!trimmedMsg) {
-      setInquiryError('Please enter an inquiry message.');
-      return;
-    }
-
-    if (trimmedMsg.length < 10) {
-      setInquiryError('Inquiry message must be at least 10 characters.');
-      return;
-    }
-
-    let cleanPhone = inquiryPhone.trim().replace(/\D/g, '');
-    if (cleanPhone.length === 12 && cleanPhone.startsWith('91')) {
-      cleanPhone = cleanPhone.slice(2);
-    } else if (cleanPhone.length === 11 && cleanPhone.startsWith('0')) {
-      cleanPhone = cleanPhone.slice(1);
-    }
-    if (!cleanPhone) {
-      setInquiryError('Please enter your 10-digit mobile number so the landowner can contact you.');
-      return;
-    }
-
-    if (!/^[6-9]\d{9}$/.test(cleanPhone)) {
-      setInquiryError('Please enter a valid 10-digit Indian mobile number (starting with 6, 7, 8, or 9).');
-      return;
-    }
-
-    const cleanEmail = inquiryEmail.trim() || user?.email?.trim();
-    if (!cleanEmail) {
-      setInquiryError('Please enter your contact email address.');
-      return;
-    }
-
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
-      setInquiryError('Please enter a valid email address.');
-      return;
-    }
-
-    setInquirySending(true);
-    setInquiryError('');
-
-    try {
-      const response = await fetch('/api/inquiries', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          propertyId: property._id,
-          message: trimmedMsg,
-          phoneShared: true,
-          buyerPhone: cleanPhone,
-          buyerEmail: cleanEmail,
-        }),
-      });
-
-      const data = await response.json().catch(() => null);
-
-      if (response.status === 401) {
-        setInquiryOpen(false);
-        setAuthModalOpen(true);
-        return;
-      }
-
-      if (!response.ok) {
-        throw new Error(
-          data?.message ||
-          data?.error ||
-          'Unable to send your inquiry.',
-        );
-      }
-
-      setInquirySuccess(true);
-      setInquiryMessage('');
-    } catch (err) {
-      console.error('Inquiry error:', err);
-
-      setInquiryError(
-        err instanceof Error
-          ? err.message
-          : 'Unable to send your inquiry.',
-      );
-    } finally {
-      setInquirySending(false);
-    }
-  };
-
-  /* ================================================================
-     CALL SELLER ACTION (Cloudflare Turnstile Verified & Database Recorded)
-  ================================================================= */
-
   const initiateCallSeller = () => {
     if (!property) return;
-
     if (isOwner) {
       setShareMessage('You are the owner of this listing.');
-      window.setTimeout(() => setShareMessage(''), 3000);
+      setTimeout(() => setShareMessage(''), 3000);
       return;
     }
-
     if (isDraft) {
-      setShareMessage('Draft listings cannot receive direct calls until published.');
-      window.setTimeout(() => setShareMessage(''), 4000);
+      setShareMessage('Draft listings cannot receive calls until published.');
+      setTimeout(() => setShareMessage(''), 4000);
       return;
     }
-
     if (!user) {
       setAuthModalOpen(true);
       return;
     }
 
     setCallError('');
-    setCallCopied(false);
     setCallModalOpen(true);
 
-    // If seller details were already unlocked previously, trigger tel prompt on mobile
     if (
       sellerCallData?.sellerPhone &&
       typeof window !== 'undefined' &&
@@ -817,28 +412,20 @@ function PropertyDetailsContent() {
 
     setCallLoading(true);
     setCallError('');
-    setCallCopied(false);
 
     try {
-      const response = await fetch(
-        `/api/properties/${encodeURIComponent(property._id)}/call`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ turnstileToken }),
-        },
-      );
+      const response = await fetch(`/api/properties/${encodeURIComponent(property._id)}/call`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ turnstileToken }),
+      });
 
       const data = await response.json();
-
       if (!response.ok) {
         throw new Error(data.error || 'Human verification failed or contact limit reached.');
       }
 
       const phone = data.sellerPhone || property.sellerPhone;
-
       if (!phone) {
         throw new Error('Seller contact phone number is not available for this listing.');
       }
@@ -851,64 +438,60 @@ function PropertyDetailsContent() {
 
       setSellerCallData(contactDetails);
 
-      // If mobile device, automatically trigger tel: prompt
-      if (
-        typeof window !== 'undefined' &&
-        /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)
-      ) {
-        window.location.href = `tel:${phone}`;
+      if (typeof window !== 'undefined' && /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)) {
+        window.location.href = `tel:${contactDetails.sellerPhone}`;
       }
     } catch (err: unknown) {
-      const msg =
-        err instanceof Error ? err.message : 'Unable to retrieve contact details.';
-      setCallError(msg);
+      setCallError(err instanceof Error ? err.message : 'Failed to retrieve landowner phone number');
     } finally {
       setCallLoading(false);
     }
   };
 
-  /* ================================================================
-     LOADING STATE
-  ================================================================= */
+  const locationText = useMemo(() => {
+    if (!property?.location) return '';
+    const parts = [
+      property.location.city,
+      property.location.district,
+      property.location.state,
+      property.location.pincode,
+    ].filter(Boolean);
+    return parts.join(', ');
+  }, [property?.location]);
 
-  if (loading || sessionLoading) {
+  const publishedDate = useMemo(() => {
+    return formatDate(property?.publishedAt || property?.createdAt);
+  }, [property?.publishedAt, property?.createdAt]);
+
+
+  /* Loading Skeleton */
+  if (loading && !property) {
     return (
       <div className="min-h-screen bg-slate-50">
         <Navbar />
-
         <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
           <PropertyPageSkeleton />
         </main>
-
         <Footer />
       </div>
     );
   }
 
-  /* ================================================================
-     ERROR / NOT FOUND
-  ================================================================= */
-
+  /* Error / Not Found */
   if (!property) {
     return (
       <div className="min-h-screen bg-slate-50">
         <Navbar />
-
         <main className="mx-auto flex min-h-[60vh] max-w-2xl items-center justify-center px-4 py-16 text-center">
           <div>
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-slate-100">
               <LandPlot className="h-7 w-7 text-slate-400" />
             </div>
-
-            <h1 className="mt-5 text-2xl font-black text-slate-900">
-              Property not available
-            </h1>
-
+            <h1 className="mt-5 text-2xl font-black text-slate-900">Property not available</h1>
             <p className="mt-3 text-sm leading-6 text-slate-500">
               {error ||
                 'This listing may have been removed, sold, paused, or is no longer available.'}
             </p>
-
             <div className="mt-7 flex flex-wrap justify-center gap-3">
               <button
                 type="button"
@@ -917,7 +500,6 @@ function PropertyDetailsContent() {
               >
                 Try Again
               </button>
-
               <Link
                 href="/buy"
                 className="rounded-xl border border-slate-200 bg-white px-5 py-3 text-xs font-bold text-slate-700 hover:bg-slate-50"
@@ -927,81 +509,44 @@ function PropertyDetailsContent() {
             </div>
           </div>
         </main>
-
         <Footer />
       </div>
     );
   }
 
-  /* ================================================================
-     MAIN PROPERTY PAGE
-  ================================================================= */
-
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
-      {jsonLd && (
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-        />
-      )}
       <Navbar />
 
-      {/* ============================================================
-          BREADCRUMB
-      ============================================================ */}
-
+      {/* Breadcrumb */}
       <div className="border-b border-slate-200 bg-white">
         <div className="mx-auto max-w-7xl px-4 py-3 sm:px-6 lg:px-8">
           <div className="flex items-center gap-2 overflow-hidden text-[11px] text-slate-500">
-            <Link
-              href="/"
-              className="shrink-0 hover:text-[#c75e0a]"
-            >
+            <Link href="/" className="shrink-0 hover:text-[#c75e0a]">
               Home
             </Link>
-
             <span>/</span>
-
-            <Link
-              href="/buy"
-              className="shrink-0 hover:text-[#c75e0a]"
-            >
+            <Link href="/buy" className="shrink-0 hover:text-[#c75e0a]">
               Find Land
             </Link>
-
             <span>/</span>
-
-            <span className="truncate font-semibold text-slate-700">
-              {property.title}
-            </span>
+            <span className="truncate font-semibold text-slate-700">{property.title}</span>
           </div>
         </div>
       </div>
 
-      {/* ============================================================
-          MAIN
-      ============================================================ */}
-
       <main className="mx-auto max-w-7xl px-4 py-6 pb-28 sm:px-6 lg:px-8 lg:py-8 lg:pb-12">
-        {/* Back */}
-
+        {/* Back Link */}
         <button
           type="button"
           onClick={() => router.back()}
-          className="mb-5 inline-flex items-center gap-2 text-xs font-bold text-slate-500 transition-colors hover:text-[#c75e0a]"
+          className="mb-5 inline-flex items-center gap-2 text-xs font-bold text-slate-500 transition-colors hover:text-[#c75e0a] cursor-pointer"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to listings
         </button>
 
-        {/* ========================================================
-            PROPERTY HEADER
-        ======================================================== */}
-
-        {/* ========================================================
-            DRAFT PREVIEW BANNER (OWNER ONLY)
-        ======================================================== */}
+        {/* Private Draft Preview Banner */}
         {isDraft && (
           <div className="mb-6 rounded-2xl border-2 border-amber-300 bg-amber-50/95 p-4 sm:p-5 shadow-xs">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -1019,7 +564,7 @@ function PropertyDetailsContent() {
                     </span>
                   </div>
                   <p className="mt-1 text-xs text-amber-900/90 leading-relaxed max-w-2xl">
-                    This listing is currently in <strong>Draft (Payment Pending)</strong>. Only you can view this preview. 
+                    This listing is currently in <strong>Draft (Payment Pending)</strong>. Only you can view this preview.
                     Public buyers and search engines cannot find or view this page until you activate your listing subscription.
                   </p>
                 </div>
@@ -1037,10 +582,7 @@ function PropertyDetailsContent() {
           </div>
         )}
 
-        {/* ========================================================
-            PROPERTY HEADER
-        ======================================================== */}
-
+        {/* Property Header */}
         <section className="mb-6">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <div className="min-w-0">
@@ -1086,437 +628,149 @@ function PropertyDetailsContent() {
               </div>
             </div>
 
-            {/* Header actions */}
-
+            {/* Header Actions */}
             <div className="flex shrink-0 items-center gap-2">
               <div className="relative" ref={shareMenuRef}>
                 <button
                   type="button"
-                  onClick={handleShareButtonClick}
-                  className={`relative inline-flex items-center gap-2 rounded-xl border px-3.5 py-2.5 text-xs font-bold shadow-sm transition-colors cursor-pointer ${
-                    isDraft
-                      ? 'border-amber-300 bg-amber-50 text-amber-900 hover:bg-amber-100'
-                      : shareMenuOpen
-                        ? 'border-[#FF9933] bg-[#fff9f0] text-[#c75e0a]'
-                        : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
-                  }`}
-                  title={isDraft ? 'Draft listings cannot be shared' : 'Share property'}
+                  onClick={() => setShareMenuOpen((o) => !o)}
+                  className="flex h-10 items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-bold text-slate-700 shadow-xs hover:bg-slate-50 transition-colors cursor-pointer"
                 >
-                  <Share2 className={`h-4 w-4 ${isDraft ? 'text-amber-600' : shareMenuOpen ? 'text-[#FF9933]' : ''}`} />
-
-                  <span className="hidden sm:inline">
-                    {shareMessage || (isDraft ? 'Draft (Private)' : 'Share')}
-                  </span>
+                  <Share2 className="h-4 w-4" />
+                  <span>Share</span>
                 </button>
 
-                {/* Share Options Dropdown Popover */}
-                {shareMenuOpen && !isDraft && (
-                  <div className="absolute right-0 top-full mt-2 w-72 rounded-2xl border border-slate-200 bg-white p-2 shadow-xl z-50 animate-in fade-in slide-in-from-top-2 duration-150">
-                    <div className="px-3 py-2 border-b border-slate-100">
-                      <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                        Share Listing
-                      </p>
-                    </div>
-
-                    <div className="mt-1 space-y-1">
-                      {/* Copy Link Option */}
-                      <button
-                        type="button"
-                        onClick={handleCopyLink}
-                        className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-50 text-left transition-colors cursor-pointer group"
-                      >
-                        <div
-                          className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
-                            copiedLink
-                              ? 'bg-emerald-50 text-emerald-600 border border-emerald-200'
-                              : 'bg-slate-100 text-slate-600 group-hover:bg-[#fff1dc] group-hover:text-[#c75e0a]'
-                          }`}
-                        >
-                          {copiedLink ? (
-                            <Check className="w-4 h-4 text-emerald-600" />
-                          ) : (
-                            <Copy className="w-4 h-4" />
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p
-                            className={`text-xs font-bold leading-tight ${
-                              copiedLink ? 'text-emerald-700' : 'text-slate-800'
-                            }`}
-                          >
-                            {copiedLink ? 'Link Copied to Clipboard!' : 'Copy Link'}
-                          </p>
-                          <p className="text-[11px] text-slate-500 leading-tight truncate">
-                            {copiedLink
-                              ? 'Ready to paste anywhere'
-                              : 'Direct link to this property'}
-                          </p>
-                        </div>
-                      </button>
-
-                      {/* Share on WhatsApp Option */}
-                      <button
-                        type="button"
-                        onClick={handleShareWhatsApp}
-                        className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-emerald-50/60 text-left transition-colors cursor-pointer group"
-                      >
-                        <div className="w-8 h-8 rounded-lg bg-[#25D366] text-white flex items-center justify-center shrink-0 shadow-xs group-hover:bg-[#20bd5a] transition-colors">
-                          <svg
-                            viewBox="0 0 24 24"
-                            width="16"
-                            height="16"
-                            fill="currentColor"
-                            className="w-4 h-4"
-                          >
-                            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
-                           </svg>
-                         </div>
-                         <div className="flex-1 min-w-0">
-                           <p className="text-xs font-bold text-slate-800 leading-tight">
-                             Share on WhatsApp
-                           </p>
-                           <p className="text-[11px] text-slate-500 leading-tight truncate">
-                             Pre-filled message &amp; direct link
-                           </p>
-                         </div>
-                       </button>
-                     </div>
-                   </div>
-                 )}
-               </div>
+                {shareMenuOpen && (
+                  <div className="absolute right-0 top-12 z-30 w-48 rounded-xl border border-slate-200 bg-white p-2 shadow-xl animate-in fade-in zoom-in-95 duration-100">
+                    <button
+                      type="button"
+                      onClick={handleCopyLink}
+                      className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 text-left cursor-pointer"
+                    >
+                      {copiedLink ? (
+                        <>
+                          <Check className="h-3.5 w-3.5 text-[#FF9933]" />
+                          <span className="text-[#c75e0a]">Link Copied!</span>
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="h-3.5 w-3.5 text-slate-400" />
+                          <span>Copy Link</span>
+                        </>
+                      )}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleShareWhatsApp}
+                      className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 text-left cursor-pointer"
+                    >
+                      <MessageSquare className="h-3.5 w-3.5 text-[#25D366]" />
+                      <span>WhatsApp</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleShareTwitter}
+                      className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 text-left cursor-pointer"
+                    >
+                      <Share2 className="h-3.5 w-3.5 text-sky-500" />
+                      <span>Twitter / X</span>
+                    </button>
+                  </div>
+                )}
+              </div>
 
               <button
                 type="button"
                 onClick={toggleFavorite}
                 disabled={favoriteLoading}
-                className={`inline-flex items-center gap-2 rounded-xl border px-3.5 py-2.5 text-xs font-bold shadow-sm transition-colors ${favorite
-                  ? 'border-rose-200 bg-rose-50 text-rose-600'
-                  : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
-                  }`}
+                className={`flex h-10 items-center gap-1.5 rounded-xl border px-3.5 text-xs font-bold transition-colors cursor-pointer ${
+                  favorite
+                    ? 'border-rose-200 bg-rose-50 text-rose-600'
+                    : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+                }`}
               >
-                {favoriteLoading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Heart
-                    className={`h-4 w-4 ${favorite ? 'fill-current' : ''
-                      }`}
-                  />
-                )}
-
-                <span className="hidden sm:inline">
-                  {favorite ? 'Saved' : 'Save'}
-                </span>
+                <Heart className={`h-4 w-4 ${favorite ? 'fill-current text-rose-500' : ''}`} />
+                <span>{favorite ? 'Saved' : 'Save'}</span>
               </button>
 
-              {!isDraft && (
-                <button
-                  type="button"
-                  onClick={openReportModal}
-                  className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs font-bold text-slate-700 shadow-sm transition-colors hover:border-rose-200 hover:bg-rose-50 hover:text-rose-700"
-                  title="Report suspicious or incorrect listing"
-                  aria-label="Report listing"
+              {isOwner && (
+                <Link
+                  href={`/sell?propertyId=${property._id}`}
+                  className="flex h-10 items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors"
                 >
-                  <Flag className="h-4 w-4" />
-                  <span className="hidden sm:inline">Report</span>
-                </button>
+                  <Edit className="h-4 w-4" />
+                  <span>Edit</span>
+                </Link>
               )}
             </div>
           </div>
+
+          {shareMessage && (
+            <p className="mt-2 text-xs font-bold text-amber-600 animate-in fade-in">{shareMessage}</p>
+          )}
         </section>
 
-        {/* ========================================================
-            IMAGE + SUMMARY GRID
-        ======================================================== */}
-
+        {/* Media & Summary Grid */}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-          {/* ======================================================
-              IMAGE GALLERY
-          ====================================================== */}
-
+          {/* Subcomponent: Gallery Carousel */}
           <section className="lg:col-span-7">
-            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-              <div className="relative aspect-[4/3] overflow-hidden bg-slate-900 sm:aspect-[16/10]">
-                {/* Media Switcher Tab (Photos vs Video Tour) */}
-                {property.video?.secureUrl && (
-                  <div className="absolute top-3 right-3 z-20 flex items-center gap-1 rounded-xl bg-black/70 p-1 backdrop-blur-md text-white text-[11px] font-bold">
-                    <button
-                      type="button"
-                      onClick={() => setActiveMediaTab('PHOTOS')}
-                      className={`flex items-center gap-1.5 px-3 py-1 rounded-lg transition-colors cursor-pointer ${
-                        activeMediaTab === 'PHOTOS' ? 'bg-[#FF9933] text-white shadow-xs' : 'text-slate-300 hover:text-white'
-                      }`}
-                    >
-                      <ImageIcon className="w-3.5 h-3.5" />
-                      <span>Photos ({images.length})</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setActiveMediaTab('VIDEO')}
-                      className={`flex items-center gap-1.5 px-3 py-1 rounded-lg transition-colors cursor-pointer ${
-                        activeMediaTab === 'VIDEO' ? 'bg-[#FF9933] text-white shadow-xs' : 'text-slate-300 hover:text-white'
-                      }`}
-                    >
-                      <Play className="w-3.5 h-3.5 fill-current" />
-                      <span>Video Tour</span>
-                    </button>
-                  </div>
-                )}
-
-                {activeMediaTab === 'VIDEO' && property.video?.secureUrl ? (
-                  <div className="relative w-full h-full flex items-center justify-center bg-black">
-                    <video
-                      src={property.video.secureUrl}
-                      controls
-                      playsInline
-                      autoPlay
-                      preload="metadata"
-                      className="w-full h-full object-contain"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setIsLightboxOpen(true)}
-                      className="absolute bottom-3 right-3 z-10 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-black/60 hover:bg-black/80 text-white text-xs font-bold backdrop-blur-md transition-all shadow-md cursor-pointer hover:scale-105"
-                      title="Expand video to fullscreen"
-                    >
-                      <Maximize2 className="w-3.5 h-3.5" />
-                      <span className="hidden sm:inline">Maximize</span>
-                    </button>
-                  </div>
-                ) : activeImage?.secureUrl ? (
-                  <div
-                    onClick={() => setIsLightboxOpen(true)}
-                    className="relative w-full h-full cursor-zoom-in group"
-                    title="Click to maximize image"
-                  >
-                    <Image
-                      src={activeImage.secureUrl}
-                      alt={
-                        activeImage.fileName ||
-                        property.title
-                      }
-                      fill
-                      placeholder="blur"
-                      blurDataURL={SHIMMER_BLUR_DATA_URL}
-                      sizes="(max-width: 1024px) 100vw, 58vw"
-                      className="object-cover transition-transform duration-300 group-hover:scale-[1.02]"
-                      priority
-                    />
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors pointer-events-none" />
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setIsLightboxOpen(true);
-                      }}
-                      className="absolute bottom-3 right-3 z-10 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-black/60 hover:bg-black/80 text-white text-xs font-bold backdrop-blur-md transition-all shadow-md cursor-pointer hover:scale-105"
-                      title="Click to maximize image"
-                    >
-                      <Maximize2 className="w-3.5 h-3.5" />
-                      <span className="hidden sm:inline">Click to Maximize</span>
-                    </button>
-                  </div>
-                ) : (
-                  <div className="flex h-full items-center justify-center bg-slate-100">
-                    <div className="text-center">
-                      <LandPlot className="mx-auto h-12 w-12 text-slate-300" />
-
-                      <p className="mt-3 text-xs font-semibold text-slate-400">
-                        No property images available
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                {/* Image count */}
-                {activeMediaTab === 'PHOTOS' && images.length > 0 && (
-                  <div className="absolute bottom-3 left-3 rounded-lg bg-black/60 px-2.5 py-1.5 text-[10px] font-bold text-white backdrop-blur">
-                    {activeImageIndex + 1} / {images.length}
-                  </div>
-                )}
-
-                {/* Navigation (Only on photos) */}
-                {activeMediaTab === 'PHOTOS' && images.length > 1 && (
-                  <>
-                    <button
-                      type="button"
-                      onClick={previousImage}
-                      aria-label="Previous property image"
-                      className="absolute left-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur transition-colors hover:bg-black/70"
-                    >
-                      <ChevronLeft className="h-5 w-5" />
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={nextImage}
-                      aria-label="Next property image"
-                      className="absolute right-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur transition-colors hover:bg-black/70"
-                    >
-                      <ChevronRight className="h-5 w-5" />
-                    </button>
-                  </>
-                )}
-
-                {/* Verification */}
-                <div className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-lg bg-[#FF9933] px-3 py-2 text-[10px] font-black text-white shadow-lg">
-                  <ShieldCheck className="h-4 w-4" />
-                  Direct Classified
-                </div>
-              </div>
-
-              {/* Thumbnails */}
-              {(images.length > 1 || Boolean(property.video?.secureUrl)) && (
-                <div className="flex gap-2 overflow-x-auto p-3 items-center">
-                  {images.map((image, index) => (
-                    <button
-                      type="button"
-                      key={
-                        image._id ||
-                        image.objectKey ||
-                        index
-                      }
-                      onClick={() => {
-                        setActiveImageIndex(index);
-                        setActiveMediaTab('PHOTOS');
-                      }}
-                      className={`relative h-16 w-20 shrink-0 overflow-hidden rounded-lg border-2 transition-colors cursor-pointer ${
-                        activeMediaTab === 'PHOTOS' && activeImageIndex === index
-                          ? 'border-[#FF9933]'
-                          : 'border-transparent opacity-80 hover:opacity-100'
-                      }`}
-                    >
-                      <Image
-                        src={image.secureUrl}
-                        alt=""
-                        fill
-                        placeholder="blur"
-                        blurDataURL={SHIMMER_BLUR_DATA_URL}
-                        sizes="80px"
-                        className="object-cover"
-                      />
-                    </button>
-                  ))}
-
-                  {/* Video Thumbnail Button */}
-                  {property.video?.secureUrl && (
-                    <button
-                      type="button"
-                      onClick={() => setActiveMediaTab('VIDEO')}
-                      className={`relative h-16 w-20 shrink-0 overflow-hidden rounded-lg border-2 bg-slate-950 flex flex-col items-center justify-center text-white transition-all cursor-pointer ${
-                        activeMediaTab === 'VIDEO'
-                          ? 'border-[#FF9933] shadow-sm'
-                          : 'border-slate-800 opacity-80 hover:opacity-100 hover:border-slate-700'
-                      }`}
-                      title="Watch Video Tour"
-                    >
-                      <div className="w-7 h-7 rounded-full bg-[#fff1dc] text-[#c75e0a] flex items-center justify-center mb-0.5">
-                        <Play className="w-3.5 h-3.5 fill-current ml-0.5" />
-                      </div>
-                      <span className="text-[9px] font-black text-white uppercase tracking-wider">Video</span>
-                    </button>
-                  )}
-                </div>
-              )}
-            </div>
+            <GalleryCarousel property={property} />
           </section>
 
-          {/* ======================================================
-              PROPERTY SUMMARY CARD
-          ====================================================== */}
-
+          {/* Property Summary Card */}
           <section className="lg:col-span-5">
             <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
               {/* Price */}
-
               <div className="border-b border-slate-100 pb-5">
                 <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                   Asking price
                 </p>
-
                 <div className="mt-1 flex flex-wrap items-baseline gap-2">
                   <span className="text-3xl font-black tracking-tight text-slate-950">
-                    {formatCompactCurrency(
-                      property.totalPrice,
-                    )}
+                    {formatCompactCurrency(property.totalPrice)}
                   </span>
-
                   {property.priceNegotiable && (
-                    <span className="text-xs font-bold text-blue-600">
-                      Negotiable
-                    </span>
+                    <span className="text-xs font-bold text-blue-600">Negotiable</span>
                   )}
                 </div>
-
                 <p className="mt-1 text-xs text-slate-500">
-                  {formatIndianCurrency(
-                    property.pricePerYard,
-                  )}{' '}
-                  per sq. yard
+                  {formatIndianCurrency(property.pricePerYard)} per sq. yard
                 </p>
               </div>
 
-              {/* Core facts */}
-
+              {/* Core Facts */}
               <div className="grid grid-cols-2 gap-3 border-b border-slate-100 py-5">
-                <Fact
-                  label="Land area"
-                  value={formatArea(
-                    property.landAreaYards,
-                  )}
-                />
-
-                <Fact
-                  label="Land type"
-                  value={formatLandType(
-                    property.landType,
-                  )}
-                />
-
-                <Fact
-                  label="Road access"
-                  value={
-                    property.roadAccess || 'Not specified'
-                  }
-                />
-
+                <Fact label="Land area" value={formatArea(property.landAreaYards)} />
+                <Fact label="Land type" value={formatLandType(property.landType)} />
+                <Fact label="Road access" value={property.roadAccess || 'Not specified'} />
                 <Fact
                   label="Location"
-                  value={
-                    property.location?.city ||
-                    property.location?.state ||
-                    'See listing'
-                  }
+                  value={property.location?.city || property.location?.state || 'See listing'}
                 />
               </div>
 
-              {/* Protected information gate */}
-
+              {/* CTA Gate & Actions */}
               {!user && !showProtectedInformation ? (
                 <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4">
                   <div className="flex items-start gap-3">
                     <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white shadow-sm">
                       <ShieldCheck className="h-4 w-4 text-[#FF9933]" />
                     </div>
-
                     <div>
                       <h3 className="text-xs font-black text-slate-900">
                         Want the full property information?
                       </h3>
-
                       <p className="mt-1 text-[11px] leading-5 text-slate-500">
-                        Sign in with Google to continue to
-                        protected property information and buyer
-                        actions.
+                        Sign in to connect directly with the landowner without brokerage fees.
                       </p>
                     </div>
                   </div>
-
                   <button
                     type="button"
-                    onClick={requireLoginForProtectedInformation}
-                    className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-slate-950 px-4 py-3 text-xs font-bold text-white transition-colors hover:bg-slate-800"
+                    onClick={() => setAuthModalOpen(true)}
+                    className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-slate-950 px-4 py-3 text-xs font-bold text-white transition-colors hover:bg-slate-800 cursor-pointer"
                   >
-                    Continue with Google
+                    Sign in to Continue
                   </button>
                 </div>
               ) : isDraft ? (
@@ -1530,7 +784,6 @@ function PropertyDetailsContent() {
                       Buyer phone calls and inquiries will be activated once you publish this listing live.
                     </p>
                   </div>
-
                   <Link
                     href={`/sell?propertyId=${property._id}`}
                     className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#FF9933] px-4 py-3.5 text-xs font-black text-white shadow-sm transition-all hover:bg-[#f07d12]"
@@ -1550,7 +803,6 @@ function PropertyDetailsContent() {
                       This listing is live on the marketplace. You can edit details or review buyer inquiries.
                     </p>
                   </div>
-
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <Link
                       href={`/sell?propertyId=${property._id}`}
@@ -1559,7 +811,6 @@ function PropertyDetailsContent() {
                       <Edit className="h-3.5 w-3.5 text-slate-500" />
                       <span>Edit Listing</span>
                     </Link>
-
                     <Link
                       href="/dashboard/seller"
                       className="flex items-center justify-center gap-1.5 rounded-xl bg-[#FF9933] px-3 py-3 text-xs font-bold text-white shadow-xs hover:bg-[#f07d12] transition-colors"
@@ -1581,12 +832,12 @@ function PropertyDetailsContent() {
                       {callLoading ? (
                         <>
                           <Loader2 className="h-4 w-4 animate-spin" />
-                          Connecting...
+                          <span>Connecting...</span>
                         </>
                       ) : (
                         <>
                           <Phone className="h-4 w-4 text-[#FF9933]" />
-                          Call Seller
+                          <span>Call Seller</span>
                         </>
                       )}
                     </button>
@@ -1597,42 +848,35 @@ function PropertyDetailsContent() {
                       className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#FF9933] px-4 py-3.5 text-xs font-black text-white shadow-sm transition-colors hover:bg-[#f07d12] cursor-pointer"
                     >
                       <MessageSquare className="h-4 w-4" />
-                      Send Message
+                      <span>Send Message</span>
                     </button>
                   </div>
 
                   <div className="flex items-center justify-center gap-2 text-[10px] text-slate-400 pt-1">
                     <ShieldCheck className="h-3.5 w-3.5 text-[#FF9933]" />
-                    Buyer protection: direct call action is logged on BhoomiMitra
+                    <span>Buyer protection: direct connection is logged on BhoomiMitra</span>
                   </div>
                 </div>
               )}
 
-              {/* Seller identity */}
-
+              {/* Seller Identity */}
               {user && (
                 <div className="mt-5 border-t border-slate-100 pt-5">
                   <p className="mb-3 text-[10px] font-bold uppercase tracking-wider text-slate-400">
                     Seller
                   </p>
-
                   <div className="flex items-center gap-3">
                     <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100">
                       <UserRound className="h-5 w-5 text-slate-500" />
                     </div>
-
                     <div className="min-w-0">
                       <p className="truncate text-sm font-bold text-slate-900">
-                        {property.sellerName ||
-                          'Property Seller'}
+                        {property.sellerName || 'Property Seller'}
                       </p>
-
                       <p className="text-[10px] text-slate-500">
-                        {property.sellerType ===
-                          'COMPANY'
+                        {property.sellerType === 'COMPANY'
                           ? 'Company'
-                          : property.sellerType ===
-                            'AGENT'
+                          : property.sellerType === 'AGENT'
                             ? 'Property Agent'
                             : 'Individual seller'}
                       </p>
@@ -1641,35 +885,20 @@ function PropertyDetailsContent() {
                 </div>
               )}
             </div>
-
-            {/* Fee clarification */}
-
-            <div className="mt-4 flex items-start gap-3 rounded-2xl border border-slate-200 bg-white p-4">
-              <Info className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" />
-
-              <p className="text-[10px] leading-5 text-slate-500">
-                The price shown is the seller&apos;s asking price.
-                BhoomiMitra&apos;s listing subscription fee is charged
-                to sellers and is separate from the property price.
-              </p>
-            </div>
           </section>
         </div>
 
-        {/* ========================================================
-            DETAILS
-        ======================================================== */}
-
+        {/* Details & Location Row */}
         <div className="mt-7 grid grid-cols-1 gap-6 lg:grid-cols-12">
-          {/* Description */}
-
+          {/* About This Land */}
           <section className="lg:col-span-8">
             <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-              <SectionHeading
-                icon={<LandPlot className="h-4 w-4" />}
-                title="About this land"
-              />
-
+              <div className="flex items-center gap-2">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#fff1dc] text-[#c75e0a]">
+                  <LandPlot className="h-4 w-4" />
+                </div>
+                <h2 className="text-sm font-black text-slate-950">About this land</h2>
+              </div>
               <div className="mt-5">
                 <p className="whitespace-pre-line text-sm leading-7 text-slate-600">
                   {property.description ||
@@ -1679,374 +908,64 @@ function PropertyDetailsContent() {
             </div>
           </section>
 
-          {/* Location */}
-
+          {/* Subcomponent: Location Section */}
           <section className="lg:col-span-4">
-            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-              <SectionHeading
-                icon={<MapPin className="h-4 w-4" />}
-                title="Location"
-              />
-
-              <div className="mt-5 space-y-4">
-                <LocationRow
-                  label="City"
-                  value={
-                    property.location?.city ||
-                    'Not specified'
-                  }
-                />
-
-                <LocationRow
-                  label="District"
-                  value={
-                    property.location?.district ||
-                    'Not specified'
-                  }
-                />
-
-                <LocationRow
-                  label="State"
-                  value={
-                    property.location?.state ||
-                    'Not specified'
-                  }
-                />
-
-                <LocationRow
-                  label="Pincode"
-                  value={
-                    property.location?.pincode ||
-                    'Not specified'
-                  }
-                />
-
-                {property.location?.address && (
-                  <div className="rounded-xl bg-slate-50 p-3">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                      Address
-                    </p>
-
-                    <p className="mt-1 text-xs leading-5 text-slate-700">
-                      {property.location.address}
-                    </p>
-                  </div>
-                )}
-
-                {property.googleMapsShareLink && (
-                  <a
-                    href={property.googleMapsShareLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-xs font-bold text-slate-700 transition-colors hover:border-[#FF9933] hover:bg-[#fff9f0] hover:text-[#c75e0a]"
-                  >
-                    <MapPin className="h-4 w-4" />
-                    Open in Google Maps
-                    <ExternalLink className="h-3.5 w-3.5" />
-                  </a>
-                )}
-              </div>
-            </div>
+            <LocationSection property={property} />
           </section>
         </div>
 
-        {/* ========================================================
-            PROPERTY FEATURES
-        ======================================================== */}
-
+        {/* Basic Property Features */}
         <section className="mt-6">
           <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-            <SectionHeading
-              icon={<Tag className="h-4 w-4" />}
-              title="Property information"
-            />
-
-            <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              <InfoCard
-                label="Land area"
-                value={formatArea(
-                  property.landAreaYards,
-                )}
-              />
-
-              <InfoCard
-                label="Price / sq. yard"
-                value={formatIndianCurrency(
-                  property.pricePerYard,
-                )}
-              />
-
-              <InfoCard
-                label="Total asking price"
-                value={formatCompactCurrency(
-                  property.totalPrice,
-                )}
-              />
-
-              <InfoCard
-                label="Road access"
-                value={
-                  property.roadAccess ||
-                  'Not specified'
-                }
-              />
+            <div className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#fff1dc] text-[#c75e0a]">
+                <Tag className="h-4 w-4" />
+              </div>
+              <h2 className="text-sm font-black text-slate-950">Property Information</h2>
             </div>
 
-            {property.nearbyLandmarks?.length > 0 && (
+            <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              <InfoCard label="Land area" value={formatArea(property.landAreaYards)} />
+              <InfoCard
+                label="Price / sq. yard"
+                value={formatIndianCurrency(property.pricePerYard)}
+              />
+              <InfoCard
+                label="Total asking price"
+                value={formatCompactCurrency(property.totalPrice)}
+              />
+              <InfoCard label="Road access" value={property.roadAccess || 'Not specified'} />
+            </div>
+
+            {property.nearbyLandmarks && property.nearbyLandmarks.length > 0 && (
               <div className="mt-5 border-t border-slate-100 pt-5">
                 <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                   Nearby landmarks
                 </p>
-
                 <div className="mt-3 flex flex-wrap gap-2">
-                  {property.nearbyLandmarks.map(
-                    (landmark, index) => (
-                      <span
-                        key={`${landmark}-${index}`}
-                        className="rounded-full bg-slate-100 px-3 py-1.5 text-[10px] font-semibold text-slate-600"
-                      >
-                        {landmark}
-                      </span>
-                    ),
-                  )}
+                  {property.nearbyLandmarks.map((landmark, index) => (
+                    <span
+                      key={`${landmark}-${index}`}
+                      className="rounded-full bg-slate-100 px-3 py-1.5 text-[10px] font-semibold text-slate-600"
+                    >
+                      {landmark}
+                    </span>
+                  ))}
                 </div>
               </div>
             )}
           </div>
         </section>
 
-        {/* ========================================================
-            DYNAMIC PROPERTY SPECIFICATIONS & EXCLUSIVE AMENITIES
-        ======================================================== */}
-        {(property.bhk ||
-          property.facing ||
-          property.bathrooms ||
-          property.balconies ||
-          property.superBuiltUpAreaSqFt ||
-          property.carpetAreaSqFt ||
-          property.propertyAttributes?.villaType ||
-          property.propertyAttributes?.villaFloors ||
-          property.propertyAttributes?.vastuCompliant ||
-          (Array.isArray(property.propertyAttributes?.additionalRooms) && property.propertyAttributes.additionalRooms.length > 0) ||
-          (Array.isArray(property.propertyAttributes?.villaPrivateFeatures) && property.propertyAttributes.villaPrivateFeatures.length > 0) ||
-          (Array.isArray(property.propertyAttributes?.furnishingDetails) && property.propertyAttributes.furnishingDetails.length > 0) ||
-          (Array.isArray(property.amenities) && property.amenities.length > 0)) && (
-          <section className="mt-6">
-            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6 space-y-6">
-              <div className="flex items-center justify-between">
-                <SectionHeading
-                  icon={<Home className="h-4 w-4" />}
-                  title="Property Specifications &amp; Highlights"
-                />
-                <span className="text-[10px] font-bold text-[#c75e0a] bg-[#fff1dc] px-2.5 py-1 rounded-full">
-                  Direct Owner Verified
-                </span>
-              </div>
+        {/* Subcomponent: Dynamic Property Specifications & Amenities */}
+        <PropertySpecifications property={property} />
 
-              {/* Grid of Key Structural Details */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-                {property.bhk && property.bhk !== 'NOT_SPECIFIED' && (
-                  <Fact label="Configuration" value={property.bhk} />
-                )}
-
-                {property.propertyAttributes?.villaType && property.propertyAttributes.villaType !== 'NOT_SPECIFIED' && (
-                  <Fact
-                    label="Villa Architecture"
-                    value={
-                      property.propertyAttributes.villaType === 'GATED_VILLA'
-                        ? 'Gated Luxury Villa'
-                        : property.propertyAttributes.villaType === 'INDEPENDENT_HOUSE'
-                        ? 'Independent Bungalow'
-                        : property.propertyAttributes.villaType === 'DUPLEX_VILLA'
-                        ? 'Duplex Villa'
-                        : property.propertyAttributes.villaType === 'TRIPLEX_VILLA'
-                        ? 'Triplex Villa'
-                        : property.propertyAttributes.villaType === 'ROW_HOUSE'
-                        ? 'Row House / Townhouse'
-                        : property.propertyAttributes.villaType === 'FARMHOUSE_VILLA'
-                        ? 'Farmhouse Villa'
-                        : property.propertyAttributes.villaType.replace(/_/g, ' ')
-                    }
-                  />
-                )}
-
-                {property.propertyAttributes?.villaFloors && property.propertyAttributes.villaFloors !== 'NOT_SPECIFIED' && (
-                  <Fact
-                    label="Structure Levels"
-                    value={
-                      property.propertyAttributes.villaFloors === 'G'
-                        ? 'Ground Only (G)'
-                        : property.propertyAttributes.villaFloors === 'G_PLUS_1'
-                        ? 'G + 1 Floor (Duplex)'
-                        : property.propertyAttributes.villaFloors === 'G_PLUS_2'
-                        ? 'G + 2 Floors (Triplex)'
-                        : property.propertyAttributes.villaFloors === 'G_PLUS_3'
-                        ? 'G + 3 Floors'
-                        : property.propertyAttributes.villaFloors.replace(/_/g, ' ')
-                    }
-                  />
-                )}
-
-                {property.facing && property.facing !== 'NOT_SPECIFIED' && (
-                  <Fact label="Main Facing" value={`${property.facing.replace(/_/g, ' ')} Facing`} />
-                )}
-
-                {property.bathrooms && property.bathrooms > 0 && (
-                  <Fact label="Bathrooms" value={`${property.bathrooms} Baths`} />
-                )}
-
-                {property.balconies !== undefined && property.balconies >= 0 && (
-                  <Fact label="Balconies / Sit-outs" value={`${property.balconies} Balconies`} />
-                )}
-
-                {property.superBuiltUpAreaSqFt && (
-                  <Fact label="Built-up Area" value={`${property.superBuiltUpAreaSqFt.toLocaleString('en-IN')} sq. ft`} />
-                )}
-
-                {property.carpetAreaSqFt && (
-                  <Fact label="Carpet Area" value={`${property.carpetAreaSqFt.toLocaleString('en-IN')} sq. ft`} />
-                )}
-
-                {property.furnishingStatus && property.furnishingStatus !== 'NOT_SPECIFIED' && (
-                  <Fact label="Furnishing" value={property.furnishingStatus.replace(/_/g, ' ')} />
-                )}
-
-                {property.propertyAttributes?.parkingSlots && property.propertyAttributes.parkingSlots !== 'NOT_SPECIFIED' && (
-                  <Fact
-                    label="Car Parking"
-                    value={
-                      property.propertyAttributes.parkingSlots === '1_COVERED'
-                        ? '1 Covered Porch'
-                        : property.propertyAttributes.parkingSlots === '2_COVERED'
-                        ? '2 Covered Porch'
-                        : property.propertyAttributes.parkingSlots === '3_PLUS_COVERED'
-                        ? '3+ Covered Porch'
-                        : property.propertyAttributes.parkingSlots === 'OPEN'
-                        ? 'Open Driveway'
-                        : property.propertyAttributes.parkingSlots.replace(/_/g, ' ')
-                    }
-                  />
-                )}
-
-                {property.propertyAttributes?.possessionStatus && property.propertyAttributes.possessionStatus !== 'NOT_SPECIFIED' && (
-                  <Fact label="Possession Status" value={property.propertyAttributes.possessionStatus.replace(/_/g, ' ')} />
-                )}
-
-                {property.propertyAttributes?.ageOfProperty && property.propertyAttributes.ageOfProperty !== 'NOT_SPECIFIED' && (
-                  <Fact
-                    label="Property Age"
-                    value={
-                      property.propertyAttributes.ageOfProperty === 'NEW'
-                        ? 'Brand New (0-1 yr)'
-                        : property.propertyAttributes.ageOfProperty.replace(/_/g, ' ')
-                    }
-                  />
-                )}
-              </div>
-
-              {/* 100% Vastu Badge */}
-              {property.propertyAttributes?.vastuCompliant && (
-                <div className="flex items-center gap-2.5 p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-950 text-xs font-bold">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>100% Vastu Compliant Architecture (Entrance, Kitchen, Master Bedroom &amp; Pooja aligned)</span>
-                </div>
-              )}
-
-              {/* Dedicated Additional Rooms */}
-              {Array.isArray(property.propertyAttributes?.additionalRooms) && property.propertyAttributes.additionalRooms.length > 0 && (
-                <div className="pt-4 border-t border-slate-100">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">
-                    Dedicated Additional Rooms ({property.propertyAttributes.additionalRooms.length})
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {property.propertyAttributes.additionalRooms.map((room: string) => (
-                      <span
-                        key={room}
-                        className="px-3 py-1.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-950 text-xs font-bold"
-                      >
-                        ✓ {room}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Exclusive Private Villa Grounds & Features */}
-              {Array.isArray(property.propertyAttributes?.villaPrivateFeatures) && property.propertyAttributes.villaPrivateFeatures.length > 0 && (
-                <div className="pt-4 border-t border-slate-100">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">
-                    Exclusive Private Grounds &amp; Features ({property.propertyAttributes.villaPrivateFeatures.length})
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {property.propertyAttributes.villaPrivateFeatures.map((feat: string) => (
-                      <span
-                        key={feat}
-                        className="px-3 py-1.5 rounded-xl bg-[#fff9f0] border border-[#FF9933]/40 text-[#7a3705] text-xs font-bold shadow-xs"
-                      >
-                        ★ {feat}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Included Furnishings & Inclusions */}
-              {Array.isArray(property.propertyAttributes?.furnishingDetails) && property.propertyAttributes.furnishingDetails.length > 0 && (
-                <div className="pt-4 border-t border-slate-100">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">
-                    Fittings &amp; Interior Inclusions ({property.propertyAttributes.furnishingDetails.length})
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {property.propertyAttributes.furnishingDetails.map((inc: string) => (
-                      <span
-                        key={inc}
-                        className="px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-700 text-xs font-semibold"
-                      >
-                        + {inc}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Society / Community Amenities */}
-              {Array.isArray(property.amenities) && property.amenities.length > 0 && (
-                <div className="pt-4 border-t border-slate-100">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">
-                    Community Amenities &amp; Infrastructure ({property.amenities.length})
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {property.amenities.map((amenity: string) => (
-                      <span
-                        key={amenity}
-                        className="px-3 py-1.5 rounded-xl bg-slate-100 border border-slate-200 text-slate-800 text-xs font-semibold"
-                      >
-                        ✓ {amenity}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </section>
-        )}
-
-        {/* ========================================================
-            VERIFICATION
-        ======================================================== */}
-
-        {/* ========================================================
-            LAND BUYER'S DUE DILIGENCE CHECKLIST & LEGAL NOTICE
-        ========================================================= */}
-
+        {/* Subcomponent: Land Buyer's Due Diligence Card */}
         <section className="mt-8">
-          <DueDiligenceChecklist />
+          <DueDiligenceCard onOpenReportModal={() => setReportModalOpen(true)} />
         </section>
 
-        {/* ========================================================
-            SELLER / CONTACT
-        ======================================================== */}
-
+        {/* Seller / Contact Banner */}
         {user && (
           <section className="mt-6">
             <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
@@ -2055,12 +974,10 @@ function PropertyDetailsContent() {
                   <div className="flex h-11 w-11 items-center justify-center rounded-full bg-slate-100">
                     <UserRound className="h-5 w-5 text-slate-500" />
                   </div>
-
                   <div>
                     <p className="text-sm font-black text-slate-900">
                       {isOwner ? 'Listing Management' : 'Interested in this property?'}
                     </p>
-
                     <p className="mt-1 text-xs text-slate-500">
                       {isOwner
                         ? 'Manage details, review incoming inquiries, or check performance in your Seller Dashboard.'
@@ -2081,553 +998,50 @@ function PropertyDetailsContent() {
                   <button
                     type="button"
                     onClick={openInquiry}
-                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#FF9933] px-5 py-3 text-xs font-black text-white hover:bg-[#f07d12] transition-colors"
+                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#FF9933] px-5 py-3 text-xs font-black text-white hover:bg-[#f07d12] transition-colors cursor-pointer"
                   >
                     <MessageSquare className="h-4 w-4" />
-                    Contact Seller
+                    <span>Contact Seller</span>
                   </button>
                 )}
               </div>
             </div>
           </section>
         )}
-
-        {/* ========================================================
-            DISCLAIMER
-        ======================================================== */}
-
-        <section className="mt-6">
-          <div className="rounded-2xl border border-slate-200 bg-white p-5">
-            <div className="flex items-start gap-3">
-              <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" />
-
-              <div>
-                <h3 className="text-[11px] font-bold text-slate-700">
-                  Before you proceed
-                </h3>
-
-                <p className="mt-1 text-[10px] leading-5 text-slate-500">
-                  BhoomiMitra facilitates property discovery, advertising hosting,
-                  and direct communication between sellers and prospective buyers.
-                  BhoomiMitra does not provide title verification, legal opinions,
-                  or survey certification. A listing does not constitute a guarantee
-                  of title, ownership, legality, boundary accuracy, or dispute-free status.
-                  Conduct independent legal, title, registration, and physical due
-                  diligence with qualified advocates and revenue authorities before entering
-                  into any transaction.
-                </p>
-
-                <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between">
-                  <span className="text-[10px] text-slate-400">Notice fraudulent or misleading information?</span>
-                  <button
-                    type="button"
-                    onClick={openReportModal}
-                    className="inline-flex items-center gap-1.5 text-xs font-bold text-rose-700 hover:underline cursor-pointer"
-                  >
-                    <Flag className="h-3.5 w-3.5 text-rose-600" />
-                    <span>Report Listing to Moderation</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
       </main>
 
-      {/* ============================================================
-          MOBILE STICKY CONTACT BAR
-      ============================================================ */}
-
+      {/* Mobile Sticky Contact Bar */}
       <div className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 p-3 shadow-2xl backdrop-blur lg:hidden">
         <div className="mx-auto flex max-w-7xl items-center gap-2">
           <button
             type="button"
-            onClick={toggleFavorite}
-            disabled={favoriteLoading}
-            className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border ${favorite
-              ? 'border-rose-200 bg-rose-50 text-rose-600'
-              : 'border-slate-200 bg-white text-slate-600'
-              }`}
-            aria-label={
-              favorite
-                ? 'Remove from saved properties'
-                : 'Save property'
-            }
+            onClick={openInquiry}
+            className="flex-1 rounded-xl bg-[#FF9933] py-3 text-center text-xs font-black text-white shadow-sm hover:bg-[#f07d12] transition-colors cursor-pointer"
           >
-            <Heart
-              className={`h-5 w-5 ${favorite ? 'fill-current' : ''
-                }`}
-            />
+            Inquire Now
           </button>
-
-          {isDraft ? (
-            <Link
-              href={`/sell?propertyId=${property._id}`}
-              className="flex h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-[#FF9933] px-4 text-xs font-black text-white hover:bg-[#f07d12] transition-colors"
-            >
-              <span>Publish Listing (₹10)</span>
-              <ExternalLink className="h-4 w-4" />
-            </Link>
-          ) : isOwner ? (
-            <Link
-              href="/dashboard/seller"
-              className="flex h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-slate-950 px-4 text-xs font-black text-white hover:bg-slate-800 transition-colors"
-            >
-              <LayoutDashboard className="h-4 w-4 text-[#FF9933]" />
-              <span>Seller Control Center</span>
-            </Link>
-          ) : (
-            <button
-              type="button"
-              onClick={openInquiry}
-              className="flex h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-[#FF9933] px-4 text-xs font-black text-white hover:bg-[#f07d12] transition-colors"
-            >
-              <MessageSquare className="h-4 w-4" />
-              {user ? 'Contact Seller' : 'Sign in to Contact'}
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={initiateCallSeller}
+            disabled={callLoading}
+            className="flex-1 rounded-xl bg-slate-900 py-3 text-center text-xs font-black text-white shadow-sm hover:bg-slate-800 transition-colors disabled:opacity-50 cursor-pointer"
+          >
+            {callLoading ? 'Connecting...' : 'Call Seller'}
+          </button>
         </div>
       </div>
 
-      {/* ============================================================
-          INQUIRY MODAL
-      ============================================================ */}
+      {/* Modals */}
+      <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} />
 
-      {inquiryOpen && (
-        <div className="fixed inset-0 z-[80] flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-lg max-h-[92vh] flex flex-col overflow-hidden rounded-2xl bg-white shadow-2xl animate-in fade-in zoom-in-95 duration-150">
-            {/* Modal Header */}
-            <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4 bg-slate-50/80">
-              <div className="flex items-center gap-2.5">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#fff1dc] text-[#c75e0a]">
-                  <Mail className="h-4 w-4" />
-                </div>
-                <div>
-                  <h2 className="text-sm font-black text-slate-900">
-                    Contact Landowner
-                  </h2>
-                  <p className="text-[11px] text-slate-500 line-clamp-1 max-w-xs sm:max-w-sm">
-                    {property.title}
-                  </p>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setInquiryOpen(false)}
-                className="rounded-lg p-2 text-slate-400 hover:bg-slate-200/80 hover:text-slate-700 transition-colors"
-                aria-label="Close inquiry"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <div className="p-5 sm:p-6 overflow-y-auto space-y-4">
-              {inquirySuccess ? (
-                <div className="py-8 text-center">
-                  <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#fff1dc]">
-                    <CheckCircle2 className="h-7 w-7 text-[#FF9933]" />
-                  </div>
-
-                  <h3 className="mt-4 text-base font-black text-slate-900">
-                    Inquiry Sent Successfully
-                  </h3>
-
-                  <p className="mt-2 text-xs leading-5 text-slate-600 max-w-sm mx-auto">
-                    Your inquiry and contact details have been securely dispatched to the landowner. You can view updates anytime in your Buyer Dashboard.
-                  </p>
-
-                  <div className="mt-6 flex items-center justify-center gap-3">
-                    <button
-                      type="button"
-                      onClick={() => setInquiryOpen(false)}
-                      className="rounded-xl bg-slate-950 px-5 py-2.5 text-xs font-bold text-white hover:bg-slate-800 transition-colors"
-                    >
-                      Done
-                    </button>
-                    <Link
-                      href="/dashboard/buyer"
-                      onClick={() => setInquiryOpen(false)}
-                      className="rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors"
-                    >
-                      View Buyer Dashboard
-                    </Link>
-                  </div>
-                </div>
-              ) : (
-                <>
-                  {/* 1. Buyer Contact Details (First Section) */}
-                  <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-3.5 space-y-3">
-                    <div>
-                      <h4 className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
-                        <Phone className="h-3.5 w-3.5 text-[#FF9933]" />
-                        <span>Your Contact Information</span>
-                      </h4>
-                      <p className="text-[10px] text-slate-500 mt-0.5">
-                        The landowner will use these details to contact you directly.
-                      </p>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      {/* Email Address Input (Prefilled with signed-in email) */}
-                      <div>
-                        <label
-                          htmlFor="inquiry-email"
-                          className="block text-[11px] font-semibold text-slate-700 mb-1"
-                        >
-                          Email Address <span className="text-rose-500">*</span>
-                        </label>
-                        <div className="relative flex items-center">
-                          <Mail className="absolute left-3 h-3.5 w-3.5 text-slate-400" />
-                          <input
-                            id="inquiry-email"
-                            type="email"
-                            required
-                            value={inquiryEmail}
-                            onChange={(e) =>
-                              setInquiryEmail(e.target.value)
-                            }
-                            placeholder="your.email@example.com"
-                            className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-xs text-slate-900 placeholder:text-slate-400 focus:border-[#FF9933] focus:outline-none focus:ring-2 focus:ring-[#FF9933]/20"
-                          />
-                        </div>
-                        <p className="text-[10px] text-slate-400 mt-1">
-                          Written replies &amp; status updates
-                        </p>
-                      </div>
-
-                      {/* Mobile Number Input (Empty by default for manual entry) */}
-                      <div>
-                        <label
-                          htmlFor="inquiry-phone"
-                          className="block text-[11px] font-semibold text-slate-700 mb-1"
-                        >
-                          Mobile Number <span className="text-rose-500">*</span>
-                        </label>
-                        <div className="relative flex items-center">
-                          <span className="absolute left-3 text-xs font-bold text-slate-500">
-                            +91
-                          </span>
-                          <input
-                            id="inquiry-phone"
-                            type="tel"
-                            required
-                            maxLength={10}
-                            value={inquiryPhone}
-                            onChange={(e) =>
-                              setInquiryPhone(e.target.value.replace(/\D/g, ''))
-                            }
-                            placeholder="Enter 10-digit mobile"
-                            className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-11 pr-3 text-xs text-slate-900 placeholder:text-slate-400 focus:border-[#FF9933] focus:outline-none focus:ring-2 focus:ring-[#FF9933]/20"
-                          />
-                        </div>
-                        <p className="text-[10px] text-slate-400 mt-1">
-                          Direct phone / WhatsApp callbacks
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* 2. Quick Preset Message Chips */}
-                  <div>
-                    <label className="text-[11px] font-bold text-slate-600 mb-1.5 block">
-                      Quick Questions
-                    </label>
-                    <div className="flex flex-wrap gap-1.5">
-                      {[
-                        '💰 Is the price negotiable?',
-                        '📅 Schedule a site visit',
-                        '📐 Share boundary & survey details',
-                        '📄 Legal documents & clear title?',
-                      ].map((preset) => (
-                        <button
-                          key={preset}
-                          type="button"
-                          onClick={() => {
-                            setInquiryMessage((prev) =>
-                              prev ? `${prev.trim()}\n${preset}` : preset,
-                            );
-                          }}
-                          className="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-medium text-slate-700 hover:border-[#FF9933]/50 hover:bg-[#fff9f0] hover:text-[#7a3705] transition-colors cursor-pointer"
-                        >
-                          {preset}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* 3. Message Textarea */}
-                  <div>
-                    <div className="flex items-center justify-between mb-1">
-                      <label
-                        htmlFor="inquiry-message"
-                        className="text-xs font-bold text-slate-800"
-                      >
-                        Your Message <span className="text-rose-500">*</span>
-                      </label>
-                      <span className="text-[10px] text-slate-400">
-                        {inquiryMessage.length}/1000 (min 10 chars)
-                      </span>
-                    </div>
-
-                    <textarea
-                      id="inquiry-message"
-                      value={inquiryMessage}
-                      onChange={(event) =>
-                        setInquiryMessage(event.target.value)
-                      }
-                      rows={4}
-                      placeholder="Hi, I am interested in this parcel. Please share current availability, road access details, and when we can arrange a physical inspection."
-                      className="w-full resize-none rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs leading-5 text-slate-900 outline-none placeholder:text-slate-400 focus:border-[#FF9933] focus:bg-white focus:ring-2 focus:ring-[#FF9933]/20 transition-all"
-                    />
-                  </div>
-
-                  {inquiryError && (
-                    <div className="rounded-lg bg-rose-50 border border-rose-200 p-2.5 text-xs font-medium text-rose-700">
-                      {inquiryError}
-                    </div>
-                  )}
-
-                  {/* Shield Notice */}
-                  <div className="flex items-start gap-2 rounded-xl bg-[#fff9f0] border border-[#FF9933]/20 p-2.5">
-                    <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#FF9933]" />
-                    <p className="text-[10px] leading-4 text-[#7a3705]">
-                      <strong>Direct Connect Policy:</strong> Your contact email and mobile number are dispatched directly to the verified landowner via email &amp; dashboard.
-                    </p>
-                  </div>
-
-                  {/* Submit Button */}
-                  <div className="flex items-center justify-end gap-2 pt-1">
-                    <button
-                      type="button"
-                      onClick={() => setInquiryOpen(false)}
-                      className="rounded-xl px-4 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="button"
-                      onClick={sendInquiry}
-                      disabled={
-                        inquirySending ||
-                        inquiryMessage.trim().length < 10 ||
-                        inquiryPhone.trim().length < 10 ||
-                        !inquiryEmail.trim()
-                      }
-                      className="flex items-center justify-center gap-2 rounded-xl bg-[#FF9933] px-6 py-2.5 text-xs font-black text-white transition-colors hover:bg-[#f07d12] disabled:cursor-not-allowed disabled:opacity-50 shadow-xs"
-                    >
-                      {inquirySending ? (
-                        <>
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                          Sending...
-                        </>
-                      ) : (
-                        <>
-                          <MessageSquare className="h-4 w-4" />
-                          Send Inquiry
-                        </>
-                      )}
-                    </button>
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
+      {property && (
+        <InquiryModal
+          property={property}
+          isOpen={inquiryOpen}
+          onClose={() => setInquiryOpen(false)}
+          buyerUser={user}
+        />
       )}
-
-      {/* ============================================================
-          CALL SELLER MODAL
-      ============================================================ */}
-
-      {callModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl border border-slate-100 space-y-5 animate-in zoom-in-95 duration-150">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <div className="flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#fff1dc] text-[#c75e0a]">
-                  <Phone className="h-4 w-4" />
-                </div>
-                <div>
-                  <h3 className="text-sm font-black text-slate-900">
-                    Contact Landowner / Seller
-                  </h3>
-                  <p className="text-[11px] text-slate-400">
-                    Direct phone line
-                  </p>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setCallModalOpen(false)}
-                className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-
-            {callError ? (
-              <div className="rounded-xl bg-rose-50 border border-rose-100 p-4 text-xs text-rose-800 space-y-3">
-                <p className="font-bold">Unable to retrieve contact</p>
-                <p>{callError}</p>
-                <button
-                  type="button"
-                  onClick={() => setCallError('')}
-                  className="w-full rounded-lg bg-rose-600 px-3 py-2 text-white font-bold text-xs hover:bg-rose-700 cursor-pointer transition-colors"
-                >
-                  Try Again
-                </button>
-              </div>
-            ) : sellerCallData ? (
-              <div className="space-y-4">
-                <div className="rounded-xl bg-slate-50 border border-slate-100 p-4 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                        Seller Name
-                      </p>
-                      <p className="text-sm font-black text-slate-900 mt-0.5">
-                        {sellerCallData.sellerName}
-                      </p>
-                    </div>
-
-                    <div className="inline-flex items-center gap-1 rounded-full bg-[#fff1dc] px-2.5 py-1 text-[10px] font-bold text-[#c75e0a] border border-[#FF9933]/30">
-                      <Sparkles className="h-3.5 w-3.5 text-[#FF9933]" />
-                      Direct Seller
-                    </div>
-                  </div>
-
-                  <div className="border-t border-slate-200/60 pt-3">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                      Phone Number
-                    </p>
-                    <div className="mt-1 flex items-center justify-between gap-2">
-                      <span className="text-lg font-mono font-black tracking-wide text-slate-900">
-                        {sellerCallData.sellerPhone}
-                      </span>
-
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (sellerCallData?.sellerPhone) {
-                            navigator.clipboard.writeText(sellerCallData.sellerPhone);
-                            setCallCopied(true);
-                            setTimeout(() => setCallCopied(false), 2500);
-                          }
-                        }}
-                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 shadow-xs transition-colors cursor-pointer"
-                      >
-                        {callCopied ? (
-                          <>
-                            <Check className="h-3.5 w-3.5 text-[#FF9933]" />
-                            <span className="text-[#c75e0a]">Copied</span>
-                          </>
-                        ) : (
-                          <>
-                            <Copy className="h-3.5 w-3.5" />
-                            <span>Copy</span>
-                          </>
-                        )}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-2 pt-1">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    <a
-                      href={`tel:${sellerCallData.sellerPhone}`}
-                      className="flex items-center justify-center gap-2 rounded-xl bg-[#FF9933] hover:bg-[#f07d12] px-4 py-3.5 text-xs font-black text-white shadow-sm transition-all cursor-pointer"
-                    >
-                      <Phone className="h-4 w-4" />
-                      <span>Call Now</span>
-                    </a>
-
-                    <a
-                      href={`https://api.whatsapp.com/send?phone=91${sellerCallData.sellerPhone.replace(/\D/g, '').slice(-10)}&text=${encodeURIComponent(`Hi ${sellerCallData.sellerName || ''}, I am interested in your property listing on BhoomiMitra: ${property.title}`)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center justify-center gap-2 rounded-xl bg-[#25D366] hover:bg-[#20bd5a] px-4 py-3.5 text-xs font-black text-white shadow-sm transition-all cursor-pointer"
-                    >
-                      <MessageSquare className="h-4 w-4" />
-                      <span>WhatsApp</span>
-                    </a>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setCallModalOpen(false);
-                      openInquiry();
-                    }}
-                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-slate-100 hover:bg-slate-200 px-4 py-2.5 text-xs font-bold text-slate-700 transition-colors cursor-pointer"
-                  >
-                    <Mail className="h-3.5 w-3.5" />
-                    <span>Or Send Written Message</span>
-                  </button>
-                </div>
-
-                <div className="rounded-xl bg-[#fff9f0] border border-[#FF9933]/25 p-3 text-[11px] text-[#7a3705] flex items-start gap-2.5">
-                  <ShieldCheck className="h-4 w-4 text-[#FF9933] shrink-0 mt-0.5" />
-                  <p className="leading-relaxed">
-                    <strong>Direct Connection:</strong> Logged with your verified account (<code className="font-semibold text-[#c75e0a]">{user?.email}</code>) for safe marketplace communications.
-                  </p>
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-4 py-1">
-                <div className="rounded-2xl bg-[#fffbf5] border border-[#FF9933]/30 p-4 text-center space-y-2">
-                  <div className="w-12 h-12 rounded-2xl bg-[#fff1dc] text-[#c75e0a] flex items-center justify-center mx-auto">
-                    <ShieldCheck className="w-6 h-6 text-[#FF9933]" />
-                  </div>
-                  <h4 className="text-sm font-extrabold text-slate-900">
-                    Security Verification
-                  </h4>
-                  <p className="text-xs text-slate-600 leading-relaxed max-w-sm mx-auto">
-                    Please complete this quick security verification to view landowner contact details.
-                  </p>
-                </div>
-
-                {callLoading ? (
-                  <div className="flex flex-col items-center justify-center py-6 space-y-2.5">
-                    <Loader2 className="w-8 h-8 animate-spin text-[#FF9933]" />
-                    <p className="text-xs font-bold text-slate-700">
-                      Retrieving landowner contact...
-                    </p>
-                  </div>
-                ) : (
-                  <div className="flex justify-center py-2">
-                    <CloudflareTurnstile
-                      action="call_seller"
-                      onSuccess={verifyAndFetchCallData}
-                      onError={() => {
-                        setCallError('Security verification failed. Please try again.');
-                      }}
-                      onExpire={() => {
-                        setCallError('Verification expired. Please retry.');
-                      }}
-                    />
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* ============================================================
-          AUTH MODAL
-      ============================================================ */}
-
-      <AuthModal
-        isOpen={authModalOpen}
-        onClose={() => setAuthModalOpen(false)}
-      />
-
-      {/* ============================================================
-          REPORT MODAL
-      ============================================================ */}
 
       {property && (
         <ReportModal
@@ -2637,302 +1051,46 @@ function PropertyDetailsContent() {
         />
       )}
 
-      {/* ================================================================
-          FULLSCREEN LIGHTBOX / MAXIMIZE MEDIA MODAL
-      ================================================================= */}
-      {isLightboxOpen && property && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          className="fixed inset-0 z-50 flex flex-col justify-between bg-black/95 backdrop-blur-xl animate-in fade-in duration-200"
-          onClick={() => setIsLightboxOpen(false)}
-        >
-          {/* Top Bar */}
-          <div
-            className="flex items-center justify-between p-4 sm:p-5 z-20 text-white"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center gap-3">
-              <span className="px-3 py-1 rounded-full bg-white/10 text-white text-xs font-bold backdrop-blur">
-                {activeMediaTab === 'VIDEO'
-                  ? 'Video Tour'
-                  : `Photo ${activeImageIndex + 1} of ${images.length}`}
-              </span>
-              <h3 className="text-sm font-semibold text-slate-200 hidden md:block truncate max-w-md">
-                {property.title}
-              </h3>
-            </div>
-
-            {/* Media tab switcher inside lightbox */}
-            <div className="flex items-center gap-2">
-              {property.video?.secureUrl && (
-                <div className="flex items-center gap-1 rounded-xl bg-white/10 p-1 backdrop-blur text-white text-xs font-bold">
-                  <button
-                    type="button"
-                    onClick={() => setActiveMediaTab('PHOTOS')}
-                    className={`flex items-center gap-1 px-3 py-1 rounded-lg transition-colors cursor-pointer ${
-                      activeMediaTab === 'PHOTOS' ? 'bg-[#FF9933] text-white' : 'text-slate-300 hover:text-white'
-                    }`}
-                  >
-                    <ImageIcon className="w-3.5 h-3.5" />
-                    <span>Photos</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setActiveMediaTab('VIDEO')}
-                    className={`flex items-center gap-1 px-3 py-1 rounded-lg transition-colors cursor-pointer ${
-                      activeMediaTab === 'VIDEO' ? 'bg-[#FF9933] text-white' : 'text-slate-300 hover:text-white'
-                    }`}
-                  >
-                    <Play className="w-3.5 h-3.5 fill-current" />
-                    <span>Video</span>
-                  </button>
-                </div>
-              )}
-
-              <button
-                type="button"
-                onClick={() => setIsLightboxOpen(false)}
-                aria-label="Close fullscreen view"
-                className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
-
-          {/* Main Stage */}
-          <div
-            className="relative flex-1 flex items-center justify-center p-2 sm:p-6 overflow-hidden"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {activeMediaTab === 'VIDEO' && property.video?.secureUrl ? (
-              <div className="relative w-full max-w-5xl h-full max-h-[80vh] flex items-center justify-center">
-                <video
-                  src={property.video.secureUrl}
-                  controls
-                  autoPlay
-                  playsInline
-                  className="w-full h-full max-h-[80vh] object-contain rounded-xl shadow-2xl"
-                />
-              </div>
-            ) : activeImage?.secureUrl ? (
-              <div className="relative w-full h-full max-h-[82vh] flex items-center justify-center">
-                <Image
-                  src={activeImage.secureUrl}
-                  alt={activeImage.fileName || property.title}
-                  fill
-                  sizes="100vw"
-                  className="object-contain"
-                  priority
-                />
-              </div>
-            ) : null}
-
-            {/* Previous / Next Arrows in Lightbox */}
-            {activeMediaTab === 'PHOTOS' && images.length > 1 && (
-              <>
-                <button
-                  type="button"
-                  onClick={previousImage}
-                  aria-label="Previous image"
-                  className="absolute left-4 top-1/2 -translate-y-1/2 flex h-12 w-12 items-center justify-center rounded-full bg-black/60 hover:bg-black/90 text-white border border-white/20 backdrop-blur-md transition-transform hover:scale-110 cursor-pointer shadow-xl"
-                >
-                  <ChevronLeft className="w-6 h-6" />
-                </button>
-                <button
-                  type="button"
-                  onClick={nextImage}
-                  aria-label="Next image"
-                  className="absolute right-4 top-1/2 -translate-y-1/2 flex h-12 w-12 items-center justify-center rounded-full bg-black/60 hover:bg-black/90 text-white border border-white/20 backdrop-blur-md transition-transform hover:scale-110 cursor-pointer shadow-xl"
-                >
-                  <ChevronRight className="w-6 h-6" />
-                </button>
-              </>
-            )}
-          </div>
-
-          {/* Bottom Thumbnails Ribbon in Lightbox */}
-          <div
-            className="p-4 z-20 flex justify-center overflow-x-auto gap-2 max-w-full bg-black/40 backdrop-blur-md"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {images.map((image, idx) => (
-              <button
-                type="button"
-                key={image._id || image.objectKey || idx}
-                onClick={() => {
-                  setActiveImageIndex(idx);
-                  setActiveMediaTab('PHOTOS');
-                }}
-                className={`relative h-14 w-20 shrink-0 overflow-hidden rounded-lg border-2 transition-all cursor-pointer ${
-                  activeMediaTab === 'PHOTOS' && activeImageIndex === idx
-                    ? 'border-[#FF9933] scale-105 shadow-md'
-                    : 'border-white/20 opacity-60 hover:opacity-100'
-                }`}
-              >
-                <Image
-                  src={image.secureUrl}
-                  alt=""
-                  fill
-                  sizes="80px"
-                  className="object-cover"
-                />
-              </button>
-            ))}
-
-            {property.video?.secureUrl && (
-              <button
-                type="button"
-                onClick={() => setActiveMediaTab('VIDEO')}
-                className={`relative h-14 w-20 shrink-0 overflow-hidden rounded-lg border-2 bg-slate-900 flex flex-col items-center justify-center text-white transition-all cursor-pointer ${
-                  activeMediaTab === 'VIDEO'
-                    ? 'border-[#FF9933] scale-105 shadow-md'
-                    : 'border-white/20 opacity-60 hover:opacity-100'
-                }`}
-                title="Watch Video"
-              >
-                <div className="w-6 h-6 rounded-full bg-[#FF9933] text-white flex items-center justify-center mb-0.5">
-                  <Play className="w-3 h-3 fill-current ml-0.5" />
-                </div>
-                <span className="text-[8px] font-bold uppercase tracking-wider">Video</span>
-              </button>
-            )}
-          </div>
-        </div>
-      )}
+      <CallSellerModal
+        isOpen={callModalOpen}
+        onClose={() => setCallModalOpen(false)}
+        sellerData={sellerCallData}
+        propertyTitle={property.title}
+        callLoading={callLoading}
+        callError={callError}
+        onVerify={verifyAndFetchCallData}
+        onRetry={() => setCallError('')}
+        onOpenInquiry={openInquiry}
+        userEmail={user?.email}
+      />
 
       <Footer />
     </div>
   );
 }
 
-/* ================================================================
-   SECTION HEADING
-================================================================ */
-
-function SectionHeading({
-  icon,
-  title,
-}: {
-  icon: React.ReactNode;
-  title: string;
-}) {
-  return (
-    <div className="flex items-center gap-2">
-      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#fff1dc] text-[#c75e0a]">
-        {icon}
-      </div>
-
-      <h2 className="text-sm font-black text-slate-950">
-        {title}
-      </h2>
-    </div>
-  );
-}
-
-/* ================================================================
-   FACT
-================================================================ */
-
-function Fact({
-  label,
-  value,
-}: {
-  label: string;
-  value: string;
-}) {
-  return (
-    <div className="rounded-xl bg-slate-50 p-3">
-      <p className="text-[9px] font-bold uppercase tracking-wider text-slate-400">
-        {label}
-      </p>
-
-      <p className="mt-1 line-clamp-2 text-xs font-bold text-slate-800">
-        {value}
-      </p>
-    </div>
-  );
-}
-
-/* ================================================================
-   INFO CARD
-================================================================ */
-
-function InfoCard({
-  label,
-  value,
-}: {
-  label: string;
-  value: string;
-}) {
-  return (
-    <div className="rounded-xl border border-slate-100 bg-slate-50 p-4">
-      <p className="text-[9px] font-bold uppercase tracking-wider text-slate-400">
-        {label}
-      </p>
-
-      <p className="mt-1.5 text-sm font-black text-slate-900">
-        {value}
-      </p>
-    </div>
-  );
-}
-
-/* ================================================================
-   LOCATION ROW
-================================================================ */
-
-function LocationRow({
-  label,
-  value,
-}: {
-  label: string;
-  value: string;
-}) {
-  return (
-    <div className="flex items-start justify-between gap-4 border-b border-slate-100 pb-3 last:border-0 last:pb-0">
-      <span className="text-[10px] font-semibold text-slate-400">
-        {label}
-      </span>
-
-      <span className="max-w-[65%] text-right text-xs font-bold text-slate-700">
-        {value}
-      </span>
-    </div>
-  );
-}
-
-/* ================================================================
-   PAGE SKELETON
-================================================================ */
-
+/* Page Skeleton fallback */
 function PropertyPageSkeleton() {
   return (
     <div>
       <div className="mb-6 h-4 w-32 rounded-md shimmer" />
-
       <div className="mb-6 space-y-3">
         <div className="h-8 w-3/4 max-w-xl rounded-xl shimmer" />
         <div className="h-4 w-1/3 max-w-xs rounded-md shimmer" />
       </div>
-
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
         <div className="aspect-[4/3] rounded-3xl shimmer lg:col-span-7" />
-
         <div className="rounded-3xl border border-slate-200/90 bg-white p-6 lg:col-span-5 space-y-6">
           <div className="space-y-2">
             <div className="h-4 w-24 rounded-md shimmer" />
             <div className="h-9 w-44 rounded-xl shimmer" />
           </div>
-
           <div className="grid grid-cols-2 gap-3">
             <div className="h-16 rounded-2xl shimmer-light" />
             <div className="h-16 rounded-2xl shimmer-light" />
             <div className="h-16 rounded-2xl shimmer-light" />
             <div className="h-16 rounded-2xl shimmer-light" />
           </div>
-
           <div className="h-12 rounded-xl shimmer w-full" />
           <div className="h-12 rounded-xl shimmer w-full" />
         </div>
@@ -2941,27 +1099,24 @@ function PropertyPageSkeleton() {
   );
 }
 
-
-/* ================================================================
-   EXPORT
-================================================================ */
-
-export default function PropertyDetailsClient() {
+export default function PropertyDetailsClient({
+  initialProperty,
+}: {
+  initialProperty?: IProperty | null;
+}) {
   return (
     <Suspense
       fallback={
         <div className="min-h-screen bg-slate-50">
           <Navbar />
-
           <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
             <PropertyPageSkeleton />
           </main>
-
           <Footer />
         </div>
       }
     >
-      <PropertyDetailsContent />
+      <PropertyDetailsContent initialProperty={initialProperty} />
     </Suspense>
   );
 }

@@ -284,11 +284,8 @@ export default async function PropertyDetailsPage({
       }
     : null;
 
-  /*
-   * The interactive property page is a client component.
-   * It performs its own data fetch on mount (existing behaviour).
-   * We inject the schema.org JSON-LD for search crawlers alongside the client component.
-   */
+  const serializedProperty = property ? JSON.parse(JSON.stringify(property)) : null;
+
   return (
     <>
       {jsonLd && (
@@ -297,7 +294,7 @@ export default async function PropertyDetailsPage({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       )}
-      <PropertyDetailsClient />
+      <PropertyDetailsClient initialProperty={serializedProperty} />
     </>
   );
 }

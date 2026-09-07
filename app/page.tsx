@@ -178,10 +178,9 @@ export default function HomePage() {
 
     async function loadData() {
       try {
-        const [propsRes, settingsRes, sessionRes] = await Promise.all([
+        const [propsRes, settingsRes] = await Promise.all([
           fetch('/api/properties?limit=12', { cache: 'no-store' }),
           fetch('/api/settings/public', { cache: 'no-store' }).catch(() => null),
-          fetch('/api/auth/session', { cache: 'no-store' }).catch(() => null),
         ]);
 
         if (settingsRes?.ok) {
@@ -189,13 +188,6 @@ export default function HomePage() {
           if (!cancelled) {
             if (typeof s.listingFeeAmount === 'number') setPublicListingFee(s.listingFeeAmount);
             if (typeof s.listingFeeDurationDays === 'number') setListingDurationDays(s.listingFeeDurationDays);
-          }
-        }
-
-        if (sessionRes?.ok) {
-          const sess = await sessionRes.json();
-          if (!cancelled && sess?.session?.user) {
-            setUser(sess.session.user);
           }
         }
 
@@ -910,10 +902,11 @@ export default function HomePage() {
             </div>
           ) : (
             <div className="flex flex-col gap-5 sm:gap-6">
-              {properties.map((property) => (
+              {properties.map((property, index) => (
                 <PropertyCard
                   key={property._id}
                   property={property}
+                  priority={index === 0}
                   onRequireLogin={() => setAuthModalOpen(true)}
                 />
               ))}

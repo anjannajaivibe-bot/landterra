@@ -307,6 +307,10 @@ export interface IProperty {
     */
    latitude?: number;
    longitude?: number;
+   locationCoordinates?: {
+      type: 'Point';
+      coordinates: [number, number];
+   };
 
    /**
     * When enabled, exact coordinates should not be publicly exposed.
@@ -458,6 +462,13 @@ export interface IPublicProperty {
 
    googleMapsShareLink?: string;
 
+   latitude?: number;
+   longitude?: number;
+   locationCoordinates?: {
+      type: 'Point';
+      coordinates: [number, number];
+   };
+
    approximateLocation?: boolean;
 
    verificationStatus: VerificationStatus;
@@ -555,6 +566,10 @@ export interface PropertyFilterParams {
 
    publicOnly?: boolean;
    isAdmin?: boolean;
+
+   nearLat?: number;
+   nearLng?: number;
+   radiusKm?: number;
 }
 
 /* ================================================================

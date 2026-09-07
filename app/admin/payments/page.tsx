@@ -10,6 +10,7 @@ import {
   ExternalLink,
   Loader2,
   Calendar,
+  Download,
 } from 'lucide-react';
 
 import { IPayment } from '@/types/payment';
@@ -90,12 +91,54 @@ export default function AdminPaymentsPage() {
     return { totalCollected, paidCount, pendingCount, failedCount, total: payments.length };
   }, [payments]);
 
+  const exportToCSV = () => {
+    if (filteredPayments.length === 0) return;
+
+    const headers = [
+      'Transaction ID',
+      'Order ID',
+      'Property Title',
+      'Property ID',
+      'Seller ID',
+      'Amount (INR)',
+      'Status',
+      'Created Date',
+      'Paid Date',
+    ];
+
+    const rows = filteredPayments.map((p) => [
+      p.razorpayPaymentId || 'N/A',
+      p.razorpayOrderId || 'N/A',
+      `"${(p.propertyTitle || '').replace(/"/g, '""')}"`,
+      p.propertyId || 'N/A',
+      p.sellerId || 'N/A',
+      p.amount || 0,
+      p.paymentStatus || 'UNKNOWN',
+      p.createdAt ? new Date(p.createdAt).toLocaleString('en-IN') : '',
+      (p as any).paidAt ? new Date((p as any).paidAt).toLocaleString('en-IN') : '',
+    ]);
+
+    const csvContent = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute(
+      'download',
+      `landterra-payments-${new Date().toISOString().slice(0, 10)}.csv`
+    );
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
       {/* Section Header with Dedicated Refresh */}
       <AdminSectionHeader
         eyebrow="Financial Operations"
-        title="Payments &amp; Revenue"
+        title="Payments & Revenue"
         description="Monitor classified listing subscriptions, Razorpay transactions, and financial settlements."
         count={`${filteredPayments.length} of ${payments.length} Transactions`}
         onRefresh={handleRefresh}
@@ -163,21 +206,34 @@ export default function AdminPaymentsPage() {
           />
         </div>
 
-        <div className="flex gap-1.5 overflow-x-auto w-full sm:w-auto pb-1">
-          {['ALL', 'PAID', 'PENDING', 'FAILED'].map((status) => (
-            <button
-              key={status}
-              type="button"
-              onClick={() => setStatusFilter(status)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors shrink-0 ${
-                statusFilter === status
-                  ? 'bg-emerald-600 text-white shadow-xs'
-                  : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white'
-              }`}
-            >
-              {status}
-            </button>
-          ))}
+        <div className="flex items-center gap-2 overflow-x-auto w-full sm:w-auto pb-1">
+          <div className="flex gap-1.5 shrink-0">
+            {['ALL', 'PAID', 'PENDING', 'FAILED'].map((status) => (
+              <button
+                key={status}
+                type="button"
+                onClick={() => setStatusFilter(status)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors shrink-0 ${
+                  statusFilter === status
+                    ? 'bg-emerald-600 text-white shadow-xs'
+                    : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white'
+                }`}
+              >
+                {status}
+              </button>
+            ))}
+          </div>
+
+          <button
+            type="button"
+            onClick={exportToCSV}
+            disabled={filteredPayments.length === 0}
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold border border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
+            title="Export filtered transactions to CSV"
+          >
+            <Download className="w-3.5 h-3.5 text-emerald-400" />
+            <span>Export CSV</span>
+          </button>
         </div>
       </div>
 

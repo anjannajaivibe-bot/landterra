@@ -54,6 +54,22 @@ function parsePositiveNumber(
   return parsed;
 }
 
+function parseCoordinate(
+  value: string | null,
+): number | undefined {
+  if (!value) {
+    return undefined;
+  }
+
+  const parsed = Number(value);
+
+  if (!Number.isFinite(parsed)) {
+    return undefined;
+  }
+
+  return parsed;
+}
+
 function parsePositiveInteger(
   value: string | null,
   fallback: number,
@@ -232,6 +248,10 @@ export async function GET(
         undefined,
 
       publicOnly: !isSellerOnly,
+
+      nearLat: parseCoordinate(searchParams.get('nearLat')),
+      nearLng: parseCoordinate(searchParams.get('nearLng')),
+      radiusKm: parsePositiveNumber(searchParams.get('radiusKm')),
     };
 
     /*
@@ -248,7 +268,10 @@ export async function GET(
       await getProperties(filters);
 
     return NextResponse.json(
-      result,
+      {
+        success: true,
+        ...result,
+      },
       {
         status: 200,
         headers: {

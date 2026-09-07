@@ -129,7 +129,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`dark scroll-smooth ${plusJakartaSans.variable}`}>
+    <html lang="en" data-scroll-behavior="smooth" className={`dark scroll-smooth ${plusJakartaSans.variable}`}>
       <head>
         <link rel="alternate" type="text/plain" href="/llms.txt" title="LLM Agentic Manifest" />
         <script
