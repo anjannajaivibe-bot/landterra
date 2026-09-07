@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const result = await syncExpiredProperties();
+    const result = await syncExpiredProperties({ sendAlerts: true });
 
     return NextResponse.json(
       {
@@ -26,6 +26,7 @@ export async function GET(req: NextRequest) {
         timestamp: new Date().toISOString(),
         expiredCount: result.modifiedCount,
         matchedCount: result.matchedCount,
+        expiringAlertsSent: result.expiringAlertsSent || 0,
       },
       { status: 200 }
     );

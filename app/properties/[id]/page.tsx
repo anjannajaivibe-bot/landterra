@@ -187,10 +187,117 @@ export default async function PropertyDetailsPage({
     notFound();
   }
 
+  const property = await fetchPropertyForMetadata(id);
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://bhoomimitra.com';
+
+  const propertyCategory = formatLandTypeServer(property?.landType);
+  const isResidential =
+    property?.propertyType?.toUpperCase() === 'RESIDENTIAL' ||
+    property?.landType?.toUpperCase() === 'RESIDENTIAL' ||
+    property?.landType?.toUpperCase() === 'VILLA' ||
+    property?.landType?.toUpperCase() === 'APARTMENT';
+
+  const schemaPropertyType = isResidential ? 'SingleFamilyResidence' : 'Place';
+
+  const jsonLd = property
+    ? {
+        '@context': 'https://schema.org',
+        '@type': 'RealEstateListing',
+        name: property.title,
+        description: property.description,
+        url: `${baseUrl}/properties/${id}`,
+        datePosted: property.publishedAt || property.createdAt,
+        mainEntity: {
+          '@type': schemaPropertyType,
+          name: property.title,
+          description: property.description,
+          image: property.images?.map((img) => img.secureUrl).filter(Boolean) || [],
+          address: {
+            '@type': 'PostalAddress',
+            streetAddress: property.location?.address || '',
+            addressLocality: property.location?.city || '',
+            addressRegion: property.location?.state || '',
+            postalCode: property.location?.pincode || '',
+            addressCountry: 'IN',
+          },
+          ...(property.latitude && property.longitude
+            ? {
+                geo: {
+                  '@type': 'GeoCoordinates',
+                  latitude: property.latitude,
+                  longitude: property.longitude,
+                },
+              }
+            : {}),
+          floorSize: {
+            '@type': 'QuantitativeValue',
+            value: property.landAreaYards,
+            unitText: 'sq yd',
+          },
+        },
+        offers: {
+          '@type': 'Offer',
+          price: property.totalPrice,
+          priceCurrency: 'INR',
+          availability: 'https://schema.org/InStock',
+          validFrom: property.publishedAt || property.createdAt,
+          priceSpecification: {
+            '@type': 'UnitPriceSpecification',
+            price: property.pricePerYard,
+            priceCurrency: 'INR',
+            unitText: 'sq yd',
+          },
+          url: `${baseUrl}/properties/${id}`,
+        },
+        category: propertyCategory,
+        image: property.images?.map((img) => img.secureUrl).filter(Boolean) || [],
+        additionalProperty: [
+          {
+            '@type': 'PropertyValue',
+            name: 'Land Area',
+            value: `${property.landAreaYards} sq. yd`,
+          },
+          {
+            '@type': 'PropertyValue',
+            name: 'Price Per Yard',
+            value: `₹${property.pricePerYard}`,
+          },
+          ...(property.cornerPlot
+            ? [
+                {
+                  '@type': 'PropertyValue',
+                  name: 'Corner Plot',
+                  value: 'Yes',
+                },
+              ]
+            : []),
+          ...(property.gatedCommunity
+            ? [
+                {
+                  '@type': 'PropertyValue',
+                  name: 'Gated Community',
+                  value: 'Yes',
+                },
+              ]
+            : []),
+        ],
+      }
+    : null;
+
   /*
    * The interactive property page is a client component.
    * It performs its own data fetch on mount (existing behaviour).
-   * We simply render it here as the page body.
+   * We inject the schema.org JSON-LD for search crawlers alongside the client component.
    */
-  return <PropertyDetailsClient />;
+  return (
+    <>
+      {jsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      )}
+      <PropertyDetailsClient />
+    </>
+  );
 }

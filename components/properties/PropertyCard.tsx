@@ -11,7 +11,6 @@ import {
   Maximize2,
   Route,
   Tag,
-  Phone,
   Calendar,
   Sparkles,
   Camera,
@@ -20,6 +19,7 @@ import {
 
 import { IProperty } from '@/types/property';
 import { VerificationBadge } from './VerificationBadge';
+import { SHIMMER_BLUR_DATA_URL } from '@/lib/utils';
 
 interface PropertyCardProps {
   property: IProperty;
@@ -29,7 +29,6 @@ interface PropertyCardProps {
     isFavorite: boolean,
   ) => void;
   onRequireLogin?: () => void;
-  onCallSeller?: (property: IProperty) => void;
 }
 
 /* ================================================================
@@ -154,7 +153,6 @@ export function PropertyCard({
   initialFavorite = false,
   onFavoriteToggle,
   onRequireLogin,
-  onCallSeller,
 }: PropertyCardProps) {
   const [isFavorite, setIsFavorite] = useState(initialFavorite);
   const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
@@ -253,6 +251,8 @@ export function PropertyCard({
               src={primaryImage}
               alt={property.title}
               fill
+              placeholder="blur"
+              blurDataURL={SHIMMER_BLUR_DATA_URL}
               className="object-cover transition-transform duration-500 group-hover:scale-[1.04]"
               sizes="(max-width: 768px) 100vw, 380px"
               referrerPolicy="no-referrer"
@@ -452,17 +452,6 @@ export function PropertyCard({
           </div>
 
           <div className="flex items-center gap-2">
-            {onCallSeller && (
-              <button
-                type="button"
-                onClick={() => onCallSeller(property)}
-                className="inline-flex items-center gap-1.5 rounded-xl bg-[#fff1dc] px-4 py-2.5 text-xs font-bold text-[#c75e0a] border border-[#FF9933]/30 hover:bg-[#ffe1b8] transition-colors cursor-pointer"
-              >
-                <Phone className="h-3.5 w-3.5 text-[#FF9933]" />
-                <span>Call Seller</span>
-              </button>
-            )}
-
             <Link
               href={`/properties/${property._id}`}
               className="inline-flex items-center gap-1.5 rounded-xl bg-[#FF9933] px-5 py-2.5 text-xs font-black text-white shadow-2xs hover:bg-[#f07d12] hover:shadow-md transition-all cursor-pointer"

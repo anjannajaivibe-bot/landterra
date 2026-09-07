@@ -373,3 +373,158 @@ export async function notifySupportContactMessage({
     `,
   });
 }
+
+/**
+ * Pre-Expiry Renewal Reminder Notification (7-Day & 2-Day alerts)
+ */
+export async function notifyExpiringSoon(
+  sellerEmail: string,
+  sellerName: string,
+  propertyTitle: string,
+  daysRemaining: number,
+  propertyId: string,
+) {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://bhoomimitra.com';
+  const renewUrl = `${appUrl}/dashboard/seller?renew=${encodeURIComponent(propertyId)}`;
+  const isUrgent = daysRemaining <= 2;
+
+  return sendEmail({
+    to: sellerEmail,
+    subject: isUrgent
+      ? `[URGENT] Only ${daysRemaining} day${daysRemaining === 1 ? '' : 's'} left: Renew "${propertyTitle}" on BhoomiMitra`
+      : `Action Required: Your listing "${propertyTitle}" expires in ${daysRemaining} days`,
+    html: `
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; color: #1e293b; line-height: 1.6;">
+        <!-- Header -->
+        <div style="background: #0f172a; padding: 24px 32px; border-radius: 12px 12px 0 0; text-align: center;">
+          <h1 style="color: #ffffff; font-size: 20px; font-weight: 800; margin: 0; letter-spacing: -0.5px;">
+            Bhoomi<span style="color: #FF9933;">Mitra</span>
+          </h1>
+          <p style="color: #94a3b8; font-size: 12px; margin: 4px 0 0 0;">India's Direct Classified Land Marketplace</p>
+        </div>
+
+        <!-- Body Content -->
+        <div style="background: #ffffff; padding: 32px; border: 1px solid #e2e8f0; border-top: none;">
+          <div style="display: inline-block; background: ${isUrgent ? '#fee2e2' : '#fff1dc'}; color: ${isUrgent ? '#991b1b' : '#c75e0a'}; font-size: 11px; font-weight: 800; padding: 4px 12px; border-radius: 9999px; margin-bottom: 16px; border: 1px solid ${isUrgent ? '#fca5a5' : '#fed7aa'};">
+            ${isUrgent ? 'URGENT NOTICE' : 'SUBSCRIPTION EXPIRING SOON'}
+          </div>
+
+          <h2 style="font-size: 18px; font-weight: 800; color: #0f172a; margin: 0 0 12px 0; line-height: 1.4;">
+            Your land listing expires in ${daysRemaining} day${daysRemaining === 1 ? '' : 's'}
+          </h2>
+
+          <p style="font-size: 14px; color: #475569; margin: 0 0 20px 0;">
+            Dear <strong>${sellerName}</strong>,<br/>
+            Your 30-day listing subscription for <strong>"${propertyTitle}"</strong> is set to expire soon.
+          </p>
+
+          <div style="background: #f8fafc; border-left: 4px solid ${isUrgent ? '#ef4444' : '#FF9933'}; padding: 16px; margin: 20px 0; border-radius: 4px;">
+            <p style="margin: 0; font-size: 13px; color: #334155;">
+              <strong>What happens upon expiry?</strong><br/>
+              Once expired, prospective buyers will no longer be able to find your land parcel in search results or view your contact details. Any pending buyer inquiries will also be paused.
+            </p>
+          </div>
+
+          <!-- 1-Click Renewal CTA -->
+          <div style="margin: 32px 0; text-align: center;">
+            <a
+              href="${renewUrl}"
+              style="display: inline-block; background: #FF9933; color: #ffffff; padding: 14px 28px; border-radius: 10px; font-size: 14px; font-weight: 800; text-decoration: none; box-shadow: 0 4px 6px -1px rgba(255, 153, 51, 0.3);"
+            >
+              Renew Listing for ₹10 (1-Click) &rarr;
+            </a>
+            <p style="font-size: 11px; color: #94a3b8; margin: 10px 0 0 0;">
+              Extends your active live listing for another 30 full days instantly.
+            </p>
+          </div>
+
+          <p style="font-size: 12px; color: #64748b; line-height: 1.5; border-top: 1px solid #e2e8f0; padding-top: 20px; margin-top: 20px;">
+            You can also manage all your active and draft listings from your
+            <a href="${appUrl}/dashboard/seller" style="color: #FF9933; font-weight: 600; text-decoration: none;">Seller Dashboard</a>.
+          </p>
+        </div>
+
+        <!-- Footer -->
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px; padding: 16px 28px; font-size: 11px; color: #94a3b8; text-align: center;">
+          BhoomiMitra &bull; Zero Brokerage &bull; Direct Landowner Classifieds
+        </div>
+      </div>
+    `,
+  });
+}
+
+/**
+ * Idempotent Dispatcher for Expiring Soon Alert Emails
+ * Keyed by eventKey to guarantee at most 1 email per alert threshold (e.g. 7d or 2d).
+ */
+export async function enqueueAndDispatchExpiringSoonEmail({
+  eventKey,
+  recipientEmail,
+  recipientName,
+  propertyTitle,
+  daysRemaining,
+  propertyId,
+}: {
+  eventKey: string;
+  recipientEmail: string;
+  recipientName: string;
+  propertyTitle: string;
+  daysRemaining: number;
+  propertyId: string;
+}): Promise<boolean> {
+  if (!recipientEmail) return false;
+
+  await connectToDatabase();
+
+  const delivery = await EmailDeliveryModel.findOneAndUpdate(
+    { eventKey },
+    {
+      $setOnInsert: {
+        eventKey,
+        recipientEmail,
+        recipientName,
+        template: 'EXPIRING_SOON_REMINDER',
+        payload: { propertyTitle, daysRemaining, propertyId },
+        status: 'PENDING',
+        attempts: 0,
+      },
+    },
+    { upsert: true, returnDocument: 'after' }
+  );
+
+  if (!delivery || delivery.status === 'SENT') {
+    return true; // Already successfully dispatched
+  }
+
+  try {
+    delivery.attempts = (delivery.attempts || 0) + 1;
+    delivery.lastAttemptAt = new Date();
+
+    const result = await notifyExpiringSoon(
+      recipientEmail,
+      recipientName,
+      propertyTitle,
+      daysRemaining,
+      propertyId
+    );
+
+    if (result.success) {
+      delivery.status = 'SENT';
+      delivery.sentAt = new Date();
+      delivery.errorMessage = undefined;
+      await delivery.save();
+      return true;
+    } else {
+      delivery.status = 'FAILED';
+      delivery.errorMessage = result.error || 'Email dispatch failed';
+      await delivery.save();
+      return false;
+    }
+  } catch (err: unknown) {
+    delivery.status = 'FAILED';
+    delivery.errorMessage = err instanceof Error ? err.message : 'Unknown exception';
+    await delivery.save();
+    return false;
+  }
+}
+

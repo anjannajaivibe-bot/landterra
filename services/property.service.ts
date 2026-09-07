@@ -14,6 +14,7 @@ import {
 } from '@/lib/validation/property';
 
 import { deleteFilesFromStorage } from '@/services/upload.service';
+import { enqueueAndDispatchExpiringSoonEmail } from '@/services/email.service';
 
 /* ================================================================
    TYPES
@@ -903,12 +904,17 @@ export async function getPropertyById(
  * Proactively marks all properties whose subscription has expired as 'EXPIRED'.
  * Transitions both PUBLISHED and EXPIRING_SOON listings whose subscriptionExpiresAt <= now.
  */
-export async function syncExpiredProperties(): Promise<{
+export async function syncExpiredProperties(options?: {
+  sendAlerts?: boolean;
+}): Promise<{
   matchedCount: number;
   modifiedCount: number;
+  expiringAlertsSent?: number;
 }> {
   await connectToDatabase();
   const now = new Date();
+
+  // 1. Transition past-expiry properties to EXPIRED
   const result = await PropertyModel.updateMany(
     {
       listingStatus: { $in: ['PUBLISHED', 'EXPIRING_SOON'] },
@@ -919,9 +925,68 @@ export async function syncExpiredProperties(): Promise<{
     }
   );
 
+  let alertsSent = 0;
+
+  // 2. Transition active listings expiring in the next 7 days to EXPIRING_SOON and dispatch reminder emails
+  // Isolated to scheduled cron execution (sendAlerts: true) to prevent latency during search/browse queries
+  if (options?.sendAlerts) {
+    const sevenDaysFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+    const expiringProperties = await PropertyModel.find({
+      listingStatus: { $in: ['PUBLISHED', 'EXPIRING_SOON'] },
+      subscriptionExpiresAt: { $gt: now, $lte: sevenDaysFromNow },
+    }).lean();
+
+    for (const prop of expiringProperties) {
+      if (!prop.subscriptionExpiresAt || !prop.sellerEmail) continue;
+
+      // Transition to EXPIRING_SOON if still PUBLISHED
+      if (prop.listingStatus === 'PUBLISHED') {
+        await PropertyModel.findByIdAndUpdate(prop._id, {
+          $set: { listingStatus: 'EXPIRING_SOON', updatedAt: now },
+        });
+      }
+
+      const diffMs = new Date(prop.subscriptionExpiresAt).getTime() - now.getTime();
+      const daysRemaining = Math.max(1, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
+
+      // 7-day alert (when 3 <= daysRemaining <= 7)
+      if (daysRemaining <= 7 && daysRemaining > 2) {
+        const dispatched = await enqueueAndDispatchExpiringSoonEmail({
+          eventKey: `expiring_soon_${prop._id}_7d`,
+          recipientEmail: prop.sellerEmail,
+          recipientName: prop.sellerName || 'Landowner',
+          propertyTitle: prop.title,
+          daysRemaining,
+          propertyId: String(prop._id),
+        }).catch((err) => {
+          console.error(`Expiring soon 7d email error for ${prop._id}:`, err);
+          return false;
+        });
+        if (dispatched) alertsSent++;
+      }
+
+      // 2-day urgent alert (when daysRemaining <= 2)
+      if (daysRemaining <= 2) {
+        const dispatched = await enqueueAndDispatchExpiringSoonEmail({
+          eventKey: `expiring_soon_${prop._id}_2d`,
+          recipientEmail: prop.sellerEmail,
+          recipientName: prop.sellerName || 'Landowner',
+          propertyTitle: prop.title,
+          daysRemaining,
+          propertyId: String(prop._id),
+        }).catch((err) => {
+          console.error(`Expiring soon 2d email error for ${prop._id}:`, err);
+          return false;
+        });
+        if (dispatched) alertsSent++;
+      }
+    }
+  }
+
   return {
     matchedCount: result.matchedCount,
     modifiedCount: result.modifiedCount,
+    expiringAlertsSent: alertsSent,
   };
 }
 

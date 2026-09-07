@@ -167,6 +167,8 @@ const PropertySchema = new Schema<IProperty>(
 // Compound indexes for optimal marketplace query performance
 PropertySchema.index({ listingStatus: 1, verificationStatus: 1, 'location.city': 1 });
 PropertySchema.index({ listingStatus: 1, landAreaYards: 1, totalPrice: 1 });
+PropertySchema.index({ sellerId: 1, listingStatus: 1 });
+PropertySchema.index({ 'location.pincode': 1, listingStatus: 1 });
 PropertySchema.index({ createdAt: -1 });
 
 if (process.env.NODE_ENV !== 'production' && mongoose.models.Property) {

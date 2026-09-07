@@ -30,7 +30,6 @@ import {
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { PropertyCard } from '@/components/properties/PropertyCard';
-import { CallSellerModal } from '@/components/properties/CallSellerModal';
 import { LandAreaConverter } from '@/components/tools/LandAreaConverter';
 import { DueDiligenceChecklist } from '@/components/legal/DueDiligenceChecklist';
 import { AuthModal } from '@/components/auth/AuthModal';
@@ -169,16 +168,6 @@ export default function HomePage() {
   /* User & Auth */
   const [user, setUser] = useState<Partial<IUser> | null>(null);
   const [authModalOpen, setAuthModalOpen] = useState(false);
-
-  /* Call Seller State */
-  const [callModalOpen, setCallModalOpen] = useState(false);
-  const [selectedPropertyForCall, setSelectedPropertyForCall] =
-    useState<IProperty | null>(null);
-  const [sellerCallData, setSellerCallData] = useState<{
-    sellerName: string;
-    sellerPhone: string;
-    sellerEmail?: string;
-  } | null>(null);
 
   /* ================================================================
      LOAD REAL DATA & SESSION
@@ -336,37 +325,7 @@ export default function HomePage() {
 
   const selectedBudget = BUDGET_PRESETS[selectedBudgetIndex];
 
-  /* ================================================================
-     HANDLE CALL SELLER ACTION
-  ================================================================ */
 
-  const handleCallSellerClick = async (property: IProperty) => {
-    if (!user) {
-      setAuthModalOpen(true);
-      return;
-    }
-
-    try {
-      const res = await fetch(`/api/properties/${property._id}/call`, {
-        method: 'POST',
-      });
-      const data = await res.json();
-
-      if (res.ok && data) {
-        setSelectedPropertyForCall(property);
-        setSellerCallData({
-          sellerName: data.sellerName || property.sellerName,
-          sellerPhone: data.sellerPhone || property.sellerPhone,
-          sellerEmail: data.sellerEmail || property.sellerEmail,
-        });
-        setCallModalOpen(true);
-      } else {
-        alert(data.error || 'Unable to retrieve seller contact.');
-      }
-    } catch {
-      alert('Network error. Please try again.');
-    }
-  };
 
   return (
     <div className="min-h-screen bg-white text-slate-900 flex flex-col selection:bg-[#FF9933] selection:text-white">
@@ -956,7 +915,6 @@ export default function HomePage() {
                   key={property._id}
                   property={property}
                   onRequireLogin={() => setAuthModalOpen(true)}
-                  onCallSeller={() => handleCallSellerClick(property)}
                 />
               ))}
             </div>
@@ -1251,17 +1209,7 @@ export default function HomePage() {
 
       <Footer />
 
-      {/* Call Seller Modal */}
-      <CallSellerModal
-        isOpen={callModalOpen}
-        onClose={() => {
-          setCallModalOpen(false);
-          setSelectedPropertyForCall(null);
-          setSellerCallData(null);
-        }}
-        sellerData={sellerCallData}
-        propertyTitle={selectedPropertyForCall?.title}
-      />
+
 
       {/* Authentication Modal */}
       <AuthModal
