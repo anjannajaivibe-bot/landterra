@@ -448,16 +448,12 @@ function PropertyDetailsContent({
     }
   };
 
-  const locationText = useMemo(() => {
-    if (!property?.location) return '';
-    const parts = [
-      property.location.city,
-      property.location.district,
-      property.location.state,
-      property.location.pincode,
-    ].filter(Boolean);
-    return parts.join(', ');
-  }, [property?.location]);
+  const locationText = [
+    property?.location?.city,
+    property?.location?.district,
+    property?.location?.state,
+    property?.location?.pincode,
+  ].filter(Boolean).join(', ');
 
   const publishedDate = useMemo(() => {
     return formatDate(property?.publishedAt || property?.createdAt);
