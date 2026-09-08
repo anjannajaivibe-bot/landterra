@@ -118,12 +118,20 @@ export async function getInquiriesForBuyer(buyerId: string): Promise<IInquiry[]>
 
 export async function updateInquiryStatus(
   inquiryId: string,
-  sellerId: string,
-  status: 'PENDING' | 'RESPONDED' | 'CLOSED'
+  userId: string,
+  status: 'PENDING' | 'RESPONDED' | 'CLOSED',
+  userRole?: string
 ): Promise<IInquiry | null> {
   await connectToDatabase();
+  const query = userRole === 'ADMIN'
+    ? { _id: inquiryId }
+    : {
+        _id: inquiryId,
+        $or: [{ sellerId: userId }, { buyerId: userId }],
+      };
+
   const updated = await InquiryModel.findOneAndUpdate(
-    { _id: inquiryId, sellerId },
+    query,
     { $set: { status, updatedAt: new Date() } },
     { returnDocument: 'after' }
   ).lean();
@@ -268,6 +276,51 @@ export async function getAllReports(): Promise<IReport[]> {
   })) as unknown as IReport[];
 }
 
+export async function updateReportStatus(
+  reportId: string,
+  status: 'RESOLVED' | 'DISMISSED',
+  adminUser: { id: string; name: string; email: string; role: string }
+): Promise<IReport | null> {
+  await connectToDatabase();
+
+  const updated = await ReportModel.findByIdAndUpdate(
+    reportId,
+    {
+      $set: {
+        status,
+        reviewedBy: adminUser.id,
+        reviewedAt: new Date(),
+        actionTaken: status,
+      },
+    },
+    { returnDocument: 'after' }
+  ).lean();
+
+  if (!updated) return null;
+
+  await createAuditLog({
+    actorId: adminUser.id,
+    actorName: adminUser.name,
+    actorEmail: adminUser.email,
+    actorRole: adminUser.role,
+    action: `REPORT_${status}`,
+    entityType: 'REPORT',
+    entityId: reportId,
+    metadata: {
+      status,
+      propertyId: updated.propertyId,
+      reason: updated.reason,
+    },
+  }).catch((err) => {
+    console.error('Audit log for report update error:', err);
+  });
+
+  return {
+    ...updated,
+    _id: String(updated._id),
+  } as unknown as IReport;
+}
+
 // ============================================================================
 // BUYER CALL SELLER ACTION (Database Tracking & Audit Logging)
 // ============================================================================
@@ -279,6 +332,7 @@ export async function recordBuyerCallAction(data: {
   buyerEmail: string;
   buyerPhone?: string;
   ipAddress?: string;
+  channel?: 'PHONE' | 'WHATSAPP';
 }): Promise<{
   success: boolean;
   sellerName: string;
@@ -296,12 +350,17 @@ export async function recordBuyerCallAction(data: {
   }
 
   if (property.sellerId === data.buyerId) {
-    throw new InquiryBusinessError('You cannot record a call action on your own property listing.', 403);
+    throw new InquiryBusinessError('You cannot record a contact action on your own property listing.', 403);
   }
 
   await connectToDatabase();
 
-  // 1. Record call lead in InquiryModel so seller sees the phone inquiry in dashboard
+  const isWhatsApp = data.channel === 'WHATSAPP';
+  const leadChannelText = isWhatsApp ? 'WhatsApp Chat Lead' : 'Phone Call Lead';
+  const leadActionText = isWhatsApp ? 'initiated WhatsApp conversation' : 'initiated direct phone contact';
+  const auditAction = isWhatsApp ? 'BUYER_WHATSAPP_SELLER' : 'BUYER_CALL_SELLER';
+
+  // 1. Record lead in InquiryModel so seller sees the inquiry in dashboard
   const callInquiry = {
     propertyId: data.propertyId,
     propertyTitle: property.title,
@@ -312,7 +371,7 @@ export async function recordBuyerCallAction(data: {
     buyerEmail: data.buyerEmail,
     buyerPhone: data.buyerPhone,
     sellerId: property.sellerId,
-    message: `[Phone Call Lead] Buyer initiated direct phone contact regarding "${property.title}".`,
+    message: `[${leadChannelText}] Buyer ${leadActionText} regarding "${property.title}".`,
     phoneShared: Boolean(data.buyerPhone),
     status: 'PENDING' as const,
   };
@@ -332,11 +391,12 @@ export async function recordBuyerCallAction(data: {
     actorName: data.buyerName,
     actorEmail: data.buyerEmail,
     actorRole: 'BUYER',
-    action: 'BUYER_CALL_SELLER',
+    action: auditAction,
     entityType: 'PROPERTY',
     entityId: data.propertyId,
     ipAddress: data.ipAddress,
     metadata: {
+      channel: data.channel || 'PHONE',
       buyerId: data.buyerId,
       buyerEmail: data.buyerEmail,
       buyerName: data.buyerName,
@@ -351,7 +411,7 @@ export async function recordBuyerCallAction(data: {
       timestamp: new Date().toISOString(),
     },
   }).catch((err) => {
-    console.error('Failed to create audit log for buyer call:', err);
+    console.error('Failed to create audit log for buyer contact:', err);
   });
 
   if (!property.sellerPhone) {

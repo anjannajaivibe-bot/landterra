@@ -33,7 +33,7 @@ export default function AdminPaymentsPage() {
 
   const loadPayments = useCallback(async () => {
     try {
-      const res = await fetch('/api/payments/my', {
+      const res = await fetch('/api/admin/payments', {
         cache: 'no-store',
         credentials: 'include',
       });

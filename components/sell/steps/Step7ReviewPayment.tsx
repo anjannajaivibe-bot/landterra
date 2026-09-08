@@ -47,12 +47,11 @@ export function Step7ReviewPayment({
     additionalRooms,
     selectedAmenities,
     termsAccepted,
-    turnstileToken,
     authoritativeFees,
     areaConversions,
   } = state;
 
-  const { setTermsAccepted, setTurnstileToken } = actions;
+  const { setTermsAccepted } = actions;
   const { landAreaYards, totalPrice } = authoritativeFees;
 
   return (

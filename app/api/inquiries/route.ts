@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
   const type = searchParams.get('type'); // 'seller' | 'buyer'
 
   try {
-    if (type === 'seller' || authUser.role === 'SELLER') {
+    if (type === 'seller' || (!type && authUser.role === 'SELLER')) {
       const inquiries = await getInquiriesForSeller(authUser.id);
       return NextResponse.json({ inquiries });
     } else {
@@ -140,7 +140,7 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid status. Allowed: PENDING, RESPONDED, CLOSED' }, { status: 400 });
     }
 
-    const updated = await updateInquiryStatus(inquiryId, authUser.id, status);
+    const updated = await updateInquiryStatus(inquiryId, authUser.id, status, authUser.role);
 
     if (!updated) {
       return NextResponse.json({ error: 'Inquiry not found or unauthorized' }, { status: 404 });

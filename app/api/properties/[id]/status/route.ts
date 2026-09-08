@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getPropertyById, updateProperty } from '@/services/property.service';
+import { getPropertyById, updateProperty, markPropertyAsSold } from '@/services/property.service';
 import { requireAuth } from '@/lib/security/auth';
 import { createAuditLog } from '@/services/audit.service';
 
@@ -21,30 +21,66 @@ export async function PATCH(
   }
 
   try {
-    const { action } = await req.json(); // 'PAUSE' | 'RESUME'
-    if (action !== 'PAUSE' && action !== 'RESUME') {
-      return NextResponse.json({ error: 'Invalid action. Must be PAUSE or RESUME' }, { status: 400 });
-    }
-
-    if (action === 'RESUME' && existing.verificationStatus !== 'VERIFIED') {
+    const { action } = await req.json(); // 'PAUSE' | 'RESUME' | 'MARK_SOLD'
+    if (action !== 'PAUSE' && action !== 'RESUME' && action !== 'MARK_SOLD') {
       return NextResponse.json(
-        { error: 'Cannot resume listing. Only verified properties can be published live.' },
+        { error: 'Invalid action. Must be PAUSE, RESUME, or MARK_SOLD' },
         { status: 400 }
       );
     }
 
-    const newStatus = action === 'PAUSE' ? 'PAUSED' : 'PUBLISHED';
-    const updated = await updateProperty(id, { listingStatus: newStatus });
+    if (existing.listingStatus === 'DELETED') {
+      return NextResponse.json(
+        { error: 'Cannot update status of a deleted listing.' },
+        { status: 400 }
+      );
+    }
+
+    let updated = null;
+    let newStatus = existing.listingStatus;
+
+    if (action === 'MARK_SOLD') {
+      updated = await markPropertyAsSold(id);
+      newStatus = 'SOLD';
+    } else if (action === 'RESUME') {
+      if (existing.verificationStatus === 'REJECTED') {
+        return NextResponse.json(
+          { error: 'Cannot resume listing. This listing was rejected by moderation.' },
+          { status: 400 }
+        );
+      }
+
+      const hasPaid = existing.paymentStatus === 'PAID' || existing.isFeePaid === true;
+      if (!hasPaid) {
+        return NextResponse.json(
+          { error: 'Cannot resume listing. Listing fee payment is required.' },
+          { status: 400 }
+        );
+      }
+
+      if (existing.subscriptionExpiresAt && new Date(existing.subscriptionExpiresAt) < new Date()) {
+        return NextResponse.json(
+          { error: 'Listing subscription has expired. Please renew to publish.' },
+          { status: 400 }
+        );
+      }
+
+      newStatus = 'PUBLISHED';
+      updated = await updateProperty(id, { listingStatus: 'PUBLISHED' });
+    } else if (action === 'PAUSE') {
+      newStatus = 'PAUSED';
+      updated = await updateProperty(id, { listingStatus: 'PAUSED' });
+    }
 
     await createAuditLog({
       actorId: authUser.id,
       actorName: authUser.name,
       actorEmail: authUser.email,
       actorRole: authUser.role,
-      action: `PROPERTY_${action}D`,
+      action: action === 'MARK_SOLD' ? 'PROPERTY_MARKED_SOLD' : `PROPERTY_${action}D`,
       entityType: 'PROPERTY',
       entityId: id,
-      metadata: { previousStatus: existing.listingStatus, newStatus },
+      metadata: { previousStatus: existing.listingStatus, newStatus, action },
     });
 
     return NextResponse.json({ success: true, property: updated });

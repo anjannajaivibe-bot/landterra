@@ -11,6 +11,7 @@ import {
   CreditCard,
   Clock,
   Flag,
+  MessageSquare,
   Activity,
   Settings,
   ShieldCheck,
@@ -66,6 +67,11 @@ export const ADMIN_NAV_ITEMS = [
     href: '/admin/reports',
     label: 'Reports',
     icon: Flag,
+  },
+  {
+    href: '/admin/feedbacks',
+    label: 'Feedbacks',
+    icon: MessageSquare,
   },
   {
     href: '/admin/audit-logs',
@@ -210,7 +216,7 @@ export function AdminShell({ children }: AdminShellProps) {
   /* Loading state */
   if (authChecking) {
     return (
-      <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center">
+      <div className="dark min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center">
         <div className="text-center space-y-3">
           <div className="w-12 h-12 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center mx-auto">
             <Loader2 className="w-6 h-6 animate-spin text-emerald-400" />
@@ -226,7 +232,7 @@ export function AdminShell({ children }: AdminShellProps) {
   /* Unauthorized access restricted screen */
   if (!isAdminAuthorized) {
     return (
-      <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-center items-center px-4 py-16">
+      <div className="dark min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-center items-center px-4 py-16">
         <div className="max-w-md w-full bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-2xl text-center space-y-6">
           <div className="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center mx-auto shadow-inner">
             <Lock className="w-8 h-8" />
@@ -338,7 +344,7 @@ export function AdminShell({ children }: AdminShellProps) {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
+    <div className="dark min-h-screen bg-slate-950 text-slate-100 flex flex-col">
       {/* ============================================================
           TOP HEADER
           ============================================================ */}

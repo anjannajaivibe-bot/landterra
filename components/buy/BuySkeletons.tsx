@@ -37,15 +37,15 @@ export function BuyPageSkeleton() {
       <Navbar />
 
       {/* Hero / Search Section Skeleton */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 py-10 sm:py-14 text-white">
+      <section className="relative overflow-hidden bg-gradient-to-b from-white via-[#fffbf5] to-slate-50 py-10 sm:py-14 border-b border-slate-200/80">
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-3xl space-y-4 text-center flex flex-col items-center">
-            <div className="h-7 w-52 rounded-full shimmer bg-slate-800" />
-            <div className="h-9 sm:h-11 w-4/5 max-w-xl rounded-2xl shimmer bg-slate-800" />
-            <div className="h-4 w-3/5 max-w-md rounded-lg shimmer bg-slate-800/80" />
+            <div className="h-7 w-52 rounded-full shimmer bg-[#fff1dc] border border-[#FF9933]/30" />
+            <div className="h-9 sm:h-11 w-4/5 max-w-xl rounded-2xl shimmer bg-slate-200" />
+            <div className="h-4 w-3/5 max-w-md rounded-lg shimmer bg-slate-200/80" />
 
-            <div className="mt-4 w-full rounded-2xl bg-white/10 p-2 backdrop-blur-md border border-white/15">
-              <div className="h-12 w-full rounded-xl shimmer bg-slate-800/90" />
+            <div className="mt-4 w-full rounded-2xl bg-white p-2.5 border border-slate-200 shadow-md">
+              <div className="h-12 w-full rounded-xl shimmer bg-slate-100" />
             </div>
           </div>
         </div>

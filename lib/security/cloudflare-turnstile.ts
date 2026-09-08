@@ -49,7 +49,7 @@ export interface TurnstileVerifyOptions {
 export async function verifyCloudflareTurnstile(
   tokenOrOptions?: string | null | TurnstileVerifyOptions,
   clientIpLegacy?: string
-): Promise<{ success: boolean; error?: string }> {
+): Promise<{ success: boolean; error?: string; codes?: string[] }> {
   // Support both legacy call signature and options object
   let token: string | null | undefined;
   let clientIp: string | undefined;
@@ -83,9 +83,9 @@ export async function verifyCloudflareTurnstile(
     process.env.CLOUDFLARE_TURNSTILE_SECRET_KEY ||
     CLOUDFLARE_TURNSTILE_TEST_SECRET;
 
-  // ── Dev-only bypass: test token + test secret ──
+  // ── Dev-only bypass: test token + test secret OR non-production dev token ──
   if (
-    secretKey === CLOUDFLARE_TURNSTILE_TEST_SECRET &&
+    (secretKey === CLOUDFLARE_TURNSTILE_TEST_SECRET || process.env.NODE_ENV !== 'production') &&
     trimmedToken.startsWith('cf_turnstile_test_token_')
   ) {
     return { success: true };
@@ -150,6 +150,7 @@ export async function verifyCloudflareTurnstile(
     console.warn('[Turnstile] verification failed:', codes);
     return {
       success: false,
+      codes,
       error: codes.includes('timeout-or-duplicate')
         ? 'Verification expired. Please complete the security check again.'
         : 'Verification failed. Please try again.',

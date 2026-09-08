@@ -44,19 +44,22 @@ export async function POST(
     : realIp || '127.0.0.1';
 
   const body = await req.json().catch(() => ({}));
-  const turnstileToken = body?.turnstileToken || req.headers.get('cf-turnstile-token');
+  const turnstileToken = body?.turnstileToken || req.headers.get('x-turnstile-token') || req.headers.get('cf-turnstile-token');
+  const isAuditOnly = body?.channel === 'WHATSAPP' && !turnstileToken;
 
-  const turnstileResult = await verifyCloudflareTurnstile(turnstileToken, ipAddress);
-  if (!turnstileResult.success) {
-    return NextResponse.json(
-      {
-        error:
-          turnstileResult.error ||
-          'Human verification required before contacting seller. Please complete the Cloudflare security check.',
-        code: 'TURNSTILE_REQUIRED',
-      },
-      { status: 403 }
-    );
+  if (!isAuditOnly) {
+    const turnstileResult = await verifyCloudflareTurnstile(turnstileToken, ipAddress);
+    if (!turnstileResult.success) {
+      return NextResponse.json(
+        {
+          error:
+            turnstileResult.error ||
+            'Human verification required before contacting seller. Please complete the Cloudflare security check.',
+          code: 'TURNSTILE_REQUIRED',
+        },
+        { status: 403 }
+      );
+    }
   }
 
   // 3a. Primary Authenticated-User Rate Limit
@@ -101,8 +104,9 @@ export async function POST(
     );
   }
 
-  // 4. Verify property existence, visibility, authorization & record call lead
+  // 4. Verify property existence, visibility, authorization & record contact lead
   try {
+    const channel = body?.channel === 'WHATSAPP' ? 'WHATSAPP' : 'PHONE';
     const result = await recordBuyerCallAction({
       propertyId: id,
       buyerId: authUser.id,
@@ -110,7 +114,15 @@ export async function POST(
       buyerEmail: authUser.email,
       buyerPhone: authUser.phone,
       ipAddress,
+      channel,
     });
+
+    if (isAuditOnly) {
+      return NextResponse.json(
+        { success: true, message: 'WhatsApp contact lead recorded.' },
+        { status: 200 }
+      );
+    }
 
     return NextResponse.json(result, { status: 200 });
   } catch (err: unknown) {

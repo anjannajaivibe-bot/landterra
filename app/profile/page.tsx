@@ -31,9 +31,12 @@ import {
   Building2,
   Calendar,
   LandPlot,
+  Loader2,
 } from 'lucide-react';
 import { IUser } from '@/types/user';
 import { IProperty } from '@/types/property';
+import { DeleteListingModal } from '@/components/properties/DeleteListingModal';
+import { FeedbackReason } from '@/types/feedback';
 
 /* ================================================================
    PROFILE PAGE SKELETON (Gray Boxes with Continuous Shimmer Wave)
@@ -166,19 +169,43 @@ export default function ProfilePage() {
       .finally(() => setLoading(false));
   }, []);
 
-  const handleDeleteProperty = async (propertyId: string) => {
-    if (!confirm('Are you sure you want to remove this land listing?')) return;
+  // Delete listing modal state
+  const [propertyToDelete, setPropertyToDelete] = useState<{ id: string; title: string } | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteAlert, setDeleteAlert] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  const handleConfirmDelete = async (feedbackData: { reason: FeedbackReason; comments?: string }) => {
+    if (!propertyToDelete) return;
     try {
-      const res = await fetch(`/api/properties/${propertyId}`, {
+      setIsDeleting(true);
+      setDeleteAlert(null);
+      const res = await fetch(`/api/properties/${propertyToDelete.id}`, {
         method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(feedbackData),
       });
       if (res.ok) {
-        loadProperties();
+        setDeleteAlert({
+          type: 'success',
+          text: `"${propertyToDelete.title}" has been permanently removed from the marketplace. Thank you for your feedback!`,
+        });
+        setPropertyToDelete(null);
+        await loadProperties();
       } else {
-        alert('Failed to delete property. Please try again.');
+        const data = await res.json().catch(() => ({}));
+        setDeleteAlert({
+          type: 'error',
+          text: data.error || 'Failed to delete listing. Please try again.',
+        });
       }
     } catch (err) {
       console.error('Delete property error:', err);
+      setDeleteAlert({
+        type: 'error',
+        text: 'Network error occurred while deleting listing. Please try again.',
+      });
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -383,6 +410,32 @@ export default function ProfilePage() {
             </div>
           </div>
 
+          {deleteAlert && (
+            <div
+              className={`p-3.5 rounded-2xl border flex items-center justify-between gap-3 text-xs font-semibold animate-in fade-in duration-150 ${
+                deleteAlert.type === 'success'
+                  ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                  : 'bg-rose-50 text-rose-800 border-rose-200'
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                {deleteAlert.type === 'success' ? (
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                ) : (
+                  <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                )}
+                <span>{deleteAlert.text}</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setDeleteAlert(null)}
+                className="text-slate-400 hover:text-slate-600 text-[11px] font-bold cursor-pointer"
+              >
+                Dismiss
+              </button>
+            </div>
+          )}
+
           {loadingProperties ? (
             <div className="divide-y divide-slate-100">
               {Array.from({ length: 2 }).map((_, i) => (
@@ -421,13 +474,12 @@ export default function ProfilePage() {
           ) : (
             <div className="divide-y divide-slate-100">
               {myProperties.map((prop) => {
+                const isSold = prop.listingStatus === 'SOLD';
                 const isUnpaid =
                   (prop.listingStatus === 'PAYMENT_PENDING' || prop.listingStatus === 'DRAFT') &&
                   prop.paymentStatus !== 'PAID';
                 const isPublished = prop.listingStatus === 'PUBLISHED';
-                const isUnderReview =
-                  prop.listingStatus === 'PENDING_VERIFICATION' ||
-                  (prop.verificationStatus === 'PENDING' && prop.paymentStatus === 'PAID');
+                const isUnderReview = prop.listingStatus === 'PENDING_VERIFICATION';
                 const isExpired = prop.listingStatus === 'EXPIRED';
                 const isPaused = prop.listingStatus === 'PAUSED';
 
@@ -453,7 +505,12 @@ export default function ProfilePage() {
 
                       <div className="space-y-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
-                          {isPublished ? (
+                          {isSold ? (
+                            <span className="px-2 py-0.5 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-800 text-[10px] font-bold inline-flex items-center gap-1">
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 inline-block" />
+                              Deal Closed / Sold
+                            </span>
+                          ) : isPublished ? (
                             <span className="px-2 py-0.5 rounded-md bg-[#fff1dc] border border-[#FF9933]/30 text-[#c75e0a] text-[10px] font-bold">
                               Published &amp; Active
                             </span>
@@ -495,8 +552,8 @@ export default function ProfilePage() {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
-                      {prop.listingStatus === 'PAYMENT_PENDING' || prop.listingStatus === 'DRAFT' ? (
+                    <div className="flex items-center gap-2 self-end sm:self-center shrink-0 flex-wrap">
+                      {isUnpaid ? (
                         <Link
                           href={`/sell?propertyId=${prop._id}`}
                           className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#FF9933] hover:bg-[#f07d12] text-white text-xs font-bold transition-colors cursor-pointer shadow-xs"
@@ -512,29 +569,31 @@ export default function ProfilePage() {
                           title="Edit title, photos, price, description, etc."
                         >
                           <Edit3 className="w-3.5 h-3.5" />
-                          <span>Edit Property</span>
+                          <span>Edit</span>
                         </Link>
                       )}
 
                       <Link
                         href={`/properties/${prop._id}`}
-                        className="p-2 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-600 cursor-pointer"
+                        className="inline-flex items-center gap-1 p-2 sm:px-2.5 sm:py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-600 text-xs font-semibold cursor-pointer"
                         title={
                           prop.listingStatus === 'PUBLISHED' || prop.listingStatus === 'EXPIRING_SOON'
                             ? 'View public page'
-                            : 'Private preview (Only visible to you - Draft)'
+                            : 'Private preview (Only visible to you)'
                         }
                       >
                         <ExternalLink className="w-3.5 h-3.5" />
+                        <span className="hidden sm:inline">View</span>
                       </Link>
 
                       <button
                         type="button"
-                        onClick={() => handleDeleteProperty(prop._id)}
-                        className="p-2 rounded-lg border border-slate-200 hover:bg-rose-50 hover:text-rose-600 text-slate-400 transition-colors cursor-pointer"
-                        title="Delete listing"
+                        onClick={() => setPropertyToDelete({ id: prop._id, title: prop.title })}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold transition-colors cursor-pointer shadow-2xs"
+                        title="Permanently remove this listing from the marketplace"
                       >
-                        <Trash2 className="w-3.5 h-3.5" />
+                        <Trash2 className="w-3.5 h-3.5 text-rose-600" />
+                        <span>Delete Listing</span>
                       </button>
                     </div>
                   </div>
@@ -790,6 +849,15 @@ export default function ProfilePage() {
           </div>
         </div>
       </main>
+
+      {/* Delete Listing Confirmation & Feedback Modal */}
+      <DeleteListingModal
+        isOpen={Boolean(propertyToDelete)}
+        onClose={() => setPropertyToDelete(null)}
+        property={propertyToDelete}
+        onConfirmDelete={handleConfirmDelete}
+        isDeleting={isDeleting}
+      />
 
       <Footer />
     </div>

@@ -12,6 +12,7 @@ import {
   createProperty,
   DuplicatePropertyError,
   SellerListingLimitError,
+  SpamContentValidationError,
 } from '@/services/property.service';
 
 import {
@@ -360,7 +361,9 @@ export async function POST(
     const turnstileToken = (body as { turnstileToken?: string })?.turnstileToken || req.headers.get('x-turnstile-token') || req.headers.get('cf-turnstile-token');
 
     const turnstileResult = await verifyCloudflareTurnstile(turnstileToken, ip);
-    if (!turnstileResult.success) {
+    // Allow if verified successfully, or if the initial entry-gate token timed out while the authenticated seller spent time filling out the detailed multi-step form.
+    const isTimeoutFromFormSession = !turnstileResult.success && turnstileResult.codes?.includes('timeout-or-duplicate') && Boolean(authUser.id);
+    if (!turnstileResult.success && !isTimeoutFromFormSession) {
       return NextResponse.json(
         {
           error:
@@ -523,6 +526,17 @@ export async function POST(
         },
         {
           status: 409,
+        },
+      );
+    }
+
+    if (error instanceof SpamContentValidationError) {
+      return NextResponse.json(
+        {
+          error: error.message,
+        },
+        {
+          status: 400,
         },
       );
     }

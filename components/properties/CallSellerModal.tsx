@@ -24,11 +24,13 @@ interface CallSellerModalProps {
     sellerEmail?: string;
   } | null;
   propertyTitle?: string;
+  propertyId?: string;
   callLoading?: boolean;
   callError?: string;
   onVerify?: (token: string) => void;
   onRetry?: () => void;
   onOpenInquiry?: () => void;
+  onTrackWhatsApp?: () => void;
   userEmail?: string;
 }
 
@@ -37,11 +39,13 @@ export function CallSellerModal({
   onClose,
   sellerData,
   propertyTitle,
+  propertyId,
   callLoading,
   callError,
   onVerify,
   onRetry,
   onOpenInquiry,
+  onTrackWhatsApp,
   userEmail,
 }: CallSellerModalProps) {
   const [copied, setCopied] = useState(false);
@@ -160,25 +164,38 @@ export function CallSellerModal({
             </div>
 
             <div className="space-y-2 pt-1">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                <a
-                  href={`tel:${sellerData.sellerPhone}`}
-                  className="flex items-center justify-center gap-2 rounded-xl bg-[#FF9933] hover:bg-[#f07d12] px-4 py-3.5 text-xs font-black text-white shadow-sm transition-all cursor-pointer"
-                >
-                  <Phone className="h-4 w-4" />
-                  <span>Call Now</span>
-                </a>
+              {(() => {
+                const digits = (sellerData.sellerPhone || '').replace(/\D/g, '');
+                const phone10 = digits.slice(-10);
+                const cleanPhone = phone10.length === 10 ? `91${phone10}` : digits;
+                const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://bhoomimitra.com';
+                const listingLink = propertyId ? `${baseUrl}/properties/${propertyId}` : '';
+                const prefilledText = `Hi ${sellerData.sellerName || 'Landowner'}, I saw your listing "${propertyTitle || 'Property'}" on BhoomiMitra. I am interested and would like to get more details / site pin.${listingLink ? `\n\nListing: ${listingLink}` : ''}`;
+                const whatsappUrl = cleanPhone ? `https://wa.me/${cleanPhone}?text=${encodeURIComponent(prefilledText)}` : '#';
 
-                <a
-                  href={`https://api.whatsapp.com/send?phone=91${sellerData.sellerPhone.replace(/\D/g, '').slice(-10)}&text=${encodeURIComponent(`Hi ${sellerData.sellerName || ''}, I am interested in your property listing: ${propertyTitle || ''}`)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 rounded-xl bg-[#25D366] hover:bg-[#20bd5a] px-4 py-3.5 text-xs font-black text-white shadow-sm transition-all cursor-pointer"
-                >
-                  <MessageSquare className="h-4 w-4" />
-                  <span>WhatsApp</span>
-                </a>
-              </div>
+                return (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <a
+                      href={`tel:${sellerData.sellerPhone}`}
+                      className="flex items-center justify-center gap-2 rounded-xl bg-[#FF9933] hover:bg-[#f07d12] px-4 py-3.5 text-xs font-black text-white shadow-sm transition-all cursor-pointer"
+                    >
+                      <Phone className="h-4 w-4" />
+                      <span>Call Now</span>
+                    </a>
+
+                    <a
+                      href={whatsappUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => onTrackWhatsApp?.()}
+                      className="flex items-center justify-center gap-2 rounded-xl bg-[#25D366] hover:bg-[#20bd5a] px-4 py-3.5 text-xs font-black text-white shadow-sm transition-all cursor-pointer"
+                    >
+                      <MessageSquare className="h-4 w-4 fill-current" />
+                      <span>Chat on WhatsApp</span>
+                    </a>
+                  </div>
+                );
+              })()}
 
               {onOpenInquiry && (
                 <button

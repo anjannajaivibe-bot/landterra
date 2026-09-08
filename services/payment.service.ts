@@ -411,10 +411,12 @@ async function executePaymentSettlementPipeline({
   /*
    * 6. PROPERTY LIFECYCLE TRANSITION (DIRECT CLASSIFIEDS MODEL)
    *
-   * Payment activates the advertisement directly onto the marketplace.
-   * There is no administrative title verification queue.
+   * Payment activates clean advertisements directly onto the marketplace.
+   * If flagged by automated anti-spam heuristic (VERIFICATION_REQUIRED),
+   * routes to PENDING_VERIFICATION for admin review before live display.
    */
-  const nextListingStatus = 'PUBLISHED';
+  const isFlaggedForModeration = property.verificationStatus === 'VERIFICATION_REQUIRED';
+  const nextListingStatus = isFlaggedForModeration ? 'PENDING_VERIFICATION' : 'PUBLISHED';
 
   const activePeriodEnd = subscription ? subscription.periodEnd : newPeriodEnd;
 

@@ -7,13 +7,8 @@ export async function GET(req: NextRequest) {
   if (authUser instanceof NextResponse) return authUser;
 
   try {
-    if (authUser.role === 'ADMIN') {
-      const payments = await getAllPayments(100);
-      return NextResponse.json({ payments });
-    } else {
-      const payments = await getPaymentsForSeller(authUser.id);
-      return NextResponse.json({ payments });
-    }
+    const payments = await getPaymentsForSeller(authUser.id);
+    return NextResponse.json({ payments });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Failed to fetch payments';
     return NextResponse.json({ error: msg }, { status: 500 });

@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
     }
 
     const arrayBuffer = await file.arrayBuffer();
-    const inputBuffer = Buffer.from(arrayBuffer);
+    const inputBuffer = Buffer.from(arrayBuffer) as Buffer;
 
     if (!inputBuffer.length) {
       return NextResponse.json(
@@ -62,17 +62,38 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 1. Transcode and compress video to WebM using backend ffmpeg
-    const transcodeResult = await transcodeVideoToWebM(inputBuffer, file.name, {
-      maxDurationSec: 90,
-      targetWidth: 1280,
-    });
+    // 1. Attempt to transcode and compress video to WebM using backend ffmpeg
+    let uploadBuffer: Buffer = inputBuffer;
+    let finalFileName = file.name;
+    let finalMimeType = file.type || 'video/mp4';
+    const originalSize = inputBuffer.length;
+    let finalSize = inputBuffer.length;
+    let compressionRatio = 0;
 
-    // 2. Upload transcoded WebM file to storage (under properties/videos)
+    try {
+      const transcodeResult = await transcodeVideoToWebM(inputBuffer, file.name, {
+        maxDurationSec: 90,
+        targetWidth: 1280,
+      });
+      uploadBuffer = transcodeResult.buffer;
+      finalFileName = transcodeResult.fileName;
+      finalMimeType = transcodeResult.mimeType || 'video/webm';
+      finalSize = transcodeResult.size;
+      compressionRatio = transcodeResult.compressionRatio;
+    } catch (ffmpegErr) {
+      console.warn(
+        'FFmpeg transcoding unavailable or failed, falling back to uploading original video file:',
+        ffmpegErr
+      );
+      // Clean up fallback filename to avoid special characters
+      finalFileName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+    }
+
+    // 2. Upload file to storage (under properties)
     const uploadResult = await uploadFileToStorage(
-      transcodeResult.buffer,
-      transcodeResult.fileName,
-      'video/webm',
+      uploadBuffer,
+      finalFileName,
+      finalMimeType,
       false,
       'properties'
     );
@@ -83,11 +104,11 @@ export async function POST(req: NextRequest) {
         file: {
           objectKey: uploadResult.objectKey,
           secureUrl: uploadResult.secureUrl,
-          fileName: transcodeResult.fileName,
-          size: transcodeResult.size,
-          originalSize: transcodeResult.originalSize,
-          compressionRatio: transcodeResult.compressionRatio,
-          mimeType: 'video/webm',
+          fileName: finalFileName,
+          size: finalSize,
+          originalSize,
+          compressionRatio,
+          mimeType: finalMimeType,
         },
       },
       { status: 200 }

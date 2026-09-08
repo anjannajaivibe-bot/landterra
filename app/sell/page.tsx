@@ -324,9 +324,18 @@ function SellPageForm() {
             <div className="flex justify-center pt-2">
               <CloudflareTurnstile
                 action="sell_entry"
-                onSuccess={() => setHumanVerified(true)}
-                onError={() => setHumanVerified(false)}
-                onExpire={() => setHumanVerified(false)}
+                onSuccess={(token) => {
+                  setHumanVerified(true);
+                  actions.setTurnstileToken(token);
+                }}
+                onError={() => {
+                  setHumanVerified(false);
+                  actions.setTurnstileToken(null);
+                }}
+                onExpire={() => {
+                  setHumanVerified(false);
+                  actions.setTurnstileToken(null);
+                }}
               />
             </div>
 

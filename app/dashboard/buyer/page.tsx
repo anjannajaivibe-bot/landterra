@@ -46,7 +46,7 @@ export default function BuyerDashboardPage() {
         }
 
         // Load inquiries
-        const inqRes = await fetch('/api/inquiries').catch(() => null);
+        const inqRes = await fetch('/api/inquiries?type=buyer').catch(() => null);
         if (inqRes && inqRes.ok) {
           const inqData = await inqRes.json().catch(() => null);
           if (isMounted && Array.isArray(inqData?.inquiries)) {

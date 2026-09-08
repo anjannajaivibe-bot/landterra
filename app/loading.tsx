@@ -1,78 +1,111 @@
+import React from 'react';
+import { Navbar } from '@/components/layout/Navbar';
+import { Footer } from '@/components/layout/Footer';
+
 export default function RootLoading() {
   return (
-    <div className="min-h-screen bg-slate-900 text-white animate-pulse">
-      {/* Top Navigation Bar Skeleton */}
-      <header className="h-20 border-b border-slate-800/80 bg-slate-900/60 backdrop-blur-md px-6 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-slate-800" />
-          <div className="w-32 h-6 rounded-md bg-slate-800" />
-        </div>
-        <div className="hidden md:flex items-center gap-6">
-          <div className="w-20 h-4 rounded bg-slate-800" />
-          <div className="w-24 h-4 rounded bg-slate-800" />
-          <div className="w-20 h-4 rounded bg-slate-800" />
-        </div>
-        <div className="flex items-center gap-3">
-          <div className="w-24 h-10 rounded-xl bg-slate-800" />
-          <div className="w-10 h-10 rounded-full bg-slate-800" />
-        </div>
-      </header>
+    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 font-sans">
+      {/* Real Persistent Header */}
+      <Navbar />
 
-      {/* Hero Section Skeleton */}
-      <section className="relative px-6 py-20 max-w-7xl mx-auto flex flex-col items-center text-center">
-        <div className="w-48 h-7 rounded-full bg-emerald-500/10 border border-emerald-500/20 mb-6" />
-        <div className="w-3/4 max-w-2xl h-12 rounded-xl bg-slate-800 mb-4" />
-        <div className="w-1/2 max-w-xl h-5 rounded-lg bg-slate-800/70 mb-10" />
+      {/* Hero Section Blueprint Skeleton */}
+      <section className="relative overflow-hidden bg-gradient-to-b from-white via-[#fffbf5] to-slate-50 border-b border-slate-200/60 pt-10 pb-16 px-4 sm:px-6 lg:px-8">
+        <div className="relative mx-auto max-w-5xl flex flex-col items-center text-center space-y-5">
+          {/* Trust Pill */}
+          <div className="h-7 w-72 rounded-full bg-[#fff1dc] border border-[#FF9933]/30 shimmer" />
 
-        {/* Search Omnibar Skeleton */}
-        <div className="w-full max-w-4xl h-16 rounded-2xl bg-slate-800/80 border border-slate-700/60 p-3 flex items-center justify-between shadow-2xl">
-          <div className="flex items-center gap-4 px-3 w-2/3">
-            <div className="w-6 h-6 rounded-full bg-slate-700" />
-            <div className="w-1/2 h-4 rounded bg-slate-700" />
+          {/* Headline */}
+          <div className="space-y-3 w-full flex flex-col items-center">
+            <div className="h-10 sm:h-14 w-4/5 max-w-2xl rounded-2xl bg-slate-200 shimmer" />
+            <div className="h-4 sm:h-5 w-3/5 max-w-xl rounded-lg bg-slate-200/80 shimmer" />
           </div>
-          <div className="w-32 h-10 rounded-xl bg-emerald-600/40" />
+
+          {/* Omnibar Search Box */}
+          <div className="w-full max-w-4xl rounded-2xl bg-white border border-slate-200 shadow-md p-3.5 mt-4 flex flex-col md:flex-row items-center justify-between gap-3">
+            <div className="flex items-center gap-3 w-full md:w-2/3 px-2">
+              <div className="w-5 h-5 rounded-full bg-slate-200 shimmer shrink-0" />
+              <div className="h-5 w-3/4 rounded-lg bg-slate-200/70 shimmer" />
+            </div>
+            <div className="flex items-center gap-2 w-full md:w-auto">
+              <div className="h-11 w-32 rounded-xl bg-slate-200/80 shimmer hidden sm:block" />
+              <div className="h-11 w-full md:w-36 rounded-xl bg-[#FF9933]/40 shimmer" />
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* Featured Properties Grid Skeleton */}
-      <section className="max-w-7xl mx-auto px-6 py-12">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <div className="w-48 h-8 rounded-lg bg-slate-800 mb-2" />
-            <div className="w-64 h-4 rounded bg-slate-800/60" />
-          </div>
-          <div className="w-28 h-8 rounded-lg bg-slate-800" />
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[1, 2, 3, 4, 5, 6].map((i) => (
+      {/* 4 Feature Benefit Cards Blueprint */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6 relative z-10 w-full">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map((i) => (
             <div
               key={i}
-              className="rounded-2xl border border-slate-800 bg-slate-900/60 overflow-hidden flex flex-col"
+              className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-2xs space-y-3"
             >
-              <div className="aspect-[16/10] bg-slate-800 relative">
-                <div className="absolute top-3 left-3 w-20 h-6 rounded-md bg-slate-700" />
-                <div className="absolute top-3 right-3 w-8 h-8 rounded-full bg-slate-700" />
-              </div>
-              <div className="p-5 flex-1 flex flex-col justify-between">
-                <div>
-                  <div className="w-3/4 h-6 rounded bg-slate-800 mb-2" />
-                  <div className="w-1/2 h-4 rounded bg-slate-800/60 mb-4" />
-                  <div className="flex items-center gap-2 mb-4">
-                    <div className="w-16 h-5 rounded bg-slate-800/80" />
-                    <div className="w-20 h-5 rounded bg-slate-800/80" />
-                    <div className="w-16 h-5 rounded bg-slate-800/80" />
-                  </div>
-                </div>
-                <div className="pt-4 border-t border-slate-800/80 flex items-center justify-between">
-                  <div className="w-28 h-6 rounded bg-slate-800" />
-                  <div className="w-24 h-8 rounded-lg bg-slate-800" />
-                </div>
+              <div className="w-10 h-10 rounded-xl bg-[#fff1dc] shimmer" />
+              <div className="h-5 w-3/4 rounded-lg bg-slate-200 shimmer" />
+              <div className="space-y-1.5 pt-1">
+                <div className="h-3 w-full rounded bg-slate-100 shimmer" />
+                <div className="h-3 w-4/5 rounded bg-slate-100 shimmer" />
               </div>
             </div>
           ))}
         </div>
       </section>
+
+      {/* Featured Properties Grid Blueprint */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 w-full flex-1 space-y-8">
+        <div className="flex items-center justify-between">
+          <div className="space-y-2">
+            <div className="h-7 w-60 rounded-xl bg-slate-200 shimmer" />
+            <div className="h-4 w-72 rounded-md bg-slate-200/70 shimmer" />
+          </div>
+          <div className="h-8 w-32 rounded-xl bg-slate-200 shimmer hidden sm:block" />
+        </div>
+
+        {/* 3 Property Cards with exact image & details shape */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[1, 2, 3, 4, 5, 6].map((idx) => (
+            <div
+              key={idx}
+              className="rounded-3xl border border-slate-200/90 bg-white shadow-2xs overflow-hidden flex flex-col"
+            >
+              {/* Image Aspect Box */}
+              <div className="aspect-[16/10] bg-slate-200 shimmer relative">
+                <div className="absolute top-3 left-3 w-24 h-6 rounded-md bg-slate-300/80" />
+                <div className="absolute top-3 right-3 w-8 h-8 rounded-full bg-slate-300/80" />
+              </div>
+
+              {/* Card Details Box */}
+              <div className="p-5 sm:p-6 flex-1 flex flex-col justify-between space-y-4">
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="h-4 w-32 rounded-full bg-slate-200 shimmer" />
+                    <div className="h-6 w-24 rounded-lg bg-slate-200 shimmer" />
+                  </div>
+                  <div className="h-6 w-4/5 rounded-lg bg-slate-200 shimmer" />
+                  <div className="h-4 w-1/2 rounded-md bg-slate-100 shimmer" />
+
+                  {/* Specs Pill Grid */}
+                  <div className="grid grid-cols-3 gap-2 p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+                    <div className="h-8 rounded-lg bg-slate-200/70 shimmer" />
+                    <div className="h-8 rounded-lg bg-slate-200/70 shimmer" />
+                    <div className="h-8 rounded-lg bg-slate-200/70 shimmer" />
+                  </div>
+                </div>
+
+                {/* Footer Action Row */}
+                <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-3">
+                  <div className="h-9 w-28 rounded-xl bg-[#fff1dc] shimmer" />
+                  <div className="h-9 w-28 rounded-xl bg-slate-100 shimmer" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </main>
+
+      <Footer />
     </div>
   );
 }

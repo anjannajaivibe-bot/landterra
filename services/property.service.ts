@@ -15,6 +15,7 @@ import {
 
 import { deleteFilesFromStorage } from '@/services/upload.service';
 import { enqueueAndDispatchExpiringSoonEmail } from '@/services/email.service';
+import { createAuditLog } from '@/services/audit.service';
 
 /* ================================================================
    TYPES
@@ -1081,6 +1082,77 @@ export class DuplicatePropertyError extends Error {
   }
 }
 
+export class SpamContentValidationError extends Error {
+  public status = 400;
+
+  constructor(message = 'Listing content contains prohibited terms or suspicious claims.') {
+    super(message);
+    this.name = 'SpamContentValidationError';
+  }
+}
+
+export interface SpamScanResult {
+  isBlocked: boolean;
+  isSuspicious: boolean;
+  blockedReason?: string;
+  flaggedTerms: string[];
+}
+
+/**
+ * Automated Pre-Submission Spam & Scam Keyword Filter
+ * Scans title and description for fraudulent promises, advance payment solicitations,
+ * fake document claims, and suspicious URL shorteners / off-platform chat links.
+ */
+export function scanListingContentForSpam(title = '', description = ''): SpamScanResult {
+  const fullText = `${title || ''} ${description || ''}`.toLowerCase();
+
+  // 1. Severe fraudulent / illegal claims that immediately block submission
+  const BLOCKED_FRAUD_PATTERNS = [
+    { pattern: /\bfake\s+deed\b/i, label: 'Fake Deed claims' },
+    { pattern: /\b(disputed\s+land|kabja\s+land|illegal\s+possession)\b/i, label: 'Disputed or illegal possession land' },
+    { pattern: /\b(advance\s+(money|payment|token)\s+before\s+(visit|seeing|site))\b/i, label: 'Advance payment solicitation before site visit' },
+    { pattern: /\b(transfer\s+(advance|money)\s+to\s+(gpay|phonepe|paytm)\s+before\s+visit)\b/i, label: 'Off-platform advance payment demand' },
+    { pattern: /\b(double\s+your\s+money|triple\s+your\s+money|100%\s+guaranteed\s+profit)\b/i, label: 'Unrealistic speculative financial guarantee' },
+    { pattern: /\b(ponzi|money\s+doubling\s+scheme)\b/i, label: 'Financial fraud schemes' },
+  ];
+
+  for (const item of BLOCKED_FRAUD_PATTERNS) {
+    if (item.pattern.test(fullText)) {
+      return {
+        isBlocked: true,
+        isSuspicious: true,
+        blockedReason: `Listing content contains prohibited terms: "${item.label}". BhoomiMitra strictly prohibits fraudulent promises, off-platform advance payment demands, and disputed properties.`,
+        flaggedTerms: [item.label],
+      };
+    }
+  }
+
+  // 2. Suspicious terms and URL heuristics that flag the listing for mandatory manual admin review
+  const SUSPICIOUS_TERMS_PATTERNS = [
+    { pattern: /\bguaranteed\s+(return|returns|profit|income)\b/i, term: 'guaranteed returns' },
+    { pattern: /\b(100%\s+return|risk\s+free\s+investment)\b/i, term: 'risk free investment' },
+    { pattern: /\bwithout\s+documents\b/i, term: 'without documents' },
+    { pattern: /\bno\s+documents\s+needed\b/i, term: 'no documents needed' },
+    { pattern: /\b(earn\s+daily|earn\s+per\s+day)\b/i, term: 'daily earning claims' },
+    { pattern: /\b(bitcoin|crypto|usdt|ethereum)\b/i, term: 'cryptocurrency solicitation' },
+    { pattern: /(https?:\/\/)?(t\.me|telegram\.me)\/[a-zA-Z0-9_+]+/i, term: 'telegram channel link' },
+    { pattern: /(https?:\/\/)?(bit\.ly|tinyurl\.com|cutt\.ly|is\.gd)\/[a-zA-Z0-9_-]+/i, term: 'url shortener link' },
+  ];
+
+  const flaggedTerms: string[] = [];
+  for (const item of SUSPICIOUS_TERMS_PATTERNS) {
+    if (item.pattern.test(fullText)) {
+      flaggedTerms.push(item.term);
+    }
+  }
+
+  return {
+    isBlocked: false,
+    isSuspicious: flaggedTerms.length > 0,
+    flaggedTerms,
+  };
+}
+
 /**
  * Create a new property listing.
  *
@@ -1231,6 +1303,16 @@ export async function createProperty(
         );
       }
     }
+  }
+
+  /*
+   * ------------------------------------------------------------
+   * RULE 3: AUTOMATED PRE-SUBMISSION ANTI-SPAM & SCAM FILTER
+   * ------------------------------------------------------------
+   */
+  const spamScan = scanListingContentForSpam(data.title, data.description);
+  if (spamScan.isBlocked) {
+    throw new SpamContentValidationError(spamScan.blockedReason);
   }
 
   /*
@@ -1443,11 +1525,16 @@ export async function createProperty(
       '',
 
     /*
-     * New listings always require verification.
+     * New listings verification status (flagged if suspicious terms detected).
      */
 
-    verificationStatus:
-      'PENDING' as const,
+    verificationStatus: spamScan.isSuspicious
+      ? ('VERIFICATION_REQUIRED' as const)
+      : ('PENDING' as const),
+
+    rejectionReason: spamScan.isSuspicious
+      ? `Flagged by automated anti-spam scanner for terms: ${spamScan.flaggedTerms.join(', ')}`
+      : undefined,
 
     /*
      * Payment comes before publication.
@@ -1480,6 +1567,22 @@ export async function createProperty(
     await PropertyModel.create(
       newPropertyData,
     );
+
+  if (spamScan.isSuspicious && data.sellerId) {
+    createAuditLog({
+      actorId: data.sellerId,
+      actorName: data.sellerName || 'Seller',
+      actorEmail: data.sellerEmail || '',
+      actorRole: 'SELLER',
+      action: 'PROPERTY_SPAM_FLAGGED',
+      entityType: 'PROPERTY',
+      entityId: String(created._id),
+      metadata: {
+        title: data.title,
+        flaggedTerms: spamScan.flaggedTerms,
+      },
+    }).catch(() => {});
+  }
 
   return created.toObject() as unknown as IProperty;
 }
@@ -1522,6 +1625,24 @@ export async function updateProperty(
     sanitizePropertyUpdates(
       incoming,
     );
+
+  /*
+   * ------------------------------------------------------------
+   * CONTENT ANTI-SPAM & SCAM KEYWORD CHECK ON UPDATE
+   * ------------------------------------------------------------
+   */
+  if (incoming.title !== undefined || incoming.description !== undefined) {
+    const titleToCheck = incoming.title !== undefined ? String(incoming.title) : String(existing.title || '');
+    const descToCheck = incoming.description !== undefined ? String(incoming.description) : String(existing.description || '');
+    const updateSpamScan = scanListingContentForSpam(titleToCheck, descToCheck);
+    if (updateSpamScan.isBlocked) {
+      throw new SpamContentValidationError(updateSpamScan.blockedReason);
+    }
+    if (updateSpamScan.isSuspicious) {
+      propertyUpdates.verificationStatus = 'VERIFICATION_REQUIRED';
+      propertyUpdates.rejectionReason = `Flagged by automated anti-spam scanner for terms: ${updateSpamScan.flaggedTerms.join(', ')}`;
+    }
+  }
 
   /*
    * ------------------------------------------------------------

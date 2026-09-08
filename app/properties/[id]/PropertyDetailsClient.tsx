@@ -214,7 +214,7 @@ function PropertyDetailsContent({
             setProperty(null);
             setError(
               errData?.error ||
-                'This land listing could not be found or has not been published yet.',
+              'This land listing could not be found or has not been published yet.',
             );
           }
           return;
@@ -273,7 +273,7 @@ function PropertyDetailsContent({
           setFavorite(data.favorites.includes(propertyId));
         }
       })
-      .catch(() => {});
+      .catch(() => { });
 
     return () => {
       cancelled = true;
@@ -446,6 +446,17 @@ function PropertyDetailsContent({
     } finally {
       setCallLoading(false);
     }
+  };
+
+  const handleTrackWhatsApp = () => {
+    if (!property?._id) return;
+    fetch(`/api/properties/${encodeURIComponent(property._id)}/call`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ channel: 'WHATSAPP' }),
+    }).catch((err) => {
+      console.warn('Failed to record WhatsApp lead audit:', err);
+    });
   };
 
   const locationText = [
@@ -679,11 +690,10 @@ function PropertyDetailsContent({
                 type="button"
                 onClick={toggleFavorite}
                 disabled={favoriteLoading}
-                className={`flex h-10 items-center gap-1.5 rounded-xl border px-3.5 text-xs font-bold transition-colors cursor-pointer ${
-                  favorite
+                className={`flex h-10 items-center gap-1.5 rounded-xl border px-3.5 text-xs font-bold transition-colors cursor-pointer ${favorite
                     ? 'border-rose-200 bg-rose-50 text-rose-600'
                     : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
-                }`}
+                  }`}
               >
                 <Heart className={`h-4 w-4 ${favorite ? 'fill-current text-rose-500' : ''}`} />
                 <span>{favorite ? 'Saved' : 'Save'}</span>
@@ -833,7 +843,7 @@ function PropertyDetailsContent({
                       ) : (
                         <>
                           <Phone className="h-4 w-4 text-[#FF9933]" />
-                          <span>Call Seller</span>
+                          <span>Call Owner</span>
                         </>
                       )}
                     </button>
@@ -1052,11 +1062,13 @@ function PropertyDetailsContent({
         onClose={() => setCallModalOpen(false)}
         sellerData={sellerCallData}
         propertyTitle={property.title}
+        propertyId={property._id}
         callLoading={callLoading}
         callError={callError}
         onVerify={verifyAndFetchCallData}
         onRetry={() => setCallError('')}
         onOpenInquiry={openInquiry}
+        onTrackWhatsApp={handleTrackWhatsApp}
         userEmail={user?.email}
       />
 

@@ -1616,6 +1616,8 @@ export function useSellForm(): UseSellFormReturn {
       if (!response.ok) {
         if (data.code === 'PHONE_VERIFICATION_REQUIRED') {
           setErrorMessage('Phone verification is required before listing. Please verify your mobile number.');
+        } else if (data.code === 'TURNSTILE_REQUIRED') {
+          setErrorMessage(data.error || 'Security verification required to list property.');
         } else {
           const detailMsg = Array.isArray(data.details)
             ? data.details.map((d: any) => `${d.path?.join('.') || 'field'}: ${d.message || 'invalid'}`).join('; ')
@@ -1718,6 +1720,8 @@ export function useSellForm(): UseSellFormReturn {
       if (!response.ok) {
         if (data.code === 'PHONE_VERIFICATION_REQUIRED') {
           setErrorMessage('Phone verification is required before listing. Please verify your phone number.');
+        } else if (data.code === 'TURNSTILE_REQUIRED') {
+          setErrorMessage(data.error || 'Security verification required to list property.');
         } else {
           const detailMsg = Array.isArray(data.details)
             ? data.details.map((d: any) => `${d.path?.join('.') || 'field'}: ${d.message || 'invalid'}`).join('; ')

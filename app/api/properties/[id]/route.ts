@@ -8,6 +8,7 @@ import {
   updateProperty,
   deleteProperty,
 } from '@/services/property.service';
+import { createFeedback } from '@/services/feedback.service';
 
 import {
   getSession,
@@ -660,6 +661,27 @@ export async function DELETE(
           status: 403,
         },
       );
+    }
+
+    const body = await req.json().catch(() => ({}));
+    const reason = body?.reason;
+    const comments = body?.comments;
+
+    if (reason) {
+      await createFeedback({
+        feedbackType: 'LISTING_DELETION',
+        propertyId: id,
+        propertyTitle: existing.title,
+        propertyLocation: `${existing.location?.city || ''}, ${existing.location?.state || ''}`,
+        sellerId: existing.sellerId,
+        sellerName: existing.sellerName || authUser.name,
+        sellerEmail: existing.sellerEmail || authUser.email,
+        sellerPhone: existing.sellerPhone || authUser.phone,
+        reason,
+        comments,
+      }).catch((err) => {
+        console.warn('Failed to record deletion feedback:', err);
+      });
     }
 
     await deleteProperty(id);
