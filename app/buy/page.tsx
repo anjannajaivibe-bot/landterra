@@ -2,6 +2,8 @@ import React from 'react';
 import { getProperties } from '@/services/property.service';
 import { RESULTS_PER_PAGE } from '@/components/buy/types';
 import { BuyPageClient } from './BuyPageClient';
+import { Footer } from '@/components/layout/Footer';
+import { DueDiligenceChecklist } from '@/components/legal/DueDiligenceChecklist';
 
 export default async function BuyPage() {
   let initialData = { data: [], total: 0, totalPages: 1 };
@@ -27,6 +29,8 @@ export default async function BuyPage() {
       initialProperties={initialData.data}
       initialTotal={initialData.total}
       initialTotalPages={initialData.totalPages}
+      dueDiligence={<DueDiligenceChecklist />}
+      footer={<Footer />}
     />
   );
 }

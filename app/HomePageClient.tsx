@@ -28,7 +28,6 @@ import {
 } from 'lucide-react';
 
 import { Navbar } from '@/components/layout/Navbar';
-import { Footer } from '@/components/layout/Footer';
 import { PropertyCard } from '@/components/properties/PropertyCard';
 import dynamic from 'next/dynamic';
 import { IProperty } from '@/types/property';
@@ -130,12 +129,14 @@ export interface HomePageClientProps {
   initialProperties?: IProperty[];
   initialListingFee?: number;
   initialListingDurationDays?: number;
+  footer?: React.ReactNode;
 }
 
 export function HomePageClient({
   initialProperties = [],
   initialListingFee = 10,
   initialListingDurationDays = 30,
+  footer,
 }: HomePageClientProps) {
   const [properties, setProperties] = useState<IProperty[]>(initialProperties);
   const [loading, setLoading] = useState(!initialProperties || initialProperties.length === 0);
@@ -927,11 +928,11 @@ export function HomePageClient({
             </div>
           ) : (
             <div className="flex flex-col gap-5 sm:gap-6">
-              {properties.map((property, index) => (
+              {properties.map((property) => (
                 <PropertyCard
                   key={property._id}
                   property={property}
-                  priority={index === 0}
+                  priority={false}
                   onRequireLogin={() => setAuthModalOpen(true)}
                 />
               ))}
@@ -1226,15 +1227,17 @@ export function HomePageClient({
         </section>
       </main>
 
-      <Footer />
+      {footer}
 
 
 
       {/* Authentication Modal */}
-      <AuthModal
-        isOpen={authModalOpen}
-        onClose={() => setAuthModalOpen(false)}
-      />
+      {authModalOpen && (
+        <AuthModal
+          isOpen={authModalOpen}
+          onClose={() => setAuthModalOpen(false)}
+        />
+      )}
     </div>
   );
 }

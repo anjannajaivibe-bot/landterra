@@ -2,6 +2,7 @@ import React from 'react';
 import type { Metadata } from 'next';
 import { getProperties } from '@/services/property.service';
 import { HomePageClient } from './HomePageClient';
+import { Footer } from '@/components/layout/Footer';
 
 export const metadata: Metadata = {
   title: {
@@ -39,6 +40,7 @@ export default async function HomePage() {
       initialProperties={initialProperties}
       initialListingFee={publicListingFee}
       initialListingDurationDays={listingDurationDays}
+      footer={<Footer />}
     />
   );
 }

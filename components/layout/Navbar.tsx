@@ -21,9 +21,14 @@ import {
   Sparkles,
 } from 'lucide-react';
 
+import dynamic from 'next/dynamic';
 import { IUser } from '@/types/user';
-import { AuthModal } from '@/components/auth/AuthModal';
 import { CitySelectorMegaMenu } from './CitySelectorMegaMenu';
+
+const AuthModal = dynamic(
+  () => import('@/components/auth/AuthModal').then((mod) => mod.AuthModal),
+  { ssr: false }
+);
 
 export function Navbar() {
   const pathname = usePathname();
@@ -617,10 +622,12 @@ export function Navbar() {
           AUTH MODAL
       ======================================================== */}
 
-      <AuthModal
-        isOpen={authModalOpen}
-        onClose={() => setAuthModalOpen(false)}
-      />
+      {authModalOpen && (
+        <AuthModal
+          isOpen={authModalOpen}
+          onClose={() => setAuthModalOpen(false)}
+        />
+      )}
     </>
   );
 }

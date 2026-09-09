@@ -20,14 +20,8 @@ import {
   Home as HomeIcon,
 } from 'lucide-react';
 
-import dynamic from 'next/dynamic';
 import { Navbar } from '@/components/layout/Navbar';
-import { Footer } from '@/components/layout/Footer';
 import { PropertyCard } from '@/components/properties/PropertyCard';
-const DueDiligenceChecklist = dynamic(
-  () => import('@/components/legal/DueDiligenceChecklist').then((mod) => mod.DueDiligenceChecklist),
-  { ssr: false }
-);
 import { IProperty } from '@/types/property';
 import {
   DEFAULT_MAX_PRICE,
@@ -49,6 +43,8 @@ export interface BuyPageClientProps {
   initialProperties?: IProperty[];
   initialTotal?: number;
   initialTotalPages?: number;
+  footer?: React.ReactNode;
+  dueDiligence?: React.ReactNode;
 }
 
 /* ================================================================
@@ -59,6 +55,8 @@ function BuyPageContent({
   initialProperties,
   initialTotal,
   initialTotalPages,
+  footer,
+  dueDiligence,
 }: BuyPageClientProps) {
   const searchParams = useSearchParams();
 
@@ -748,15 +746,17 @@ function BuyPageContent({
               />
 
               {/* Buyer Due Diligence Advisory Guide at Bottom of Marketplace */}
-              <div className="mt-12">
-                <DueDiligenceChecklist />
-              </div>
+              {dueDiligence && (
+                <div className="mt-12">
+                  {dueDiligence}
+                </div>
+              )}
             </>
           )}
         </section>
       </main>
 
-      <Footer />
+      {footer}
     </div>
   );
 }
@@ -769,12 +769,16 @@ export function BuyPageClient({
   initialProperties,
   initialTotal,
   initialTotalPages,
+  footer,
+  dueDiligence,
 }: BuyPageClientProps) {
   return (
     <BuyPageContent
       initialProperties={initialProperties}
       initialTotal={initialTotal}
       initialTotalPages={initialTotalPages}
+      footer={footer}
+      dueDiligence={dueDiligence}
     />
   );
 }

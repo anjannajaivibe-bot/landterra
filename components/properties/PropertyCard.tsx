@@ -237,7 +237,10 @@ export function PropertyCard({
   const listedDate = formatListedDate(property.createdAt);
 
   return (
-    <article className="group relative flex flex-col md:flex-row overflow-hidden rounded-3xl border border-slate-200/90 bg-white shadow-xs transition-all duration-300 hover:-translate-y-0.5 hover:border-[#FF9933]/50 hover:shadow-[0_16px_40px_rgba(255,153,51,0.08)]">
+    <article
+      style={{ contentVisibility: 'auto', containIntrinsicSize: '320px' }}
+      className="group relative flex flex-col md:flex-row overflow-hidden rounded-3xl border border-slate-200/90 bg-white shadow-xs transition-all duration-300 hover:-translate-y-0.5 hover:border-[#FF9933]/50 hover:shadow-[0_16px_40px_rgba(255,153,51,0.08)]"
+    >
       {/* ==========================================================
           LEFT: PANORAMIC IMAGE AREA (Horizontal Rectangle)
       ========================================================== */}
@@ -259,7 +262,7 @@ export function PropertyCard({
               placeholder={priority ? 'empty' : 'blur'}
               blurDataURL={priority ? undefined : SHIMMER_BLUR_DATA_URL}
               className="object-cover transition-transform duration-500 group-hover:scale-[1.04]"
-              sizes="(max-width: 640px) calc(100vw - 32px), (max-width: 768px) 540px, (max-width: 1024px) 320px, (max-width: 1280px) 360px, 380px"
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 340px, 380px"
               referrerPolicy="no-referrer"
             />
           ) : (
