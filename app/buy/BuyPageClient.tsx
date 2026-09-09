@@ -26,7 +26,7 @@ import { Footer } from '@/components/layout/Footer';
 import { PropertyCard } from '@/components/properties/PropertyCard';
 const DueDiligenceChecklist = dynamic(
   () => import('@/components/legal/DueDiligenceChecklist').then((mod) => mod.DueDiligenceChecklist),
-  { ssr: true }
+  { ssr: false }
 );
 import { IProperty } from '@/types/property';
 import {
@@ -731,11 +731,11 @@ function BuyPageContent({
 
               {/* Property List (Horizontal layout - 1 card per row) */}
               <div className="flex flex-col gap-5 sm:gap-6">
-                {properties.map((property, index) => (
+                {properties.map((property) => (
                   <PropertyCard
                     key={property._id}
                     property={property}
-                    priority={index === 0}
+                    priority={false}
                   />
                 ))}
               </div>
