@@ -14,6 +14,7 @@ const nextConfig: NextConfig = {
   },
   // Allow access to remote image placeholders and R2/Unsplash domains
   images: {
+    formats: ['image/avif', 'image/webp'],
     remotePatterns: [
       {
         protocol: 'https',

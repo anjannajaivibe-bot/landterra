@@ -175,6 +175,14 @@ const PropertySchema = new Schema<IProperty>(
 );
 
 // Compound indexes for optimal marketplace query performance
+PropertySchema.index({ listingStatus: 1, createdAt: -1 });
+PropertySchema.index({ listingStatus: 1, landType: 1, createdAt: -1 });
+PropertySchema.index({ listingStatus: 1, propertyType: 1, createdAt: -1 });
+PropertySchema.index({ listingStatus: 1, 'location.state': 1, 'location.city': 1, createdAt: -1 });
+PropertySchema.index({ listingStatus: 1, totalPrice: 1 });
+PropertySchema.index({ listingStatus: 1, totalPrice: -1 });
+PropertySchema.index({ listingStatus: 1, landAreaYards: 1 });
+PropertySchema.index({ listingStatus: 1, landAreaYards: -1 });
 PropertySchema.index({ listingStatus: 1, verificationStatus: 1, 'location.city': 1 });
 PropertySchema.index({ listingStatus: 1, landAreaYards: 1, totalPrice: 1 });
 PropertySchema.index({ sellerId: 1, listingStatus: 1 });
@@ -197,11 +205,8 @@ PropertySchema.pre('save', function () {
   }
 });
 
-if (process.env.NODE_ENV !== 'production' && mongoose.models.Property) {
-  mongoose.deleteModel('Property');
-}
-
 export const PropertyModel: Model<IProperty> =
-  mongoose.models.Property || mongoose.model<IProperty>('Property', PropertySchema);
+  (mongoose.models.Property as Model<IProperty>) ||
+  mongoose.model<IProperty>('Property', PropertySchema);
 
 export default PropertyModel;

@@ -126,6 +126,11 @@ export function FilterBar({
               placeholder="Enter city, locality, district, or project e.g. Kokapet, Visakhapatnam, Hyderabad, Bengaluru..."
               className="w-full bg-transparent text-xs sm:text-sm font-semibold text-slate-900 placeholder:text-slate-400 focus:outline-none"
             />
+            {searchQuery.trim().length > 0 && searchQuery.trim().length < 3 && (
+              <span className="shrink-0 mr-1.5 px-2 py-0.5 text-[10px] font-bold text-amber-700 bg-amber-50 border border-amber-200/80 rounded-full select-none">
+                Min 3 chars
+              </span>
+            )}
             {searchQuery && (
               <button
                 type="button"

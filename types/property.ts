@@ -570,6 +570,8 @@ export interface PropertyFilterParams {
    nearLat?: number;
    nearLng?: number;
    radiusKm?: number;
+   cardOnly?: boolean;
+   fullDetails?: boolean;
 }
 
 /* ================================================================

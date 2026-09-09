@@ -179,8 +179,8 @@ export default function HomePage() {
     async function loadData() {
       try {
         const [propsRes, settingsRes] = await Promise.all([
-          fetch('/api/properties?limit=12', { cache: 'no-store' }),
-          fetch('/api/settings/public', { cache: 'no-store' }).catch(() => null),
+          fetch('/api/properties?limit=12&cardOnly=true'),
+          fetch('/api/settings/public').catch(() => null),
         ]);
 
         if (settingsRes?.ok) {

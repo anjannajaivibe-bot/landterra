@@ -22,6 +22,7 @@
 
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { cache } from 'react';
 
 import PropertyDetailsClient from './PropertyDetailsClient';
 import { getPropertyById } from '@/services/property.service';
@@ -53,11 +54,10 @@ function formatLandTypeServer(value?: string): string {
 }
 
 /**
- * Fetches only the fields needed for metadata.
- * Returns null if the property is not publicly visible (draft, deleted, etc.)
- * or if MongoDB is unavailable.
+ * Deduplicated server-side property lookup using React.cache().
+ * Shares a single database lookup across generateMetadata() and PropertyDetailsPage().
  */
-async function fetchPropertyForMetadata(id: string) {
+const fetchPropertyForMetadata = cache(async (id: string) => {
   try {
     // Validate ObjectId format before hitting the DB (avoids CastError logs)
     if (!/^[0-9a-fA-F]{24}$/.test(id)) return null;
@@ -79,7 +79,7 @@ async function fetchPropertyForMetadata(id: string) {
     // rather than crashing the page. The client component handles its own errors.
     return null;
   }
-}
+});
 
 /* ================================================================
    GENERATE METADATA

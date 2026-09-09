@@ -253,6 +253,9 @@ export async function GET(
       nearLat: parseCoordinate(searchParams.get('nearLat')),
       nearLng: parseCoordinate(searchParams.get('nearLng')),
       radiusKm: parsePositiveNumber(searchParams.get('radiusKm')),
+
+      cardOnly: searchParams.get('cardOnly') !== 'false',
+      fullDetails: searchParams.get('fullDetails') === 'true',
     };
 
     /*
@@ -268,6 +271,10 @@ export async function GET(
     const result =
       await getProperties(filters);
 
+    const cacheHeader = isSellerOnly
+      ? 'private, no-cache, no-store, must-revalidate'
+      : 'public, s-maxage=15, stale-while-revalidate=45';
+
     return NextResponse.json(
       {
         success: true,
@@ -276,8 +283,7 @@ export async function GET(
       {
         status: 200,
         headers: {
-          'Cache-Control':
-            'private, no-cache, no-store, must-revalidate',
+          'Cache-Control': cacheHeader,
         },
       },
     );
