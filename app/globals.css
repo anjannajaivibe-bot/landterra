@@ -1,20 +1,17 @@
 @import "tailwindcss";
 
 @theme {
-  /* Indian Saffron / Deep Saffron Palette (#FF9933) */
   --color-saffron-50: #fff9f0;
   --color-saffron-100: #fff1dc;
   --color-saffron-200: #ffe1b8;
   --color-saffron-300: #ffcb88;
   --color-saffron-400: #ffae4d;
-  --color-saffron-500: #FF9933; /* Indian Deep Saffron */
+  --color-saffron-500: #FF9933;
   --color-saffron-600: #f07d12;
   --color-saffron-700: #c75e0a;
   --color-saffron-800: #9e490f;
   --color-saffron-900: #7f3e10;
   --color-saffron-950: #451d05;
-
-  /* Global Emerald Remap to Indian Deep Saffron (#FF9933) */
   --color-emerald-50: #fff9f0;
   --color-emerald-100: #fff1dc;
   --color-emerald-200: #ffe1b8;
@@ -36,6 +33,279 @@
 ::selection {
   background-color: #FF9933;
   color: #ffffff;
+}
+
+/* ================================================================
+   RESPONSIVE FOUNDATION
+   Mobile: 320–639 | Large mobile: 640–767 | Tablet: 768–1023
+   Desktop: 1024+
+================================================================ */
+
+html {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  width: 100%;
+  max-width: 100%;
+  min-width: 320px;
+  margin: 0;
+  overflow-x: clip;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+img,
+video,
+canvas,
+svg,
+iframe {
+  max-width: 100%;
+}
+
+input,
+select,
+textarea,
+button {
+  max-width: 100%;
+}
+
+main,
+section,
+article,
+aside,
+header,
+footer,
+nav,
+form,
+fieldset {
+  min-width: 0;
+}
+
+.flex > *,
+.inline-flex > *,
+.grid > * {
+  min-width: 0;
+}
+
+p,
+li,
+a,
+button,
+label,
+span {
+  overflow-wrap: anywhere;
+}
+
+/* Do not turn intentional scrolling components into page overflow. */
+[role="dialog"],
+[data-radix-popper-content-wrapper] {
+  max-width: 100vw;
+}
+
+/* ================================================================
+   NAVBAR — INTENTIONAL BREAKPOINTS
+   Desktop navigation begins at 1024px. Tablets use compact nav.
+================================================================ */
+
+@media (min-width: 48rem) and (max-width: 63.999rem) {
+  /* Existing navbar uses md:flex for primary links. Override that at
+     tablet so the compact actions/drawer are the only navigation. */
+  header > div:nth-of-type(2) > nav[aria-label="Primary navigation"] {
+    display: none !important;
+  }
+
+  header > div:nth-of-type(2) > div:last-child {
+    display: flex !important;
+  }
+
+  header > div:nth-of-type(3) {
+    display: block !important;
+  }
+
+  header > div:nth-of-type(2) {
+    gap: 0.75rem;
+  }
+}
+
+@media (max-width: 47.999rem) {
+  /* The city selector is useful on desktop but wastes the narrow header.
+     Location remains available through the selector/menu elsewhere. */
+  header > div:nth-of-type(2) > div:first-child > div:last-child {
+    display: none;
+  }
+
+  header > div:nth-of-type(2) {
+    min-height: 64px;
+    height: auto;
+    padding-top: 0.625rem;
+    padding-bottom: 0.625rem;
+  }
+
+  header > div:nth-of-type(2) > div:first-child {
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  header > div:nth-of-type(2) > div:first-child a {
+    min-width: 0;
+  }
+
+  header > div:nth-of-type(2) > div:first-child a > div:last-child {
+    min-width: 0;
+  }
+
+  header > div:nth-of-type(2) > div:first-child a > div:last-child span:first-child {
+    font-size: 1.05rem;
+  }
+
+  header > div:nth-of-type(2) > div:last-child {
+    flex: 0 0 auto;
+  }
+}
+
+@media (max-width: 23.75rem) {
+  /* 320–380px: preserve the hierarchy instead of squeezing three labeled
+     actions beside the logo. Icons remain available with accessible labels. */
+  header > div:nth-of-type(2) > div:last-child > button:first-child span,
+  header > div:nth-of-type(2) > div:last-child > a span {
+    display: none;
+  }
+
+  header > div:nth-of-type(2) > div:last-child > button:first-child,
+  header > div:nth-of-type(2) > div:last-child > a {
+    width: 40px;
+    height: 40px;
+    justify-content: center;
+    padding: 0;
+  }
+
+  header > div:nth-of-type(2) > div:last-child {
+    gap: 0.375rem;
+  }
+}
+
+/* ================================================================
+   FOOTER — MOBILE/TABLET LAYOUT
+================================================================ */
+
+@media (max-width: 63.999rem) {
+  footer > div:nth-child(1) > div {
+    grid-template-columns: 1fr;
+  }
+
+  footer > div:nth-child(2) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2.25rem 1.5rem;
+  }
+
+  footer > div:nth-child(2) > div:first-child {
+    grid-column: 1 / -1;
+  }
+
+  footer > div:nth-child(3) > div {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  footer > div:nth-child(3) > div > div:last-child {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 39.999rem) {
+  footer > div:nth-child(1) {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+  }
+
+  footer > div:nth-child(1) > div {
+    gap: 0.75rem;
+  }
+
+  footer > div:nth-child(1) > div > div {
+    padding: 1rem;
+    border-radius: 1.25rem;
+  }
+
+  footer > div:nth-child(1) > div > div > div:first-child {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
+  footer > div:nth-child(2) {
+    grid-template-columns: 1fr;
+    padding-top: 2.5rem;
+    padding-bottom: 2.5rem;
+    gap: 2rem;
+  }
+
+  footer > div:nth-child(2) > div:first-child {
+    grid-column: auto;
+  }
+
+  footer > div:nth-child(4) > div {
+    align-items: flex-start;
+  }
+
+  footer > div:nth-child(4) > div > div:last-child {
+    width: 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 0.75rem 1rem;
+  }
+}
+
+/* ================================================================
+   MODAL / DIALOG — VIEWPORT SAFE FOUNDATION
+================================================================ */
+
+[role="dialog"][aria-modal="true"] {
+  width: 100%;
+  max-width: 100vw;
+  max-height: 100dvh;
+  overscroll-behavior: contain;
+}
+
+[role="dialog"][aria-modal="true"] > * {
+  min-width: 0;
+  max-width: 100%;
+}
+
+@media (max-width: 47.999rem) {
+  [role="dialog"][aria-modal="true"] {
+    align-items: flex-end !important;
+    padding: max(0.75rem, env(safe-area-inset-top)) max(0.75rem, env(safe-area-inset-right)) max(0.75rem, env(safe-area-inset-bottom)) max(0.75rem, env(safe-area-inset-left)) !important;
+  }
+
+  [role="dialog"][aria-modal="true"] > div {
+    width: 100% !important;
+    max-width: 32rem !important;
+    max-height: calc(100dvh - 1.5rem) !important;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border-radius: 1.5rem 1.5rem 1rem 1rem;
+  }
+}
+
+@media (max-width: 39.999rem) {
+  [role="dialog"][aria-modal="true"] > div {
+    max-height: calc(100dvh - 0.75rem) !important;
+    border-radius: 1.5rem 1.5rem 0.75rem 0.75rem;
+  }
+}
+
+/* Prevent fixed/sticky children from creating a second horizontal axis. */
+.fixed,
+.sticky {
+  max-width: 100vw;
 }
 
 /* ================================================================
@@ -64,12 +334,7 @@
   bottom: 0;
   left: 0;
   transform: translateX(-100%);
-  background-image: linear-gradient(
-    90deg,
-    rgba(255, 255, 255, 0) 0%,
-    rgba(255, 255, 255, 0.55) 50%,
-    rgba(255, 255, 255, 0) 100%
-  );
+  background-image: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.55) 50%, rgba(255, 255, 255, 0) 100%);
   animation: shimmer 1.8s infinite;
   content: '';
 }
@@ -87,13 +352,7 @@
   bottom: 0;
   left: 0;
   transform: translateX(-100%);
-  background-image: linear-gradient(
-    90deg,
-    rgba(255, 255, 255, 0) 0%,
-    rgba(255, 255, 255, 0.65) 50%,
-    rgba(255, 255, 255, 0) 100%
-  );
+  background-image: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.65) 50%, rgba(255, 255, 255, 0) 100%);
   animation: shimmer 1.8s infinite;
   content: '';
 }
-
