@@ -770,10 +770,8 @@ export function BuyPageClient({
   initialTotal,
   initialTotalPages,
 }: BuyPageClientProps) {
-  const searchParams = useSearchParams();
   return (
     <BuyPageContent
-      key={searchParams.toString()}
       initialProperties={initialProperties}
       initialTotal={initialTotal}
       initialTotalPages={initialTotalPages}
