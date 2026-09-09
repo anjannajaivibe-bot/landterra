@@ -238,7 +238,7 @@ export function PropertyCard({
 
   return (
     <article
-      style={{ contentVisibility: 'auto', containIntrinsicSize: '320px' }}
+      style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 500px' }}
       className="group relative flex flex-col md:flex-row overflow-hidden rounded-3xl border border-slate-200/90 bg-white shadow-xs transition-all duration-300 hover:-translate-y-0.5 hover:border-[#FF9933]/50 hover:shadow-[0_16px_40px_rgba(255,153,51,0.08)]"
     >
       {/* ==========================================================

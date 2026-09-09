@@ -1,6 +1,5 @@
 import React from 'react';
 import { getProperties } from '@/services/property.service';
-import { RESULTS_PER_PAGE } from '@/components/buy/types';
 import { BuyPageClient } from './BuyPageClient';
 import { Footer } from '@/components/layout/Footer';
 import { DueDiligenceChecklist } from '@/components/legal/DueDiligenceChecklist';
@@ -11,7 +10,7 @@ export default async function BuyPage() {
   try {
     const result = await getProperties({
       page: 1,
-      limit: RESULTS_PER_PAGE,
+      limit: 6,
       cardOnly: true,
     });
 
