@@ -1,11 +1,11 @@
 import type { Metadata, Viewport } from 'next';
 import Script from 'next/script';
+import ReactDOM from 'react-dom';
 import { Plus_Jakarta_Sans } from 'next/font/google';
 import './globals.css';
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ['latin'],
-  weight: ['300', '400', '500', '600', '700', '800'],
   display: 'swap',
   variable: '--font-sans',
 });
@@ -133,6 +133,9 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  ReactDOM.preconnect('https://images.unsplash.com');
+  ReactDOM.prefetchDNS('https://images.unsplash.com');
+
   return (
     <html lang="en" data-scroll-behavior="smooth" className={`scroll-smooth ${plusJakartaSans.variable}`}>
       <body
