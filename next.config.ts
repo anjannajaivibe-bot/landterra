@@ -15,6 +15,7 @@ const nextConfig: NextConfig = {
   // Allow access to remote image placeholders and R2/Unsplash domains
   images: {
     formats: ['image/avif', 'image/webp'],
+    deviceSizes: [384, 480, 640, 750, 828, 1080, 1200, 1920],
     remotePatterns: [
       {
         protocol: 'https',
@@ -43,8 +44,6 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  output: 'standalone',
-  transpilePackages: ['motion'],
   webpack: (config, {dev}) => {
     // HMR is disabled in AI Studio via DISABLE_HMR env var.
     // Do not modify -- file watching is disabled to prevent flickering during agent edits.

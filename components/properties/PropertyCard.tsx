@@ -245,6 +245,7 @@ export function PropertyCard({
       <div className="relative w-full md:w-[320px] lg:w-[360px] xl:w-[380px] shrink-0 aspect-[16/10] md:aspect-auto min-h-[220px] md:min-h-[270px] bg-slate-100 overflow-hidden">
         <Link
           href={`/properties/${property._id}`}
+          prefetch={false}
           aria-label={`View ${property.title}`}
           className="absolute inset-0 block"
         >
@@ -254,10 +255,11 @@ export function PropertyCard({
               alt={property.title}
               fill
               priority={priority}
-              placeholder="blur"
-              blurDataURL={SHIMMER_BLUR_DATA_URL}
+              quality={65}
+              placeholder={priority ? 'empty' : 'blur'}
+              blurDataURL={priority ? undefined : SHIMMER_BLUR_DATA_URL}
               className="object-cover transition-transform duration-500 group-hover:scale-[1.04]"
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 340px, 380px"
+              sizes="(max-width: 640px) calc(100vw - 32px), (max-width: 768px) 540px, (max-width: 1024px) 320px, (max-width: 1280px) 360px, 380px"
               referrerPolicy="no-referrer"
             />
           ) : (
@@ -457,6 +459,7 @@ export function PropertyCard({
           <div className="flex items-center gap-2">
             <Link
               href={`/properties/${property._id}`}
+              prefetch={false}
               className="inline-flex items-center gap-1.5 rounded-xl bg-[#FF9933] px-5 py-2.5 text-xs font-black text-white shadow-2xs hover:bg-[#f07d12] hover:shadow-md transition-all cursor-pointer"
             >
               <span>View Details</span>

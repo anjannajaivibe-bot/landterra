@@ -1,13 +1,18 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Direct Land & Plots Marketplace in India | BhoomiMitra',
+  title: {
+    absolute: 'Direct Real Estate & Properties Marketplace | BhoomiMitra',
+  },
   description:
-    'Search residential plots, commercial land, farmlands, and industrial plots across India. Connect directly with genuine landowners with zero brokerage.',
+    'Browse direct owner properties — plots, apartments, houses, villas, commercial spaces, and farmlands across India with zero broker commissions.',
+  alternates: {
+    canonical: '/buy',
+  },
   openGraph: {
-    title: 'Direct Land & Plots Marketplace in India | BhoomiMitra',
+    title: 'Direct Real Estate & Properties Marketplace | BhoomiMitra',
     description:
-      'Search residential plots, commercial land, farmlands, and industrial plots across India. Connect directly with genuine landowners with zero brokerage.',
+      'Browse direct owner properties — plots, apartments, houses, villas, commercial spaces, and farmlands across India with zero broker commissions.',
   },
 };
 

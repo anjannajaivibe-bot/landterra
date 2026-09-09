@@ -502,10 +502,13 @@ export function FilterBar({
 
             {/* 2. Geographic Region / State (All 36 Indian States & UTs) */}
             <div className="relative">
-              <label className="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1">
+              <label htmlFor="filter-region-state" className="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1">
                 Region / State
               </label>
               <select
+                id="filter-region-state"
+                name="regionState"
+                aria-label="Filter properties by Indian Region or State"
                 value={selectedState}
                 onChange={(e) => onStateChange(e.target.value)}
                 className="w-full rounded-xl border border-slate-200 bg-[#f8fafc] hover:bg-white px-3 py-2 text-xs font-semibold text-slate-800 outline-none transition-colors focus:border-[#FF9933] focus:ring-2 focus:ring-[#FF9933]/20 cursor-pointer"
@@ -521,10 +524,13 @@ export function FilterBar({
 
             {/* 3. Budget (Matching Home Page BUDGET_PRESETS) */}
             <div className="relative">
-              <label className="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1">
+              <label htmlFor="filter-budget-range" className="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1">
                 Budget Range
               </label>
               <select
+                id="filter-budget-range"
+                name="budgetRange"
+                aria-label="Filter properties by Budget Range"
                 value={selectedBudgetIndex}
                 onChange={(e) => onBudgetPresetChange(Number(e.target.value))}
                 className="w-full rounded-xl border border-slate-200 bg-[#f8fafc] hover:bg-white px-3 py-2 text-xs font-semibold text-slate-800 outline-none transition-colors focus:border-[#FF9933] focus:ring-2 focus:ring-[#FF9933]/20 cursor-pointer"
@@ -539,10 +545,13 @@ export function FilterBar({
 
             {/* 4. Land Extent / Area */}
             <div className="relative">
-              <label className="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1">
+              <label htmlFor="filter-land-area" className="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1">
                 Land Area
               </label>
               <select
+                id="filter-land-area"
+                name="landArea"
+                aria-label="Filter properties by Land Area Extent"
                 value={selectedAreaIndex}
                 onChange={(e) => onAreaPresetChange(Number(e.target.value))}
                 className="w-full rounded-xl border border-slate-200 bg-[#f8fafc] hover:bg-white px-3 py-2 text-xs font-semibold text-slate-800 outline-none transition-colors focus:border-[#FF9933] focus:ring-2 focus:ring-[#FF9933]/20 cursor-pointer"

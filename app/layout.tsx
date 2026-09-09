@@ -86,8 +86,13 @@ export const metadata: Metadata = {
     title: 'BhoomiMitra',
   },
   icons: {
-    icon: '/favicon.ico',
+    icon: '/icon',
     apple: '/icon-192.png',
+  },
+  alternates: {
+    types: {
+      'text/plain': [{ url: '/llms.txt', title: 'LLM Agentic Manifest' }],
+    },
   },
 };
 
@@ -130,21 +135,18 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" data-scroll-behavior="smooth" className={`scroll-smooth ${plusJakartaSans.variable}`}>
-      <head>
-        <link rel="alternate" type="text/plain" href="/llms.txt" title="LLM Agentic Manifest" />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-        />
-      </head>
       <body
         suppressHydrationWarning
         className="min-h-screen bg-slate-50 text-slate-900 antialiased font-sans selection:bg-[#FF9933] selection:text-white"
       >
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
         {children}
         <Script id="register-sw" strategy="afterInteractive">
           {`
-            if ('serviceWorker' in navigator && (window.location.protocol === 'https:' || window.location.hostname === 'localhost')) {
+            if ('serviceWorker' in navigator && window.location.protocol === 'https:') {
               window.addEventListener('load', function() {
                 navigator.serviceWorker.register('/sw.js').catch(function() {});
               });

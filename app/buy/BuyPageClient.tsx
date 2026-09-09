@@ -20,10 +20,14 @@ import {
   Home as HomeIcon,
 } from 'lucide-react';
 
+import dynamic from 'next/dynamic';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { PropertyCard } from '@/components/properties/PropertyCard';
-import { DueDiligenceChecklist } from '@/components/legal/DueDiligenceChecklist';
+const DueDiligenceChecklist = dynamic(
+  () => import('@/components/legal/DueDiligenceChecklist').then((mod) => mod.DueDiligenceChecklist),
+  { ssr: true }
+);
 import { IProperty } from '@/types/property';
 import {
   DEFAULT_MAX_PRICE,
@@ -608,6 +612,8 @@ function BuyPageContent({
                 </label>
                 <select
                   id="sort"
+                  name="sortBy"
+                  aria-label="Sort properties"
                   value={sortBy}
                   onChange={(event) => updateSort(event.target.value)}
                   className="bg-transparent text-xs font-bold text-slate-800 outline-none cursor-pointer"
@@ -701,6 +707,7 @@ function BuyPageContent({
                 </button>
                 <Link
                   href="/sell"
+                  prefetch={false}
                   className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 px-5 py-3 text-xs font-bold text-slate-700 transition-colors"
                 >
                   <span>+ List Your Property</span>
@@ -728,7 +735,7 @@ function BuyPageContent({
                   <PropertyCard
                     key={property._id}
                     property={property}
-                    priority={index < 2}
+                    priority={index === 0}
                   />
                 ))}
               </div>

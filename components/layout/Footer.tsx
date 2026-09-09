@@ -151,6 +151,7 @@ export function Footer() {
             <li>
               <Link
                 href="/sell"
+                prefetch={false}
                 className="inline-flex items-center gap-1.5 text-[#c75e0a] font-black hover:text-[#FF9933] transition-colors"
               >
                 <span>+ List Your Property</span>
@@ -160,7 +161,7 @@ export function Footer() {
               </Link>
             </li>
             <li>
-              <Link href="/dashboard/seller" className="hover:text-[#FF9933] transition-colors">
+              <Link href="/dashboard/seller" prefetch={false} className="hover:text-[#FF9933] transition-colors">
                 Seller Dashboard
               </Link>
             </li>

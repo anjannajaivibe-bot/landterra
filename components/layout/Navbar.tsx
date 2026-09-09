@@ -227,6 +227,7 @@ export function Navbar() {
 
             <NavLink
               href="/sell"
+              prefetch={false}
               active={isActive('/sell')}
               icon={<Plus className="h-4 w-4" />}
             >
@@ -400,6 +401,7 @@ export function Navbar() {
             {/* PRIMARY SELL CTA WITH BADGE */}
             <Link
               href="/sell"
+              prefetch={false}
               className="inline-flex items-center gap-2 rounded-xl bg-[#FF9933] px-4 py-2.5 text-xs font-bold text-white shadow-sm transition-all hover:bg-[#f07d12] hover:shadow-md cursor-pointer"
             >
               <Plus className="h-4 w-4" />
@@ -428,6 +430,7 @@ export function Navbar() {
 
             <Link
               href="/sell"
+              prefetch={false}
               onClick={closeAllMenus}
               className="inline-flex items-center gap-1 rounded-lg bg-[#FF9933] px-3 py-2 text-xs font-bold text-white"
             >
@@ -506,6 +509,7 @@ export function Navbar() {
 
                 <MobileNavLink
                   href="/sell"
+                  prefetch={false}
                   active={isActive('/sell')}
                   icon={<Plus className="h-4 w-4" />}
                   onClick={closeAllMenus}
@@ -630,15 +634,18 @@ function NavLink({
   active,
   children,
   icon,
+  prefetch,
 }: {
   href: string;
   active: boolean;
   children: React.ReactNode;
   icon?: React.ReactNode;
+  prefetch?: boolean;
 }) {
   return (
     <Link
       href={href}
+      prefetch={prefetch}
       className={`inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-bold transition-all ${active
         ? 'bg-[#fff1dc] text-[#c75e0a] border border-[#FF9933]/30 shadow-2xs'
         : 'text-slate-900 hover:bg-slate-100/80 hover:text-[#c75e0a]'
@@ -701,16 +708,19 @@ function MobileNavLink({
   children,
   icon,
   onClick,
+  prefetch,
 }: {
   href: string;
   active: boolean;
   children: React.ReactNode;
   icon?: React.ReactNode;
   onClick: () => void;
+  prefetch?: boolean;
 }) {
   return (
     <Link
       href={href}
+      prefetch={prefetch}
       onClick={onClick}
       className={`flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-xs transition-colors ${active
         ? 'bg-[#fff1dc] font-bold text-[#c75e0a] border border-[#FF9933]/30'
