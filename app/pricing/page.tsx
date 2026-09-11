@@ -46,7 +46,7 @@ export default function PricingPage() {
             Seller Listing Pricing &amp; 0% Brokerage
           </h1>
           <p className="text-slate-300 text-sm sm:text-base mt-4 max-w-2xl leading-relaxed">
-            Sell your agricultural plots, farmhouses, or commercial land directly to serious buyers. Pay only a nominal flat fee to host your advertisement and keep 100% of your sale proceeds.
+            Sell your agricultural plots, farmhouses, residential, or commercial property directly to serious buyers. Pay only a nominal flat fee to host your advertisement and keep 100% of your sale proceeds.
           </p>
         </div>
       </div>

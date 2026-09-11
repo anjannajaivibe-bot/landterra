@@ -1,6 +1,8 @@
 import {
   IProperty,
   IPublicProperty,
+  IPropertyImage,
+  IPropertyDocument,
   PropertyFilterParams,
   PaginatedResponse,
 } from '@/types/property';
@@ -11,11 +13,14 @@ import { connectToDatabase } from '@/lib/db/mongodb';
 
 import {
   calculateAuthoritativeFees,
+  CreatePropertyInput,
+  UpdatePropertyInput,
 } from '@/lib/validation/property';
 
 import { deleteFilesFromStorage } from '@/services/upload.service';
 import { enqueueAndDispatchExpiringSoonEmail } from '@/services/email.service';
 import { createAuditLog } from '@/services/audit.service';
+import { getRedisClient, isUpstashConfigured } from '@/lib/redis';
 
 /* ================================================================
    TYPES
@@ -118,7 +123,7 @@ export const CARD_PROPERTY_PROJECTION = {
 } as const;
 
 /* ================================================================
-   HOT QUERY IN-MEMORY CACHE
+   DISTRIBUTED & IN-MEMORY HOT QUERY CACHE
 ================================================================ */
 
 interface CacheEntry<T> {
@@ -128,18 +133,66 @@ interface CacheEntry<T> {
 
 const hotPropertyCache = new Map<string, CacheEntry<PaginatedResponse<IProperty>>>();
 const CACHE_TTL_MS = 30000; // 30 seconds
+const REDIS_CACHE_TTL_SEC = 30;
+const REDIS_VERSION_KEY = 'bhoomimitra:props:ver';
 
+/**
+ * Local micro-cache of the Redis cache version to avoid extra roundtrips
+ */
+let localCacheVersion = 1;
+let localCacheVersionExpiresAt = 0;
+
+async function getDistributedCacheVersion(): Promise<number> {
+  const now = Date.now();
+  if (now < localCacheVersionExpiresAt) {
+    return localCacheVersion;
+  }
+  const redis = getRedisClient();
+  if (!redis) return 1;
+  try {
+    const ver = await redis.get<number>(REDIS_VERSION_KEY);
+    if (typeof ver === 'number' && ver > 0) {
+      localCacheVersion = ver;
+    } else if (ver !== null && !isNaN(Number(ver))) {
+      localCacheVersion = Number(ver);
+    } else {
+      localCacheVersion = 1;
+    }
+    localCacheVersionExpiresAt = now + 5000; // Micro-cache version locally for 5 seconds
+    return localCacheVersion;
+  } catch {
+    return localCacheVersion;
+  }
+}
+
+/**
+ * Invalidates the hot query cache across both the local node and
+ * distributed serverless instances by incrementing the Redis version key.
+ */
 export function invalidatePropertyCache(): void {
+  // 1. Immediately invalidate local in-memory cache
   hotPropertyCache.clear();
+  localCacheVersionExpiresAt = 0;
+
+  // 2. Increment distributed Redis version key (O(1) multi-node invalidation)
+  if (isUpstashConfigured) {
+    const redis = getRedisClient();
+    if (redis) {
+      redis.incr(REDIS_VERSION_KEY).catch((err) => {
+        console.warn('[property-cache] Failed to increment Redis cache version:', err);
+      });
+    }
+  }
 }
 
 /**
  * Defense-in-depth serializer for public marketplace listing items.
- * Ensures the returned shape strictly adheres to IPublicProperty and
- * strips any inadvertent sensitive or private fields.
+ * Ensures the returned shape strictly adheres to IPublicProperty,
+ * strips any inadvertent sensitive or private fields, and converts
+ * Mongoose ObjectIds and Date instances to JSON-serializable primitives.
  */
 export function toPublicPropertyListItem(
-  doc: any,
+  doc: Record<string, any> | IProperty,
 ): IProperty {
   const publicItem: IPublicProperty = {
     _id: String(doc._id),
@@ -180,9 +233,9 @@ export function toPublicPropertyListItem(
     listingStatus: doc.listingStatus,
     sellerType: doc.sellerType,
     images: Array.isArray(doc.images)
-      ? doc.images.map((img: any) => ({
+      ? doc.images.map((img: Partial<IPropertyImage>) => ({
           _id: img._id ? String(img._id) : undefined,
-          secureUrl: img.secureUrl,
+          secureUrl: img.secureUrl || '',
           isPrimary: Boolean(img.isPrimary),
           sortOrder: typeof img.sortOrder === 'number' ? img.sortOrder : 0,
         }))
@@ -194,13 +247,81 @@ export function toPublicPropertyListItem(
           duration: doc.video.duration,
         }
       : undefined,
-    publishedAt: doc.publishedAt,
-    createdAt: doc.createdAt,
-    updatedAt: doc.updatedAt,
+    publishedAt: doc.publishedAt instanceof Date
+      ? doc.publishedAt.toISOString()
+      : (doc.publishedAt ? String(doc.publishedAt) : undefined),
+    createdAt: doc.createdAt instanceof Date
+      ? doc.createdAt.toISOString()
+      : (doc.createdAt ? String(doc.createdAt) : new Date().toISOString()),
+    updatedAt: doc.updatedAt instanceof Date
+      ? doc.updatedAt.toISOString()
+      : (doc.updatedAt ? String(doc.updatedAt) : new Date().toISOString()),
     viewsCount: doc.viewsCount,
   };
 
   return publicItem as unknown as IProperty;
+}
+
+function isObjectIdLike(val: any): boolean {
+  if (!val || typeof val !== 'object') return false;
+  return (
+    val._bsontype === 'ObjectID' ||
+    val._bsontype === 'ObjectId' ||
+    typeof val.toHexString === 'function' ||
+    val.constructor?.name === 'ObjectId' ||
+    val.constructor?.name === 'ObjectID' ||
+    (typeof val.toString === 'function' && /^[0-9a-fA-F]{24}$/.test(val.toString()))
+  );
+}
+
+/**
+ * Fast POJO sanitizer for Mongoose documents and objects.
+ * Recursively converts ObjectIds to strings and Date instances to ISO strings,
+ * producing a pure JSON-serializable plain JavaScript object without
+ * the CPU and memory allocation overhead of JSON.parse(JSON.stringify(doc)).
+ */
+export function toSerializableProperty<T = any>(doc: any): T {
+  if (doc === null || doc === undefined) return doc;
+
+  // Primitives
+  if (typeof doc !== 'object') return doc;
+
+  // Date objects
+  if (doc instanceof Date) {
+    return doc.toISOString() as unknown as T;
+  }
+
+  // MongoDB ObjectId or BSON type
+  if (isObjectIdLike(doc)) {
+    return doc.toString() as unknown as T;
+  }
+
+  // Arrays
+  if (Array.isArray(doc)) {
+    return doc.map((item) => toSerializableProperty(item)) as unknown as T;
+  }
+
+  // Plain objects & Mongoose lean documents
+  const result: Record<string, any> = {};
+  for (const key of Object.keys(doc)) {
+    const val = doc[key];
+    if (val === undefined) continue;
+    if (val === null) {
+      result[key] = null;
+    } else if (val instanceof Date) {
+      result[key] = val.toISOString();
+    } else if (isObjectIdLike(val)) {
+      result[key] = val.toString();
+    } else if (Array.isArray(val)) {
+      result[key] = val.map((item) => toSerializableProperty(item));
+    } else if (typeof val === 'object') {
+      result[key] = toSerializableProperty(val);
+    } else {
+      result[key] = val;
+    }
+  }
+
+  return result as T;
 }
 
 /* ================================================================
@@ -352,12 +473,32 @@ export async function getProperties(
     !params.sellerId &&
     !params.isAdmin;
 
-  // Check in-memory cache for public queries (fast path: <1ms response)
+  // Check in-memory & distributed Redis cache for public queries (fast path: <1ms response)
   const cacheKey = isPublicQuery ? JSON.stringify(params) : null;
   if (cacheKey) {
     const cached = hotPropertyCache.get(cacheKey);
     if (cached && cached.expiresAt > Date.now()) {
       return cached.data;
+    }
+
+    if (isUpstashConfigured) {
+      try {
+        const redis = getRedisClient();
+        if (redis) {
+          const version = await getDistributedCacheVersion();
+          const redisKey = `bhoomimitra:props:v${version}:${cacheKey}`;
+          const redisData = await redis.get<PaginatedResponse<IProperty>>(redisKey);
+          if (redisData && Array.isArray(redisData.data)) {
+            hotPropertyCache.set(cacheKey, {
+              data: redisData,
+              expiresAt: Date.now() + CACHE_TTL_MS,
+            });
+            return redisData;
+          }
+        }
+      } catch {
+        // Fall back gracefully to database query
+      }
     }
   }
 
@@ -949,6 +1090,20 @@ export async function getProperties(
         data: response,
         expiresAt: Date.now() + CACHE_TTL_MS,
       });
+
+      if (isUpstashConfigured) {
+        const redis = getRedisClient();
+        if (redis) {
+          getDistributedCacheVersion().then((version) => {
+            const redisKey = `bhoomimitra:props:v${version}:${cacheKey}`;
+            redis.set(redisKey, response, { ex: REDIS_CACHE_TTL_SEC }).catch((err) => {
+              console.warn('[property-cache] Failed to cache query in Redis:', err);
+            });
+          }).catch((err) => {
+            console.warn('[property-cache] Failed to retrieve cache version for query caching:', err);
+          });
+        }
+      }
     }
 
     return response;
@@ -1229,7 +1384,7 @@ export function scanListingContentForSpam(title = '', description = ''): SpamSca
  * are ignored.
  */
 export async function createProperty(
-  data: any,
+  data: CreatePropertyInput,
 ): Promise<IProperty> {
   const area =
     Number(data.landAreaYards);
@@ -1281,7 +1436,7 @@ export async function createProperty(
    *    videos, or exact matching title + land area + pincode.
    */
   if (data.sellerId) {
-    const sellerConditions: any[] = [{ sellerId: data.sellerId }];
+    const sellerConditions: Record<string, unknown>[] = [{ sellerId: data.sellerId }];
 
     if (data.sellerEmail && typeof data.sellerEmail === 'string' && data.sellerEmail.trim()) {
       sellerConditions.push({ sellerEmail: data.sellerEmail.trim().toLowerCase() });
@@ -1308,10 +1463,10 @@ export async function createProperty(
 
     // Rule 2: Deep content-level duplicate detection for the same seller
     const newDocKeys = new Set(
-      (data.documents || []).map((d: any) => d?.objectKey).filter(Boolean)
+      (data.documents || []).map((d: Partial<IPropertyDocument>) => d?.objectKey).filter(Boolean)
     );
     const newImageKeys = new Set(
-      (data.images || []).map((img: any) => img?.objectKey).filter(Boolean)
+      (data.images || []).map((img: Partial<IPropertyImage>) => img?.objectKey).filter(Boolean)
     );
     const newVideoKey = data.video?.objectKey;
     const normalizedNewTitle = String(data.title || '').trim().toLowerCase();
@@ -1386,40 +1541,28 @@ export async function createProperty(
    * Images.
    */
 
-  const formattedImages =
-    (
-      data.images || []
-    ).map(
-      (
-        img: any,
-        index: number,
-      ) => ({
-        objectKey:
-          img.objectKey,
+  let primaryFound = false;
+  const formattedImages = (data.images || []).map((img: Partial<IPropertyImage>, index: number) => {
+    let isPrimary = Boolean(img.isPrimary);
+    if (isPrimary && !primaryFound) {
+      primaryFound = true;
+    } else if (isPrimary && primaryFound) {
+      isPrimary = false;
+    }
+    return {
+      objectKey: img.objectKey,
+      secureUrl: img.secureUrl,
+      fileName: img.fileName || 'image.jpg',
+      mimeType: img.mimeType || 'image/jpeg',
+      size: img.size || 0,
+      isPrimary,
+      sortOrder: img.sortOrder ?? index,
+    };
+  });
 
-        secureUrl:
-          img.secureUrl,
-
-        fileName:
-          img.fileName ||
-          'image.jpg',
-
-        mimeType:
-          img.mimeType ||
-          'image/jpeg',
-
-        size:
-          img.size || 0,
-
-        isPrimary:
-          img.isPrimary ??
-          index === 0,
-
-        sortOrder:
-          img.sortOrder ??
-          index,
-      }),
-    );
+  if (!primaryFound && formattedImages.length > 0) {
+    formattedImages[0].isPrimary = true;
+  }
 
   /*
    * Documents always start as PENDING.
@@ -1429,7 +1572,7 @@ export async function createProperty(
     (
       data.documents || []
     ).map(
-      (doc: any) => ({
+      (doc: Partial<IPropertyDocument>) => ({
         sellerId:
           data.sellerId,
 
@@ -1648,7 +1791,9 @@ export async function createProperty(
         title: data.title,
         flaggedTerms: spamScan.flaggedTerms,
       },
-    }).catch(() => {});
+    }).catch((err) => {
+      console.warn('[AuditLog] Failed to record spam moderation flag:', err);
+    });
   }
 
   invalidatePropertyCache();
@@ -1812,6 +1957,31 @@ export async function updateProperty(
 
   propertyUpdates.updatedAt =
     new Date();
+
+  // Ensure exactly one primary image when images are updated
+  if (Array.isArray(propertyUpdates.images) && propertyUpdates.images.length > 0) {
+    let primaryFound = false;
+    const normalizedImages: IPropertyImage[] = propertyUpdates.images.map(
+      (img: Partial<IPropertyImage>, index: number): IPropertyImage => {
+        let isPrimary = Boolean(img.isPrimary);
+        if (isPrimary && !primaryFound) {
+          primaryFound = true;
+        } else if (isPrimary && primaryFound) {
+          isPrimary = false;
+        }
+        return {
+          ...img,
+          secureUrl: img.secureUrl || '',
+          isPrimary,
+          sortOrder: img.sortOrder ?? index,
+        };
+      }
+    );
+    if (!primaryFound && normalizedImages.length > 0) {
+      normalizedImages[0].isPrimary = true;
+    }
+    propertyUpdates.images = normalizedImages;
+  }
 
   const conn =
     await connectToDatabase();

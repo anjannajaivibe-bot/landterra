@@ -487,7 +487,7 @@ function BuyPageContent({
 
             <div className="inline-flex items-center gap-1.5 rounded-full border border-[#FF9933]/30 bg-[#fff1dc] px-3 py-1 text-[11px] font-black text-[#c75e0a] shadow-2xs">
               <Sparkles className="h-3.5 w-3.5 text-[#FF9933]" />
-              <span>Direct From Owners ΓÇó 0% Brokerage</span>
+              <span>Direct From Owners • 0% Brokerage</span>
             </div>
           </div>
 
@@ -498,7 +498,7 @@ function BuyPageContent({
               <span className="text-[#FF9933]">Marketplace</span>
             </h1>
             <p className="mt-2 text-xs sm:text-sm leading-relaxed text-slate-600">
-              Browse direct owner properties ΓÇö plots, apartments, houses, villas, commercial spaces, and farmlands across India with zero broker commissions.
+              Browse direct owner properties — plots, apartments, houses, villas, commercial spaces, and farmlands across India with zero broker commissions.
             </p>
           </div>
 

@@ -25,7 +25,7 @@ export const LISTING_SUBSCRIPTION_DURATION_DAYS = 30;
 export const SITE_CONFIG = {
   name: 'BhoomiMitra',
 
-  tagline: 'Find Land With More Confidence',
+  tagline: 'Find Property With More Confidence',
 
   description:
     'Discover land and plots across India, compare properties, review listing information, and connect directly with sellers.',
@@ -375,7 +375,7 @@ export const DOCUMENT_TYPES = [
 
 export const VERIFICATION_BADGES = {
   VERIFIED: {
-    label: 'Direct Classified',
+    label: 'Verified',
 
     color: 'saffron',
 

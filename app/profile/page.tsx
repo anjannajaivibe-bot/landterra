@@ -38,6 +38,24 @@ import { IProperty } from '@/types/property';
 import { DeleteListingModal } from '@/components/properties/DeleteListingModal';
 import { FeedbackReason } from '@/types/feedback';
 
+function ProfileListingThumbnail({ src, alt }: { src?: string; alt: string }) {
+  const [hasError, setHasError] = useState(false);
+  if (!src || hasError) {
+    return <LandPlot className="w-6 h-6 text-slate-300" />;
+  }
+  return (
+    <Image
+      src={src}
+      alt={alt}
+      fill
+      sizes="64px"
+      className="object-cover"
+      referrerPolicy="no-referrer"
+      onError={() => setHasError(true)}
+    />
+  );
+}
+
 /* ================================================================
    PROFILE PAGE SKELETON (Gray Boxes with Continuous Shimmer Wave)
 ================================================================ */
@@ -324,6 +342,7 @@ export default function ProfilePage() {
                     src={user.profileImage || (user as any).image}
                     alt={user.name || 'User'}
                     fill
+                    sizes="64px"
                     className="object-cover"
                     referrerPolicy="no-referrer"
                   />
@@ -412,11 +431,10 @@ export default function ProfilePage() {
 
           {deleteAlert && (
             <div
-              className={`p-3.5 rounded-2xl border flex items-center justify-between gap-3 text-xs font-semibold animate-in fade-in duration-150 ${
-                deleteAlert.type === 'success'
+              className={`p-3.5 rounded-2xl border flex items-center justify-between gap-3 text-xs font-semibold animate-in fade-in duration-150 ${deleteAlert.type === 'success'
                   ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
                   : 'bg-rose-50 text-rose-800 border-rose-200'
-              }`}
+                }`}
             >
               <div className="flex items-center gap-2.5">
                 {deleteAlert.type === 'success' ? (
@@ -482,6 +500,9 @@ export default function ProfilePage() {
                 const isUnderReview = prop.listingStatus === 'PENDING_VERIFICATION';
                 const isExpired = prop.listingStatus === 'EXPIRED';
                 const isPaused = prop.listingStatus === 'PAUSED';
+                const primaryThumb =
+                  prop.images?.find((img) => img.isPrimary)?.secureUrl ||
+                  prop.images?.[0]?.secureUrl;
 
                 return (
                   <div
@@ -490,17 +511,10 @@ export default function ProfilePage() {
                   >
                     <div className="flex items-start gap-3.5 min-w-0">
                       <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-slate-100 shrink-0 border border-slate-200 flex items-center justify-center">
-                        {prop.images?.[0]?.secureUrl ? (
-                          <Image
-                            src={prop.images[0].secureUrl}
-                            alt={prop.title}
-                            fill
-                            className="object-cover"
-                            referrerPolicy="no-referrer"
-                          />
-                        ) : (
-                          <LandPlot className="w-6 h-6 text-slate-300" />
-                        )}
+                        <ProfileListingThumbnail
+                          src={primaryThumb}
+                          alt={prop.title}
+                        />
                       </div>
 
                       <div className="space-y-1 min-w-0">
@@ -603,9 +617,9 @@ export default function ProfilePage() {
           )}
         </div>
 
-        {/* 3. Find Land & Sell Land Unified Hubs */}
+        {/* 3. Find Property & Sell Property Unified Hubs */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Find Land Hub */}
+          {/* Find Property Hub */}
           <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs flex flex-col justify-between space-y-4">
             <div className="space-y-3">
               <div className="flex items-center gap-3">
@@ -613,8 +627,8 @@ export default function ProfilePage() {
                   <Search className="w-5 h-5 text-[#FF9933]" />
                 </div>
                 <div>
-                  <h2 className="text-base font-bold text-slate-900">Find Land</h2>
-                  <p className="text-xs text-slate-500">Search, save &amp; inquire about land parcels</p>
+                  <h2 className="text-base font-bold text-slate-900">Find Property</h2>
+                  <p className="text-xs text-slate-500">Search, save &amp; inquire about properties</p>
                 </div>
               </div>
 
@@ -625,7 +639,7 @@ export default function ProfilePage() {
                 >
                   <span className="flex items-center gap-2">
                     <Search className="w-4 h-4 text-[#FF9933]" />
-                    <span>Browse All Available Lands</span>
+                    <span>Browse All Available Properties</span>
                   </span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
@@ -636,7 +650,7 @@ export default function ProfilePage() {
                 >
                   <span className="flex items-center gap-2">
                     <Heart className="w-4 h-4 text-rose-500" />
-                    <span>Saved Lands &amp; Shortlisted Plots</span>
+                    <span>Saved Properties &amp; Shortlist</span>
                   </span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
@@ -655,7 +669,7 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          {/* Sell Land Hub */}
+          {/* Sell Property Hub */}
           <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs flex flex-col justify-between space-y-4">
             <div className="space-y-3">
               <div className="flex items-center gap-3">
@@ -663,8 +677,8 @@ export default function ProfilePage() {
                   <LayoutDashboard className="w-5 h-5 text-[#FF9933]" />
                 </div>
                 <div>
-                  <h2 className="text-base font-bold text-slate-900">Sell Land</h2>
-                  <p className="text-xs text-slate-500">List land, manage subscriptions &amp; renew</p>
+                  <h2 className="text-base font-bold text-slate-900">Sell Property</h2>
+                  <p className="text-xs text-slate-500">List property, manage subscriptions &amp; renew</p>
                 </div>
               </div>
 
@@ -675,7 +689,7 @@ export default function ProfilePage() {
                 >
                   <span className="flex items-center gap-2">
                     <PlusCircle className="w-4 h-4 text-[#FF9933]" />
-                    <span>Sell Your Land (Create Listing)</span>
+                    <span>Post Property (Create Listing)</span>
                   </span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
@@ -739,11 +753,10 @@ export default function ProfilePage() {
 
             {otpMessage && (
               <div
-                className={`p-3.5 rounded-xl text-xs font-medium flex items-center gap-2 ${
-                  otpMessage.type === 'success'
+                className={`p-3.5 rounded-xl text-xs font-medium flex items-center gap-2 ${otpMessage.type === 'success'
                     ? 'bg-[#fff1dc] text-[#c75e0a] border border-[#FF9933]/30'
                     : 'bg-rose-50 text-rose-700 border border-rose-200'
-                }`}
+                  }`}
               >
                 {otpMessage.type === 'success' ? (
                   <CheckCircle2 className="w-4 h-4 shrink-0 text-[#FF9933]" />

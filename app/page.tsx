@@ -1,6 +1,7 @@
 import React from 'react';
 import type { Metadata } from 'next';
 import { getProperties } from '@/services/property.service';
+import type { IProperty } from '@/types/property';
 import { HomePageClient } from './HomePageClient';
 import { Footer } from '@/components/layout/Footer';
 
@@ -21,15 +22,17 @@ export const metadata: Metadata = {
   },
 };
 
+export const dynamic = 'force-dynamic';
+
 export default async function HomePage() {
-  let initialProperties = [];
+  let initialProperties: IProperty[] = [];
   const publicListingFee = 10;
   const listingDurationDays = 30;
 
   try {
     const result = await getProperties({ limit: 12, cardOnly: true });
     if (result && Array.isArray(result.data)) {
-      initialProperties = JSON.parse(JSON.stringify(result.data));
+      initialProperties = result.data;
     }
   } catch (error) {
     console.error('Failed to preload properties on homepage server:', error);

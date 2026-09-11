@@ -18,7 +18,6 @@ import {
 } from 'lucide-react';
 
 import { IProperty } from '@/types/property';
-import { VerificationBadge } from './VerificationBadge';
 import { SHIMMER_BLUR_DATA_URL } from '@/lib/utils';
 
 interface PropertyCardProps {
@@ -158,6 +157,7 @@ export function PropertyCard({
 }: PropertyCardProps) {
   const [isFavorite, setIsFavorite] = useState(initialFavorite);
   const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
+  const [imageError, setImageError] = useState(false);
 
   /* --------------------------------------------------------------
      PRIMARY IMAGE
@@ -181,11 +181,17 @@ export function PropertyCard({
       return;
     }
 
+    const previousFavorite = isFavorite;
+    const nextFavorite = !previousFavorite;
+
+    // Optimistically update visual heart state immediately (0ms perceived latency)
+    setIsFavorite(nextFavorite);
+    onFavoriteToggle?.(property._id, nextFavorite);
     setIsTogglingFavorite(true);
 
     try {
       const response = await fetch('/api/favorites', {
-        method: isFavorite ? 'DELETE' : 'POST',
+        method: previousFavorite ? 'DELETE' : 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -195,6 +201,9 @@ export function PropertyCard({
       });
 
       if (response.status === 401) {
+        // Roll back optimistic toggle if not logged in
+        setIsFavorite(previousFavorite);
+        onFavoriteToggle?.(property._id, previousFavorite);
         onRequireLogin?.();
         return;
       }
@@ -205,19 +214,15 @@ export function PropertyCard({
 
       const data = await response.json().catch(() => null);
 
-      const nextFavorite =
-        typeof data?.isFavorite === 'boolean'
-          ? data.isFavorite
-          : !isFavorite;
-
-      setIsFavorite(nextFavorite);
-
-      onFavoriteToggle?.(
-        property._id,
-        nextFavorite,
-      );
+      if (typeof data?.isFavorite === 'boolean' && data.isFavorite !== nextFavorite) {
+        setIsFavorite(data.isFavorite);
+        onFavoriteToggle?.(property._id, data.isFavorite);
+      }
     } catch (error) {
       console.error('Failed to toggle favorite:', error);
+      // Rollback on network or server error
+      setIsFavorite(previousFavorite);
+      onFavoriteToggle?.(property._id, previousFavorite);
     } finally {
       setIsTogglingFavorite(false);
     }
@@ -252,7 +257,7 @@ export function PropertyCard({
           aria-label={`View ${property.title}`}
           className="absolute inset-0 block"
         >
-          {primaryImage ? (
+          {primaryImage && !imageError ? (
             <Image
               src={primaryImage}
               alt={property.title}
@@ -262,8 +267,9 @@ export function PropertyCard({
               placeholder={priority ? 'empty' : 'blur'}
               blurDataURL={priority ? undefined : SHIMMER_BLUR_DATA_URL}
               className="object-cover transition-transform duration-500 group-hover:scale-[1.04]"
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 340px, 380px"
+              sizes="(max-width: 768px) 100vw, (max-width: 1024px) 320px, (max-width: 1280px) 360px, 380px"
               referrerPolicy="no-referrer"
+              onError={() => setImageError(true)}
             />
           ) : (
             <div className="flex h-full items-center justify-center bg-slate-100">
@@ -280,10 +286,6 @@ export function PropertyCard({
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-black/25" />
         </Link>
 
-        {/* Verification Badge (Top-Left) */}
-        <div className="absolute left-3 top-3 z-10 pointer-events-auto">
-          <VerificationBadge status={property.verificationStatus} />
-        </div>
 
         {/* Favorite Button (Top-Right) */}
         <button
@@ -451,14 +453,7 @@ export function PropertyCard({
         </div>
 
         {/* Bottom Action Bar */}
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-3.5">
-          <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 text-xs font-bold text-[#c75e0a]">
-              <Sparkles className="h-4 w-4 text-[#FF9933]" />
-              <span>Direct Classified Listing</span>
-            </span>
-          </div>
-
+        <div className="mt-4 flex flex-wrap items-center justify-end gap-3 border-t border-slate-100 pt-3.5">
           <div className="flex items-center gap-2">
             <Link
               href={`/properties/${property._id}`}

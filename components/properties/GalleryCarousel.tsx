@@ -10,7 +10,6 @@ import {
   ZoomIn,
   ZoomOut,
   RotateCcw,
-  ShieldCheck,
   LandPlot,
   Play,
   Image as ImageIcon,
@@ -25,13 +24,25 @@ interface GalleryCarouselProps {
 }
 
 export function GalleryCarousel({ property }: GalleryCarouselProps) {
+  const images: IPropertyImage[] = Array.isArray(property.images) ? property.images : [];
+  const primaryIndex = images.findIndex((img) => img.isPrimary);
+
   const [activeMediaTab, setActiveMediaTab] = useState<'PHOTOS' | 'VIDEO'>('PHOTOS');
-  const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [activeImageIndex, setActiveImageIndex] = useState(() => (primaryIndex >= 0 ? primaryIndex : 0));
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [lightboxScale, setLightboxScale] = useState(1);
 
-  const images: IPropertyImage[] = Array.isArray(property.images) ? property.images : [];
-  const activeImage = images[activeImageIndex] || images[0];
+  const activeImage =
+    images[activeImageIndex] ||
+    (primaryIndex >= 0 ? images[primaryIndex] : images[0]);
+
+  useEffect(() => {
+    const list: IPropertyImage[] = Array.isArray(property.images) ? property.images : [];
+    const idx = list.findIndex((img) => img.isPrimary);
+    if (idx >= 0) {
+      setActiveImageIndex(idx);
+    }
+  }, [property._id, property.images]);
 
   const handlePrevImage = useCallback(() => {
     setActiveImageIndex((prev) => (prev > 0 ? prev - 1 : images.length - 1));
@@ -184,12 +195,6 @@ export function GalleryCarousel({ property }: GalleryCarouselProps) {
               </button>
             </>
           )}
-
-          {/* Direct Classified Badge */}
-          <div className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-lg bg-[#FF9933] px-3 py-2 text-[10px] font-black text-white shadow-lg">
-            <ShieldCheck className="h-4 w-4" />
-            Direct Classified
-          </div>
         </div>
 
         {/* Thumbnails strip */}

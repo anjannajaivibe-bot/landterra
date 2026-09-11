@@ -179,12 +179,12 @@ export function AuthModal({
             </p>
 
             <AuthBenefit
-              title="Find land"
+              title="Find Property"
               description="Save properties, send inquiries and manage your property searches."
             />
 
             <AuthBenefit
-              title="Sell your land"
+              title="Sell your property"
               description="Create listings, manage subscriptions and track inquiries."
             />
 

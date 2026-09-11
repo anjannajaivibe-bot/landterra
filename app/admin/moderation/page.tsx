@@ -294,7 +294,9 @@ export default function AdminModerationPage() {
                 pendingQueue.map((prop) => {
                   const isProcessing = processingId === prop._id;
                   const isSelected = selectedIds.has(prop._id);
-                  const thumb = prop.images?.[0]?.secureUrl;
+                  const thumb =
+                    prop.images?.find((img) => img.isPrimary)?.secureUrl ||
+                    prop.images?.[0]?.secureUrl;
                   const docCount = prop.documents?.length || 0;
 
                   return (
@@ -322,6 +324,7 @@ export default function AdminModerationPage() {
                                 src={thumb}
                                 alt={prop.title}
                                 fill
+                                sizes="48px"
                                 className="object-cover"
                                 referrerPolicy="no-referrer"
                               />

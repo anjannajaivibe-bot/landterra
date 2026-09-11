@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { IProperty } from '@/types/property';
 import { Mail, Phone, X, Send, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { useModalAccessibility } from '@/hooks/useModalAccessibility';
 
 interface InquiryModalProps {
   property: IProperty;
@@ -21,6 +22,7 @@ export function InquiryModal({
   onClose,
   buyerUser,
 }: InquiryModalProps) {
+  const modalRef = useModalAccessibility({ isOpen, onClose });
   const [message, setMessage] = useState('');
   const [phoneShared, setPhoneShared] = useState(false);
   const [buyerPhone, setBuyerPhone] = useState('');
@@ -100,12 +102,21 @@ export function InquiryModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-lg w-full overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="inquiry-modal-title"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs"
+    >
+      <div
+        ref={modalRef}
+        tabIndex={-1}
+        className="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-lg w-full overflow-hidden animate-in fade-in zoom-in-95 duration-150 outline-none"
+      >
         {/* Modal Header */}
         <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
           <div>
-            <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+            <h3 id="inquiry-modal-title" className="text-base font-bold text-slate-900 flex items-center gap-2">
               <Mail className="w-4 h-4 text-[#FF9933]" />
               <span>Contact Landowner</span>
             </h3>

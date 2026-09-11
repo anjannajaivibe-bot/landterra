@@ -85,7 +85,7 @@ export function VerificationBadge({
 
   const label =
     compact && status === 'VERIFIED'
-      ? 'Direct Classified'
+      ? 'Verified'
       : badge.label;
 
   return (

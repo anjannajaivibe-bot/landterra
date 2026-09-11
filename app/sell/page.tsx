@@ -149,8 +149,8 @@ function SellPageForm() {
         <AuthModal
           isOpen={authModalOpen}
           onClose={() => setAuthModalOpen(false)}
-          title="Sign in to Sell Your Land"
-          description="Authenticate with Google to create your land listing, manage inquiries, and track monthly subscriptions."
+          title="Sign in to Sell Your Property"
+          description="Authenticate with Google to create your property listing, manage inquiries, and track monthly subscriptions."
         />
 
         <Footer />
@@ -627,8 +627,8 @@ function SellPageForm() {
       <AuthModal
         isOpen={authModalOpen}
         onClose={() => setAuthModalOpen(false)}
-        title="Sign in to Sell Your Land"
-        description="Authenticate with Google to create and manage your land listing."
+        title="Sign in to Sell Your Property"
+        description="Authenticate with Google to create and manage your property listing."
       />
     </div>
   );

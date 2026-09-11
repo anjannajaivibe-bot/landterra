@@ -3,7 +3,6 @@ import type {NextConfig} from 'next';
 const nextConfig: NextConfig = {
   experimental: {
     optimizePackageImports: ['lucide-react'],
-    optimizeCss: true,
   },
   reactStrictMode: true,
   eslint: {
@@ -18,6 +17,7 @@ const nextConfig: NextConfig = {
   },
   // Allow access to remote image placeholders and R2/Unsplash domains
   images: {
+    qualities: [50, 65, 75, 80, 100],
     formats: ['image/avif', 'image/webp'],
     imageSizes: [64, 128, 256, 384, 480],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920],
@@ -73,6 +73,10 @@ const nextConfig: NextConfig = {
       {
         source: '/(.*)',
         headers: [
+          {
+            key: 'Strict-Transport-Security',
+            value: 'max-age=63072000; includeSubDomains; preload',
+          },
           {
             key: 'X-Content-Type-Options',
             value: 'nosniff',

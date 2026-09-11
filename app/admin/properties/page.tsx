@@ -241,7 +241,9 @@ export default function AdminPropertiesPage() {
               ) : (
                 filteredProperties.map((prop) => {
                   const isDeleting = deletingId === prop._id;
-                  const thumb = prop.images?.[0]?.secureUrl;
+                  const thumb =
+                    prop.images?.find((img) => img.isPrimary)?.secureUrl ||
+                    prop.images?.[0]?.secureUrl;
 
                   return (
                     <tr key={prop._id} className="hover:bg-slate-800/40 transition-colors">
@@ -254,6 +256,7 @@ export default function AdminPropertiesPage() {
                                 src={thumb}
                                 alt={prop.title}
                                 fill
+                                sizes="48px"
                                 className="object-cover"
                                 referrerPolicy="no-referrer"
                               />

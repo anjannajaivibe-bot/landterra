@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { IProperty } from '@/types/property';
 import { VerificationBadge } from '@/components/properties/VerificationBadge';
 import { ShieldCheck, XCircle, AlertCircle, FileText, CheckCircle2, MapPin, X, ExternalLink, User } from 'lucide-react';
+import { useModalAccessibility } from '@/hooks/useModalAccessibility';
 
 interface PropertyReviewModalProps {
   property: IProperty;
@@ -19,6 +20,7 @@ export function PropertyReviewModal({
   onClose,
   onActionComplete,
 }: PropertyReviewModalProps) {
+  const modalRef = useModalAccessibility({ isOpen, onClose });
   const [activeTab, setActiveTab] = useState<'DETAILS' | 'DOCUMENTS' | 'IMAGES'>('DETAILS');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [rejectionReason, setRejectionReason] = useState('');
@@ -61,8 +63,17 @@ export function PropertyReviewModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs">
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="review-modal-title"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs"
+    >
+      <div
+        ref={modalRef}
+        tabIndex={-1}
+        className="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150 outline-none"
+      >
         {/* Header */}
         <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
           <div>
@@ -72,7 +83,9 @@ export function PropertyReviewModal({
               </span>
               <VerificationBadge status={property.verificationStatus} />
             </div>
-            <h3 className="text-base font-bold text-slate-900 line-clamp-1">{property.title}</h3>
+            <h3 id="review-modal-title" className="text-base font-bold text-slate-900 line-clamp-1">
+              {property.title}
+            </h3>
           </div>
           <button
             onClick={onClose}
@@ -290,6 +303,7 @@ export function PropertyReviewModal({
                     src={img.secureUrl}
                     alt="Property image"
                     fill
+                    sizes="(max-width: 768px) 45vw, 240px"
                     className="object-cover"
                     referrerPolicy="no-referrer"
                   />

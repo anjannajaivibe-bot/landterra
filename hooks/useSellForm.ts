@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { LandType, IProperty } from '@/types/property';
+import { LandType, IProperty, IPropertyImage, IPropertyDocument } from '@/types/property';
 import { SellerType, IUser } from '@/types/user';
 import {
   LandAreaUnit,
@@ -620,7 +620,7 @@ export function useSellForm(): UseSellFormReturn {
 
                 if (Array.isArray(property.images) && property.images.length > 0) {
                   setImages(
-                    property.images.map((img: any) => ({
+                    property.images.map((img: IPropertyImage) => ({
                       secureUrl: img.secureUrl,
                       isPrimary: Boolean(img.isPrimary),
                       objectKey: img.objectKey,
@@ -633,7 +633,7 @@ export function useSellForm(): UseSellFormReturn {
 
                 if (Array.isArray(property.documents) && property.documents.length > 0) {
                   setDocuments(
-                    property.documents.map((doc: any) => ({
+                    property.documents.map((doc: IPropertyDocument) => ({
                       documentType: doc.documentType,
                       fileName: doc.fileName || 'document.pdf',
                       objectKey: doc.objectKey,
@@ -1541,15 +1541,18 @@ export function useSellForm(): UseSellFormReturn {
       sellerType,
       sellerDeclarationAccepted: Boolean(termsAccepted),
       turnstileToken: turnstileToken || undefined,
-      images: images.map((image, index) => ({
-        objectKey: image.objectKey,
-        secureUrl: image.secureUrl,
-        fileName: image.fileName,
-        mimeType: image.mimeType,
-        size: image.size,
-        isPrimary: image.isPrimary,
-        sortOrder: index,
-      })),
+      images: (() => {
+        const hasPrimary = images.some((img) => img.isPrimary);
+        return images.map((image, index) => ({
+          objectKey: image.objectKey,
+          secureUrl: image.secureUrl,
+          fileName: image.fileName,
+          mimeType: image.mimeType,
+          size: image.size,
+          isPrimary: hasPrimary ? Boolean(image.isPrimary) : index === 0,
+          sortOrder: index,
+        }));
+      })(),
       video: video
         ? {
             objectKey: video.objectKey,
@@ -1620,7 +1623,7 @@ export function useSellForm(): UseSellFormReturn {
           setErrorMessage(data.error || 'Security verification required to list property.');
         } else {
           const detailMsg = Array.isArray(data.details)
-            ? data.details.map((d: any) => `${d.path?.join('.') || 'field'}: ${d.message || 'invalid'}`).join('; ')
+            ? data.details.map((d: { path?: (string | number)[]; message?: string }) => `${d.path?.join('.') || 'field'}: ${d.message || 'invalid'}`).join('; ')
             : '';
           throw new Error(data.error || detailMsg || 'Failed to save listing draft');
         }
@@ -1724,7 +1727,7 @@ export function useSellForm(): UseSellFormReturn {
           setErrorMessage(data.error || 'Security verification required to list property.');
         } else {
           const detailMsg = Array.isArray(data.details)
-            ? data.details.map((d: any) => `${d.path?.join('.') || 'field'}: ${d.message || 'invalid'}`).join('; ')
+            ? data.details.map((d: { path?: (string | number)[]; message?: string }) => `${d.path?.join('.') || 'field'}: ${d.message || 'invalid'}`).join('; ')
             : '';
           throw new Error(data.error || detailMsg || 'Failed to submit listing draft');
         }

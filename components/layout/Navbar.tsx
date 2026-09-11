@@ -227,16 +227,7 @@ export function Navbar() {
               active={isActive('/buy')}
               icon={<Search className="h-4 w-4" />}
             >
-              Find Land
-            </NavLink>
-
-            <NavLink
-              href="/sell"
-              prefetch={false}
-              active={isActive('/sell')}
-              icon={<Plus className="h-4 w-4" />}
-            >
-              Sell Your Land
+              Find Property
             </NavLink>
 
             <NavLink
@@ -410,7 +401,7 @@ export function Navbar() {
               className="inline-flex items-center gap-2 rounded-xl bg-[#FF9933] px-4 py-2.5 text-xs font-bold text-white shadow-sm transition-all hover:bg-[#f07d12] hover:shadow-md cursor-pointer"
             >
               <Plus className="h-4 w-4" />
-              <span>Post Land</span>
+              <span>Post Property</span>
               <span className="ml-0.5 rounded-md bg-white text-[#9e490f] px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider shadow-2xs">
                 ₹10
               </span>
@@ -440,7 +431,7 @@ export function Navbar() {
               className="inline-flex items-center gap-1 rounded-lg bg-[#FF9933] px-3 py-2 text-xs font-bold text-white"
             >
               <Plus className="h-3.5 w-3.5" />
-              <span>List Land</span>
+              <span>Post Property</span>
             </Link>
 
             <button
@@ -509,17 +500,7 @@ export function Navbar() {
                   icon={<Search className="h-4 w-4" />}
                   onClick={closeAllMenus}
                 >
-                  Find Land
-                </MobileNavLink>
-
-                <MobileNavLink
-                  href="/sell"
-                  prefetch={false}
-                  active={isActive('/sell')}
-                  icon={<Plus className="h-4 w-4" />}
-                  onClick={closeAllMenus}
-                >
-                  Sell Your Land
+                  Find Property
                 </MobileNavLink>
 
                 <MobileNavLink
@@ -573,7 +554,7 @@ export function Navbar() {
                       }
                       onClick={closeAllMenus}
                     >
-                      My Land Listings
+                      My Property Listings
                     </MobileAccountLink>
 
                     <MobileAccountLink

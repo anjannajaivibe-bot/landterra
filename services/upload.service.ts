@@ -27,6 +27,109 @@ export interface UploadResult {
 }
 
 /**
+ * Detect the genuine file MIME type from initial magic bytes binary signatures.
+ * Protects against MIME-type spoofing, polyglot files, and executable injection.
+ */
+export function detectBufferMimeType(buffer: Buffer): string | null {
+  if (!buffer || buffer.length < 4) return null;
+
+  // JPEG: FF D8 FF
+  if (buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) {
+    return 'image/jpeg';
+  }
+
+  // PNG: 89 50 4E 47 (0x89 'P' 'N' 'G')
+  if (
+    buffer[0] === 0x89 &&
+    buffer[1] === 0x50 &&
+    buffer[2] === 0x4e &&
+    buffer[3] === 0x47
+  ) {
+    return 'image/png';
+  }
+
+  // PDF: %PDF- (25 50 44 46)
+  if (
+    buffer[0] === 0x25 &&
+    buffer[1] === 0x50 &&
+    buffer[2] === 0x44 &&
+    buffer[3] === 0x46
+  ) {
+    return 'application/pdf';
+  }
+
+  // WebP: RIFF .... WEBP
+  if (
+    buffer.length >= 12 &&
+    buffer.toString('ascii', 0, 4) === 'RIFF' &&
+    buffer.toString('ascii', 8, 12) === 'WEBP'
+  ) {
+    return 'image/webp';
+  }
+
+  // WebM / Matroska (MKV): 1A 45 DF A3
+  if (
+    buffer[0] === 0x1a &&
+    buffer[1] === 0x45 &&
+    buffer[2] === 0xdf &&
+    buffer[3] === 0xa3
+  ) {
+    return 'video/webm';
+  }
+
+  // MP4 / MOV / M4V / QuickTime: .... ftyp
+  if (
+    buffer.length >= 8 &&
+    buffer.toString('ascii', 4, 8) === 'ftyp'
+  ) {
+    return 'video/mp4';
+  }
+
+  return null;
+}
+
+/**
+ * Validate that the binary content matches legitimate media and document formats.
+ */
+export function validateUploadBuffer(
+  buffer: Buffer,
+  declaredMime: string,
+  isPrivate: boolean
+): string {
+  const detected = detectBufferMimeType(buffer);
+
+  if (isPrivate) {
+    const allowedDocs = ['application/pdf', 'image/jpeg', 'image/png'];
+    if (!detected || !allowedDocs.includes(detected)) {
+      throw new Error(
+        'Invalid or unsupported document format. File binary does not match an authentic PDF, JPEG, or PNG document.'
+      );
+    }
+    return detected;
+  }
+
+  const isVideo = declaredMime.startsWith('video/');
+  if (isVideo) {
+    const allowedVideos = ['video/mp4', 'video/webm'];
+    if (!detected || !allowedVideos.includes(detected)) {
+      throw new Error(
+        'Invalid video format. File binary does not match an authentic MP4 or WebM video stream.'
+      );
+    }
+    return detected;
+  }
+
+  const allowedImages = ['image/jpeg', 'image/png', 'image/webp'];
+  if (!detected || !allowedImages.includes(detected)) {
+    throw new Error(
+      'Invalid image format. File binary does not match an authentic JPEG, PNG, or WebP photograph.'
+    );
+  }
+
+  return detected;
+}
+
+/**
  * Handle upload of image or document with type/size validation and R2 integration
  */
 export async function uploadFileToStorage(
@@ -36,12 +139,15 @@ export async function uploadFileToStorage(
   isPrivate = false,
   folder = 'properties'
 ): Promise<UploadResult> {
+  // Validate authentic magic bytes to prevent MIME-spoofing
+  const verifiedMimeType = validateUploadBuffer(fileBuffer, mimeType, isPrivate);
+
   const sanitizedFileName = fileName.replace(/[^a-zA-Z0-9.-]/g, '_');
   const timestamp = Date.now();
   const randomStr = Math.random().toString(36).substring(2, 8);
   const subfolder = isPrivate
     ? 'documents'
-    : mimeType.startsWith('video/')
+    : verifiedMimeType.startsWith('video/')
       ? 'videos'
       : 'images';
   const objectKey = folder.includes('/')
@@ -62,7 +168,8 @@ export async function uploadFileToStorage(
     Bucket: R2_BUCKET_NAME,
     Key: objectKey,
     Body: fileBuffer,
-    ContentType: mimeType,
+    ContentType: verifiedMimeType,
+    ContentDisposition: 'inline',
   });
 
   await client.send(command);
@@ -76,7 +183,7 @@ export async function uploadFileToStorage(
     objectKey,
     secureUrl,
     fileName,
-    mimeType,
+    mimeType: verifiedMimeType,
     size: fileBuffer.length,
     isPrivate,
   };
@@ -91,6 +198,23 @@ export async function generateUploadTicket(
   isPrivate = false,
   options?: { maxBytes?: number; folder?: string }
 ) {
+  const allowedMimes = isPrivate
+    ? ['application/pdf', 'image/jpeg', 'image/png']
+    : [
+        'image/jpeg',
+        'image/png',
+        'image/webp',
+        'image/jpg',
+        'video/mp4',
+        'video/quicktime',
+        'video/webm',
+        'video/x-matroska',
+      ];
+
+  if (!allowedMimes.includes(mimeType.toLowerCase())) {
+    throw new Error(`Unsupported upload MIME type: ${mimeType}. Only verified image, video, and PDF documents are permitted.`);
+  }
+
   if (!isR2Configured()) {
     throw new Error('Cloudflare R2 storage is not configured. Please set R2 credentials.');
   }
@@ -262,10 +386,10 @@ export async function cleanupOrphanedUploads(
     throw new Error('Cloudflare R2 client initialization failed.');
   }
 
-  // 1. Gather all referenced objectKeys across all MongoDB properties
+  // 1. Gather all referenced objectKeys across active (non-deleted) MongoDB properties
   await connectToDatabase();
   const properties = await PropertyModel.find(
-    {},
+    { listingStatus: { $ne: 'DELETED' } },
     { 'images.objectKey': 1, 'video.objectKey': 1, 'documents.objectKey': 1 }
   ).lean();
 

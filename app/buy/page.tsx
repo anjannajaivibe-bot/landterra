@@ -1,11 +1,18 @@
 import React from 'react';
 import { getProperties } from '@/services/property.service';
+import type { IProperty } from '@/types/property';
 import { BuyPageClient } from './BuyPageClient';
 import { Footer } from '@/components/layout/Footer';
 import { DueDiligenceChecklist } from '@/components/legal/DueDiligenceChecklist';
 
+export const dynamic = 'force-dynamic';
+
 export default async function BuyPage() {
-  let initialData = { data: [], total: 0, totalPages: 1 };
+  let initialData: { data: IProperty[]; total: number; totalPages: number } = {
+    data: [],
+    total: 0,
+    totalPages: 1,
+  };
 
   try {
     const result = await getProperties({
@@ -15,7 +22,7 @@ export default async function BuyPage() {
     });
 
     initialData = {
-      data: JSON.parse(JSON.stringify(result.data)),
+      data: result.data,
       total: result.total,
       totalPages: result.totalPages,
     };

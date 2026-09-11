@@ -14,8 +14,8 @@ Indian Land Measurement Conversions:
 ## Key Public Routes
 
 - [Marketplace Homepage](https://bhoomimitra.com/): Multi-attribute search and featured land classifieds.
-- [Find Land & Properties](https://bhoomimitra.com/buy): Interactive land explorer with price sliders, unit conversions, and location filters.
-- [List Your Land](https://bhoomimitra.com/sell): Multi-step land listing creator with seller legal declarations and instant publishing upon payment.
+- [Find Property](https://bhoomimitra.com/buy): Interactive real estate and property explorer with price sliders, unit conversions, and location filters.
+- [Post Property](https://bhoomimitra.com/sell): Multi-step property listing creator with seller legal declarations and instant publishing upon payment.
 - [Advertising Pricing](https://bhoomimitra.com/pricing): Platform advertising pricing (Flat ₹10-₹25 for 30-day listing subscriptions).
 - [About BhoomiMitra](https://bhoomimitra.com/about): Mission, transparency policies, and zero-brokerage classifieds model.
 - [Customer Support](https://bhoomimitra.com/contact): Customer support desk and listing grievance redressal team.

@@ -25,7 +25,7 @@ import { notFound } from 'next/navigation';
 import { cache } from 'react';
 
 import PropertyDetailsClient from './PropertyDetailsClient';
-import { getPropertyById } from '@/services/property.service';
+import { getPropertyById, toSerializableProperty } from '@/services/property.service';
 import { connectToDatabase } from '@/lib/db/mongodb';
 
 /* ================================================================
@@ -127,7 +127,9 @@ export async function generateMetadata({
 
   /* ---- Open Graph image ---- */
 
-  const ogImage = property.images?.[0]?.secureUrl;
+  const ogImage =
+    property.images?.find((img) => img.isPrimary)?.secureUrl ||
+    property.images?.[0]?.secureUrl;
   const ogImages = ogImage
     ? [{ url: ogImage, width: 1200, height: 630, alt: property.title }]
     : [{ url: `${baseUrl}/og-image.png`, width: 1200, height: 630, alt: 'BhoomiMitra' }];
@@ -246,6 +248,11 @@ export default async function PropertyDetailsPage({
             price: property.pricePerYard,
             priceCurrency: 'INR',
             unitText: 'sq yd',
+            unitCode: 'SQY',
+          },
+          seller: {
+            '@type': property.sellerType === 'COMPANY' || property.sellerType === 'AGENT' ? 'Organization' : 'Person',
+            name: property.sellerName || 'Verified Property Owner',
           },
           url: `${baseUrl}/properties/${id}`,
         },
@@ -284,7 +291,34 @@ export default async function PropertyDetailsPage({
       }
     : null;
 
-  const serializedProperty = property ? JSON.parse(JSON.stringify(property)) : null;
+  const breadcrumbJsonLd = property
+    ? {
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          {
+            '@type': 'ListItem',
+            position: 1,
+            name: 'Home',
+            item: baseUrl,
+          },
+          {
+            '@type': 'ListItem',
+            position: 2,
+            name: 'Buy Properties',
+            item: `${baseUrl}/buy`,
+          },
+          {
+            '@type': 'ListItem',
+            position: 3,
+            name: property.title,
+            item: `${baseUrl}/properties/${id}`,
+          },
+        ],
+      }
+    : null;
+
+  const serializedProperty = property ? toSerializableProperty(property) : null;
 
   return (
     <>
@@ -292,6 +326,12 @@ export default async function PropertyDetailsPage({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      )}
+      {breadcrumbJsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
         />
       )}
       <PropertyDetailsClient initialProperty={serializedProperty} />

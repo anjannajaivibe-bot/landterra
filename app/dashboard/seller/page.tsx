@@ -37,6 +37,24 @@ import {
   Eye,
 } from 'lucide-react';
 
+function SellerListingThumbnail({ src, alt }: { src?: string; alt: string }) {
+  const [hasError, setHasError] = useState(false);
+  if (!src || hasError) {
+    return <LandPlot className="w-8 h-8 text-slate-300" />;
+  }
+  return (
+    <Image
+      src={src}
+      alt={alt}
+      fill
+      sizes="80px"
+      className="object-cover"
+      referrerPolicy="no-referrer"
+      onError={() => setHasError(true)}
+    />
+  );
+}
+
 export default function SellerDashboardPage() {
   const [activeTab, setActiveTab] = useState<'LISTINGS' | 'INQUIRIES' | 'PAYMENTS'>('LISTINGS');
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
@@ -417,6 +435,9 @@ export default function SellerDashboardPage() {
                       const isSold = prop.listingStatus === 'SOLD';
                       const isRejected =
                         prop.listingStatus === 'REJECTED' || prop.verificationStatus === 'REJECTED';
+                      const primaryThumb =
+                        prop.images?.find((img) => img.isPrimary)?.secureUrl ||
+                        prop.images?.[0]?.secureUrl;
 
                       return (
                         <div
@@ -425,17 +446,10 @@ export default function SellerDashboardPage() {
                         >
                           <div className="flex items-start gap-4">
                             <div className="relative w-20 h-20 rounded-xl overflow-hidden bg-slate-100 shrink-0 border border-slate-200 flex items-center justify-center">
-                              {prop.images?.[0]?.secureUrl ? (
-                                <Image
-                                  src={prop.images[0].secureUrl}
-                                  alt={prop.title}
-                                  fill
-                                  className="object-cover"
-                                  referrerPolicy="no-referrer"
-                                />
-                              ) : (
-                                <LandPlot className="w-8 h-8 text-slate-300" />
-                              )}
+                              <SellerListingThumbnail
+                                src={primaryThumb}
+                                alt={prop.title}
+                              />
                             </div>
 
                             <div className="space-y-1">

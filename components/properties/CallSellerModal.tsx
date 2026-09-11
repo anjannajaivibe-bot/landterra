@@ -14,6 +14,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { CloudflareTurnstile } from '@/components/security/CloudflareTurnstile';
+import { useModalAccessibility } from '@/hooks/useModalAccessibility';
 
 interface CallSellerModalProps {
   isOpen: boolean;
@@ -48,6 +49,7 @@ export function CallSellerModal({
   onTrackWhatsApp,
   userEmail,
 }: CallSellerModalProps) {
+  const modalRef = useModalAccessibility({ isOpen, onClose });
   const [copied, setCopied] = useState(false);
 
   if (!isOpen) return null;
@@ -63,9 +65,14 @@ export function CallSellerModal({
     <div
       role="dialog"
       aria-modal="true"
+      aria-labelledby="call-seller-modal-title"
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200"
     >
-      <div className="relative w-full max-w-md overflow-hidden rounded-3xl bg-white p-6 sm:p-7 shadow-2xl border border-slate-100 animate-in zoom-in-95 duration-150">
+      <div
+        ref={modalRef}
+        tabIndex={-1}
+        className="relative w-full max-w-md overflow-hidden rounded-3xl bg-white p-6 sm:p-7 shadow-2xl border border-slate-100 animate-in zoom-in-95 duration-150 outline-none"
+      >
         <button
           type="button"
           onClick={onClose}
@@ -80,7 +87,7 @@ export function CallSellerModal({
             <Phone className="h-6 w-6 text-[#FF9933]" />
           </div>
           <div>
-            <h3 className="text-base font-extrabold text-slate-900 leading-tight">
+            <h3 id="call-seller-modal-title" className="text-base font-extrabold text-slate-900 leading-tight">
               Direct Landowner Contact
             </h3>
             <p className="text-xs text-slate-500 mt-0.5">

@@ -534,7 +534,7 @@ function PropertyDetailsContent({
             </Link>
             <span>/</span>
             <Link href="/buy" className="shrink-0 hover:text-[#c75e0a]">
-              Find Land
+              Find Property
             </Link>
             <span>/</span>
             <span className="truncate font-semibold text-slate-700">{property.title}</span>
@@ -598,14 +598,9 @@ function PropertyDetailsContent({
                   {formatLandType(property.landType)}
                 </span>
 
-                {isDraft ? (
+                {isDraft && (
                   <span className="inline-flex items-center gap-1 rounded-full border border-amber-300 bg-amber-100 px-2.5 py-1 text-[10px] font-black text-amber-900">
                     🔒 Private Draft Preview
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center gap-1 rounded-full border border-[#FF9933]/40 bg-[#fff1dc] px-2.5 py-1 text-[10px] font-bold text-[#c75e0a]">
-                    <ShieldCheck className="h-3.5 w-3.5 text-[#FF9933]" />
-                    Direct Classified
                   </span>
                 )}
 
@@ -691,8 +686,8 @@ function PropertyDetailsContent({
                 onClick={toggleFavorite}
                 disabled={favoriteLoading}
                 className={`flex h-10 items-center gap-1.5 rounded-xl border px-3.5 text-xs font-bold transition-colors cursor-pointer ${favorite
-                    ? 'border-rose-200 bg-rose-50 text-rose-600'
-                    : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+                  ? 'border-rose-200 bg-rose-50 text-rose-600'
+                  : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
                   }`}
               >
                 <Heart className={`h-4 w-4 ${favorite ? 'fill-current text-rose-500' : ''}`} />

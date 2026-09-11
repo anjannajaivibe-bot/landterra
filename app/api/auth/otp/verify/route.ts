@@ -10,6 +10,7 @@ import {
 
 import {
   getAuthUser,
+  invalidateUserSessionCache,
 } from '@/lib/security/auth';
 
 import {
@@ -189,6 +190,9 @@ export async function POST(
         },
       );
     }
+
+    // Immediately flush micro-cache so subsequent getSession calls see isPhoneVerified: true
+    invalidateUserSessionCache(authUser.id);
 
     /* ------------------------------------------------------------
        SUCCESS

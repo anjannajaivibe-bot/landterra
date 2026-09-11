@@ -1,5 +1,7 @@
 import { Ratelimit } from '@upstash/ratelimit';
-import { Redis } from '@upstash/redis';
+import { isUpstashConfigured, getRedisClient } from '@/lib/redis';
+
+export { isUpstashConfigured };
 
 /* ================================================================
    UPSTASH REDIS RATE LIMITER WITH RESILIENT IN-MEMORY FALLBACK
@@ -11,56 +13,40 @@ interface RateLimitRecord {
   resetTime: number;
 }
 
+const MAX_IN_MEMORY_ENTRIES = 5000;
 const inMemoryMap = new Map<string, RateLimitRecord>();
 
-function cleanEnv(val: string | undefined): string {
-  if (!val) return '';
-  return val.replace(/^["']|["']$/g, '').trim();
+/**
+ * Sweep expired rate limit entries from in-memory Map
+ */
+function sweepExpiredEntries(now = Date.now()): void {
+  for (const [key, record] of inMemoryMap.entries()) {
+    if (now > record.resetTime) {
+      inMemoryMap.delete(key);
+    }
+  }
 }
 
-const upstashUrl = cleanEnv(
-  process.env.UPSTASH_REDIS_KV_REST_API_URL ||
-  process.env.UPSTASH_REDIS_REST_URL ||
-  process.env.STORAGE_REST_API_URL ||
-  process.env.STORAGE_URL ||
-  process.env.KV_REST_API_URL
-);
-const upstashToken = cleanEnv(
-  process.env.UPSTASH_REDIS_KV_REST_API_TOKEN ||
-  process.env.UPSTASH_REDIS_REST_TOKEN ||
-  process.env.STORAGE_REST_API_TOKEN ||
-  process.env.STORAGE_TOKEN ||
-  process.env.KV_REST_API_TOKEN
-);
-
-export const isUpstashConfigured = Boolean(
-  upstashUrl &&
-  upstashToken &&
-  !upstashUrl.includes('your-') &&
-  !upstashToken.includes('your-')
-);
-
-let redisClient: Redis | null = null;
-if (isUpstashConfigured) {
-  try {
-    redisClient = new Redis({
-      url: upstashUrl,
-      token: upstashToken,
-    });
-  } catch (err) {
-    console.warn('[rate-limit] Failed to initialize Upstash Redis client, falling back to in-memory limiter:', err);
+// Background sweep every 5 minutes (unref prevents blocking process termination)
+if (typeof setInterval !== 'undefined') {
+  const sweepInterval = setInterval(() => {
+    sweepExpiredEntries();
+  }, 5 * 60 * 1000);
+  if (typeof sweepInterval.unref === 'function') {
+    sweepInterval.unref();
   }
 }
 
 const upstashLimiters = new Map<string, Ratelimit>();
 
 function getUpstashLimiter(limit: number, windowMs: number): Ratelimit | null {
-  if (!redisClient) return null;
+  const redis = getRedisClient();
+  if (!redis) return null;
   const key = `${limit}:${windowMs}`;
   let limiter = upstashLimiters.get(key);
   if (!limiter) {
     limiter = new Ratelimit({
-      redis: redisClient,
+      redis,
       limiter: Ratelimit.slidingWindow(limit, `${windowMs} ms` as any),
       prefix: 'bhoomimitra:ratelimit',
       analytics: false,
@@ -76,6 +62,20 @@ function checkInMemoryRateLimit(
   windowMs: number
 ): { allowed: boolean; remaining: number } {
   const now = Date.now();
+
+  // Enforce bounded cache size: evict expired entries or trim oldest 10% if overflowing
+  if (inMemoryMap.size >= MAX_IN_MEMORY_ENTRIES) {
+    sweepExpiredEntries(now);
+    if (inMemoryMap.size >= MAX_IN_MEMORY_ENTRIES) {
+      let toRemove = Math.floor(MAX_IN_MEMORY_ENTRIES * 0.1);
+      for (const key of inMemoryMap.keys()) {
+        if (toRemove <= 0) break;
+        inMemoryMap.delete(key);
+        toRemove--;
+      }
+    }
+  }
+
   const record = inMemoryMap.get(identifier);
 
   // Clean up expired records
@@ -106,7 +106,7 @@ export async function checkRateLimit(
   limit = 60,
   windowMs = 60000
 ): Promise<{ allowed: boolean; remaining: number }> {
-  if (isUpstashConfigured && redisClient) {
+  if (isUpstashConfigured) {
     try {
       const limiter = getUpstashLimiter(limit, windowMs);
       if (limiter) {

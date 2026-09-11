@@ -37,11 +37,11 @@ export async function POST(req: NextRequest) {
       targetWidth: 1280,
     });
 
-    // 3. Upload the compressed WebM file to permanent properties/videos/ storage
+    // 3. Upload the optimized video file to permanent properties/videos/ storage
     const uploadResult = await uploadFileToStorage(
       transcodeResult.buffer,
       transcodeResult.fileName,
-      'video/webm',
+      transcodeResult.mimeType,
       false,
       'properties'
     );
@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
           size: transcodeResult.size,
           originalSize: transcodeResult.originalSize,
           compressionRatio: transcodeResult.compressionRatio,
-          mimeType: 'video/webm',
+          mimeType: uploadResult.mimeType || transcodeResult.mimeType,
         },
       },
       { status: 200 }

@@ -53,7 +53,9 @@ export async function createInquiry(data: {
     propertyId: data.propertyId,
     propertyTitle: property.title,
     propertyLocation: `${property.location.city}, ${property.location.state}`,
-    propertyImage: property.images[0]?.secureUrl,
+    propertyImage:
+      property.images?.find((img) => img.isPrimary)?.secureUrl ||
+      property.images?.[0]?.secureUrl,
     buyerId: data.buyerId,
     buyerName: data.buyerName,
     buyerEmail: data.buyerEmail,
@@ -365,7 +367,9 @@ export async function recordBuyerCallAction(data: {
     propertyId: data.propertyId,
     propertyTitle: property.title,
     propertyLocation: `${property.location?.city || ''}, ${property.location?.state || ''}`,
-    propertyImage: property.images?.[0]?.secureUrl,
+    propertyImage:
+      property.images?.find((img) => img.isPrimary)?.secureUrl ||
+      property.images?.[0]?.secureUrl,
     buyerId: data.buyerId,
     buyerName: data.buyerName,
     buyerEmail: data.buyerEmail,
@@ -383,7 +387,9 @@ export async function recordBuyerCallAction(data: {
   // 2. Increment property inquiries counter
   await updateProperty(data.propertyId, {
     inquiriesCount: (property.inquiriesCount || 0) + 1,
-  }).catch(() => {});
+  }).catch((err) => {
+    console.warn('[Inquiry] Failed to increment property inquiriesCount:', err);
+  });
 
   // 3. Record full audit log for safety, compliance, and dispute resolution
   await createAuditLog({

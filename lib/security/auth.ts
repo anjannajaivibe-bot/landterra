@@ -223,6 +223,25 @@ export function verifySessionToken(
    GET SESSION
 ================================================================ */
 
+interface CachedUserEntry {
+  user: UserSession['user'];
+  cachedAt: number;
+}
+
+const userSessionMicroCache = new Map<string, CachedUserEntry>();
+const USER_SESSION_CACHE_TTL_MS = 45 * 1000; // 45s micro-cache to eliminate redundant Mongo roundtrips
+
+/**
+ * Invalidate user session cache for a specific user ID or entirely
+ */
+export function invalidateUserSessionCache(userId?: string): void {
+  if (userId) {
+    userSessionMicroCache.delete(userId);
+  } else {
+    userSessionMicroCache.clear();
+  }
+}
+
 export async function getSession(
   req?: NextRequest,
 ): Promise<UserSession | null> {
@@ -245,6 +264,14 @@ export async function getSession(
 
     if (!payload) {
       return null;
+    }
+
+    const now = Date.now();
+
+    // Check high-speed in-memory micro-cache (<0.01ms)
+    const cachedEntry = userSessionMicroCache.get(payload.userId);
+    if (cachedEntry && now - cachedEntry.cachedAt < USER_SESSION_CACHE_TTL_MS) {
+      return { user: cachedEntry.user };
     }
 
     const connection = await connectToDatabase();
@@ -277,21 +304,37 @@ export async function getSession(
     }
 
     if (!dbUser || dbUser.isActive === false) {
+      userSessionMicroCache.delete(payload.userId);
       return null;
     }
 
-    return {
-      user: {
-        id: dbUser._id.toString(),
-        name: dbUser.name,
-        email: dbUser.email,
-        role: dbUser.role as UserRole,
-        image: dbUser.profileImage,
-        phone: dbUser.phone,
-        isPhoneVerified: Boolean(dbUser.isPhoneVerified),
-        sellerType: dbUser.sellerType,
-      },
+    const user: UserSession['user'] = {
+      id: dbUser._id.toString(),
+      name: dbUser.name,
+      email: dbUser.email,
+      role: dbUser.role as UserRole,
+      image: dbUser.profileImage,
+      phone: dbUser.phone,
+      isPhoneVerified: Boolean(dbUser.isPhoneVerified),
+      sellerType: dbUser.sellerType,
     };
+
+    // Populate micro-cache
+    userSessionMicroCache.set(payload.userId, {
+      user,
+      cachedAt: now,
+    });
+
+    // Bound micro-cache capacity to 2,000 active entries
+    if (userSessionMicroCache.size > 2000) {
+      for (const [k, v] of userSessionMicroCache.entries()) {
+        if (now - v.cachedAt > USER_SESSION_CACHE_TTL_MS) {
+          userSessionMicroCache.delete(k);
+        }
+      }
+    }
+
+    return { user };
   } catch {
     return null;
   }

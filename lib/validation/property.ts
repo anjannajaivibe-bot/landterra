@@ -133,6 +133,17 @@ export const CreatePropertySchema = z.object({
 
 export const UpdatePropertySchema = CreatePropertySchema.partial();
 
+export type CreatePropertyInput = z.infer<typeof CreatePropertySchema> & {
+  sellerId?: string;
+  sellerName?: string;
+  _id?: string;
+};
+
+export type UpdatePropertyInput = z.infer<typeof UpdatePropertySchema> & {
+  sellerId?: string;
+  sellerName?: string;
+};
+
 export function calculateAuthoritativeFees(
   landAreaYards: number,
   pricePerYard: number,

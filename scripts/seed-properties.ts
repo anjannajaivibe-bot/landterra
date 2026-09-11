@@ -163,7 +163,7 @@ const SAMPLE_PROPERTIES = [
     sellerId: 'demo_seller_004',
     sellerName: 'Naveen Kumar',
     sellerPhone: '+91 97011 44556',
-    sellerEmail: 'naveen.k@example.com',
+    sellerEmail: 'jairammargam02@gmail.com',
     sellerType: 'INDIVIDUAL',
     title: 'Scenic Hillview Gated Farmhouse Plot in Shankarpally',
     description:

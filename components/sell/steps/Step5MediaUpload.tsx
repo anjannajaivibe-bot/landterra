@@ -253,7 +253,7 @@ export function Step5MediaUpload({ form }: Step5MediaUploadProps) {
                     src={image.secureUrl}
                     alt={image.fileName}
                     fill
-                    sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 25vw"
+                    sizes="(max-width: 640px) 45vw, (max-width: 768px) 30vw, (max-width: 1024px) 25vw, 200px"
                     className="object-cover"
                   />
                   {image.isPrimary && (
