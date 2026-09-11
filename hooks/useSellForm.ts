@@ -483,17 +483,25 @@ export function useSellForm(): UseSellFormReturn {
 
           // Fetch settings
           try {
-            const settingsRes = await fetch('/api/settings/public');
+            const settingsRes = await fetch('/api/settings/public', {
+              cache: 'no-store',
+              headers: { 'Cache-Control': 'no-cache' },
+            });
             if (settingsRes.ok) {
               const settingsData = await settingsRes.json();
-              if (settingsData.settings) {
-                setRequireGoogleLogin(Boolean(settingsData.settings.requireGoogleLogin));
-                setRequirePhoneOtp(Boolean(settingsData.settings.requirePhoneOtp));
-                if (settingsData.settings.listingFeeAmount !== undefined) {
-                  setListingFeeAmount(Number(settingsData.settings.listingFeeAmount));
+              const config = settingsData?.settings || settingsData;
+              if (config) {
+                if (typeof config.requireGoogleLogin === 'boolean') {
+                  setRequireGoogleLogin(config.requireGoogleLogin);
                 }
-                if (settingsData.settings.listingDurationDays !== undefined) {
-                  setListingDurationDays(Number(settingsData.settings.listingDurationDays));
+                if (typeof config.requirePhoneOtp === 'boolean') {
+                  setRequirePhoneOtp(config.requirePhoneOtp);
+                }
+                if (config.listingFeeAmount !== undefined) {
+                  setListingFeeAmount(Number(config.listingFeeAmount));
+                }
+                if (config.listingDurationDays !== undefined) {
+                  setListingDurationDays(Number(config.listingDurationDays));
                 }
               }
             }

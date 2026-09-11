@@ -20,7 +20,7 @@ import {
 import { deleteFilesFromStorage } from '@/services/upload.service';
 import { enqueueAndDispatchExpiringSoonEmail } from '@/services/email.service';
 import { createAuditLog } from '@/services/audit.service';
-import { getRedisClient, isUpstashConfigured } from '@/lib/redis';
+import { getRedisClient, isUpstashConfigured, isRedisAvailable } from '@/lib/redis';
 
 /* ================================================================
    TYPES
@@ -175,7 +175,7 @@ export function invalidatePropertyCache(): void {
   localCacheVersionExpiresAt = 0;
 
   // 2. Increment distributed Redis version key (O(1) multi-node invalidation)
-  if (isUpstashConfigured) {
+  if (isRedisAvailable()) {
     const redis = getRedisClient();
     if (redis) {
       redis.incr(REDIS_VERSION_KEY).catch((err) => {
@@ -481,7 +481,7 @@ export async function getProperties(
       return cached.data;
     }
 
-    if (isUpstashConfigured) {
+    if (isRedisAvailable()) {
       try {
         const redis = getRedisClient();
         if (redis) {
@@ -1091,7 +1091,7 @@ export async function getProperties(
         expiresAt: Date.now() + CACHE_TTL_MS,
       });
 
-      if (isUpstashConfigured) {
+      if (isRedisAvailable()) {
         const redis = getRedisClient();
         if (redis) {
           getDistributedCacheVersion().then((version) => {

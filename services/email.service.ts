@@ -38,18 +38,46 @@ export async function sendEmail({
   }
 
   try {
-    const data = await client.emails.send({
+    let result = await client.emails.send({
       from: FROM_EMAIL,
       to,
       subject,
       html,
     });
 
-    return { success: true, id: data.data?.id };
+    // If custom domain is unverified, gracefully retry with Resend sandbox testing sender
+    if (
+      result.error &&
+      (result.error.message.includes('not verified') ||
+        result.error.message.includes('domain on https://resend.com/domains'))
+    ) {
+      console.warn(
+        `[Email Service]: Domain in "${FROM_EMAIL}" is unverified on Resend. Falling back to onboarding@resend.dev for testing...`
+      );
+      result = await client.emails.send({
+        from: 'BhoomiMitra <onboarding@resend.dev>',
+        to,
+        subject,
+        html,
+      });
+    }
+
+    if (result.error) {
+      console.error(
+        `[Email Service Error]: Resend rejected delivery to ${to}:`,
+        result.error.message
+      );
+      return { success: false, error: result.error.message };
+    }
+
+    console.log(
+      `[Email Service]: Email dispatched successfully to ${to} (Message ID: ${result.data?.id})`
+    );
+    return { success: true, id: result.data?.id };
   } catch (err: unknown) {
     const errorMsg =
       err instanceof Error ? err.message : 'Unknown email error';
-    console.error('Resend email error:', errorMsg);
+    console.error('[Email Service Error]:', errorMsg);
     return { success: false, error: errorMsg };
   }
 }

@@ -1,7 +1,12 @@
 import { Ratelimit } from '@upstash/ratelimit';
-import { isUpstashConfigured, getRedisClient } from '@/lib/redis';
+import {
+  isUpstashConfigured,
+  isRedisAvailable,
+  markRedisUnreachable,
+  getRedisClient,
+} from '@/lib/redis';
 
-export { isUpstashConfigured };
+export { isUpstashConfigured, isRedisAvailable };
 
 /* ================================================================
    UPSTASH REDIS RATE LIMITER WITH RESILIENT IN-MEMORY FALLBACK
@@ -106,7 +111,7 @@ export async function checkRateLimit(
   limit = 60,
   windowMs = 60000
 ): Promise<{ allowed: boolean; remaining: number }> {
-  if (isUpstashConfigured) {
+  if (isRedisAvailable()) {
     try {
       const limiter = getUpstashLimiter(limit, windowMs);
       if (limiter) {
@@ -116,8 +121,15 @@ export async function checkRateLimit(
           remaining: result.remaining,
         };
       }
-    } catch (err) {
-      console.warn('[rate-limit] Upstash Redis request failed, falling back to in-memory limiter:', err);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      if (msg.includes('WRONGPASS') || msg.includes('disabled') || msg.includes('unauthorized')) {
+        markRedisUnreachable(5 * 60 * 1000); // 5 minutes cooldown
+        console.warn('[rate-limit] Upstash Redis credentials invalid (WRONGPASS). Switched cleanly to in-memory rate limiter.');
+      } else {
+        markRedisUnreachable(30 * 1000); // 30s cooldown
+        console.warn('[rate-limit] Upstash Redis request failed, falling back to in-memory limiter:', msg);
+      }
     }
   }
 

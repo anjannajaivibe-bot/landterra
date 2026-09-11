@@ -33,13 +33,30 @@ export const isUpstashConfigured = Boolean(
   !upstashToken.includes('your-')
 );
 
+let isTemporarilyDisabled = false;
+let disabledUntil = 0;
+
+export function markRedisUnreachable(cooldownMs = 60000): void {
+  isTemporarilyDisabled = true;
+  disabledUntil = Date.now() + cooldownMs;
+}
+
+export function isRedisAvailable(): boolean {
+  if (!isUpstashConfigured) return false;
+  if (isTemporarilyDisabled) {
+    if (Date.now() < disabledUntil) return false;
+    isTemporarilyDisabled = false;
+  }
+  return true;
+}
+
 let redisClient: Redis | null = null;
 
 /**
- * Returns the shared Redis client instance if configured, or null otherwise.
+ * Returns the shared Redis client instance if configured and available, or null otherwise.
  */
 export function getRedisClient(): Redis | null {
-  if (!isUpstashConfigured) return null;
+  if (!isRedisAvailable()) return null;
   if (!redisClient) {
     try {
       redisClient = new Redis({
@@ -48,6 +65,7 @@ export function getRedisClient(): Redis | null {
       });
     } catch (err) {
       console.warn('[redis] Failed to initialize Upstash Redis client:', err);
+      markRedisUnreachable(60000);
       return null;
     }
   }
