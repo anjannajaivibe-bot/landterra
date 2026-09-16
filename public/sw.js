@@ -1,4 +1,4 @@
-const CACHE_NAME = 'bhoomimitra-cache-v1';
+const CACHE_NAME = 'bhoomimitra-cache-v2';
 const PRECACHE_URLS = [
   '/',
   '/buy',
@@ -35,8 +35,9 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(event.request.url);
 
-  // Do not cache API routes, admin paths, or external analytics/payment scripts
+  // Do not intercept Next.js static chunks, API routes, admin paths, or external origins
   if (
+    url.pathname.startsWith('/_next/') ||
     url.pathname.startsWith('/api/') ||
     url.pathname.startsWith('/admin') ||
     url.pathname.startsWith('/dashboard') ||
