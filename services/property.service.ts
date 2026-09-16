@@ -20,7 +20,12 @@ import {
 import { deleteFilesFromStorage } from '@/services/upload.service';
 import { enqueueAndDispatchExpiringSoonEmail } from '@/services/email.service';
 import { createAuditLog } from '@/services/audit.service';
-import { getRedisClient, isUpstashConfigured, isRedisAvailable } from '@/lib/redis';
+import {
+  getRedisClient,
+  isUpstashConfigured,
+  isRedisAvailable,
+  markRedisUnreachable,
+} from '@/lib/redis';
 
 /* ================================================================
    TYPES
@@ -142,6 +147,17 @@ const REDIS_VERSION_KEY = 'bhoomimitra:props:ver';
 let localCacheVersion = 1;
 let localCacheVersionExpiresAt = 0;
 
+function handleRedisCacheError(err: unknown, action: string): void {
+  const msg = err instanceof Error ? err.message : String(err);
+  if (msg.includes('WRONGPASS') || msg.includes('disabled') || msg.includes('unauthorized')) {
+    markRedisUnreachable(15 * 60 * 1000); // 15 minutes cooldown
+    console.warn('[property-cache] Upstash Redis credentials invalid or disabled (WRONGPASS). Switched to fast in-memory cache.');
+  } else {
+    markRedisUnreachable(30 * 1000); // 30s cooldown
+    console.warn(`[property-cache] Redis operation failed (${action}):`, msg.slice(0, 100));
+  }
+}
+
 async function getDistributedCacheVersion(): Promise<number> {
   const now = Date.now();
   if (now < localCacheVersionExpiresAt) {
@@ -160,7 +176,8 @@ async function getDistributedCacheVersion(): Promise<number> {
     }
     localCacheVersionExpiresAt = now + 5000; // Micro-cache version locally for 5 seconds
     return localCacheVersion;
-  } catch {
+  } catch (err) {
+    handleRedisCacheError(err, 'retrieve cache version');
     return localCacheVersion;
   }
 }
@@ -179,7 +196,7 @@ export function invalidatePropertyCache(): void {
     const redis = getRedisClient();
     if (redis) {
       redis.incr(REDIS_VERSION_KEY).catch((err) => {
-        console.warn('[property-cache] Failed to increment Redis cache version:', err);
+        handleRedisCacheError(err, 'increment cache version');
       });
     }
   }
@@ -496,8 +513,8 @@ export async function getProperties(
             return redisData;
           }
         }
-      } catch {
-        // Fall back gracefully to database query
+      } catch (err) {
+        handleRedisCacheError(err, 'read query cache');
       }
     }
   }
@@ -1097,10 +1114,10 @@ export async function getProperties(
           getDistributedCacheVersion().then((version) => {
             const redisKey = `bhoomimitra:props:v${version}:${cacheKey}`;
             redis.set(redisKey, response, { ex: REDIS_CACHE_TTL_SEC }).catch((err) => {
-              console.warn('[property-cache] Failed to cache query in Redis:', err);
+              handleRedisCacheError(err, 'write query cache');
             });
           }).catch((err) => {
-            console.warn('[property-cache] Failed to retrieve cache version for query caching:', err);
+            handleRedisCacheError(err, 'retrieve version for query cache');
           });
         }
       }
@@ -1246,7 +1263,7 @@ export async function syncExpiredProperties(options?: {
           propertyTitle: prop.title,
           daysRemaining,
           propertyId: String(prop._id),
-        }).catch((err) => {
+        }).catch((err: unknown) => {
           console.error(`Expiring soon 7d email error for ${prop._id}:`, err);
           return false;
         });
@@ -1262,7 +1279,7 @@ export async function syncExpiredProperties(options?: {
           propertyTitle: prop.title,
           daysRemaining,
           propertyId: String(prop._id),
-        }).catch((err) => {
+        }).catch((err: unknown) => {
           console.error(`Expiring soon 2d email error for ${prop._id}:`, err);
           return false;
         });
@@ -1791,7 +1808,7 @@ export async function createProperty(
         title: data.title,
         flaggedTerms: spamScan.flaggedTerms,
       },
-    }).catch((err) => {
+    }).catch((err: unknown) => {
       console.warn('[AuditLog] Failed to record spam moderation flag:', err);
     });
   }

@@ -140,7 +140,7 @@ export function DueDiligenceChecklist({
                     <Icon className="w-4 h-4" />
                   </div>
                 </div>
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                <span className="text-xs font-bold text-slate-500">
                   Recommended Check
                 </span>
               </div>
@@ -154,7 +154,7 @@ export function DueDiligenceChecklist({
                 </p>
               </div>
 
-              <div className="rounded-xl bg-white p-3 border border-slate-100 text-[11px] text-slate-500 leading-relaxed">
+              <div className="rounded-xl bg-white p-3 border border-slate-100 text-xs text-slate-600 leading-relaxed">
                 <span className="font-bold text-[#c75e0a]">Inspection Guidance: </span>
                 {item.detail}
               </div>
@@ -173,7 +173,7 @@ export function DueDiligenceChecklist({
           <p className="text-[#9c4c0b]">
             Examples of documents buyers should independently inspect. Requirements vary by property type, location, and applicable state law. Consult an independent property lawyer and appropriate government/revenue/survey authorities.
           </p>
-          <p className="text-[11px] text-[#7a3705]/80">
+          <p className="text-xs text-[#7a3705]/90 leading-relaxed">
             BhoomiMitra operates as an online classifieds marketplace platform. BhoomiMitra does not provide title verification, legal verification, survey certification, or government-authority certification of property listings. Users are responsible for complying with applicable laws and conducting their own due diligence before entering transactions.
           </p>
         </div>

@@ -164,14 +164,14 @@ export function Navbar() {
 
         <div className="border-b border-slate-100 bg-slate-50/90 text-slate-800">
           <div className="mx-auto flex h-8 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-            <div className="flex min-w-0 items-center gap-2 text-[11px] font-semibold text-slate-800">
+            <div className="flex min-w-0 items-center gap-2 text-xs font-semibold text-slate-800">
               <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-[#FF9933]" />
               <span className="truncate">
                 Direct-to-owner property marketplace • 0% Broker Commission • Direct Peer-to-Peer Listings
               </span>
             </div>
 
-            <div className="hidden shrink-0 items-center gap-3 text-[11px] text-slate-600 sm:flex">
+            <div className="hidden shrink-0 items-center gap-3 text-xs text-slate-600 sm:flex">
               <span>Classifieds Publishing:</span>
               <span className="font-bold text-[#c75e0a]">
                 Flat ₹10 for 30 Days
@@ -202,7 +202,7 @@ export function Navbar() {
                   Bhoomi
                   <span className="text-[#FF9933]">Mitra</span>
                 </span>
-                <span className="mt-1 block text-[8px] font-extrabold uppercase tracking-[0.18em] text-slate-500">
+                <span className="mt-0.5 block text-[11px] font-bold text-slate-500">
                   Property Marketplace
                 </span>
               </div>

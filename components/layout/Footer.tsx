@@ -77,7 +77,7 @@ export function Footer() {
               <span className="flex items-center text-xl font-black text-slate-950 tracking-tight">
                 Bhoomi<span className="text-[#FF9933]">Mitra</span>
               </span>
-              <span className="mt-1 block text-[9px] font-extrabold uppercase tracking-[0.18em] text-slate-400">
+              <span className="mt-0.5 block text-[11px] font-bold text-slate-500">
                 Property Marketplace
               </span>
             </div>
@@ -105,7 +105,7 @@ export function Footer() {
 
         {/* Col 2: For Buyers */}
         <div className="space-y-3">
-          <h4 className="text-xs font-black text-slate-950 uppercase tracking-wider">
+          <h4 className="text-sm font-bold text-slate-950">
             For Buyers &amp; Tenants
           </h4>
           <ul className="space-y-2.5 text-xs font-semibold text-slate-600">
@@ -120,23 +120,18 @@ export function Footer() {
               </Link>
             </li>
             <li>
-              <Link href="/buy?landType=AGRICULTURAL_LAND" className="hover:text-[#FF9933] transition-colors">
-                Fertile Farmlands &amp; Estates
+              <Link href="/buy?landType=AGRICULTURAL_LAND,FARMLAND_PLOT" className="hover:text-[#FF9933] transition-colors">
+                Farmland &amp; Agriculture
               </Link>
             </li>
             <li>
               <Link href="/buy?landType=COMMERCIAL_LAND,OFFICE_SPACE,RETAIL_SHOP" className="hover:text-[#FF9933] transition-colors">
-                Commercial &amp; Retail Spaces
+                Commercial &amp; Retail Land
               </Link>
             </li>
             <li>
-              <Link href="/buy?landType=VILLA,FARM_HOUSE_LAND" className="hover:text-[#FF9933] transition-colors">
-                Villas &amp; Weekend Farmhouses
-              </Link>
-            </li>
-            <li>
-              <Link href="/dashboard/buyer" className="hover:text-[#FF9933] transition-colors">
-                Saved Watchlist &amp; Inquiries
+              <Link href="/buy?verifiedOnly=true" className="hover:text-[#FF9933] transition-colors">
+                Direct Landowner Listings
               </Link>
             </li>
           </ul>
@@ -144,7 +139,7 @@ export function Footer() {
 
         {/* Col 3: For Property Owners */}
         <div className="space-y-3">
-          <h4 className="text-xs font-black text-slate-950 uppercase tracking-wider">
+          <h4 className="text-sm font-bold text-slate-950">
             For Property Owners
           </h4>
           <ul className="space-y-2.5 text-xs font-semibold text-slate-600">
@@ -155,7 +150,7 @@ export function Footer() {
                 className="inline-flex items-center gap-1.5 text-[#c75e0a] font-black hover:text-[#FF9933] transition-colors"
               >
                 <span>+ List Your Property</span>
-                <span className="px-1.5 py-0.5 rounded-md bg-[#FF9933] text-white text-[9px] font-black">
+                <span className="px-1.5 py-0.5 rounded-md bg-[#FF9933] text-white text-[10px] font-black">
                   ₹10
                 </span>
               </Link>
@@ -185,7 +180,7 @@ export function Footer() {
 
         {/* Col 4: Trust & Legal Guides */}
         <div className="space-y-3">
-          <h4 className="text-xs font-black text-slate-950 uppercase tracking-wider">
+          <h4 className="text-sm font-bold text-slate-950">
             Trust &amp; Legal
           </h4>
           <ul className="space-y-2.5 text-xs font-semibold text-slate-600">
@@ -219,7 +214,7 @@ export function Footer() {
       </div>
 
       {/* ── Statutory Indian Land Due Diligence Advisory ── */}
-      <div className="border-t border-slate-100 bg-[#fffbf5] py-5 px-4 sm:px-6 lg:px-8 text-[11px] text-slate-500">
+      <div className="border-t border-slate-100 bg-[#fffbf5] py-5 px-4 sm:px-6 lg:px-8 text-xs text-slate-600">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
           <div className="flex items-start gap-2 max-w-4xl">
             <Scale className="w-4 h-4 text-[#FF9933] shrink-0 mt-0.5" />
@@ -228,7 +223,7 @@ export function Footer() {
             </span>
           </div>
 
-          <div className="flex items-center gap-4 text-slate-600 font-bold shrink-0">
+          <div className="flex items-center gap-4 text-slate-700 font-bold shrink-0">
             <span>🇮🇳 Made for Indian Land</span>
             <span>•</span>
             <span>0% Brokerage</span>
@@ -244,20 +239,11 @@ export function Footer() {
           </div>
 
           <div className="flex items-center gap-6 text-xs font-semibold">
-            <Link href="/terms" className="hover:text-[#FF9933] transition-colors">
-              Terms
-            </Link>
-            <Link href="/privacy" className="hover:text-[#FF9933] transition-colors">
-              Privacy
-            </Link>
-            <Link href="/refund-policy" className="hover:text-[#FF9933] transition-colors">
-              Refunds
-            </Link>
-            <Link href="/listing-rules" className="hover:text-[#FF9933] transition-colors">
-              Listing Rules
-            </Link>
             <Link href="/sitemap.xml" className="hover:text-[#FF9933] transition-colors">
               Sitemap
+            </Link>
+            <Link href="/contact" className="hover:text-[#FF9933] transition-colors">
+              Help &amp; Grievances
             </Link>
           </div>
         </div>

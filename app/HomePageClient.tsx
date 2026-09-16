@@ -382,10 +382,13 @@ export function HomePageClient({
                     <MapPin className="w-4 h-4 text-[#FF9933] shrink-0 mr-2.5" />
                     <input
                       type="text"
+                      id="hero-search-location"
+                      name="query"
                       value={searchLocation}
                       onChange={(e) => setSearchLocation(e.target.value)}
                       aria-label="Search by city, locality, or project name"
                       placeholder="Enter City, Locality, or Project e.g. Kokapet"
+                      autoComplete="off"
                       className="w-full bg-transparent text-xs sm:text-sm font-semibold text-slate-900 placeholder:text-slate-400 focus:outline-none"
                     />
                   </div>
@@ -778,29 +781,31 @@ export function HomePageClient({
               </div>
 
               {/* ── Popular Search Chips & Verified Toggle Beneath ── */}
-              <div className="flex flex-wrap items-center justify-between gap-3 px-2 text-xs">
-                <label className="flex items-center gap-2 text-slate-700 font-semibold cursor-pointer select-none">
+              <div className="flex flex-wrap items-center justify-between gap-3 px-1 text-xs">
+                <label htmlFor="hero-verified-only" className="inline-flex items-center gap-2 text-slate-700 font-semibold cursor-pointer select-none">
                   <input
                     type="checkbox"
+                    id="hero-verified-only"
+                    name="verifiedOnly"
                     checked={verifiedOnly}
                     onChange={(e) => setVerifiedOnly(e.target.checked)}
                     className="w-4 h-4 rounded accent-[#FF9933] border-slate-300"
                   />
                   <span className="flex items-center gap-1.5">
                     <Sparkles className="w-4 h-4 text-[#FF9933]" />
-                    <span className="text-[11px] sm:text-xs font-bold text-slate-700">
+                    <span className="text-xs font-bold text-slate-700">
                       Direct Owner Listings Only (0% Brokerage)
                     </span>
                   </span>
                 </label>
 
                 <div className="flex items-center gap-1.5 flex-wrap">
-                  <span className="text-slate-400 font-bold text-[11px]">Popular:</span>
+                  <span className="text-slate-400 font-bold text-xs">Popular:</span>
                   {POPULAR_SEARCH_TAGS.map((tag) => (
                     <Link
                       key={tag.label}
                       href={`/buy?query=${encodeURIComponent(tag.query)}`}
-                      className="px-3 py-1 rounded-full bg-white hover:bg-[#fff1dc] hover:text-[#c75e0a] text-slate-600 text-[11px] font-bold border border-slate-200/80 shadow-2xs transition-colors"
+                      className="px-3 py-1 rounded-full bg-white hover:bg-[#fff1dc] hover:text-[#c75e0a] text-slate-600 text-xs font-bold border border-slate-200/80 shadow-2xs transition-colors"
                     >
                       {tag.label}
                     </Link>
@@ -814,7 +819,10 @@ export function HomePageClient({
         {/* ═══════════════════════════════════════════════════════
             2. FOUR VALUE PILLARS (Clean Minimalist White Cards)
         ═══════════════════════════════════════════════════════ */}
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" aria-labelledby="platform-highlights-heading">
+          <h2 id="platform-highlights-heading" className="sr-only">
+            Why Choose BhoomiMitra Platform Highlights
+          </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             <div className="p-6 rounded-3xl bg-white border border-slate-200 shadow-2xs space-y-2.5">
               <div className="w-11 h-11 rounded-2xl bg-[#fff1dc] text-[#c75e0a] flex items-center justify-center font-bold">
@@ -868,7 +876,7 @@ export function HomePageClient({
                 <h2 className="text-xl sm:text-2xl font-black text-slate-950 tracking-tight">
                   Featured Property Classifieds
                 </h2>
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#fff1dc] text-[#c75e0a] text-[10px] font-bold">
+                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#fff1dc] text-[#c75e0a] text-xs font-bold">
                   <Sparkles className="w-3.5 h-3.5 text-[#FF9933]" />
                   <span>Direct Classifieds • 0% Brokerage</span>
                 </span>
@@ -1026,79 +1034,15 @@ export function HomePageClient({
         </section>
 
         {/* ═══════════════════════════════════════════════════════
-            6. LAND BUYER'S DUE DILIGENCE & DOCUMENT GUIDE
+            6. MULTI-COLUMN SEO DIRECTORY (Clean Real Routes)
         ═══════════════════════════════════════════════════════ */}
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-2xl mx-auto mb-8 space-y-2">
-            <h2 className="text-xl sm:text-2xl font-black text-slate-950 tracking-tight">
-              Land Buyer&apos;s Due Diligence Checklist
-            </h2>
-            <p className="text-xs text-slate-500">
-              Essential Indian land documents every buyer must inspect before entering transactions
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            <div className="p-6 rounded-3xl bg-white border border-slate-200 shadow-2xs space-y-3">
-              <div className="w-10 h-10 rounded-2xl bg-[#fff1dc] text-[#c75e0a] flex items-center justify-center font-black text-sm">
-                1
-              </div>
-              <h3 className="text-xs font-extrabold text-slate-950">
-                Registered Sale Deed &amp; 30-Year Chain
-              </h3>
-              <p className="text-[11px] text-slate-500 leading-relaxed">
-                Inspect the parent document history establishing an unbroken 30-year flow of ownership from original titleholders.
-              </p>
-            </div>
-
-            <div className="p-6 rounded-3xl bg-white border border-slate-200 shadow-2xs space-y-3">
-              <div className="w-10 h-10 rounded-2xl bg-[#fff1dc] text-[#c75e0a] flex items-center justify-center font-black text-sm">
-                2
-              </div>
-              <h3 className="text-xs font-extrabold text-slate-950">
-                Encumbrance Certificate (EC Form 15)
-              </h3>
-              <p className="text-[11px] text-slate-500 leading-relaxed">
-                Issued by the Sub-Registrar Office verifying zero existing mortgages, legal disputes, or third-party liabilities.
-              </p>
-            </div>
-
-            <div className="p-6 rounded-3xl bg-white border border-slate-200 shadow-2xs space-y-3">
-              <div className="w-10 h-10 rounded-2xl bg-[#fff1dc] text-[#c75e0a] flex items-center justify-center font-black text-sm">
-                3
-              </div>
-              <h3 className="text-xs font-extrabold text-slate-950">
-                Pahani / 7-12 Extract / ROR 1-B
-              </h3>
-              <p className="text-[11px] text-slate-500 leading-relaxed">
-                Official Revenue Department record confirming agricultural possession, extent, soil type, and crop status.
-              </p>
-            </div>
-
-            <div className="p-6 rounded-3xl bg-white border border-slate-200 shadow-2xs space-y-3">
-              <div className="w-10 h-10 rounded-2xl bg-[#fff1dc] text-[#c75e0a] flex items-center justify-center font-black text-sm">
-                4
-              </div>
-              <h3 className="text-xs font-extrabold text-slate-950">
-                Survey Number &amp; FMB Map Sketch
-              </h3>
-              <p className="text-[11px] text-slate-500 leading-relaxed">
-                Field Measurement Book (FMB) diagram verifying physical boundary stone coordinates and road access easements.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* ═══════════════════════════════════════════════════════
-            7. MULTI-COLUMN SEO DIRECTORY (Clean Real Routes)
-        ═══════════════════════════════════════════════════════ */}
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
-          <div className="border-t border-slate-200 pt-10">
-            <h3 className="text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-6">
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+          <div className="border-t border-slate-200 pt-8">
+            <h3 className="text-sm sm:text-base font-bold text-slate-800 mb-6">
               Explore Properties &amp; Plots by State, Category &amp; Legal Guides
             </h3>
 
-            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-6 text-xs">
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-5 text-xs">
               <div className="space-y-2">
                 <div className="font-bold text-slate-900">Properties by State</div>
                 <ul className="space-y-1.5 text-slate-500">
