@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireRole } from '@/lib/security/auth';
+import { requireRole, invalidateUserSessionCache } from '@/lib/security/auth';
 import { UserModel } from '@/models/User';
 import { PropertyModel } from '@/models/Property';
 import { connectToDatabase } from '@/lib/db/mongodb';
@@ -85,6 +85,9 @@ export async function PATCH(req: NextRequest) {
     if (!updatedUser) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
+
+    // Invalidate in-memory micro-cache so role or suspension changes apply immediately
+    invalidateUserSessionCache(userId);
 
     await createAuditLog({
       actorId: adminUser.id,

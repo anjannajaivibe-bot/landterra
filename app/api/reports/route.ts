@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth, requireRole } from '@/lib/security/auth';
+import { checkRateLimit } from '@/lib/security/rate-limit';
 import { CreateReportSchema } from '@/lib/validation/payment';
 import { createReport, getAllReports, updateReportStatus } from '@/services/inquiry.service';
 import { z } from 'zod';
@@ -25,6 +26,30 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   const authUser = await requireAuth(req);
   if (authUser instanceof NextResponse) return authUser;
+
+  const forwarded = req.headers.get('x-forwarded-for');
+  const realIp = req.headers.get('x-real-ip');
+  const ipAddress = forwarded
+    ? forwarded.split(',')[0].trim()
+    : realIp || '127.0.0.1';
+
+  // Per-user throttling (5 reports per 10 minutes)
+  const userRate = await checkRateLimit(`report-user:${authUser.id}`, 5, 10 * 60 * 1000);
+  if (!userRate.allowed) {
+    return NextResponse.json(
+      { error: 'Too many reports submitted. Please wait a few minutes before submitting additional reports.' },
+      { status: 429, headers: { 'Retry-After': '600' } }
+    );
+  }
+
+  // Per-IP throttling (10 reports per 10 minutes)
+  const ipRate = await checkRateLimit(`report-ip:${ipAddress}`, 10, 10 * 60 * 1000);
+  if (!ipRate.allowed) {
+    return NextResponse.json(
+      { error: 'Too many reports submitted from this network. Please wait a few minutes.' },
+      { status: 429, headers: { 'Retry-After': '600' } }
+    );
+  }
 
   try {
     const body = await req.json();

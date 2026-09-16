@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server';
+import crypto from 'crypto';
 
 /**
  * Verify that an incoming request to a scheduled cron route is authorized.
@@ -6,6 +7,8 @@ import { NextRequest } from 'next/server';
  *
  * In production:
  * - Requires a matching Bearer token or x-cron-secret header against process.env.CRON_SECRET.
+ * - Enforces constant-time cryptographic equality comparison (prevents timing attacks).
+ * - Prohibits secret exposure in URL query parameters to avoid logging in proxies/CDN logs.
  *
  * In local development:
  * - If CRON_SECRET is not configured, allows requests for local testing.
@@ -21,21 +24,33 @@ export function verifyCronRequest(req: NextRequest): boolean {
     return false;
   }
 
+  const expectedBuffer = Buffer.from(cronSecret);
+
+  // 1. Authorization: Bearer <token>
   const authHeader = req.headers.get('authorization');
-  if (authHeader && authHeader === `Bearer ${cronSecret}`) {
-    return true;
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    const token = authHeader.slice(7).trim();
+    const tokenBuffer = Buffer.from(token);
+    if (
+      tokenBuffer.length === expectedBuffer.length &&
+      crypto.timingSafeEqual(tokenBuffer, expectedBuffer)
+    ) {
+      return true;
+    }
   }
 
+  // 2. Custom header: x-cron-secret
   const customHeader = req.headers.get('x-cron-secret');
-  if (customHeader && customHeader === cronSecret) {
-    return true;
-  }
-
-  // Also support secret query parameter for quick administrative manual triggers
-  const querySecret = req.nextUrl.searchParams.get('secret');
-  if (querySecret && querySecret === cronSecret) {
-    return true;
+  if (customHeader) {
+    const customBuffer = Buffer.from(customHeader.trim());
+    if (
+      customBuffer.length === expectedBuffer.length &&
+      crypto.timingSafeEqual(customBuffer, expectedBuffer)
+    ) {
+      return true;
+    }
   }
 
   return false;
 }
+

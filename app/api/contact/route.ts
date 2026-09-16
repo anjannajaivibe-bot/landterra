@@ -3,6 +3,8 @@ import { connectToDatabase } from '@/lib/db/mongodb';
 import { ContactMessageModel } from '@/models/ContactMessage';
 import { CreateContactSchema } from '@/lib/validation/payment';
 import { notifySupportContactMessage } from '@/services/email.service';
+import { checkRateLimit } from '@/lib/security/rate-limit';
+import { verifyCloudflareTurnstile } from '@/lib/security/cloudflare-turnstile';
 
 export async function POST(req: NextRequest) {
   try {
@@ -14,12 +16,40 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const validated = CreateContactSchema.parse(body);
-
     const ipAddress =
       req.headers.get('x-forwarded-for')?.split(',')[0].trim() ||
       req.headers.get('x-real-ip') ||
-      undefined;
+      '127.0.0.1';
+
+    // 1. Sliding-window IP Rate Limiting (5 requests per 10 minutes)
+    const rate = await checkRateLimit(`contact-ip:${ipAddress}`, 5, 10 * 60 * 1000);
+    if (!rate.allowed) {
+      return NextResponse.json(
+        { error: 'Too many messages sent. Please wait a few minutes before trying again.' },
+        { status: 429, headers: { 'Retry-After': '600' } }
+      );
+    }
+
+    // 2. Cloudflare Turnstile Human Verification
+    const turnstileToken =
+      body.turnstileToken ||
+      req.headers.get('x-turnstile-token') ||
+      req.headers.get('cf-turnstile-token');
+
+    const turnstileResult = await verifyCloudflareTurnstile(turnstileToken, ipAddress);
+    if (!turnstileResult.success) {
+      return NextResponse.json(
+        {
+          error:
+            turnstileResult.error ||
+            'Human verification failed. Please complete the security check.',
+          code: 'TURNSTILE_REQUIRED',
+        },
+        { status: 403 }
+      );
+    }
+
+    const validated = CreateContactSchema.parse(body);
 
     await connectToDatabase();
 

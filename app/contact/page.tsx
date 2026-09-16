@@ -18,12 +18,14 @@ import {
   FileText,
 } from 'lucide-react';
 import { SITE_CONFIG } from '@/config/constants';
+import { CloudflareTurnstile } from '@/components/security/CloudflareTurnstile';
 
 export default function ContactPage() {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [formData, setFormData] = useState({ name: '', email: '', phone: '', message: '' });
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,6 +45,7 @@ export default function ContactPage() {
           email: formData.email.trim(),
           phone: formData.phone?.trim() || undefined,
           message: formData.message.trim(),
+          turnstileToken: turnstileToken || undefined,
         }),
       });
 
@@ -219,6 +222,17 @@ export default function ContactPage() {
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#FF9933] focus:border-[#FF9933] disabled:bg-slate-100 disabled:text-slate-400"
                   />
                 </div>
+
+                {/* Cloudflare Turnstile Human Verification */}
+                <div className="py-1">
+                  <CloudflareTurnstile
+                    action="contact_form"
+                    onSuccess={(token) => setTurnstileToken(token)}
+                    onExpire={() => setTurnstileToken(null)}
+                    onError={() => setTurnstileToken(null)}
+                  />
+                </div>
+
                 <button
                   type="submit"
                   disabled={loading}
