@@ -18,6 +18,7 @@ export default async function BuyPage({ searchParams }: BuyPageProps) {
   const city = typeof resolved.city === 'string' ? resolved.city.trim() : undefined;
   const state = typeof resolved.state === 'string' ? resolved.state.trim() : undefined;
   const landType = typeof resolved.landType === 'string' ? resolved.landType.trim() : undefined;
+  const transactionType = typeof resolved.transactionType === 'string' ? resolved.transactionType.trim() : undefined;
   const bhk = typeof resolved.bhk === 'string' ? resolved.bhk.trim() : undefined;
   const minPrice = typeof resolved.minPrice === 'string' ? Number(resolved.minPrice) : undefined;
   const maxPrice = typeof resolved.maxPrice === 'string' ? Number(resolved.maxPrice) : undefined;
@@ -45,6 +46,7 @@ export default async function BuyPage({ searchParams }: BuyPageProps) {
       city: effectiveCity,
       state: effectiveState,
       landType: landType as any,
+      transactionType: transactionType as any,
       bhk,
       minPrice,
       maxPrice,

@@ -10,14 +10,14 @@ export const metadata: Metadata = {
     absolute: "Direct Properties, Homes & Plots Across India | BhoomiMitra",
   },
   description:
-    "Discover verified properties across India — residential plots, flats, luxury villas, commercial spaces, and agricultural land. Connect directly with genuine owners with zero broker commissions.",
+    "Explore residential plots, apartments, villas, commercial spaces, and agricultural land across India. Connect directly with genuine property owners with zero broker commissions.",
   alternates: {
     canonical: '/',
   },
   openGraph: {
     title: "Direct Properties, Homes & Plots Across India | BhoomiMitra",
     description:
-      "Discover verified properties across India — residential plots, flats, luxury villas, commercial spaces, and agricultural land. Connect directly with genuine owners with zero broker commissions.",
+      "Explore residential plots, apartments, villas, commercial spaces, and agricultural land across India. Connect directly with genuine property owners with zero broker commissions.",
     type: 'website',
   },
 };

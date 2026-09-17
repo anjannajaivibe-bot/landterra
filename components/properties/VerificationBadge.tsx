@@ -85,7 +85,7 @@ export function VerificationBadge({
 
   const label =
     compact && status === 'VERIFIED'
-      ? 'Verified'
+      ? 'Direct Owner'
       : badge.label;
 
   return (

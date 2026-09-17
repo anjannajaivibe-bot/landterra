@@ -135,6 +135,27 @@ function BuyPageContent({
     } else {
       setSearchQuery('');
     }
+
+    const txParam = searchParams.get('transactionType');
+    if (txParam && ['SALE', 'RENT', 'LEASE'].includes(txParam.toUpperCase())) {
+      setTransactionType(txParam.toUpperCase());
+    } else {
+      setTransactionType('ALL');
+    }
+
+    const landTypeParam = searchParams.get('landType');
+    if (landTypeParam && landTypeParam !== 'ALL') {
+      setSelectedPropertyTypes(landTypeParam.split(',').map((p) => p.trim()).filter(Boolean));
+    } else if (landTypeParam === '' || landTypeParam === 'ALL') {
+      setSelectedPropertyTypes([]);
+    }
+
+    const bhkParam = searchParams.get('bhk');
+    if (bhkParam) {
+      setSelectedBhks(bhkParam.split(',').map((b) => b.trim()).filter(Boolean));
+    } else if (bhkParam === '') {
+      setSelectedBhks([]);
+    }
   }, [searchParams]);
 
   // Client-side cache across filter switches (e.g. Farmlands -> Villas -> Farmlands = 0ms instant)
@@ -160,6 +181,11 @@ function BuyPageContent({
   const [selectedState, setSelectedState] = useState(
     searchParams.get('state') || 'ALL',
   );
+
+  const [transactionType, setTransactionType] = useState<string>(() => {
+    const tx = searchParams.get('transactionType');
+    return tx && ['SALE', 'RENT', 'LEASE'].includes(tx.toUpperCase()) ? tx.toUpperCase() : 'ALL';
+  });
 
   const [verifiedOnly, setVerifiedOnly] = useState(
     searchParams.get('verifiedOnly') === 'true',
@@ -262,6 +288,7 @@ function BuyPageContent({
   const activeFilterCount = useMemo(() => {
     let count = 0;
     if (searchQuery.trim()) count++;
+    if (transactionType !== 'ALL') count++;
     if (selectedPropertyTypes.length > 0) count++;
     if (selectedBhks.length > 0) count++;
     if (selectedState !== 'ALL') count++;
@@ -273,6 +300,7 @@ function BuyPageContent({
     return count;
   }, [
     searchQuery,
+    transactionType,
     selectedPropertyTypes,
     selectedBhks,
     selectedState,
@@ -320,6 +348,7 @@ function BuyPageContent({
       types: [...selectedPropertyTypes].sort(),
       bhks: [...selectedBhks].sort(),
       state: selectedState,
+      tx: transactionType,
       verified: verifiedOnly,
       minP: minPrice,
       maxP: maxPrice,
@@ -374,6 +403,10 @@ function BuyPageContent({
 
         if (selectedState !== 'ALL') {
           params.set('state', selectedState);
+        }
+
+        if (transactionType !== 'ALL') {
+          params.set('transactionType', transactionType);
         }
 
         if (verifiedOnly) {
@@ -447,6 +480,7 @@ function BuyPageContent({
     selectedPropertyTypes,
     selectedBhks,
     selectedState,
+    transactionType,
     verifiedOnly,
     minPrice,
     maxPrice,
@@ -463,12 +497,29 @@ function BuyPageContent({
      FILTER HANDLERS
   ================================================================= */
 
+  const handleTransactionTypeChange = (tx: string) => {
+    setTransactionType(tx);
+    setPage(1);
+    try {
+      const url = new URL(window.location.href);
+      if (tx === 'ALL') {
+        url.searchParams.delete('transactionType');
+      } else {
+        url.searchParams.set('transactionType', tx);
+      }
+      window.history.replaceState({}, '', url.toString());
+    } catch {
+      // ignore
+    }
+  };
+
   const handleResetFilters = () => {
     setSearchQuery('');
     setSelectedPropertyTypes([]);
     setSelectedBhks([]);
     setSelectedState('ALL');
     setVerifiedOnly(false);
+    setTransactionType('ALL');
     setMinPrice(0);
     setMaxPrice(DEFAULT_MAX_PRICE);
     setMinArea(0);
@@ -586,6 +637,8 @@ function BuyPageContent({
             onAreaPresetChange={handleAreaPresetChange}
             verifiedOnly={verifiedOnly}
             onToggleVerified={updateVerified}
+            transactionType={transactionType}
+            onTransactionTypeChange={handleTransactionTypeChange}
           />
 
           {/* Quick Category Chips */}
@@ -692,6 +745,7 @@ function BuyPageContent({
             selectedBhks={selectedBhks}
             selectedState={selectedState}
             verifiedOnly={verifiedOnly}
+            transactionType={transactionType}
             minPrice={minPrice}
             maxPrice={maxPrice}
             minArea={minArea}
@@ -704,6 +758,7 @@ function BuyPageContent({
             onToggleBhk={handleToggleBhk}
             onClearState={() => updateState('ALL')}
             onToggleVerified={updateVerified}
+            onResetTransactionType={() => handleTransactionTypeChange('ALL')}
             onResetPrice={() => {
               setMaxPrice(DEFAULT_MAX_PRICE);
               setPage(1);

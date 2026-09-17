@@ -75,13 +75,21 @@ const NEARBY_CITIES: Record<string, string[]> = {
     'Ghaziabad',
     'Sonipat',
   ],
+  'All India': [
+    'Hyderabad',
+    'Bangalore',
+    'Mumbai',
+    'New Delhi',
+    'Chennai',
+    'Pune',
+  ],
   DEFAULT: [
-    'Visakhapatnam',
-    'Vijayawada',
-    'Vizianagaram',
-    'Guntur',
-    'Warangal',
-    'Bengaluru',
+    'Hyderabad',
+    'Bangalore',
+    'Mumbai',
+    'New Delhi',
+    'Chennai',
+    'Pune',
   ],
 };
 
@@ -195,7 +203,7 @@ let memorySelectedCity: string | null = null;
 export function CitySelectorMegaMenu() {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedCity, setSelectedCity] = useState<string>(() => memorySelectedCity || 'Hyderabad');
+  const [selectedCity, setSelectedCity] = useState<string>(() => memorySelectedCity || 'All India');
   const [searchQuery, setSearchQuery] = useState('');
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -211,9 +219,14 @@ export function CitySelectorMegaMenu() {
       }
       if (!memorySelectedCity) {
         const stored = localStorage.getItem('bhoomimitra_selected_city');
-        if (stored && stored.trim()) {
+        if (stored && stored.trim() && stored !== 'Hyderabad') {
           memorySelectedCity = stored;
           setSelectedCity(stored);
+        } else if (!stored || stored === 'Hyderabad') {
+          // Default to All India and clean up legacy hardcoded 'Hyderabad' default
+          memorySelectedCity = 'All India';
+          setSelectedCity('All India');
+          localStorage.setItem('bhoomimitra_selected_city', 'All India');
         }
       }
     } catch {
@@ -304,7 +317,8 @@ export function CitySelectorMegaMenu() {
 
   /* Truncate long city names like "Bokaro Steel City" -> "Bokaro..." to protect navbar layout */
   const formatDisplayCity = (city: string): string => {
-    if (!city || !city.trim()) return 'Hyderabad';
+    if (!city || !city.trim()) return 'All India';
+    if (city === 'All India') return 'All India';
     if (city.startsWith('NRI: ')) {
       const hub = city.replace('NRI: ', '');
       return hub.length > 8 ? `NRI: ${hub.slice(0, 6)}...` : city;
@@ -330,14 +344,14 @@ export function CitySelectorMegaMenu() {
         aria-label="Select City or Region"
         title={selectedCity}
         suppressHydrationWarning
-        className={`flex items-center gap-1 px-2 sm:px-3 py-1.5 rounded-xl border text-xs font-black transition-all cursor-pointer select-none max-w-[125px] sm:max-w-[150px] shrink-0 ${
+        className={`flex items-center gap-1 px-2 sm:px-3 py-1.5 rounded-xl border text-xs font-black transition-all cursor-pointer select-none max-w-[130px] sm:max-w-[160px] shrink-0 ${
           isOpen
             ? 'border-[#FF9933] bg-[#fff9f0] text-[#c75e0a] shadow-xs ring-2 ring-[#FF9933]/20'
             : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-800 hover:border-slate-300 shadow-2xs'
         }`}
       >
         <MapPin className="w-3.5 h-3.5 text-[#FF9933] shrink-0" />
-        <span className="truncate max-w-[75px] sm:max-w-[95px] min-w-0" suppressHydrationWarning>
+        <span className="truncate max-w-[80px] sm:max-w-[100px] min-w-0" suppressHydrationWarning>
           {formatDisplayCity(selectedCity)}
         </span>
         <ChevronDown
@@ -397,7 +411,11 @@ export function CitySelectorMegaMenu() {
                 <button
                   type="button"
                   onClick={() => handleSelectCity('All India')}
-                  className="px-3.5 py-2 rounded-xl bg-white border border-[#FF9933]/40 text-[#c75e0a] hover:bg-[#fff1dc] text-xs font-bold transition-colors cursor-pointer shrink-0 shadow-2xs whitespace-nowrap"
+                  className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-colors cursor-pointer shrink-0 shadow-2xs whitespace-nowrap ${
+                    selectedCity === 'All India'
+                      ? 'bg-[#FF9933] text-white border border-[#FF9933]'
+                      : 'bg-white border border-[#FF9933]/40 text-[#c75e0a] hover:bg-[#fff1dc]'
+                  }`}
                 >
                   All India (View All)
                 </button>

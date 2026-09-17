@@ -28,7 +28,7 @@ export const SITE_CONFIG = {
   tagline: 'Find Property With More Confidence',
 
   description:
-    'Discover land and plots across India, compare properties, review listing information, and connect directly with sellers.',
+    'Explore residential plots, apartments, villas, commercial spaces, and agricultural land across India. Connect directly with genuine property owners with zero broker commissions.',
 
   url:
     process.env.NEXT_PUBLIC_APP_URL ||
@@ -327,6 +327,29 @@ export const LAND_TYPES = [
   },
 ] as const;
 
+export interface CanonicalPropertyType {
+  id: string;
+  value: string;
+  label: string;
+  shortLabel: string;
+  category:
+    | 'Land & Plots'
+    | 'Residential Units'
+    | 'Commercial & Retail'
+    | 'Hospitality & Leisure'
+    | 'Income-Generating & Rentals';
+  description: string;
+}
+
+export const CANONICAL_PROPERTY_TYPES: CanonicalPropertyType[] = LAND_TYPES.map((t) => ({
+  id: t.value,
+  value: t.value,
+  label: t.label,
+  shortLabel: t.shortLabel,
+  category: t.category,
+  description: t.description,
+}));
+
 /* ================================================================
    DOCUMENT TYPES
 ================================================================ */
@@ -375,7 +398,7 @@ export const DOCUMENT_TYPES = [
 
 export const VERIFICATION_BADGES = {
   VERIFIED: {
-    label: 'Verified',
+    label: 'Direct Owner Listed',
 
     color: 'saffron',
 

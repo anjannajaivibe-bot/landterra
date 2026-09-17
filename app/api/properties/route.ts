@@ -206,6 +206,10 @@ export async function GET(
         ) as PropertyFilterParams['landType']) ||
         undefined,
 
+      transactionType:
+        (searchParams.get('transactionType')?.toUpperCase() as any) ||
+        undefined,
+
       propertyType:
         searchParams.get('propertyType') ||
         undefined,

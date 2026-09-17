@@ -1,53 +1,8 @@
-export interface PropertyTypeOption {
-  id: string;
-  label: string;
-  category:
-    | 'Land & Plots'
-    | 'Residential Units'
-    | 'Commercial & Retail'
-    | 'Hospitality & Leisure'
-    | 'Income-Generating & Rentals';
-}
+import { CANONICAL_PROPERTY_TYPES, CanonicalPropertyType } from '@/config/constants';
 
-export const ALL_PROPERTY_TYPES: PropertyTypeOption[] = [
-  // 1. Land & Plots
-  { id: 'OPEN_PLOT', label: 'Open Plots', category: 'Land & Plots' },
-  { id: 'FARMLAND_PLOT', label: 'Farmland Plots', category: 'Land & Plots' },
-  { id: 'GATED_COMMUNITY_PLOT', label: 'Gated Community Plots', category: 'Land & Plots' },
-  { id: 'AGRICULTURAL_LAND', label: 'Agricultural Land', category: 'Land & Plots' },
-  { id: 'RESIDENTIAL_PLOT', label: 'Residential Plots', category: 'Land & Plots' },
+export type PropertyTypeOption = CanonicalPropertyType;
 
-  // 2. Residential Units
-  { id: 'FLAT', label: 'Flats / Apartments', category: 'Residential Units' },
-  { id: 'INDEPENDENT_HOUSE', label: 'Independent Houses', category: 'Residential Units' },
-  { id: 'VILLA', label: 'Villas', category: 'Residential Units' },
-  { id: 'HOUSE_VILLA', label: 'House / Villa', category: 'Residential Units' },
-  { id: 'TOWNHOUSE', label: 'Townhouses', category: 'Residential Units' },
-  { id: 'DUPLEX', label: 'Duplexes', category: 'Residential Units' },
-  { id: 'PENTHOUSE', label: 'Penthouses', category: 'Residential Units' },
-
-  // 3. Commercial & Retail
-  { id: 'RETAIL_SHOP', label: 'Retail Shops', category: 'Commercial & Retail' },
-  { id: 'SHOWROOM', label: 'Showrooms', category: 'Commercial & Retail' },
-  { id: 'OFFICE_SPACE', label: 'Office Spaces', category: 'Commercial & Retail' },
-  { id: 'COWORKING_SPACE', label: 'Co-working Spaces', category: 'Commercial & Retail' },
-  { id: 'SHOPPING_MALL', label: 'Shopping Malls', category: 'Commercial & Retail' },
-  { id: 'WAREHOUSE_LAND', label: 'Warehouses / Godowns', category: 'Commercial & Retail' },
-  { id: 'COMMERCIAL_LAND', label: 'Commercial Land', category: 'Commercial & Retail' },
-
-  // 4. Hospitality & Leisure
-  { id: 'RESORT', label: 'Resorts', category: 'Hospitality & Leisure' },
-  { id: 'HOTEL', label: 'Hotels', category: 'Hospitality & Leisure' },
-  { id: 'SERVICE_APARTMENT', label: 'Service Apartments', category: 'Hospitality & Leisure' },
-  { id: 'GUEST_HOUSE', label: 'Guest Houses', category: 'Hospitality & Leisure' },
-  { id: 'FARM_HOUSE_LAND', label: 'Farmhouses', category: 'Hospitality & Leisure' },
-
-  // 5. Income-Generating & Rentals
-  { id: 'RESIDENTIAL_RENTAL', label: 'Residential Rentals', category: 'Income-Generating & Rentals' },
-  { id: 'COMMERCIAL_LEASE', label: 'Commercial Leases', category: 'Income-Generating & Rentals' },
-  { id: 'COLIVING_PG', label: 'Co-living Spaces / PGs', category: 'Income-Generating & Rentals' },
-  { id: 'VACATION_RENTAL_AIRBNB', label: 'Vacation Rentals / Airbnbs', category: 'Income-Generating & Rentals' },
-];
+export const ALL_PROPERTY_TYPES: PropertyTypeOption[] = CANONICAL_PROPERTY_TYPES;
 
 export const BHK_OPTIONS = ['1 Bhk', '2 Bhk', '3 Bhk', '4 Bhk', '5 Bhk', '5+ Bhk'];
 

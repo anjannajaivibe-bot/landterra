@@ -87,6 +87,12 @@ const PropertySchema = new Schema<IProperty>(
       required: true,
       index: true,
     },
+    transactionType: {
+      type: String,
+      enum: ['SALE', 'RENT', 'LEASE'],
+      default: 'SALE',
+      index: true,
+    },
     propertyType: { type: String, index: true },
     bhk: { type: String, index: true },
     facing: { type: String },

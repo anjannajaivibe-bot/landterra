@@ -16,6 +16,7 @@ interface ActiveFilterBadgesProps {
   selectedBhks: string[];
   selectedState: string;
   verifiedOnly: boolean;
+  transactionType?: string;
   minPrice: number;
   maxPrice: number;
   minArea: number;
@@ -25,6 +26,7 @@ interface ActiveFilterBadgesProps {
   onToggleBhk: (bhk: string) => void;
   onClearState: () => void;
   onToggleVerified: (val: boolean) => void;
+  onResetTransactionType?: () => void;
   onResetPrice: () => void;
   onResetArea: () => void;
   onResetAll: () => void;
@@ -55,6 +57,7 @@ export function ActiveFilterBadges({
   selectedBhks,
   selectedState,
   verifiedOnly,
+  transactionType,
   minPrice,
   maxPrice,
   minArea,
@@ -64,12 +67,14 @@ export function ActiveFilterBadges({
   onToggleBhk,
   onClearState,
   onToggleVerified,
+  onResetTransactionType,
   onResetPrice,
   onResetArea,
   onResetAll,
 }: ActiveFilterBadgesProps) {
   const hasActiveFilters =
     searchQuery.trim() ||
+    (transactionType && transactionType !== 'ALL') ||
     selectedPropertyTypes.length > 0 ||
     selectedBhks.length > 0 ||
     selectedState !== 'ALL' ||
@@ -91,6 +96,13 @@ export function ActiveFilterBadges({
         <FilterChip
           label={`Location: ${searchQuery}`}
           onRemove={onClearQuery}
+        />
+      )}
+
+      {transactionType && transactionType !== 'ALL' && (
+        <FilterChip
+          label={`For: ${transactionType === 'SALE' ? 'Buy' : transactionType === 'RENT' ? 'Rent' : 'Lease'}`}
+          onRemove={onResetTransactionType || (() => {})}
         />
       )}
 

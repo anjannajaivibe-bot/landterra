@@ -36,6 +36,8 @@ interface FilterBarProps {
   onAreaPresetChange: (idx: number) => void;
   verifiedOnly: boolean;
   onToggleVerified: (verified: boolean) => void;
+  transactionType?: string;
+  onTransactionTypeChange?: (type: string) => void;
 }
 
 export function FilterBar({
@@ -55,6 +57,8 @@ export function FilterBar({
   onAreaPresetChange,
   verifiedOnly,
   onToggleVerified,
+  transactionType = 'ALL',
+  onTransactionTypeChange,
 }: FilterBarProps) {
   const [propertyTypePopoverOpen, setPropertyTypePopoverOpen] = useState(false);
   const [expandedCategories, setExpandedCategories] = useState<{
@@ -115,6 +119,34 @@ export function FilterBar({
   return (
     <form onSubmit={onSearchSubmit} className="relative z-30 mt-6 w-full">
       <div className="rounded-3xl bg-white border border-slate-200/90 shadow-[0_10px_35px_rgba(0,0,0,0.06)] p-3.5 sm:p-5 transition-all focus-within:border-[#FF9933]/40">
+        {/* Transaction Type Pills: All, Buy, Rent, Lease */}
+        {onTransactionTypeChange && (
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-3.5">
+            {[
+              { id: 'ALL', label: 'All Listings' },
+              { id: 'SALE', label: 'Buy' },
+              { id: 'RENT', label: 'Rent' },
+              { id: 'LEASE', label: 'Lease' },
+            ].map((tab) => {
+              const isSelected = (transactionType || 'ALL') === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => onTransactionTypeChange(tab.id)}
+                  className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer border ${
+                    isSelected
+                      ? 'bg-[#FF9933] text-white border-[#FF9933] shadow-xs'
+                      : 'bg-slate-50 text-slate-600 border-slate-200/80 hover:bg-slate-100 hover:text-slate-900'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              );
+            })}
+          </div>
+        )}
+
         {/* Row 1: Search Omnibar */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
           <div className="flex-1 flex items-center px-4 py-3 rounded-2xl bg-[#f8fafc] border border-slate-200/80 focus-within:bg-white focus-within:border-[#FF9933]/60 focus-within:ring-2 focus-within:ring-[#FF9933]/15 transition-all">

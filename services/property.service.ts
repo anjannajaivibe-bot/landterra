@@ -55,6 +55,7 @@ export const PUBLIC_PROPERTY_PROJECTION = {
   totalPrice: 1,
   priceNegotiable: 1,
   landType: 1,
+  transactionType: 1,
   propertyType: 1,
   bhk: 1,
   facing: 1,
@@ -112,6 +113,7 @@ export const CARD_PROPERTY_PROJECTION = {
   totalPrice: 1,
   priceNegotiable: 1,
   landType: 1,
+  transactionType: 1,
   propertyType: 1,
   bhk: 1,
   roadAccess: 1,
@@ -220,6 +222,12 @@ export function toPublicPropertyListItem(
     totalPrice: doc.totalPrice,
     priceNegotiable: doc.priceNegotiable,
     landType: doc.landType,
+    transactionType: (doc.transactionType as any) ||
+      (doc.landType === 'RESIDENTIAL_RENTAL' || doc.landType === 'COLIVING_PG' || doc.landType === 'VACATION_RENTAL_AIRBNB'
+        ? 'RENT'
+        : doc.landType === 'COMMERCIAL_LEASE'
+        ? 'LEASE'
+        : 'SALE'),
     propertyType: doc.propertyType,
     bhk: doc.bhk,
     facing: doc.facing,
@@ -447,6 +455,7 @@ function hasMaterialPropertyChange(
     'landAreaYards',
     'pricePerYard',
     'landType',
+    'transactionType',
     'roadAccess',
     'nearbyLandmarks',
     'location',
@@ -658,8 +667,10 @@ export async function getProperties(
             typeOrConditions.push({ title: /\bduplex\b/i });
           } else if (t === 'PENTHOUSE') {
             typeOrConditions.push({ title: /\bpenthouse\b/i });
-          } else if (t === 'OPEN_PLOT' || t === 'RESIDENTIAL_PLOT') {
-            typeOrConditions.push({ title: /\b(residential\s*plot|open\s*plot)\b/i });
+          } else if (t === 'OPEN_PLOT') {
+            typeOrConditions.push({ title: /\bopen\s*plot\b/i });
+          } else if (t === 'RESIDENTIAL_PLOT') {
+            typeOrConditions.push({ title: /\bresidential\s*plot\b/i });
           } else if (t === 'FARMLAND_PLOT') {
             typeOrConditions.push({ title: /\bfarmland\s*plot\b/i });
           } else if (t === 'GATED_COMMUNITY_PLOT') {
@@ -743,6 +754,45 @@ export async function getProperties(
 
       if (bhkOrConditions.length > 0) {
         andConditions.push({ $or: bhkOrConditions });
+      }
+    }
+
+    /*
+     * ------------------------------------------------------------
+     * TRANSACTION TYPE (SALE / RENT / LEASE)
+     * ------------------------------------------------------------
+     */
+
+    if (params.transactionType && params.transactionType !== 'ALL') {
+      const tx = String(params.transactionType).toUpperCase();
+      if (tx === 'RENT') {
+        andConditions.push({
+          $or: [
+            { transactionType: 'RENT' },
+            { landType: { $in: ['RESIDENTIAL_RENTAL', 'COLIVING_PG', 'VACATION_RENTAL_AIRBNB'] } },
+            { title: /\b(rent|rental|to-let)\b/i },
+          ],
+        });
+      } else if (tx === 'LEASE') {
+        andConditions.push({
+          $or: [
+            { transactionType: 'LEASE' },
+            { landType: 'COMMERCIAL_LEASE' },
+            { title: /\b(lease|commercial lease)\b/i },
+          ],
+        });
+      } else if (tx === 'SALE') {
+        andConditions.push({
+          $or: [
+            { transactionType: 'SALE' },
+            {
+              $and: [
+                { transactionType: { $nin: ['RENT', 'LEASE'] } },
+                { landType: { $nin: ['RESIDENTIAL_RENTAL', 'COLIVING_PG', 'VACATION_RENTAL_AIRBNB', 'COMMERCIAL_LEASE'] } },
+              ],
+            },
+          ],
+        });
       }
     }
 

@@ -48,60 +48,7 @@ const AuthModal = dynamic(
   { ssr: false }
 );
 
-/* ================================================================
-   HERO SEARCH CONFIG
-================================================================ */
-
-interface LandTypeOption {
-  id: string;
-  label: string;
-  category:
-    | 'Land & Plots'
-    | 'Residential Units'
-    | 'Commercial & Retail'
-    | 'Hospitality & Leisure'
-    | 'Income-Generating & Rentals';
-}
-
-const HERO_LAND_TYPES: LandTypeOption[] = [
-  // 1. Land & Plots
-  { id: 'OPEN_PLOT', label: 'Open Plots', category: 'Land & Plots' },
-  { id: 'FARMLAND_PLOT', label: 'Farmland Plots', category: 'Land & Plots' },
-  { id: 'GATED_COMMUNITY_PLOT', label: 'Gated Community Plots', category: 'Land & Plots' },
-  { id: 'AGRICULTURAL_LAND', label: 'Agricultural Land', category: 'Land & Plots' },
-  { id: 'RESIDENTIAL_PLOT', label: 'Residential Plots', category: 'Land & Plots' },
-
-  // 2. Residential Units
-  { id: 'FLAT', label: 'Flats / Apartments', category: 'Residential Units' },
-  { id: 'INDEPENDENT_HOUSE', label: 'Independent Houses', category: 'Residential Units' },
-  { id: 'VILLA', label: 'Villas', category: 'Residential Units' },
-  { id: 'HOUSE_VILLA', label: 'House / Villa', category: 'Residential Units' },
-  { id: 'TOWNHOUSE', label: 'Townhouses', category: 'Residential Units' },
-  { id: 'DUPLEX', label: 'Duplexes', category: 'Residential Units' },
-  { id: 'PENTHOUSE', label: 'Penthouses', category: 'Residential Units' },
-
-  // 3. Commercial & Retail
-  { id: 'RETAIL_SHOP', label: 'Retail Shops', category: 'Commercial & Retail' },
-  { id: 'SHOWROOM', label: 'Showrooms', category: 'Commercial & Retail' },
-  { id: 'OFFICE_SPACE', label: 'Office Spaces', category: 'Commercial & Retail' },
-  { id: 'COWORKING_SPACE', label: 'Co-working Spaces', category: 'Commercial & Retail' },
-  { id: 'SHOPPING_MALL', label: 'Shopping Malls', category: 'Commercial & Retail' },
-  { id: 'WAREHOUSE_LAND', label: 'Warehouses / Godowns', category: 'Commercial & Retail' },
-  { id: 'COMMERCIAL_LAND', label: 'Commercial Land', category: 'Commercial & Retail' },
-
-  // 4. Hospitality & Leisure
-  { id: 'RESORT', label: 'Resorts', category: 'Hospitality & Leisure' },
-  { id: 'HOTEL', label: 'Hotels', category: 'Hospitality & Leisure' },
-  { id: 'SERVICE_APARTMENT', label: 'Service Apartments', category: 'Hospitality & Leisure' },
-  { id: 'GUEST_HOUSE', label: 'Guest Houses', category: 'Hospitality & Leisure' },
-  { id: 'FARM_HOUSE_LAND', label: 'Farmhouses', category: 'Hospitality & Leisure' },
-
-  // 5. Income-Generating & Rentals
-  { id: 'RESIDENTIAL_RENTAL', label: 'Residential Rentals', category: 'Income-Generating & Rentals' },
-  { id: 'COMMERCIAL_LEASE', label: 'Commercial Leases', category: 'Income-Generating & Rentals' },
-  { id: 'COLIVING_PG', label: 'Co-living Spaces / PGs', category: 'Income-Generating & Rentals' },
-  { id: 'VACATION_RENTAL_AIRBNB', label: 'Vacation Rentals / Airbnbs', category: 'Income-Generating & Rentals' },
-];
+import { CANONICAL_PROPERTY_TYPES as HERO_LAND_TYPES } from '@/config/constants';
 
 const BHK_OPTIONS = ['1 Bhk', '2 Bhk', '3 Bhk', '4 Bhk', '5 Bhk', '5+ Bhk'];
 
@@ -147,7 +94,7 @@ export function HomePageClient({
 
   /* Hero Omnibar Search states */
   const [searchLocation, setSearchLocation] = useState('');
-  const [selectedLandTypes, setSelectedLandTypes] = useState<string[]>(['FLAT']);
+  const [selectedLandTypes, setSelectedLandTypes] = useState<string[]>([]);
   const [selectedBhks, setSelectedBhks] = useState<string[]>([]);
   const [selectedBudgetIndex, setSelectedBudgetIndex] = useState(0);
   const [verifiedOnly, setVerifiedOnly] = useState(false);
@@ -346,7 +293,7 @@ export function HomePageClient({
   }
 
   /* Land Type & BHK Trigger Text (Matches Screenshot 1 & 2) */
-  let landTypeTriggerText = 'Property Type';
+  let landTypeTriggerText = 'All Property Types';
   if (selectedLandTypes.length > 0) {
     const firstSelected = HERO_LAND_TYPES.find(
       (t) => t.id === selectedLandTypes[0]
@@ -448,6 +395,24 @@ export function HomePageClient({
                     {/* Land Type Popover (Directly matching Screenshot 2) */}
                     {landTypePopoverOpen && (
                       <div className="absolute left-0 sm:left-auto sm:right-0 top-[calc(100%+14px)] z-50 w-[320px] sm:w-[390px] p-4 sm:p-5 rounded-3xl bg-white border border-slate-200 shadow-[0_20px_50px_rgba(0,0,0,0.15)] animate-in fade-in slide-in-from-top-2 duration-150 space-y-3">
+                        <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                          <span className="text-[11px] font-black uppercase tracking-wider text-slate-400">
+                            Property Types
+                          </span>
+                          {selectedLandTypes.length > 0 && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSelectedLandTypes([]);
+                                setSelectedBhks([]);
+                              }}
+                              className="text-[11px] font-bold text-[#c75e0a] hover:underline cursor-pointer"
+                            >
+                              Reset to All
+                            </button>
+                          )}
+                        </div>
+
                         {/* 1. Land & Plots */}
                         <div className="space-y-2">
                           <button
@@ -798,7 +763,7 @@ export function HomePageClient({
                   <div className="px-2 py-1">
                     <button
                       type="submit"
-                      aria-label="Search verified properties"
+                      aria-label="Search properties"
                       className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3 rounded-2xl sm:rounded-full bg-[#FF9933] hover:bg-[#f07d12] text-white text-sm font-black shadow-md hover:shadow-lg transition-all cursor-pointer shrink-0"
                     >
                       <Search className="w-4 h-4" />

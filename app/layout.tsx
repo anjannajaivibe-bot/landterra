@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     template: '%s | BhoomiMitra',
   },
   description:
-    'Discover verified properties across India — residential plots, flats, luxury villas, commercial spaces, and agricultural land. Connect directly with genuine owners with zero broker commissions.',
+    'Explore residential plots, apartments, villas, commercial spaces, and agricultural land across India. Connect directly with genuine property owners with zero broker commissions.',
   keywords: [
     'properties for sale in india',
     'real estate india',
@@ -64,7 +64,7 @@ export const metadata: Metadata = {
     siteName: 'BhoomiMitra',
     title: 'BhoomiMitra | Direct Real Estate & Property Marketplace',
     description:
-      'Discover verified properties, homes, plots, and commercial spaces across India. Direct peer-to-peer listings, direct owner contact, and zero hidden commissions.',
+      'Explore residential plots, apartments, villas, commercial spaces, and agricultural land across India. Connect directly with genuine property owners with zero broker commissions.',
     images: [
       {
         url: '/og-image.png',
@@ -138,7 +138,6 @@ export default function RootLayout({
   return (
     <html lang="en" data-scroll-behavior="smooth" className={`scroll-smooth ${plusJakartaSans.variable}`}>
       <body
-        suppressHydrationWarning
         className="min-h-screen bg-slate-50 text-slate-900 antialiased font-sans selection:bg-[#FF9933] selection:text-white"
       >
         <script

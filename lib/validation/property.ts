@@ -91,6 +91,7 @@ export const CreatePropertySchema = z.object({
     'COLIVING_PG',
     'VACATION_RENTAL_AIRBNB',
   ]),
+  transactionType: z.enum(['SALE', 'RENT', 'LEASE']).default('SALE'),
   propertyType: z.string().optional(),
   bhk: z.string().optional(),
   facing: z.string().optional(),

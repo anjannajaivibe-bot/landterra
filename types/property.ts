@@ -42,6 +42,8 @@ export type LandType =
    | 'COLIVING_PG'
    | 'VACATION_RENTAL_AIRBNB';
 
+export type TransactionType = 'SALE' | 'RENT' | 'LEASE';
+
 export type VerificationStatus =
    | 'PENDING'
    | 'VERIFIED'
@@ -244,6 +246,8 @@ export interface IProperty {
 
    landType: LandType;
 
+   transactionType?: TransactionType;
+
    propertyType?: string;
 
    bhk?: string;
@@ -414,6 +418,8 @@ export interface IPublicProperty {
 
    landType: LandType;
 
+   transactionType?: TransactionType;
+
    sellerType?: SellerType;
 
    propertyType?: string;
@@ -538,6 +544,8 @@ export interface PropertyFilterParams {
    maxPricePerYard?: number;
 
    landType?: LandType | 'ALL' | string;
+
+   transactionType?: TransactionType | 'ALL' | string;
 
    propertyType?: string;
 
