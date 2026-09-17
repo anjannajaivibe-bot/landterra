@@ -190,32 +190,49 @@ const INTERNATIONAL_HUBS = [
   { label: 'United Kingdom (UK)', code: 'UK', flag: '🇬🇧' },
 ];
 
+let memorySelectedCity: string | null = null;
+
 export function CitySelectorMegaMenu() {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedCity, setSelectedCity] = useState<string>('Hyderabad');
+  const [selectedCity, setSelectedCity] = useState<string>(() => memorySelectedCity || 'Hyderabad');
   const [searchQuery, setSearchQuery] = useState('');
   const menuRef = useRef<HTMLDivElement>(null);
 
   /* Safely synchronize client localStorage/URL city after initial hydration */
   useEffect(() => {
-    const frame = requestAnimationFrame(() => {
-      try {
-        const urlParams = new URLSearchParams(window.location.search);
-        const cityInUrl = urlParams.get('city');
-        if (cityInUrl) {
-          setSelectedCity(cityInUrl);
-          return;
-        }
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const cityInUrl = urlParams.get('city');
+      if (cityInUrl) {
+        memorySelectedCity = cityInUrl;
+        setSelectedCity(cityInUrl);
+        return;
+      }
+      if (!memorySelectedCity) {
         const stored = localStorage.getItem('bhoomimitra_selected_city');
-        if (stored) {
+        if (stored && stored.trim()) {
+          memorySelectedCity = stored;
           setSelectedCity(stored);
         }
-      } catch {
-        // ignore
       }
-    });
-    return () => cancelAnimationFrame(frame);
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  /* Synchronize with city change events across page instances */
+  useEffect(() => {
+    const handleCityChanged = (e: Event) => {
+      const customEvent = e as CustomEvent<{ city?: string }>;
+      const city = customEvent.detail?.city;
+      if (city) {
+        memorySelectedCity = city;
+        setSelectedCity(city);
+      }
+    };
+    window.addEventListener('bhoomimitra_city_changed', handleCityChanged);
+    return () => window.removeEventListener('bhoomimitra_city_changed', handleCityChanged);
   }, []);
 
   /* Close on outside click or escape */
@@ -242,6 +259,7 @@ export function CitySelectorMegaMenu() {
   }, [isOpen]);
 
   const handleSelectCity = (city: string) => {
+    memorySelectedCity = city;
     setSelectedCity(city);
     try {
       localStorage.setItem('bhoomimitra_selected_city', city);
@@ -286,7 +304,7 @@ export function CitySelectorMegaMenu() {
 
   /* Truncate long city names like "Bokaro Steel City" -> "Bokaro..." to protect navbar layout */
   const formatDisplayCity = (city: string): string => {
-    if (!city) return 'Hyderabad';
+    if (!city || !city.trim()) return 'Hyderabad';
     if (city.startsWith('NRI: ')) {
       const hub = city.replace('NRI: ', '');
       return hub.length > 8 ? `NRI: ${hub.slice(0, 6)}...` : city;
@@ -312,14 +330,14 @@ export function CitySelectorMegaMenu() {
         aria-label="Select City or Region"
         title={selectedCity}
         suppressHydrationWarning
-        className={`flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-xl border text-xs font-black transition-all cursor-pointer select-none max-w-[130px] sm:max-w-[150px] shrink-0 ${
+        className={`flex items-center gap-1 px-2 sm:px-3 py-1.5 rounded-xl border text-xs font-black transition-all cursor-pointer select-none max-w-[125px] sm:max-w-[150px] shrink-0 ${
           isOpen
             ? 'border-[#FF9933] bg-[#fff9f0] text-[#c75e0a] shadow-xs ring-2 ring-[#FF9933]/20'
             : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-800 hover:border-slate-300 shadow-2xs'
         }`}
       >
         <MapPin className="w-3.5 h-3.5 text-[#FF9933] shrink-0" />
-        <span className="truncate max-w-[80px] sm:max-w-[95px]" suppressHydrationWarning>
+        <span className="truncate max-w-[75px] sm:max-w-[95px] min-w-0" suppressHydrationWarning>
           {formatDisplayCity(selectedCity)}
         </span>
         <ChevronDown

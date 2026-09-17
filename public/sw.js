@@ -1,7 +1,5 @@
-const CACHE_NAME = 'bhoomimitra-cache-v2';
+const CACHE_NAME = 'bhoomimitra-cache-v3';
 const PRECACHE_URLS = [
-  '/',
-  '/buy',
   '/manifest.webmanifest',
   '/favicon.ico',
 ];
@@ -46,10 +44,30 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // Navigation requests (HTML documents) MUST be Network-First to avoid React hydration mismatch (#418)
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request)
+        .then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200) {
+            const responseToCache = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, responseToCache);
+            });
+          }
+          return networkResponse;
+        })
+        .catch(() => {
+          return caches.match(event.request).then((cached) => cached || caches.match('/'));
+        })
+    );
+    return;
+  }
+
+  // Static assets: Stale-while-revalidate
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       if (cachedResponse) {
-        // Fetch fresh copy in background to keep cache up to date
         fetch(event.request)
           .then((networkResponse) => {
             if (networkResponse && networkResponse.status === 200) {
@@ -63,25 +81,18 @@ self.addEventListener('fetch', (event) => {
         return cachedResponse;
       }
 
-      return fetch(event.request)
-        .then((networkResponse) => {
-          if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
-            return networkResponse;
-          }
-
-          const responseToCache = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseToCache);
-          });
-
+      return fetch(event.request).then((networkResponse) => {
+        if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
           return networkResponse;
-        })
-        .catch(() => {
-          // If offline and request is HTML, return root cache
-          if (event.request.headers.get('accept')?.includes('text/html')) {
-            return caches.match('/');
-          }
+        }
+
+        const responseToCache = networkResponse.clone();
+        caches.open(CACHE_NAME).then((cache) => {
+          cache.put(event.request, responseToCache);
         });
+
+        return networkResponse;
+      });
     })
   );
 });

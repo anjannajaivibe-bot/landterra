@@ -30,21 +30,28 @@ const AuthModal = dynamic(
   { ssr: false }
 );
 
+let cachedUser: Partial<IUser> | null | undefined = undefined;
+
 export function Navbar() {
   const pathname = usePathname();
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [accountDropdownOpen, setAccountDropdownOpen] = useState(false);
-  const [user, setUser] = useState<Partial<IUser> | null>(null);
+  const [user, setUser] = useState<Partial<IUser> | null>(() => cachedUser ?? null);
   const [authModalOpen, setAuthModalOpen] = useState(false);
 
   const accountDropdownRef = useRef<HTMLDivElement>(null);
 
   /* ============================================================
-     LOAD CURRENT SESSION
+     LOAD CURRENT SESSION (Single-fetch with in-memory caching)
   ============================================================ */
 
   useEffect(() => {
+    // If session has already been resolved in memory, avoid refetching on route changes
+    if (cachedUser !== undefined) {
+      return;
+    }
+
     let cancelled = false;
 
     async function loadSession() {
@@ -54,6 +61,7 @@ export function Navbar() {
         });
 
         if (!response.ok) {
+          cachedUser = null;
           if (!cancelled) {
             setUser(null);
           }
@@ -61,15 +69,14 @@ export function Navbar() {
         }
 
         const data = await response.json();
+        const nextUser = data?.session?.user || null;
+        cachedUser = nextUser;
 
         if (!cancelled) {
-          if (data?.session?.user) {
-            setUser(data.session.user);
-          } else {
-            setUser(null);
-          }
+          setUser(nextUser);
         }
       } catch {
+        cachedUser = null;
         if (!cancelled) {
           setUser(null);
         }
@@ -81,7 +88,22 @@ export function Navbar() {
     return () => {
       cancelled = true;
     };
-  }, [pathname]);
+  }, []);
+
+  /* Listen for global auth state changes (e.g. login/logout) */
+  useEffect(() => {
+    const handleAuthChanged = (e: Event) => {
+      const customEvent = e as CustomEvent<{ user?: Partial<IUser> | null }>;
+      const nextUser = customEvent.detail?.user ?? null;
+      cachedUser = nextUser;
+      setUser(nextUser);
+    };
+
+    window.addEventListener('bhoomimitra_auth_changed', handleAuthChanged);
+    return () => {
+      window.removeEventListener('bhoomimitra_auth_changed', handleAuthChanged);
+    };
+  }, []);
 
   /* ============================================================
      CLOSE ACCOUNT DROPDOWN WHEN CLICKING OUTSIDE
@@ -116,6 +138,7 @@ export function Navbar() {
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
+      cachedUser = null;
       setUser(null);
       setAccountDropdownOpen(false);
       setMobileMenuOpen(false);
@@ -186,30 +209,30 @@ export function Navbar() {
 
         <div className="mx-auto flex h-[68px] max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           {/* LOGO & CITY SELECTOR */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <Link
               href="/"
               onClick={closeAllMenus}
-              className="group flex shrink-0 items-center gap-2.5"
+              className="group flex shrink-0 items-center gap-2 sm:gap-2.5"
               aria-label="BhoomiMitra home"
             >
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#FF9933] text-white shadow-sm transition-all group-hover:bg-[#f07d12] group-hover:shadow-md">
+              <div className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-xl bg-[#FF9933] text-white shadow-sm transition-all group-hover:bg-[#f07d12] group-hover:shadow-md">
                 <Compass className="h-5 w-5" />
               </div>
 
               <div className="leading-none">
-                <span className="flex items-center text-xl font-black tracking-tight text-slate-950">
+                <span className="flex items-center text-lg sm:text-xl font-black tracking-tight text-slate-950">
                   Bhoomi
                   <span className="text-[#FF9933]">Mitra</span>
                 </span>
-                <span className="mt-0.5 block text-[11px] font-bold text-slate-500">
+                <span className="mt-0.5 hidden sm:block text-[11px] font-bold text-slate-500">
                   Property Marketplace
                 </span>
               </div>
             </Link>
 
             {/* City Mega-Menu Selector */}
-            <div className="flex items-center ml-1 pl-2.5 border-l border-slate-200">
+            <div className="flex items-center ml-0.5 sm:ml-1 pl-1.5 sm:pl-2.5 border-l border-slate-200 shrink-0">
               <CitySelectorMegaMenu />
             </div>
           </div>
@@ -412,12 +435,12 @@ export function Navbar() {
               MOBILE ACTIONS
           ==================================================== */}
 
-          <div className="flex items-center gap-2 md:hidden">
+          <div className="flex items-center gap-1.5 sm:gap-2 md:hidden shrink-0">
             {!user && (
               <button
                 type="button"
                 onClick={openAuthModal}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-900"
+                className="hidden sm:inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-900"
               >
                 <LogIn className="h-3.5 w-3.5 text-[#c75e0a]" />
                 <span>Sign In</span>
@@ -428,7 +451,7 @@ export function Navbar() {
               href="/sell"
               prefetch={false}
               onClick={closeAllMenus}
-              className="inline-flex items-center gap-1 rounded-lg bg-[#FF9933] px-3 py-2 text-xs font-bold text-white"
+              className="inline-flex items-center gap-1 rounded-lg bg-[#FF9933] px-2.5 sm:px-3 py-2 text-xs font-bold text-white shadow-2xs"
             >
               <Plus className="h-3.5 w-3.5" />
               <span>Post Property</span>
