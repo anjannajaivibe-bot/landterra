@@ -118,9 +118,14 @@ export function FilterBar({
         {/* Row 1: Search Omnibar */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
           <div className="flex-1 flex items-center px-4 py-3 rounded-2xl bg-[#f8fafc] border border-slate-200/80 focus-within:bg-white focus-within:border-[#FF9933]/60 focus-within:ring-2 focus-within:ring-[#FF9933]/15 transition-all">
+            <label htmlFor="buy-search-location" className="sr-only">
+              Search Location, City, Locality, or Project
+            </label>
             <MapPin className="h-4 w-4 text-[#FF9933] shrink-0 mr-2.5" />
             <input
               type="text"
+              id="buy-search-location"
+              name="query"
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
               placeholder="Enter city, locality, district, or project e.g. Kokapet, Visakhapatnam, Hyderabad, Bengaluru..."
@@ -157,9 +162,9 @@ export function FilterBar({
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5 items-end">
             {/* 1. Property Type with Multi-section Popover */}
             <div ref={propertyTypeRef} className="relative z-40">
-              <label className="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1">
+              <span className="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1">
                 Property Type
-              </label>
+              </span>
               <button
                 type="button"
                 onClick={() => setPropertyTypePopoverOpen(!propertyTypePopoverOpen)}
@@ -566,9 +571,9 @@ export function FilterBar({
 
             {/* 5. Direct Landowner Only Toggle */}
             <div className="flex flex-col justify-end">
-              <label className="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1">
+              <span className="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1">
                 Ownership
-              </label>
+              </span>
               <button
                 type="button"
                 onClick={() => onToggleVerified(!verifiedOnly)}

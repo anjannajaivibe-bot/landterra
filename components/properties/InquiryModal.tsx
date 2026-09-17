@@ -180,13 +180,16 @@ export function InquiryModal({
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                    <label htmlFor="inquiry-email-input" className="block text-[11px] font-semibold text-slate-700 mb-1">
                       Email Address <span className="text-rose-500">*</span>
                     </label>
                     <div className="relative">
                       <Mail className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
                       <input
                         type="email"
+                        id="inquiry-email-input"
+                        name="email"
+                        autoComplete="email"
                         required
                         value={buyerEmail}
                         onChange={(e) => setBuyerEmail(e.target.value)}
@@ -200,13 +203,16 @@ export function InquiryModal({
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                    <label htmlFor="inquiry-phone-input" className="block text-[11px] font-semibold text-slate-700 mb-1">
                       Mobile Number <span className="text-rose-500">*</span>
                     </label>
                     <div className="relative">
                       <Phone className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
                       <input
                         type="tel"
+                        id="inquiry-phone-input"
+                        name="phone"
+                        autoComplete="tel"
                         required
                         maxLength={10}
                         value={buyerPhone}
@@ -224,10 +230,12 @@ export function InquiryModal({
 
               {/* 2. Message Section */}
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                <label htmlFor="inquiry-message-input" className="block text-xs font-semibold text-slate-700 mb-1">
                   Your Message to the Landowner <span className="text-rose-500">*</span>
                 </label>
                 <textarea
+                  id="inquiry-message-input"
+                  name="message"
                   rows={4}
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}

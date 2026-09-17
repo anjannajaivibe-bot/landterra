@@ -404,6 +404,9 @@ export function HomePageClient({
                 >
                   {/* Segment 1: Location Input */}
                   <div className="flex-1 flex items-center px-4 py-2 sm:py-1">
+                    <label htmlFor="hero-search-location" className="sr-only">
+                      Search by city, locality, or project name
+                    </label>
                     <MapPin className="w-4 h-4 text-[#FF9933] shrink-0 mr-2.5" />
                     <input
                       type="text"

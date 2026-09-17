@@ -366,9 +366,14 @@ export function CitySelectorMegaMenu() {
             {/* Top Search & Filter Header */}
             <div className="p-4 sm:p-5 border-b border-slate-100 bg-[#fffbf5] flex flex-col sm:flex-row sm:items-center justify-between gap-3 shrink-0">
               <div className="relative flex-1">
+                <label htmlFor="city-selector-search-input" className="sr-only">
+                  Search across 100+ Indian cities and districts
+                </label>
                 <Search className="w-4 h-4 text-[#FF9933] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                 <input
                   type="text"
+                  id="city-selector-search-input"
+                  name="citySearchQuery"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   aria-label="Search across 100+ Indian cities and districts"
