@@ -58,7 +58,7 @@ export const CreateContactSchema = z.object({
   phone: z
     .string()
     .trim()
-    .regex(/^[6-9]\d{9}$/, 'Invalid 10-digit mobile number')
+    .max(30, 'Phone number cannot exceed 30 characters')
     .optional()
     .or(z.literal('')),
   subject: z.string().trim().max(200).optional(),

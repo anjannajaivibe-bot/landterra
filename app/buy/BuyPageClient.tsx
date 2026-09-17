@@ -23,6 +23,7 @@ import {
 import { Navbar } from '@/components/layout/Navbar';
 import { PropertyCard } from '@/components/properties/PropertyCard';
 import { IProperty } from '@/types/property';
+import { INDIAN_STATES } from '@/config/constants';
 import {
   DEFAULT_MAX_PRICE,
   DEFAULT_MAX_AREA,
@@ -76,6 +77,65 @@ function BuyPageContent({
     }, 350);
     return () => clearTimeout(timer);
   }, [searchQuery]);
+
+  /* Synchronize with city selection from CitySelectorMegaMenu */
+  useEffect(() => {
+    const handleCityChanged = (e: Event) => {
+      const customEvent = e as CustomEvent<{ city?: string }>;
+      const city = customEvent.detail?.city;
+      if (!city) return;
+
+      if (city === 'All India') {
+        setSearchQuery('');
+        setSelectedState('ALL');
+      } else {
+        const matchedState = (INDIAN_STATES as readonly string[]).find(
+          (s) => s.toLowerCase() === city.toLowerCase()
+        );
+        if (matchedState) {
+          setSelectedState(matchedState);
+          setSearchQuery('');
+        } else {
+          setSearchQuery(city);
+        }
+      }
+      setPage(1);
+    };
+
+    window.addEventListener('bhoomimitra_city_changed', handleCityChanged);
+    return () => {
+      window.removeEventListener('bhoomimitra_city_changed', handleCityChanged);
+    };
+  }, []);
+
+  /* Sync with searchParams if URL changes dynamically */
+  useEffect(() => {
+    const cityParam = searchParams.get('city');
+    const queryParam = searchParams.get('query');
+    const stateParam = searchParams.get('state');
+
+    if (stateParam) {
+      setSelectedState(stateParam);
+    } else {
+      setSelectedState('ALL');
+    }
+
+    if (queryParam) {
+      setSearchQuery(queryParam);
+    } else if (cityParam) {
+      const matchedState = (INDIAN_STATES as readonly string[]).find(
+        (s) => s.toLowerCase() === cityParam.toLowerCase()
+      );
+      if (matchedState) {
+        setSelectedState(matchedState);
+        setSearchQuery('');
+      } else {
+        setSearchQuery(cityParam);
+      }
+    } else {
+      setSearchQuery('');
+    }
+  }, [searchParams]);
 
   // Client-side cache across filter switches (e.g. Farmlands -> Villas -> Farmlands = 0ms instant)
   const clientCacheRef = useRef<
@@ -159,7 +219,7 @@ function BuyPageContent({
   const [totalCount, setTotalCount] = useState(initialTotal ?? (initialProperties?.length || 0));
   const [totalPages, setTotalPages] = useState(initialTotalPages ?? 1);
 
-  const [loading, setLoading] = useState(!initialProperties || initialProperties.length === 0);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   const isInitialMount = useRef(true);
@@ -253,8 +313,7 @@ function BuyPageContent({
     let cancelled = false;
 
     const trimmedQuery = debouncedSearchQuery.trim();
-    // Only search when at least 3 characters are entered (Option C)
-    const effectiveQuery = trimmedQuery.length >= 3 ? trimmedQuery : '';
+    const effectiveQuery = trimmedQuery.length >= 2 ? trimmedQuery : '';
 
     const cacheKey = JSON.stringify({
       q: effectiveQuery,
@@ -274,7 +333,7 @@ function BuyPageContent({
     // Also seed client cache so switching away and back to initial state renders at 0ms
     if (isInitialMount.current) {
       isInitialMount.current = false;
-      if (initialProperties && initialProperties.length > 0) {
+      if (initialProperties) {
         clientCacheRef.current.set(cacheKey, {
           data: initialProperties,
           total: initialTotal ?? initialProperties.length,

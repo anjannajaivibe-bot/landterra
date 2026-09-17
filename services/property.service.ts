@@ -748,36 +748,32 @@ export async function getProperties(
 
     /*
      * ------------------------------------------------------------
-     * LOCATION
+     * LOCATION (CITY & STATE)
      * ------------------------------------------------------------
      */
 
-    if (params.city && params.city.trim() && !params.query) {
-      const cityRegex =
-        escapeRegex(
-          params.city.trim(),
-        );
-
-      query['location.city'] = {
-        $regex: new RegExp(
-          cityRegex,
-          'i',
-        ),
-      };
+    if (params.city && params.city.trim()) {
+      const cityRegex = new RegExp(escapeRegex(params.city.trim()), 'i');
+      andConditions.push({
+        $or: [
+          { 'location.city': cityRegex },
+          { 'location.state': cityRegex },
+          { 'location.district': cityRegex },
+          { 'location.address': cityRegex },
+          { nearbyLandmarks: cityRegex },
+          { title: cityRegex },
+        ],
+      });
     }
 
     if (params.state && params.state !== 'ALL') {
-      const stateRegex =
-        escapeRegex(
-          params.state.trim(),
-        );
-
-      query['location.state'] = {
-        $regex: new RegExp(
-          stateRegex,
-          'i',
-        ),
-      };
+      const stateRegex = new RegExp(escapeRegex(params.state.trim()), 'i');
+      andConditions.push({
+        $or: [
+          { 'location.state': stateRegex },
+          { 'location.address': stateRegex },
+        ],
+      });
     }
 
     /*
@@ -800,11 +796,13 @@ export async function getProperties(
       // use $geoWithin with $centerSphere to allow compound MongoDB sort.
       if (params.sortBy && params.sortBy !== 'newest') {
         const radians = radiusKm / 6378.1;
-        query.locationCoordinates = {
-          $geoWithin: {
-            $centerSphere: [[lng, lat], radians],
+        andConditions.push({
+          locationCoordinates: {
+            $geoWithin: {
+              $centerSphere: [[lng, lat], radians],
+            },
           },
-        };
+        });
       } else {
         // Proximity search using $near and 2dsphere index (maxDistance in meters)
         query.locationCoordinates = {
@@ -830,47 +828,24 @@ export async function getProperties(
       params.minPrice !== undefined ||
       params.maxPrice !== undefined
     ) {
-      const priceQuery: Record<
-        string,
-        number
-      > = {};
+      const priceQuery: Record<string, number> = {};
 
-      if (
-        params.minPrice !==
-        undefined
-      ) {
-        const min =
-          Number(params.minPrice);
-
-        if (
-          Number.isFinite(min) &&
-          min > 0
-        ) {
+      if (params.minPrice !== undefined) {
+        const min = Number(params.minPrice);
+        if (Number.isFinite(min) && min > 0) {
           priceQuery.$gte = min;
         }
       }
 
-      if (
-        params.maxPrice !==
-        undefined
-      ) {
-        const max =
-          Number(params.maxPrice);
-
-        if (
-          Number.isFinite(max) &&
-          max > 0
-        ) {
+      if (params.maxPrice !== undefined) {
+        const max = Number(params.maxPrice);
+        if (Number.isFinite(max) && max > 0) {
           priceQuery.$lte = max;
         }
       }
 
-      if (
-        Object.keys(priceQuery)
-          .length > 0
-      ) {
-        query.totalPrice =
-          priceQuery;
+      if (Object.keys(priceQuery).length > 0) {
+        andConditions.push({ totalPrice: priceQuery });
       }
     }
 
@@ -884,47 +859,24 @@ export async function getProperties(
       params.minArea !== undefined ||
       params.maxArea !== undefined
     ) {
-      const areaQuery: Record<
-        string,
-        number
-      > = {};
+      const areaQuery: Record<string, number> = {};
 
-      if (
-        params.minArea !==
-        undefined
-      ) {
-        const min =
-          Number(params.minArea);
-
-        if (
-          Number.isFinite(min) &&
-          min > 0
-        ) {
+      if (params.minArea !== undefined) {
+        const min = Number(params.minArea);
+        if (Number.isFinite(min) && min > 0) {
           areaQuery.$gte = min;
         }
       }
 
-      if (
-        params.maxArea !==
-        undefined
-      ) {
-        const max =
-          Number(params.maxArea);
-
-        if (
-          Number.isFinite(max) &&
-          max > 0
-        ) {
+      if (params.maxArea !== undefined) {
+        const max = Number(params.maxArea);
+        if (Number.isFinite(max) && max > 0) {
           areaQuery.$lte = max;
         }
       }
 
-      if (
-        Object.keys(areaQuery)
-          .length > 0
-      ) {
-        query.landAreaYards =
-          areaQuery;
+      if (Object.keys(areaQuery).length > 0) {
+        andConditions.push({ landAreaYards: areaQuery });
       }
     }
 
@@ -935,7 +887,7 @@ export async function getProperties(
      */
 
     if (params.verifiedOnly) {
-      query.sellerType = 'INDIVIDUAL';
+      andConditions.push({ sellerType: 'INDIVIDUAL' });
     }
 
     /*
@@ -944,57 +896,29 @@ export async function getProperties(
      * ------------------------------------------------------------
      */
 
-    if (
-      params.query?.trim()
-    ) {
+    if (params.query?.trim()) {
       const trimmedQuery = params.query.trim();
+      const isSameAsCity =
+        params.city &&
+        params.city.trim().toLowerCase() === trimmedQuery.toLowerCase();
 
-      // Only search when at least 3 characters are entered (Option C)
-      if (trimmedQuery.length >= 3) {
-        const searchRegex =
-          new RegExp(
-            escapeRegex(
-              trimmedQuery,
-            ),
-            'i',
-          );
-
-        // Targeted search: title, city, state, district, address, nearbyLandmarks
-        // EXCLUDES heavy description text to eliminate full collection scans (Option B)
+      if (!isSameAsCity && trimmedQuery.length >= 2) {
+        const searchRegex = new RegExp(escapeRegex(trimmedQuery), 'i');
         andConditions.push({
           $or: [
-            {
-              title: searchRegex,
-            },
-            {
-              'location.city':
-                searchRegex,
-            },
-            {
-              'location.state':
-                searchRegex,
-            },
-            {
-              'location.district':
-                searchRegex,
-            },
-            {
-              'location.address':
-                searchRegex,
-            },
-            {
-              nearbyLandmarks:
-                searchRegex,
-            },
+            { title: searchRegex },
+            { 'location.city': searchRegex },
+            { 'location.state': searchRegex },
+            { 'location.district': searchRegex },
+            { 'location.address': searchRegex },
+            { nearbyLandmarks: searchRegex },
           ],
         });
       }
     }
 
     /* Combine compound AND conditions into MongoDB query */
-    if (andConditions.length === 1) {
-      Object.assign(query, andConditions[0]);
-    } else if (andConditions.length > 1) {
+    if (andConditions.length > 0) {
       query.$and = andConditions;
     }
 

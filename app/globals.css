@@ -136,12 +136,6 @@ span {
 }
 
 @media (max-width: 47.999rem) {
-  /* The city selector is useful on desktop but wastes the narrow header.
-     Location remains available through the selector/menu elsewhere. */
-  header > div:nth-of-type(2) > div:first-child > div:last-child {
-    display: none;
-  }
-
   header > div:nth-of-type(2) {
     min-height: 64px;
     height: auto;

@@ -189,6 +189,31 @@ export function HomePageClient({
   const landTypeRef = useRef<HTMLDivElement>(null);
   const budgetRef = useRef<HTMLDivElement>(null);
 
+  /* Synchronize selected city with Hero Omnibar search */
+  useEffect(() => {
+    try {
+      const savedCity = localStorage.getItem('bhoomimitra_selected_city');
+      if (savedCity && savedCity !== 'All India' && !savedCity.startsWith('NRI: ')) {
+        setSearchLocation(savedCity);
+      }
+    } catch {
+      // ignore
+    }
+
+    const handleCityChanged = (e: Event) => {
+      const customEvent = e as CustomEvent<{ city?: string }>;
+      const city = customEvent.detail?.city;
+      if (city) {
+        setSearchLocation(city === 'All India' || city.startsWith('NRI: ') ? '' : city);
+      }
+    };
+
+    window.addEventListener('bhoomimitra_city_changed', handleCityChanged);
+    return () => {
+      window.removeEventListener('bhoomimitra_city_changed', handleCityChanged);
+    };
+  }, []);
+
   /* User & Auth */
   const [user, setUser] = useState<Partial<IUser> | null>(null);
   const [authModalOpen, setAuthModalOpen] = useState(false);

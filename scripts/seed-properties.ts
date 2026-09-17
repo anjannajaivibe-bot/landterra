@@ -1,31 +1,9 @@
-import fs from 'fs';
-import path from 'path';
 import mongoose from 'mongoose';
-
-// Load .env.local manually to ensure MONGODB_URI is available
-const envPath = path.resolve(process.cwd(), '.env.local');
-if (fs.existsSync(envPath)) {
-  const envContent = fs.readFileSync(envPath, 'utf8');
-  envContent.split('\n').forEach((line) => {
-    const trimmed = line.trim();
-    if (trimmed && !trimmed.startsWith('#')) {
-      const equalsIdx = trimmed.indexOf('=');
-      if (equalsIdx > 0) {
-        const key = trimmed.slice(0, equalsIdx).trim();
-        let value = trimmed.slice(equalsIdx + 1).trim();
-        if (value.startsWith('"') && value.endsWith('"')) {
-          value = value.slice(1, -1);
-        }
-        process.env[key] = value;
-      }
-    }
-  });
-}
 
 const MONGODB_URI = process.env.MONGODB_URI;
 
 if (!MONGODB_URI) {
-  console.error('MONGODB_URI not found in .env.local');
+  console.error('Error: MONGODB_URI is not defined in .env.local');
   process.exit(1);
 }
 
@@ -54,6 +32,12 @@ const SAMPLE_PROPERTIES = [
       state: 'Telangana',
       pincode: '500075',
       district: 'Ranga Reddy',
+    },
+    latitude: 17.397,
+    longitude: 78.334,
+    locationCoordinates: {
+      type: 'Point',
+      coordinates: [78.334, 17.397],
     },
     verificationStatus: 'VERIFIED',
     paymentStatus: 'PAID',
@@ -98,6 +82,12 @@ const SAMPLE_PROPERTIES = [
       pincode: '501504',
       district: 'Ranga Reddy',
     },
+    latitude: 17.325,
+    longitude: 78.272,
+    locationCoordinates: {
+      type: 'Point',
+      coordinates: [78.272, 17.325],
+    },
     verificationStatus: 'VERIFIED',
     paymentStatus: 'PAID',
     listingStatus: 'PUBLISHED',
@@ -138,8 +128,14 @@ const SAMPLE_PROPERTIES = [
       address: 'NH-16 Highway Frontage, Enikepadu',
       city: 'Vijayawada',
       state: 'Andhra Pradesh',
-      pincode: '520001',
+      pincode: '521108',
       district: 'Krishna',
+    },
+    latitude: 16.518,
+    longitude: 80.648,
+    locationCoordinates: {
+      type: 'Point',
+      coordinates: [80.648, 16.518],
     },
     verificationStatus: 'VERIFIED',
     paymentStatus: 'PAID',
@@ -184,6 +180,12 @@ const SAMPLE_PROPERTIES = [
       pincode: '501203',
       district: 'Ranga Reddy',
     },
+    latitude: 17.452,
+    longitude: 78.132,
+    locationCoordinates: {
+      type: 'Point',
+      coordinates: [78.132, 17.452],
+    },
     verificationStatus: 'VERIFIED',
     paymentStatus: 'PAID',
     listingStatus: 'PUBLISHED',
@@ -202,6 +204,157 @@ const SAMPLE_PROPERTIES = [
       },
     ],
   },
+  {
+    sellerId: 'demo_seller_005',
+    sellerName: 'Sunil Deshmukh',
+    sellerPhone: '+91 98220 54321',
+    sellerEmail: 'sunil.deshmukh@example.com',
+    sellerType: 'INDIVIDUAL',
+    title: 'Scenic Foothill Residential Plot in Beyond Thane (Badlapur)',
+    description:
+      'Clear title 250 sq.yd residential plot situated in a serene green valley layout in Beyond Thane, Badlapur East. Excellent connectivity to railway station and highway, with water and electricity connections in place.',
+    landAreaYards: 250,
+    pricePerYard: 14000,
+    totalPrice: 3500000,
+    priceNegotiable: true,
+    publishingFee: 10,
+    monthlyListingFee: 10,
+    landType: 'RESIDENTIAL_PLOT',
+    roadAccess: '30 Feet Concrete Road',
+    nearbyLandmarks: ['Badlapur Railway Station 10 Mins', 'Barvi Dam Road'],
+    location: {
+      address: 'Plot 12, Green Hill Enclave, Badlapur East',
+      city: 'Beyond Thane',
+      state: 'Maharashtra',
+      pincode: '421503',
+      district: 'Thane',
+    },
+    latitude: 19.167,
+    longitude: 73.264,
+    locationCoordinates: {
+      type: 'Point',
+      coordinates: [73.264, 19.167],
+    },
+    verificationStatus: 'VERIFIED',
+    paymentStatus: 'PAID',
+    listingStatus: 'PUBLISHED',
+    publishedAt: new Date(),
+    subscriptionStartedAt: new Date(),
+    subscriptionExpiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+    images: [
+      {
+        objectKey: 'seed_img_5',
+        secureUrl: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800&auto=format&fit=crop&q=80',
+        fileName: 'beyond-thane-plot.jpg',
+        mimeType: 'image/jpeg',
+        size: 280000,
+        isPrimary: true,
+        sortOrder: 0,
+      },
+    ],
+  },
+  {
+    sellerId: 'demo_seller_006',
+    sellerName: 'Rohit Mehta',
+    sellerPhone: '+91 98200 98765',
+    sellerEmail: 'rohit.mehta@example.com',
+    sellerType: 'INDIVIDUAL',
+    title: 'Luxury 3 BHK Sea-Facing Flat in Bandra West',
+    description:
+      'Spacious 1,850 sq.ft (205 sq.yd) 3 BHK luxury apartment with expansive Arabian Sea views, designer interiors, 2 dedicated car parking slots, gym, and infinity pool access.',
+    landAreaYards: 205,
+    pricePerYard: 240000,
+    totalPrice: 49200000,
+    priceNegotiable: false,
+    publishingFee: 10,
+    monthlyListingFee: 10,
+    landType: 'FLAT',
+    propertyType: 'FLAT',
+    bhk: '3 BHK',
+    roadAccess: '60 Feet Main Road',
+    nearbyLandmarks: ['Carter Road Promenade', 'Bandra-Worli Sea Link'],
+    location: {
+      address: 'Floor 14, Ocean Breeze Tower, Carter Road, Bandra West',
+      city: 'Mumbai',
+      state: 'Maharashtra',
+      pincode: '400050',
+      district: 'Mumbai Suburban',
+    },
+    latitude: 19.062,
+    longitude: 72.825,
+    locationCoordinates: {
+      type: 'Point',
+      coordinates: [72.825, 19.062],
+    },
+    verificationStatus: 'VERIFIED',
+    paymentStatus: 'PAID',
+    listingStatus: 'PUBLISHED',
+    publishedAt: new Date(),
+    subscriptionStartedAt: new Date(),
+    subscriptionExpiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+    images: [
+      {
+        objectKey: 'seed_img_6',
+        secureUrl: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&auto=format&fit=crop&q=80',
+        fileName: 'bandra-flat.jpg',
+        mimeType: 'image/jpeg',
+        size: 320000,
+        isPrimary: true,
+        sortOrder: 0,
+      },
+    ],
+  },
+  {
+    sellerId: 'demo_seller_007',
+    sellerName: 'Praveen Gowda',
+    sellerPhone: '+91 98450 11223',
+    sellerEmail: 'praveen.gowda@example.com',
+    sellerType: 'INDIVIDUAL',
+    title: 'Gated 4 BHK Contemporary Villa in Whitefield',
+    description:
+      'Lavish 4 BHK independent triplex villa on 300 sq.yd plot in prime Whitefield IT corridor. Private landscaped garden, home theatre room, solar power backup, and round-the-clock security.',
+    landAreaYards: 300,
+    pricePerYard: 95000,
+    totalPrice: 28500000,
+    priceNegotiable: true,
+    publishingFee: 10,
+    monthlyListingFee: 10,
+    landType: 'HOUSE_VILLA',
+    propertyType: 'HOUSE_VILLA',
+    bhk: '4 BHK',
+    roadAccess: '40 Feet Internal Paved Road',
+    nearbyLandmarks: ['ITPL Main Gate', 'Hope Farm Junction'],
+    location: {
+      address: 'Villa 28, Palm Meadows Extension, Whitefield',
+      city: 'Bengaluru',
+      state: 'Karnataka',
+      pincode: '560066',
+      district: 'Bengaluru Urban',
+    },
+    latitude: 12.971,
+    longitude: 77.75,
+    locationCoordinates: {
+      type: 'Point',
+      coordinates: [77.75, 12.971],
+    },
+    verificationStatus: 'VERIFIED',
+    paymentStatus: 'PAID',
+    listingStatus: 'PUBLISHED',
+    publishedAt: new Date(),
+    subscriptionStartedAt: new Date(),
+    subscriptionExpiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+    images: [
+      {
+        objectKey: 'seed_img_7',
+        secureUrl: 'https://images.unsplash.com/photo-1613977257363-707ba9348227?w=800&auto=format&fit=crop&q=80',
+        fileName: 'whitefield-villa.jpg',
+        mimeType: 'image/jpeg',
+        size: 340000,
+        isPrimary: true,
+        sortOrder: 0,
+      },
+    ],
+  },
 ];
 
 async function seed() {
@@ -215,12 +368,26 @@ async function seed() {
     const { PropertyModel } = await import('../models/Property.js');
 
     // Remove any previous seed records
-    await PropertyModel.deleteMany({ sellerId: { $in: ['demo_seller_001', 'demo_seller_002', 'demo_seller_003', 'demo_seller_004'] } });
+    await PropertyModel.deleteMany({
+      sellerId: {
+        $in: [
+          'demo_seller_001',
+          'demo_seller_002',
+          'demo_seller_003',
+          'demo_seller_004',
+          'demo_seller_005',
+          'demo_seller_006',
+          'demo_seller_007',
+        ],
+      },
+    });
 
-    console.log('Inserting 4 realistic sample properties...');
+    console.log(`Inserting ${SAMPLE_PROPERTIES.length} realistic sample properties across India...`);
     const created = await PropertyModel.insertMany(SAMPLE_PROPERTIES);
     console.log(`Successfully created ${created.length} properties:`);
-    created.forEach((p) => console.log(`- [${p.landType}] ${p.title} (₹${p.totalPrice.toLocaleString('en-IN')})`));
+    created.forEach((p) =>
+      console.log(`- [${p.location?.city}, ${p.location?.state}] [${p.landType}] ${p.title} (₹${p.totalPrice.toLocaleString('en-IN')})`)
+    );
 
     await mongoose.disconnect();
     console.log('Finished.');

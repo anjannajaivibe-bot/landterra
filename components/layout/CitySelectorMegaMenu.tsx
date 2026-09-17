@@ -251,6 +251,15 @@ export function CitySelectorMegaMenu() {
     setIsOpen(false);
     setSearchQuery('');
 
+    // Broadcast change so active filter sections (Homepage Omnibar, Buy page filters) immediately receive it
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(
+        new CustomEvent('bhoomimitra_city_changed', {
+          detail: { city },
+        })
+      );
+    }
+
     const targetUrl =
       city === 'All India' ? '/buy' : `/buy?city=${encodeURIComponent(city)}`;
     router.push(targetUrl);
@@ -259,7 +268,8 @@ export function CitySelectorMegaMenu() {
   const handleSelectInternational = (hubName: string) => {
     setSelectedCity(`NRI: ${hubName}`);
     setIsOpen(false);
-    router.push(`/buy?nri=true&origin=${encodeURIComponent(hubName)}`);
+    // Redirect to the dedicated custom contact page for Non-Resident Indians
+    router.push(`/contact/nri?origin=${encodeURIComponent(hubName)}`);
   };
 
   /* Filtered cities based on search input */
@@ -321,55 +331,64 @@ export function CitySelectorMegaMenu() {
 
       {/* Mega Dropdown Menu Modal */}
       {isOpen && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          className="fixed inset-x-4 sm:absolute sm:left-0 sm:inset-x-auto top-20 sm:top-[calc(100%+8px)] z-50 w-[calc(100vw-32px)] sm:w-[780px] md:w-[860px] max-h-[82vh] overflow-hidden rounded-3xl bg-white border border-slate-200 shadow-[0_25px_60px_rgba(0,0,0,0.18)] flex flex-col animate-in fade-in slide-in-from-top-2 duration-150"
-        >
-          {/* Top Search & Filter Header */}
-          <div className="p-4 sm:p-5 border-b border-slate-100 bg-[#fffbf5] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div className="relative flex-1">
-              <Search className="w-4 h-4 text-[#FF9933] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                aria-label="Search across 100+ Indian cities and districts"
-                placeholder="Search across 100+ Indian cities and districts..."
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 bg-white text-xs sm:text-sm font-semibold text-slate-900 placeholder:text-slate-400 focus:outline-[#FF9933] focus:border-[#FF9933] shadow-2xs transition-all"
-                autoFocus
-              />
-              {searchQuery && (
+        <>
+          {/* Backdrop on mobile/tablet for easy dismissal */}
+          <div
+            className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-40 lg:hidden"
+            onClick={() => setIsOpen(false)}
+            aria-hidden="true"
+          />
+
+          <div
+            role="region"
+            aria-label="Select City or Region"
+            style={{ width: 'min(860px, calc(100vw - 24px))' }}
+            className="fixed inset-x-3 sm:inset-x-6 top-16 sm:top-20 z-50 mx-auto lg:absolute lg:inset-x-auto lg:left-0 lg:top-[calc(100%+8px)] max-h-[84vh] overflow-hidden rounded-3xl bg-white border border-slate-200 shadow-[0_25px_60px_rgba(0,0,0,0.18)] flex flex-col animate-in fade-in slide-in-from-top-2 duration-150"
+          >
+            {/* Top Search & Filter Header */}
+            <div className="p-4 sm:p-5 border-b border-slate-100 bg-[#fffbf5] flex flex-col sm:flex-row sm:items-center justify-between gap-3 shrink-0">
+              <div className="relative flex-1">
+                <Search className="w-4 h-4 text-[#FF9933] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  aria-label="Search across 100+ Indian cities and districts"
+                  placeholder="Search across 100+ Indian cities and districts..."
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 bg-white text-xs sm:text-sm font-semibold text-slate-900 placeholder:text-slate-400 focus:outline-[#FF9933] focus:border-[#FF9933] shadow-2xs transition-all"
+                  autoFocus
+                />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => setSearchQuery('')}
+                    aria-label="Clear city search query"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+
+              <div className="flex items-center gap-2 shrink-0">
                 <button
                   type="button"
-                  onClick={() => setSearchQuery('')}
-                  aria-label="Clear city search query"
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
+                  onClick={() => handleSelectCity('All India')}
+                  className="px-3.5 py-2 rounded-xl bg-white border border-[#FF9933]/40 text-[#c75e0a] hover:bg-[#fff1dc] text-xs font-bold transition-colors cursor-pointer shrink-0 shadow-2xs whitespace-nowrap"
                 >
-                  <X className="w-3.5 h-3.5" />
+                  All India (View All)
                 </button>
-              )}
-            </div>
 
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => handleSelectCity('All India')}
-                className="px-3.5 py-2 rounded-xl bg-white border border-[#FF9933]/40 text-[#c75e0a] hover:bg-[#fff1dc] text-xs font-bold transition-colors cursor-pointer shrink-0 shadow-2xs"
-              >
-                All India (View All)
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setIsOpen(false)}
-                className="p-2 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer"
-                aria-label="Close"
-              >
-                <X className="w-4 h-4" />
-              </button>
+                <button
+                  type="button"
+                  onClick={() => setIsOpen(false)}
+                  className="p-2 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer"
+                  aria-label="Close"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
             </div>
-          </div>
 
           {/* Search Matches View */}
           {searchMatches ? (
@@ -524,12 +543,13 @@ export function CitySelectorMegaMenu() {
           )}
 
           {/* Footer note */}
-          <div className="px-5 py-2.5 border-t border-slate-100 bg-[#fffbf5] text-[11px] text-slate-500 flex items-center justify-between">
+          <div className="px-5 py-2.5 border-t border-slate-100 bg-[#fffbf5] text-[11px] text-slate-500 flex items-center justify-between shrink-0">
             <span>Selected Region: <strong className="text-[#c75e0a]">{selectedCity}</strong></span>
             <span className="text-slate-400">100% Direct-to-Owner Land</span>
           </div>
         </div>
-      )}
+      </>
+    )}
     </div>
   );
 }
