@@ -216,12 +216,12 @@ export function GalleryCarousel({ property }: GalleryCarouselProps) {
               >
                 <Image
                   src={image.secureUrl}
-                  alt=""
-                  fill
+                  alt={image.fileName || `Property photo ${index + 1}`}
+                  width={80}
+                  height={64}
                   placeholder="blur"
                   blurDataURL={SHIMMER_BLUR_DATA_URL}
-                  sizes="80px"
-                  className="object-cover"
+                  className="h-full w-full object-cover"
                 />
               </button>
             ))}

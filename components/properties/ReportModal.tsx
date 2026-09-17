@@ -115,10 +115,12 @@ export function ReportModal({ property, isOpen, onClose }: ReportModalProps) {
               )}
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                <label htmlFor="report-reason-select" className="block text-xs font-semibold text-slate-700 mb-1">
                   Reason for reporting <span className="text-rose-500">*</span>
                 </label>
                 <select
+                  id="report-reason-select"
+                  name="reason"
                   value={reason}
                   disabled={isSubmitting}
                   onChange={(e) => setReason(e.target.value as ReportReason)}
@@ -133,10 +135,12 @@ export function ReportModal({ property, isOpen, onClose }: ReportModalProps) {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                <label htmlFor="report-description-input" className="block text-xs font-semibold text-slate-700 mb-1">
                   Specific Details & Description <span className="text-rose-500">*</span>
                 </label>
                 <textarea
+                  id="report-description-input"
+                  name="description"
                   rows={4}
                   value={description}
                   disabled={isSubmitting}
