@@ -138,6 +138,7 @@ function formatListedDate(
   }
 
   return date.toLocaleDateString('en-IN', {
+    timeZone: 'Asia/Kolkata',
     day: 'numeric',
     month: 'short',
     year: 'numeric',
@@ -349,7 +350,10 @@ export function PropertyCard({
                 Direct Owner • 0% Brokerage
               </span>
               {listedDate && (
-                <span className="inline-flex items-center gap-1 text-[11px] text-slate-400 font-medium">
+                <span
+                  suppressHydrationWarning
+                  className="inline-flex items-center gap-1 text-[11px] text-slate-400 font-medium"
+                >
                   <Calendar className="h-3 w-3" />
                   {listedDate}
                 </span>

@@ -88,6 +88,7 @@ function formatDate(value?: string | Date) {
   if (Number.isNaN(date.getTime())) return null;
 
   return date.toLocaleDateString('en-IN', {
+    timeZone: 'Asia/Kolkata',
     day: 'numeric',
     month: 'short',
     year: 'numeric',
