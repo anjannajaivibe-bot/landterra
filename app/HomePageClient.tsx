@@ -1,38 +1,26 @@
 'use client';
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import {
-  Search,
-  MapPin,
-  ShieldCheck,
-  Phone,
-  ArrowRight,
-  Sparkles,
-  Layers,
-  LandPlot,
-  Building2,
-  Tractor,
-  Trees,
-  FileText,
-  BadgeCheck,
-  ChevronRight,
-  ChevronDown,
-  Check,
-  Tag,
   HeartHandshake,
-  CheckCircle2,
-  Lock,
-  Home,
   Scale,
+  Phone,
+  Tag,
+  Sparkles,
+  ArrowRight,
+  ChevronRight,
 } from 'lucide-react';
 
 import { Navbar } from '@/components/layout/Navbar';
-import { PropertyCard } from '@/components/properties/PropertyCard';
-import dynamic from 'next/dynamic';
+import { HeroSearchSection } from './home/HeroSearchSection';
+import { FeaturedPropertiesSection } from './home/FeaturedPropertiesSection';
+
 import { IProperty } from '@/types/property';
 import { IUser } from '@/types/user';
 
+/* Dynamic Heavy Modules */
 const LandAreaConverter = dynamic(
   () => import('@/components/tools/LandAreaConverter').then((mod) => mod.LandAreaConverter),
   { ssr: true }
@@ -47,30 +35,6 @@ const AuthModal = dynamic(
   () => import('@/components/auth/AuthModal').then((mod) => mod.AuthModal),
   { ssr: false }
 );
-
-import { CANONICAL_PROPERTY_TYPES as HERO_LAND_TYPES } from '@/config/constants';
-
-const BHK_OPTIONS = ['1 Bhk', '2 Bhk', '3 Bhk', '4 Bhk', '5 Bhk', '5+ Bhk'];
-
-const BUDGET_PRESETS = [
-  { label: 'Any Budget', minPrice: 0, maxPrice: 0 },
-  { label: 'Under ₹25 Lakhs', minPrice: 0, maxPrice: 2500000 },
-  { label: '₹25L – ₹50 Lakhs', minPrice: 2500000, maxPrice: 5000000 },
-  { label: '₹50L – ₹1 Crore', minPrice: 5000000, maxPrice: 10000000 },
-  { label: '₹1 Cr – ₹3 Crores', minPrice: 10000000, maxPrice: 30000000 },
-  { label: '₹3 Cr – ₹5 Crores', minPrice: 30000000, maxPrice: 50000000 },
-  { label: '₹5 Cr – ₹10 Crores', minPrice: 50000000, maxPrice: 100000000 },
-  { label: 'Above ₹10 Crores', minPrice: 100000000, maxPrice: 0 },
-];
-
-const POPULAR_SEARCH_TAGS = [
-  { label: 'Kokapet Plots', query: 'Kokapet' },
-  { label: 'Moinabad Farmlands', query: 'Moinabad' },
-  { label: 'Shamshabad Airport Zone', query: 'Shamshabad' },
-  { label: 'Shankarpally Plots', query: 'Shankarpally' },
-  { label: 'Vijayawada Highway', query: 'Vijayawada Highway' },
-  { label: 'Bengaluru Rural', query: 'Bengaluru Rural' },
-];
 
 export interface HomePageClientProps {
   initialProperties?: IProperty[];
@@ -91,75 +55,6 @@ export function HomePageClient({
   /* Platform settings */
   const [publicListingFee, setPublicListingFee] = useState(initialListingFee);
   const [listingDurationDays, setListingDurationDays] = useState(initialListingDurationDays);
-
-  /* Hero Omnibar Search states */
-  const [searchLocation, setSearchLocation] = useState('');
-  const [selectedLandTypes, setSelectedLandTypes] = useState<string[]>([]);
-  const [selectedBhks, setSelectedBhks] = useState<string[]>([]);
-  const [selectedBudgetIndex, setSelectedBudgetIndex] = useState(0);
-  const [verifiedOnly, setVerifiedOnly] = useState(false);
-
-  /* Popover states */
-  const [landTypePopoverOpen, setLandTypePopoverOpen] = useState(false);
-  const [budgetPopoverOpen, setBudgetPopoverOpen] = useState(false);
-
-  /* Category accordion in Land Type Popover (Land & Plots + Residential expanded by default) */
-  const [expandedCategories, setExpandedCategories] = useState<{
-    landPlots: boolean;
-    residential: boolean;
-    commercial: boolean;
-    hospitality: boolean;
-    rentals: boolean;
-  }>({
-    landPlots: true,
-    residential: true,
-    commercial: false,
-    hospitality: false,
-    rentals: false,
-  });
-
-  const toggleCategory = (
-    cat: 'landPlots' | 'residential' | 'commercial' | 'hospitality' | 'rentals',
-  ) => {
-    setExpandedCategories((prev) => ({
-      ...prev,
-      [cat]: !prev[cat],
-    }));
-  };
-
-  const handleToggleBhk = (bhk: string) => {
-    setSelectedBhks((prev) =>
-      prev.includes(bhk) ? prev.filter((b) => b !== bhk) : [...prev, bhk]
-    );
-  };
-
-  const landTypeRef = useRef<HTMLDivElement>(null);
-  const budgetRef = useRef<HTMLDivElement>(null);
-
-  /* Synchronize selected city with Hero Omnibar search */
-  useEffect(() => {
-    try {
-      const savedCity = localStorage.getItem('bhoomimitra_selected_city');
-      if (savedCity && savedCity !== 'All India' && !savedCity.startsWith('NRI: ')) {
-        setSearchLocation(savedCity);
-      }
-    } catch {
-      // ignore
-    }
-
-    const handleCityChanged = (e: Event) => {
-      const customEvent = e as CustomEvent<{ city?: string }>;
-      const city = customEvent.detail?.city;
-      if (city) {
-        setSearchLocation(city === 'All India' || city.startsWith('NRI: ') ? '' : city);
-      }
-    };
-
-    window.addEventListener('bhoomimitra_city_changed', handleCityChanged);
-    return () => {
-      window.removeEventListener('bhoomimitra_city_changed', handleCityChanged);
-    };
-  }, []);
 
   /* User & Auth */
   const [user, setUser] = useState<Partial<IUser> | null>(null);
@@ -208,610 +103,15 @@ export function HomePageClient({
     };
   }, [initialProperties]);
 
-  /* Close popovers on outside click */
-  useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (
-        landTypeRef.current &&
-        !landTypeRef.current.contains(e.target as Node)
-      ) {
-        setLandTypePopoverOpen(false);
-      }
-      if (budgetRef.current && !budgetRef.current.contains(e.target as Node)) {
-        setBudgetPopoverOpen(false);
-      }
-    }
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const residentialTypesSupportingBhk = [
-    'FLAT',
-    'INDEPENDENT_HOUSE',
-    'VILLA',
-    'HOUSE_VILLA',
-    'TOWNHOUSE',
-    'DUPLEX',
-    'PENTHOUSE',
-    'SERVICE_APARTMENT',
-    'RESIDENTIAL_RENTAL',
-    'COLIVING_PG',
-    'VACATION_RENTAL_AIRBNB',
-  ];
-
-  const handleToggleLandType = (id: string) => {
-    setSelectedLandTypes((prev) => {
-      const next = prev.includes(id)
-        ? prev.filter((t) => t !== id)
-        : [...prev, id];
-      // If no residential unit is selected anymore, clear BHKs
-      if (!next.some((t) => residentialTypesSupportingBhk.includes(t))) {
-        setSelectedBhks([]);
-      }
-      return next;
-    });
-  };
-
-  /* ================================================================
-     HANDLE SEARCH SUBMIT
-  ================================================================ */
-
-  function handleSearchSubmit(e: React.FormEvent) {
-    e.preventDefault();
-
-    const params = new URLSearchParams();
-    if (searchLocation.trim()) {
-      params.set('query', searchLocation.trim());
-    }
-
-    if (selectedLandTypes.length > 0) {
-      params.set('landType', selectedLandTypes.join(','));
-    }
-
-    if (selectedBhks.length > 0) {
-      params.set('bhk', selectedBhks.join(','));
-    }
-
-    const budget = BUDGET_PRESETS[selectedBudgetIndex];
-    if (budget.minPrice > 0) {
-      params.set('minPrice', String(budget.minPrice));
-    }
-    if (budget.maxPrice > 0) {
-      params.set('maxPrice', String(budget.maxPrice));
-    }
-
-    if (verifiedOnly) {
-      params.set('verifiedOnly', 'true');
-    }
-
-    setLandTypePopoverOpen(false);
-    setBudgetPopoverOpen(false);
-
-    const q = params.toString();
-    window.location.href = q ? `/buy?${q}` : '/buy';
-  }
-
-  /* Land Type & BHK Trigger Text (Matches Screenshot 1 & 2) */
-  let landTypeTriggerText = 'All Property Types';
-  if (selectedLandTypes.length > 0) {
-    const firstSelected = HERO_LAND_TYPES.find(
-      (t) => t.id === selectedLandTypes[0]
-    );
-    if (firstSelected) {
-      if (
-        (firstSelected.id === 'FLAT' || firstSelected.id === 'HOUSE_VILLA') &&
-        selectedBhks.length > 0
-      ) {
-        landTypeTriggerText = `${firstSelected.label} (${selectedBhks.join(', ')})`;
-      } else if (selectedLandTypes.length > 1) {
-        landTypeTriggerText = `${firstSelected.label} +${selectedLandTypes.length - 1}`;
-      } else {
-        landTypeTriggerText = firstSelected.label;
-      }
-    }
-  }
-
-  const selectedBudget = BUDGET_PRESETS[selectedBudgetIndex];
-
-
-
   return (
     <div className="min-h-screen bg-white text-slate-900 flex flex-col selection:bg-[#FF9933] selection:text-white">
       <Navbar />
 
       <main className="flex-1 space-y-16 pb-20">
-        {/* ═══════════════════════════════════════════════════════
-            1. HERO PORTAL SEARCH SECTION (Ultra-Clean & Modern)
-        ═══════════════════════════════════════════════════════ */}
-        <section className="relative bg-gradient-to-b from-[#fff9f0] via-white to-white border-b border-slate-100 pt-10 pb-16 px-4 sm:px-6 lg:px-8">
-          <div className="max-w-5xl mx-auto space-y-8">
-            {/* Header copy */}
-            <div className="text-center max-w-3xl mx-auto space-y-4">
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-[#FF9933]/30 text-[#c75e0a] text-xs font-black shadow-xs">
-                <ShieldCheck className="w-4 h-4 text-[#FF9933]" />
-                <span>India&apos;s Direct Real Estate &amp; Property Portal • 0% Broker Commission</span>
-              </div>
+        {/* 1. HERO PORTAL SEARCH SECTION */}
+        <HeroSearchSection />
 
-              <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-slate-950 tracking-tight leading-[1.15]">
-                Direct Properties, Homes &amp; Plots Across India
-              </h1>
-
-              <p className="text-sm sm:text-base text-slate-600 font-medium max-w-2xl mx-auto leading-relaxed">
-                India&apos;s direct peer-to-peer property marketplace. Buy, sell, or rent plots, apartments, villas, commercial spaces, and farmlands directly with genuine owners — 0% broker commissions and transparent document disclosure.
-              </p>
-            </div>
-
-            {/* ── Main Unified Capsule Omnibar (Matching Magicbricks Screenshot) ── */}
-            <div className="w-full max-w-4xl mx-auto space-y-4">
-              <div className="relative bg-white rounded-3xl sm:rounded-full border border-slate-200/90 shadow-[0_12px_35px_rgba(0,0,0,0.08)] p-2 sm:p-2.5 transition-all focus-within:border-[#FF9933]/50 focus-within:shadow-[0_16px_40px_rgba(255,153,51,0.12)]">
-                <form
-                  onSubmit={handleSearchSubmit}
-                  className="flex flex-col sm:flex-row items-stretch sm:items-center divide-y sm:divide-y-0 sm:divide-x divide-slate-100 gap-2 sm:gap-0"
-                >
-                  {/* Segment 1: Location Input */}
-                  <div className="flex-1 flex items-center px-4 py-2 sm:py-1">
-                    <label htmlFor="hero-search-location" className="sr-only">
-                      Search by city, locality, or project name
-                    </label>
-                    <MapPin className="w-4 h-4 text-[#FF9933] shrink-0 mr-2.5" />
-                    <input
-                      type="text"
-                      id="hero-search-location"
-                      name="query"
-                      value={searchLocation}
-                      onChange={(e) => setSearchLocation(e.target.value)}
-                      aria-label="Search by city, locality, or project name"
-                      placeholder="Enter City, Locality, or Project e.g. Kokapet"
-                      autoComplete="off"
-                      className="w-full bg-transparent text-xs sm:text-sm font-semibold text-slate-900 placeholder:text-slate-400 focus:outline-none"
-                    />
-                  </div>
-
-                  {/* Segment 2: Property / Land Type Dropdown with Popover */}
-                  <div ref={landTypeRef} className="relative px-4 py-2 sm:py-1">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setLandTypePopoverOpen(!landTypePopoverOpen);
-                        setBudgetPopoverOpen(false);
-                      }}
-                      aria-label="Select property or land type"
-                      aria-expanded={landTypePopoverOpen}
-                      className="w-full flex items-center justify-between sm:justify-start gap-2 text-left cursor-pointer select-none"
-                    >
-                      <div className="flex items-center gap-1.5 min-w-0">
-                        <Home className="w-4 h-4 text-[#FF9933] shrink-0" />
-                        <span className="text-xs sm:text-sm font-extrabold text-slate-800 truncate max-w-[150px]">
-                          {landTypeTriggerText}
-                        </span>
-                      </div>
-                      <ChevronDown
-                        className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${landTypePopoverOpen ? 'rotate-180 text-[#FF9933]' : ''
-                          }`}
-                      />
-                    </button>
-
-                    {/* Land Type Popover (Directly matching Screenshot 2) */}
-                    {landTypePopoverOpen && (
-                      <div className="absolute left-0 sm:left-auto sm:right-0 top-[calc(100%+14px)] z-50 w-[320px] sm:w-[390px] p-4 sm:p-5 rounded-3xl bg-white border border-slate-200 shadow-[0_20px_50px_rgba(0,0,0,0.15)] animate-in fade-in slide-in-from-top-2 duration-150 space-y-3">
-                        <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-                          <span className="text-[11px] font-black uppercase tracking-wider text-slate-400">
-                            Property Types
-                          </span>
-                          {selectedLandTypes.length > 0 && (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setSelectedLandTypes([]);
-                                setSelectedBhks([]);
-                              }}
-                              className="text-[11px] font-bold text-[#c75e0a] hover:underline cursor-pointer"
-                            >
-                              Reset to All
-                            </button>
-                          )}
-                        </div>
-
-                        {/* 1. Land & Plots */}
-                        <div className="space-y-2">
-                          <button
-                            type="button"
-                            onClick={() => toggleCategory('landPlots')}
-                            className="w-full flex items-center justify-between py-1 text-[11px] font-black uppercase tracking-wider text-slate-700 hover:text-slate-900 cursor-pointer select-none"
-                          >
-                            <div className="flex items-center gap-2">
-                              <span>Land &amp; Plots</span>
-                              {HERO_LAND_TYPES.filter(
-                                (t) => t.category === 'Land & Plots' && selectedLandTypes.includes(t.id)
-                              ).length > 0 && (
-                                <span className="px-1.5 py-0.5 rounded-full bg-[#fff1dc] text-[#c75e0a] text-[10px] font-bold">
-                                  {
-                                    HERO_LAND_TYPES.filter(
-                                      (t) => t.category === 'Land & Plots' && selectedLandTypes.includes(t.id)
-                                    ).length
-                                  }
-                                </span>
-                              )}
-                            </div>
-                            <ChevronDown
-                              className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${
-                                expandedCategories.landPlots ? 'rotate-180 text-[#FF9933]' : ''
-                              }`}
-                            />
-                          </button>
-
-                          {expandedCategories.landPlots && (
-                            <div className="flex flex-wrap gap-1.5 pt-1 animate-in fade-in duration-150">
-                              {HERO_LAND_TYPES.filter((t) => t.category === 'Land & Plots').map((t) => {
-                                const isSelected = selectedLandTypes.includes(t.id);
-                                return (
-                                  <button
-                                    key={t.id}
-                                    type="button"
-                                    onClick={() => handleToggleLandType(t.id)}
-                                    className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer border ${
-                                      isSelected
-                                        ? 'bg-[#fff1dc] text-[#c75e0a] border-[#FF9933] shadow-2xs ring-1 ring-[#FF9933]/30'
-                                        : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
-                                    }`}
-                                  >
-                                    {t.label}
-                                  </button>
-                                );
-                              })}
-                            </div>
-                          )}
-                        </div>
-
-                        {/* 2. Residential Units */}
-                        <div className="space-y-2 pt-2 border-t border-slate-100">
-                          <button
-                            type="button"
-                            onClick={() => toggleCategory('residential')}
-                            className="w-full flex items-center justify-between py-1 text-[11px] font-black uppercase tracking-wider text-slate-700 hover:text-slate-900 cursor-pointer select-none"
-                          >
-                            <div className="flex items-center gap-2">
-                              <span>Residential Units</span>
-                              {HERO_LAND_TYPES.filter(
-                                (t) => t.category === 'Residential Units' && selectedLandTypes.includes(t.id)
-                              ).length > 0 && (
-                                <span className="px-1.5 py-0.5 rounded-full bg-[#fff1dc] text-[#c75e0a] text-[10px] font-bold">
-                                  {
-                                    HERO_LAND_TYPES.filter(
-                                      (t) => t.category === 'Residential Units' && selectedLandTypes.includes(t.id)
-                                    ).length
-                                  }
-                                </span>
-                              )}
-                            </div>
-                            <ChevronDown
-                              className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${
-                                expandedCategories.residential ? 'rotate-180 text-[#FF9933]' : ''
-                              }`}
-                            />
-                          </button>
-
-                          {expandedCategories.residential && (
-                            <div className="space-y-2.5 pt-1 animate-in fade-in duration-150">
-                              <div className="flex flex-wrap gap-1.5">
-                                {HERO_LAND_TYPES.filter((t) => t.category === 'Residential Units').map((t) => {
-                                  const isSelected = selectedLandTypes.includes(t.id);
-                                  return (
-                                    <button
-                                      key={t.id}
-                                      type="button"
-                                      onClick={() => handleToggleLandType(t.id)}
-                                      className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer border ${
-                                        isSelected
-                                          ? 'bg-[#fff1dc] text-[#c75e0a] border-[#FF9933] shadow-2xs ring-1 ring-[#FF9933]/30'
-                                          : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
-                                      }`}
-                                    >
-                                      {t.label}
-                                    </button>
-                                  );
-                                })}
-                              </div>
-
-                              {/* BHK Selection Row when any residential unit is selected */}
-                              {selectedLandTypes.some((t) => residentialTypesSupportingBhk.includes(t)) && (
-                                <div className="pt-2 border-t border-dashed border-slate-100 animate-in fade-in slide-in-from-top-1 duration-150">
-                                  <div className="flex flex-wrap gap-1.5">
-                                    {BHK_OPTIONS.map((bhk) => {
-                                      const isBhkSelected = selectedBhks.includes(bhk);
-                                      return (
-                                        <button
-                                          key={bhk}
-                                          type="button"
-                                          onClick={() => handleToggleBhk(bhk)}
-                                          className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer border ${
-                                            isBhkSelected
-                                              ? 'bg-[#FF9933] text-white border-[#FF9933] shadow-2xs'
-                                              : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
-                                          }`}
-                                        >
-                                          {bhk}
-                                        </button>
-                                      );
-                                    })}
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                          )}
-                        </div>
-
-                        {/* 3. Commercial & Retail */}
-                        <div className="space-y-2 pt-2 border-t border-slate-100">
-                          <button
-                            type="button"
-                            onClick={() => toggleCategory('commercial')}
-                            className="w-full flex items-center justify-between py-1 text-[11px] font-black uppercase tracking-wider text-slate-700 hover:text-slate-900 cursor-pointer select-none"
-                          >
-                            <div className="flex items-center gap-2">
-                              <span>Commercial &amp; Retail</span>
-                              {HERO_LAND_TYPES.filter(
-                                (t) => t.category === 'Commercial & Retail' && selectedLandTypes.includes(t.id)
-                              ).length > 0 && (
-                                <span className="px-1.5 py-0.5 rounded-full bg-[#fff1dc] text-[#c75e0a] text-[10px] font-bold">
-                                  {
-                                    HERO_LAND_TYPES.filter(
-                                      (t) => t.category === 'Commercial & Retail' && selectedLandTypes.includes(t.id)
-                                    ).length
-                                  }
-                                </span>
-                              )}
-                            </div>
-                            <ChevronDown
-                              className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${
-                                expandedCategories.commercial ? 'rotate-180 text-[#FF9933]' : ''
-                              }`}
-                            />
-                          </button>
-
-                          {expandedCategories.commercial && (
-                            <div className="flex flex-wrap gap-1.5 pt-1 animate-in fade-in duration-150">
-                              {HERO_LAND_TYPES.filter((t) => t.category === 'Commercial & Retail').map((t) => {
-                                const isSelected = selectedLandTypes.includes(t.id);
-                                return (
-                                  <button
-                                    key={t.id}
-                                    type="button"
-                                    onClick={() => handleToggleLandType(t.id)}
-                                    className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer border ${
-                                      isSelected
-                                        ? 'bg-[#fff1dc] text-[#c75e0a] border-[#FF9933] shadow-2xs ring-1 ring-[#FF9933]/30'
-                                        : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
-                                    }`}
-                                  >
-                                    {t.label}
-                                  </button>
-                                );
-                              })}
-                            </div>
-                          )}
-                        </div>
-
-                        {/* 4. Hospitality & Leisure */}
-                        <div className="space-y-2 pt-2 border-t border-slate-100">
-                          <button
-                            type="button"
-                            onClick={() => toggleCategory('hospitality')}
-                            className="w-full flex items-center justify-between py-1 text-[11px] font-black uppercase tracking-wider text-slate-700 hover:text-slate-900 cursor-pointer select-none"
-                          >
-                            <div className="flex items-center gap-2">
-                              <span>Hospitality &amp; Leisure</span>
-                              {HERO_LAND_TYPES.filter(
-                                (t) => t.category === 'Hospitality & Leisure' && selectedLandTypes.includes(t.id)
-                              ).length > 0 && (
-                                <span className="px-1.5 py-0.5 rounded-full bg-[#fff1dc] text-[#c75e0a] text-[10px] font-bold">
-                                  {
-                                    HERO_LAND_TYPES.filter(
-                                      (t) => t.category === 'Hospitality & Leisure' && selectedLandTypes.includes(t.id)
-                                    ).length
-                                  }
-                                </span>
-                              )}
-                            </div>
-                            <ChevronDown
-                              className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${
-                                expandedCategories.hospitality ? 'rotate-180 text-[#FF9933]' : ''
-                              }`}
-                            />
-                          </button>
-
-                          {expandedCategories.hospitality && (
-                            <div className="flex flex-wrap gap-1.5 pt-1 animate-in fade-in duration-150">
-                              {HERO_LAND_TYPES.filter((t) => t.category === 'Hospitality & Leisure').map((t) => {
-                                const isSelected = selectedLandTypes.includes(t.id);
-                                return (
-                                  <button
-                                    key={t.id}
-                                    type="button"
-                                    onClick={() => handleToggleLandType(t.id)}
-                                    className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer border ${
-                                      isSelected
-                                        ? 'bg-[#fff1dc] text-[#c75e0a] border-[#FF9933] shadow-2xs ring-1 ring-[#FF9933]/30'
-                                        : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
-                                    }`}
-                                  >
-                                    {t.label}
-                                  </button>
-                                );
-                              })}
-                            </div>
-                          )}
-                        </div>
-
-                        {/* 5. Income-Generating & Rentals */}
-                        <div className="space-y-2 pt-2 border-t border-slate-100">
-                          <button
-                            type="button"
-                            onClick={() => toggleCategory('rentals')}
-                            className="w-full flex items-center justify-between py-1 text-[11px] font-black uppercase tracking-wider text-slate-700 hover:text-slate-900 cursor-pointer select-none"
-                          >
-                            <div className="flex items-center gap-2">
-                              <span>Income-Generating &amp; Rentals</span>
-                              {HERO_LAND_TYPES.filter(
-                                (t) => t.category === 'Income-Generating & Rentals' && selectedLandTypes.includes(t.id)
-                              ).length > 0 && (
-                                <span className="px-1.5 py-0.5 rounded-full bg-[#fff1dc] text-[#c75e0a] text-[10px] font-bold">
-                                  {
-                                    HERO_LAND_TYPES.filter(
-                                      (t) => t.category === 'Income-Generating & Rentals' && selectedLandTypes.includes(t.id)
-                                    ).length
-                                  }
-                                </span>
-                              )}
-                            </div>
-                            <ChevronDown
-                              className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${
-                                expandedCategories.rentals ? 'rotate-180 text-[#FF9933]' : ''
-                              }`}
-                            />
-                          </button>
-
-                          {expandedCategories.rentals && (
-                            <div className="flex flex-wrap gap-1.5 pt-1 animate-in fade-in duration-150">
-                              {HERO_LAND_TYPES.filter((t) => t.category === 'Income-Generating & Rentals').map((t) => {
-                                const isSelected = selectedLandTypes.includes(t.id);
-                                return (
-                                  <button
-                                    key={t.id}
-                                    type="button"
-                                    onClick={() => handleToggleLandType(t.id)}
-                                    className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer border ${
-                                      isSelected
-                                        ? 'bg-[#fff1dc] text-[#c75e0a] border-[#FF9933] shadow-2xs ring-1 ring-[#FF9933]/30'
-                                        : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
-                                    }`}
-                                  >
-                                    {t.label}
-                                  </button>
-                                );
-                              })}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Segment 3: Budget Dropdown with Popover */}
-                  <div ref={budgetRef} className="relative px-4 py-2 sm:py-1">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setBudgetPopoverOpen(!budgetPopoverOpen);
-                        setLandTypePopoverOpen(false);
-                      }}
-                      aria-label="Select budget range"
-                      aria-expanded={budgetPopoverOpen}
-                      className="w-full flex items-center justify-between sm:justify-start gap-2 text-left cursor-pointer select-none"
-                    >
-                      <div className="flex items-center gap-1 min-w-0">
-                        <span className="w-5 h-5 rounded-full bg-[#fff1dc] text-[#c75e0a] flex items-center justify-center text-xs font-black shrink-0">
-                          ₹
-                        </span>
-                        <span className="text-xs sm:text-sm font-extrabold text-slate-800 truncate max-w-[130px]">
-                          {selectedBudget.label}
-                        </span>
-                      </div>
-                      <ChevronDown
-                        className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${budgetPopoverOpen ? 'rotate-180 text-[#FF9933]' : ''
-                          }`}
-                      />
-                    </button>
-
-                    {/* Budget Popover */}
-                    {budgetPopoverOpen && (
-                      <div className="absolute left-0 sm:left-auto sm:right-0 top-[calc(100%+14px)] z-50 w-[280px] sm:w-[320px] p-4 rounded-3xl bg-white border border-slate-200 shadow-[0_20px_50px_rgba(0,0,0,0.15)] animate-in fade-in slide-in-from-top-2 duration-150 space-y-3">
-                        <div className="text-[11px] font-black uppercase tracking-wider text-slate-600">
-                          Select Budget Range
-                        </div>
-
-                        <div className="space-y-1.5">
-                          {BUDGET_PRESETS.map((preset, idx) => {
-                            const isSelected = selectedBudgetIndex === idx;
-                            return (
-                              <button
-                                key={preset.label}
-                                type="button"
-                                onClick={() => {
-                                  setSelectedBudgetIndex(idx);
-                                  setBudgetPopoverOpen(false);
-                                }}
-                                className={`w-full flex items-center justify-between p-2.5 rounded-xl text-left text-xs font-bold transition-colors cursor-pointer ${isSelected
-                                    ? 'bg-[#fff1dc] text-[#c75e0a] border border-[#FF9933]/40'
-                                    : 'hover:bg-slate-50 text-slate-700'
-                                  }`}
-                              >
-                                <span>{preset.label}</span>
-                                {isSelected && (
-                                  <Check className="w-3.5 h-3.5 text-[#FF9933] shrink-0" />
-                                )}
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Segment 4: Search Button */}
-                  <div className="px-2 py-1">
-                    <button
-                      type="submit"
-                      aria-label="Search properties"
-                      className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3 rounded-2xl sm:rounded-full bg-[#FF9933] hover:bg-[#f07d12] text-white text-sm font-black shadow-md hover:shadow-lg transition-all cursor-pointer shrink-0"
-                    >
-                      <Search className="w-4 h-4" />
-                      <span>Search</span>
-                    </button>
-                  </div>
-                </form>
-              </div>
-
-              {/* ── Popular Search Chips & Verified Toggle Beneath ── */}
-              <div className="flex flex-wrap items-center justify-between gap-3 px-1 text-xs">
-                <label htmlFor="hero-verified-only" className="inline-flex items-center gap-2 text-slate-700 font-semibold cursor-pointer select-none">
-                  <input
-                    type="checkbox"
-                    id="hero-verified-only"
-                    name="verifiedOnly"
-                    checked={verifiedOnly}
-                    onChange={(e) => setVerifiedOnly(e.target.checked)}
-                    className="w-4 h-4 rounded accent-[#FF9933] border-slate-300"
-                  />
-                  <span className="flex items-center gap-1.5">
-                    <Sparkles className="w-4 h-4 text-[#FF9933]" />
-                    <span className="text-xs font-bold text-slate-700">
-                      Direct Owner Listings Only (0% Brokerage)
-                    </span>
-                  </span>
-                </label>
-
-                <div className="flex items-center gap-1.5 flex-wrap">
-                  <span className="text-slate-400 font-bold text-xs">Popular:</span>
-                  {POPULAR_SEARCH_TAGS.map((tag) => (
-                    <Link
-                      key={tag.label}
-                      href={`/buy?query=${encodeURIComponent(tag.query)}`}
-                      className="px-3 py-1 rounded-full bg-white hover:bg-[#fff1dc] hover:text-[#c75e0a] text-slate-600 text-xs font-bold border border-slate-200/80 shadow-2xs transition-colors"
-                    >
-                      {tag.label}
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ═══════════════════════════════════════════════════════
-            2. FOUR VALUE PILLARS (Clean Minimalist White Cards)
-        ═══════════════════════════════════════════════════════ */}
+        {/* 2. FOUR VALUE PILLARS (Clean Minimalist White Cards) */}
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" aria-labelledby="platform-highlights-heading">
           <h2 id="platform-highlights-heading" className="sr-only">
             Why Choose BhoomiMitra Platform Highlights
@@ -859,105 +159,26 @@ export function HomePageClient({
           </div>
         </section>
 
-        {/* ═══════════════════════════════════════════════════════
-            3. REAL FEATURED PROPERTIES SECTION (Direct Classifieds)
-        ═══════════════════════════════════════════════════════ */}
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <div className="flex items-center gap-2">
-                <h2 className="text-xl sm:text-2xl font-black text-slate-950 tracking-tight">
-                  Featured Property Classifieds
-                </h2>
-                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#fff1dc] text-[#c75e0a] text-xs font-bold">
-                  <Sparkles className="w-3.5 h-3.5 text-[#FF9933]" />
-                  <span>Direct Classifieds • 0% Brokerage</span>
-                </span>
-              </div>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Real published properties from direct owners with verified phone contact
-              </p>
-            </div>
+        {/* 3. REAL FEATURED PROPERTIES SECTION */}
+        <FeaturedPropertiesSection
+          properties={properties}
+          loading={loading}
+          publicListingFee={publicListingFee}
+          listingDurationDays={listingDurationDays}
+          onRequireLogin={() => setAuthModalOpen(true)}
+        />
 
-            <Link
-              href="/buy"
-              className="inline-flex items-center gap-1 text-xs font-bold text-[#c75e0a] hover:text-[#FF9933] hover:underline"
-            >
-              <span>View All Properties</span>
-              <ChevronRight className="w-4 h-4" />
-            </Link>
-          </div>
-
-          {loading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-              {[1, 2, 3, 4].map((n) => (
-                <div
-                  key={n}
-                  className="rounded-3xl border border-slate-200 bg-white p-4 space-y-3 animate-pulse"
-                >
-                  <div className="h-44 bg-slate-100 rounded-2xl" />
-                  <div className="h-4 bg-slate-100 rounded w-3/4" />
-                  <div className="h-3 bg-slate-100 rounded w-1/2" />
-                  <div className="h-9 bg-slate-100 rounded-xl" />
-                </div>
-              ))}
-            </div>
-          ) : properties.length === 0 ? (
-            /* Clean, elegant real empty state without any fake/demo cards */
-            <div className="p-10 sm:p-14 text-center bg-gradient-to-b from-[#fffbf5] to-white rounded-3xl border border-dashed border-[#FF9933]/40 space-y-4 max-w-2xl mx-auto">
-              <div className="w-14 h-14 rounded-2xl bg-white text-[#FF9933] border border-[#FF9933]/30 shadow-xs flex items-center justify-center mx-auto">
-                <LandPlot className="w-7 h-7" />
-              </div>
-              <div className="space-y-1.5">
-                <h3 className="text-base font-extrabold text-slate-900">
-                  No Active Property Listings Published Yet
-                </h3>
-                <p className="text-xs text-slate-500 max-w-md mx-auto leading-relaxed">
-                  Be the first owner to list your plot, home, or commercial space. Reach thousands of serious buyers and tenants across India with zero brokerage.
-                </p>
-              </div>
-              <div className="pt-2">
-                <Link
-                  href="/sell"
-                  prefetch={false}
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-[#FF9933] text-white text-xs font-extrabold shadow-md hover:bg-[#f07d12] transition-colors"
-                >
-                  <span>Post Your Property Listing — Flat ₹{publicListingFee} for {listingDurationDays} Days</span>
-                  <ArrowRight className="w-4 h-4" />
-                </Link>
-              </div>
-            </div>
-          ) : (
-            <div className="flex flex-col gap-5 sm:gap-6">
-              {properties.map((property) => (
-                <PropertyCard
-                  key={property._id}
-                  property={property}
-                  priority={false}
-                  onRequireLogin={() => setAuthModalOpen(true)}
-                />
-              ))}
-            </div>
-          )}
-        </section>
-
-        {/* ═══════════════════════════════════════════════════════
-            4. LAND BUYER'S DUE DILIGENCE CHECKLIST
-        ═══════════════════════════════════════════════════════ */}
+        {/* 4. LAND BUYER'S DUE DILIGENCE CHECKLIST */}
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <DueDiligenceChecklist />
         </section>
 
-        {/* ═══════════════════════════════════════════════════════
-            5. INTERACTIVE INDIAN LAND AREA CONVERTER
-        ═══════════════════════════════════════════════════════ */}
+        {/* 5. INTERACTIVE INDIAN LAND AREA CONVERTER */}
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <LandAreaConverter />
         </section>
 
-        {/* ═══════════════════════════════════════════════════════
-            5. "SELL YOUR LAND" HIGH-CONVERSION BANNER
-        ═══════════════════════════════════════════════════════ */}
+        {/* 5. "SELL YOUR LAND" HIGH-CONVERSION BANNER */}
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-stone-950 via-[#7f3e10] to-[#c75e0a] text-white p-8 sm:p-12 shadow-xl border border-[#FF9933]/30">
             <div className="pointer-events-none absolute inset-0 opacity-10 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:16px_16px]" />
@@ -1026,9 +247,7 @@ export function HomePageClient({
           </div>
         </section>
 
-        {/* ═══════════════════════════════════════════════════════
-            6. MULTI-COLUMN SEO DIRECTORY (Clean Real Routes)
-        ═══════════════════════════════════════════════════════ */}
+        {/* 6. MULTI-COLUMN SEO DIRECTORY (Clean Real Routes) */}
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
           <div className="border-t border-slate-200 pt-8">
             <h3 className="text-sm sm:text-base font-bold text-slate-800 mb-6">
@@ -1164,9 +383,8 @@ export function HomePageClient({
         </section>
       </main>
 
+      {/* Footer */}
       {footer}
-
-
 
       {/* Authentication Modal */}
       {authModalOpen && (
