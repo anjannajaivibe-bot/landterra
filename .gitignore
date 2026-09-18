@@ -38,3 +38,6 @@ next-env.d.ts
 
 # security audit artifacts
 .security-audit/
+
+.vercel
+.env*.local
