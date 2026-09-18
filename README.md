@@ -1,6 +1,6 @@
-# BhoomiMitra (भू-मित्र) — Direct Land & Property Marketplace
+# BhoomiMitra (भू-मित्र) - Direct Property Marketplace
 
-[![Next.js](https://img.shields.io/badge/Next.js-15.5.23-black?style=flat&logo=next.js)](https://nextjs.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-15.4.9-black?style=flat&logo=next.js)](https://nextjs.org/)
 [![React](https://img.shields.io/badge/React-19.2-blue?style=flat&logo=react)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178c6?style=flat&logo=typescript)](https://www.typescriptlang.org/)
 [![TailwindCSS](https://img.shields.io/badge/Tailwind-CSS%20v4-38bdf8?style=flat&logo=tailwindcss)](https://tailwindcss.com/)
@@ -10,13 +10,14 @@
 [![Upstash Redis](https://img.shields.io/badge/Upstash-Redis%20Rate%20Limiting-00e9a3?style=flat&logo=redis)](https://upstash.com/)
 [![Resend](https://img.shields.io/badge/Resend-Transactional%20Email-black?style=flat&logo=resend)](https://resend.com/)
 
-**BhoomiMitra** is India's direct-to-owner land and real estate classifieds platform. Engineered to eliminate broker commissions, BhoomiMitra connects buyers directly with landowners and verified sellers through transparent peer-to-peer listings, interactive Google Satellite GIS mapping, direct phone call lead tracking, automated due diligence advisories, and a server-controlled flat-fee 30-day advertising model.
+**BhoomiMitra** is an India-focused property classifieds marketplace for **Sale, Rent, and Lease** listings across **Land & Plots, Residential, Commercial, and Hospitality**. It enables direct communication between buyers or tenants and sellers or authorized representatives, with Google Maps exploration, phone lead tracking, due diligence advisories, and a server-controlled flat 30-day advertising fee. BhoomiMitra itself does not charge a percentage brokerage on property transactions; any third-party agent fees, where applicable, are separate from the platform.
 
 ---
 
 ## 📑 Table of Contents
 
 - [Key Value Propositions](#-key-value-propositions)
+- [Marketplace Taxonomy](#-marketplace-taxonomy)
 - [System Architecture](#-system-architecture)
 - [Core Features & Modules](#-core-features--modules)
   - [1. Buyer Experience & Exploration](#1-buyer-experience--exploration)
@@ -40,12 +41,40 @@
 
 | Pillar | How BhoomiMitra Delivers It |
 | :--- | :--- |
-| **0% Brokerage** | 100% direct-to-owner peer-to-peer classifieds. Direct landowner phone and email reveal without broker markups. |
-| **Rich Property Taxonomy** | 5 comprehensive categories covering 25+ property types: **Land & Plots**, **Residential Units**, **Commercial & Retail**, **Hospitality & Leisure**, and **Income-Generating Rentals**. |
+| **0% Platform Brokerage** | BhoomiMitra does not charge a percentage brokerage on the property transaction. The listing/publishing fee is separate. Any third-party agent fee, where applicable, is outside BhoomiMitra. |
+| **Canonical Property Taxonomy** | 4 primary categories covering 25 canonical property types: **Land & Plots**, **Residential**, **Commercial**, and **Hospitality**. |
+| **Transaction-Aware Listings** | **Sale**, **Rent**, and **Lease** are modeled independently from property type, keeping pricing, filters, seller inputs, and legacy compatibility transaction-aware. |
 | **Geospatial Intelligence** | MongoDB `2dsphere` geospatial indexing with `$near` proximity search and `$geoWithin` spherical radius filtering. Switchable Google Satellite and Roadmap GIS exploration. |
 | **Anti-Fraud & Quality** | Strict 2-listing limit per seller, deep content-level duplicate detection (matching media keys, documents, or title+area+pincode), and government document moderation suite. |
-| **Flat Advertising Model** | Eliminates percentage commissions with server-authoritative flat listing fees (e.g. ₹10–₹25 for 30-day advertisement cycles) powered by Razorpay. |
-| **Legal Due Diligence First** | Every listing includes prominent independent legal advisories, advocate verification guidance, and a built-in due diligence checklist. |
+| **Flat Advertising Model** | Uses server-authoritative flat listing fees for fixed advertising periods, powered by Razorpay. The publishing fee is separate from the property asking price and transaction consideration. |
+| **Legal Due Diligence First** | Listings include independent due diligence advisories and document-review status where applicable. A BhoomiMitra review does not guarantee ownership, title, legality, valuation, or suitability. |
+
+---
+
+## 🧭 Marketplace Taxonomy
+
+### Transaction Types
+
+- **Sale**
+- **Rent**
+- **Lease**
+
+Transaction type is stored separately from property type. Legacy records are normalized for search and display without destructively rewriting existing database values.
+
+### Primary Categories and Canonical Property Types
+
+| Category | Canonical Property Types |
+| :--- | :--- |
+| **Land & Plots** | Residential Plots, Farm Plots, Agricultural Land, Commercial Land, Industrial Plots, Institutional Land |
+| **Residential** | Flats / Apartments, Independent Houses, Villas, Townhouses, Duplexes, Penthouses, Farmhouses |
+| **Commercial** | Retail Shops, Showrooms, Office Spaces, Co-working Spaces, Shopping Malls, Warehouses / Godowns, Industrial Buildings, Industrial Sheds |
+| **Hospitality** | Hotels, Resorts, Serviced Apartments, Guest Houses |
+
+### Seller and Review Semantics
+
+- `INDIVIDUAL` seller type is displayed as **Individual Seller** unless an explicit ownership declaration supports **Owner Listed**.
+- Listing review status is separate from seller identity or ownership. A reviewed listing is labeled **Listing Reviewed**, not an ownership-verification claim.
+- Legacy property values remain searchable through compatibility mappings while current seller forms use canonical values.
 
 ---
 
@@ -85,16 +114,16 @@ Mongoose 9.9      Object Storage          Server Orders       Sliding-Window    
 ### 1. Buyer Experience & Exploration
 
 - **Modular Search & Filter Bar (`/buy`)**:
-  - Filter across 25+ plot, residential, commercial, and hospitality property types.
+  - Filter across 25 canonical property types in Land & Plots, Residential, Commercial, and Hospitality.
   - Multi-unit area filtering with dynamic unit conversion (`Sq. Yards`, `Guntas`, `Cents`, `Acres`, `Hectares`).
-  - Budget sliders, price per yard ranges, facing direction (North, East, West, South, etc.), road width, soil type, and approval filters (DTCP, HMDA, RERA, Gram Panchayat, Agricultural).
+  - Transaction-aware filtering for Sale, Rent, and Lease, together with budget, area, facing, road width, approvals, and property-specific filters.
   - Quick-toggle active filter badges with one-click filter dismissal and URL query persistence.
 - **Geospatial Satellite & Roadmap Explorer (`/properties/[id]`)**:
   - Switch seamlessly between high-resolution Google Satellite imagery and Roadmap view.
   - Interactive pin overlay with optional approximate privacy radius masking.
   - Instant Google Maps driving directions launch.
-- **Direct "Call Landowner" Lead Action**:
-  - One-click phone reveal button that triggers a direct phone call (`tel:`) to the property owner.
+- **Direct "Call Seller" Lead Action**:
+  - One-click phone reveal button that triggers a direct phone call (`tel:`) to the listing seller or authorized contact.
   - Rate-limited and protected against automated scrapers.
   - Automatically records buyer details, property ID, and timestamp into MongoDB `inquiries` and immutable `auditlogs`.
 - **Smart Land Area Converter Tool (`components/tools/LandAreaConverter.tsx`)**:
@@ -108,7 +137,7 @@ Mongoose 9.9      Object Storage          Server Orders       Sliding-Window    
 ### 2. Seller Portal & Listing Engine
 
 - **Multi-Step Listing Creator (`/sell`)**:
-  - Guided creation process covering basic details, property categorization, land dimensions, pricing, and amenities.
+  - Guided creation process covering transaction type, property category and subtype, property-specific specifications, location, pricing, amenities, media, records, and seller review.
   - Client-side image compression (<900 KB) before direct upload to Cloudflare R2 via presigned URLs.
   - Video tour uploads with thumbnail generation and serverless FFmpeg processing.
   - Document attachment support for official records (Title Deed, Passbook / Pahani, Encumbrance Certificate, Tax Receipts).
@@ -166,7 +195,7 @@ $$\text{1 Cent} = 48.4 \text{ sq. yd} \approx 435.6 \text{ sq. ft}$$
 
 $$\text{1 Hectare} = 11,959.9 \text{ sq. yd} \approx 2.471 \text{ Acres}$$
 
-$$\text{1 Bigha (Standard)} \approx 1,600 \text{ to } 3,025 \text{ sq. yd (region-specific)}$$
+**Bigha is region-specific and has no single national standard.** Any Bigha conversion must use the applicable local convention rather than a universal fixed value.
 
 ---
 
@@ -303,42 +332,42 @@ $$\text{1 Bigha (Standard)} \approx 1,600 \text{ to } 3,025 \text{ sq. yd (regio
 ## 🔌 API Routes Reference
 
 ### Public & Marketplace
-- `GET /api/properties` — Fetch properties with full-text search, pagination, and `$near` / `$geoWithin` geospatial radius filtering.
-- `GET /api/properties/[id]` — Retrieve full property details with view-count incrementation and seller masking.
-- `POST /api/properties/[id]/call` — Unlock seller phone number, log lead inquiry, and record audit trail.
-- `GET /api/settings/public` — Get live platform listing fees and advertisement duration.
-- `POST /api/contact` — Submit customer support grievance or query.
-- `POST /api/resolve-map-link` — Expand Google Maps short links into lat/lng coordinates (SSRF-protected).
+- `GET /api/properties` - Fetch properties with full-text search, pagination, and `$near` / `$geoWithin` geospatial radius filtering.
+- `GET /api/properties/[id]` - Retrieve full property details with view-count incrementation and seller masking.
+- `POST /api/properties/[id]/call` - Unlock seller phone number, log lead inquiry, and record audit trail.
+- `GET /api/settings/public` - Get live platform listing fees and advertisement duration.
+- `POST /api/contact` - Submit customer support grievance or query.
+- `POST /api/resolve-map-link` - Expand Google Maps short links into lat/lng coordinates (SSRF-protected).
 
 ### Authentication & User
-- `GET /api/auth/session` — Resolve authenticated user profile and permissions.
-- `POST /api/auth/otp/send` — Request 6-digit SMS OTP (Fast2SMS / Twilio).
-- `POST /api/auth/otp/verify` — Verify SMS OTP against salted HMAC challenge.
-- `GET /api/auth/google` & `/api/auth/google/callback` — Google OAuth 2.0 flow.
-- `POST /api/auth/logout` — Clear session cookie and invalidate authentication.
-- `GET|POST /api/favorites` — Manage buyer saved properties watchlist.
+- `GET /api/auth/session` - Resolve authenticated user profile and permissions.
+- `POST /api/auth/otp/send` - Request 6-digit SMS OTP (Fast2SMS / Twilio).
+- `POST /api/auth/otp/verify` - Verify SMS OTP against salted HMAC challenge.
+- `GET /api/auth/google` & `/api/auth/google/callback` - Google OAuth 2.0 flow.
+- `POST /api/auth/logout` - Clear session cookie and invalidate authentication.
+- `GET|POST /api/favorites` - Manage buyer saved properties watchlist.
 
 ### Seller Operations
-- `POST /api/properties` — Create draft or pending listing with 2-listing limit and duplicate checks.
-- `PATCH /api/properties/[id]` — Update property attributes, media, or coordinates.
-- `DELETE /api/properties/[id]` — Soft-delete listing and cancel active advertising.
-- `POST /api/uploads/presigned-url` — Request presigned Cloudflare R2 upload URL for images and documents.
-- `POST /api/uploads/video` & `/api/uploads/video/process` — Video tour upload and transcoding.
-- `POST /api/payments/create-order` — Create Razorpay order with server-calculated listing fee.
-- `POST /api/payments/verify` — Verify payment signature and activate 30-day listing subscription.
-- `POST /api/payments/webhook` — Asynchronous Razorpay webhook handler (`order.paid`, `payment.captured`).
+- `POST /api/properties` - Create draft or pending listing with 2-listing limit and duplicate checks.
+- `PATCH /api/properties/[id]` - Update property attributes, media, or coordinates.
+- `DELETE /api/properties/[id]` - Soft-delete listing and cancel active advertising.
+- `POST /api/uploads/presigned-url` - Request presigned Cloudflare R2 upload URL for images and documents.
+- `POST /api/uploads/video` & `/api/uploads/video/process` - Video tour upload and transcoding.
+- `POST /api/payments/create-order` - Create Razorpay order with server-calculated listing fee.
+- `POST /api/payments/verify` - Verify payment signature and activate 30-day listing subscription.
+- `POST /api/payments/webhook` - Asynchronous Razorpay webhook handler (`order.paid`, `payment.captured`).
 
 ### Admin Console
-- `GET /api/admin/stats` — Executive metrics (GMV, active listings, verifications, users).
-- `GET /api/admin/properties` — Filter listings by status with pagination.
-- `POST /api/admin/properties/[id]/verify` — Approve or reject property title deeds with moderator notes.
-- `GET /api/admin/users` — User management and role switching.
-- `GET /api/admin/audit-logs` — Immutable audit logs query.
-- `GET|PATCH /api/admin/settings` — Configure dynamic platform settings.
+- `GET /api/admin/stats` - Executive metrics (GMV, active listings, verifications, users).
+- `GET /api/admin/properties` - Filter listings by status with pagination.
+- `POST /api/admin/properties/[id]/verify` - Approve or reject property title deeds with moderator notes.
+- `GET /api/admin/users` - User management and role switching.
+- `GET /api/admin/audit-logs` - Immutable audit logs query.
+- `GET|PATCH /api/admin/settings` - Configure dynamic platform settings.
 
 ### Automated Crons
-- `GET /api/cron/sync-expired-subscriptions` — Daily subscription sync and pre-expiry reminder dispatch (`Bearer <CRON_SECRET>`).
-- `GET /api/cron/cleanup-orphaned-uploads` — Daily Cloudflare R2 abandoned upload cleanup (`Bearer <CRON_SECRET>`).
+- `GET /api/cron/sync-expired-subscriptions` - Daily subscription sync and pre-expiry reminder dispatch (`Bearer <CRON_SECRET>`).
+- `GET /api/cron/cleanup-orphaned-uploads` - Daily Cloudflare R2 abandoned upload cleanup (`Bearer <CRON_SECRET>`).
 
 ---
 
@@ -436,7 +465,7 @@ APP_URL="http://localhost:3000"
 
 ### 1. Clone and Install
 ```bash
-git clone https://github.com/JairamMargam/landterra.git
+git clone https://github.com/anjannajaivibe-bot/landterra.git
 cd landterra
 npm install
 ```
@@ -487,4 +516,4 @@ npm run build
 
 ## 📄 License
 
-This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
