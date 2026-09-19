@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/security/auth';
 import { checkRateLimit } from '@/lib/security/rate-limit';
-import { CreateInquirySchema } from '@/lib/validation/payment';
+import { CreateInquirySchema } from '@/lib/validation/actions';
 import { createInquiry, getInquiriesForSeller, getInquiriesForBuyer, updateInquiryStatus } from '@/services/inquiry.service';
 
 const USER_INQUIRY_LIMIT = 15;
