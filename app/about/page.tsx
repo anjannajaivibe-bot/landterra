@@ -7,15 +7,10 @@ import {
   ShieldCheck,
   LandPlot,
   Users,
-  Building2,
-  Scale,
-  Sparkles,
   ArrowRight,
-  CheckCircle2,
   HeartHandshake,
   MapPin,
   FileText,
-  TrendingUp,
 } from 'lucide-react';
 
 export default function AboutPage() {
