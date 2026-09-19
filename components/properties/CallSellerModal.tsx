@@ -13,7 +13,6 @@ import {
   Mail,
   Sparkles,
 } from 'lucide-react';
-import { CloudflareTurnstile } from '@/components/security/CloudflareTurnstile';
 import { useModalAccessibility } from '@/hooks/useModalAccessibility';
 
 interface CallSellerModalProps {
@@ -28,7 +27,6 @@ interface CallSellerModalProps {
   propertyId?: string;
   callLoading?: boolean;
   callError?: string;
-  onVerify?: (token: string) => void;
   onRetry?: () => void;
   onOpenInquiry?: () => void;
   onTrackWhatsApp?: () => void;
@@ -43,7 +41,6 @@ export function CallSellerModal({
   propertyId,
   callLoading,
   callError,
-  onVerify,
   onRetry,
   onOpenInquiry,
   onTrackWhatsApp,
@@ -88,10 +85,10 @@ export function CallSellerModal({
           </div>
           <div>
             <h3 id="call-seller-modal-title" className="text-base font-extrabold text-slate-900 leading-tight">
-              Direct Landowner Contact
+              Seller contact
             </h3>
             <p className="text-xs text-slate-500 mt-0.5">
-              Zero brokerage • Direct to owner
+              Contact the listing seller directly
             </p>
           </div>
         </div>
@@ -136,7 +133,7 @@ export function CallSellerModal({
 
                 <div className="inline-flex items-center gap-1 rounded-full bg-[#fff1dc] px-2.5 py-1 text-[10px] font-bold text-[#c75e0a] border border-[#FF9933]/30">
                   <Sparkles className="h-3.5 w-3.5 text-[#FF9933]" />
-                  Direct Seller
+                  Seller
                 </div>
               </div>
 
@@ -177,7 +174,7 @@ export function CallSellerModal({
                 const cleanPhone = phone10.length === 10 ? `91${phone10}` : digits;
                 const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://bhoomimitra.com';
                 const listingLink = propertyId ? `${baseUrl}/properties/${propertyId}` : '';
-                const prefilledText = `Hi ${sellerData.sellerName || 'Landowner'}, I saw your listing "${propertyTitle || 'Property'}" on BhoomiMitra. I am interested and would like to get more details / site pin.${listingLink ? `\n\nListing: ${listingLink}` : ''}`;
+                const prefilledText = `Hi ${sellerData.sellerName || 'Seller'}, I saw your listing "${propertyTitle || 'Property'}" on BhoomiMitra. I am interested and would like to get more details / site pin.${listingLink ? `\n\nListing: ${listingLink}` : ''}`;
                 const whatsappUrl = cleanPhone ? `https://wa.me/${cleanPhone}?text=${encodeURIComponent(prefilledText)}` : '#';
 
                 return (
@@ -223,42 +220,20 @@ export function CallSellerModal({
               <div className="rounded-xl bg-[#fff9f0] border border-[#FF9933]/25 p-3 text-[11px] text-[#7a3705] flex items-start gap-2.5">
                 <ShieldCheck className="h-4 w-4 text-[#FF9933] shrink-0 mt-0.5" />
                 <p className="leading-relaxed">
-                  <strong>Direct Connection:</strong> Logged with your verified account (<code className="font-semibold text-[#c75e0a]">{userEmail}</code>) for safe marketplace communications.
+                  <strong>Contact access:</strong> Logged with your verified account (<code className="font-semibold text-[#c75e0a]">{userEmail}</code>) for safe marketplace communications.
                 </p>
               </div>
             )}
           </div>
         ) : (
-          <div className="space-y-4 py-1">
-            <div className="rounded-2xl bg-[#fffbf5] border border-[#FF9933]/30 p-4 text-center space-y-2">
-              <div className="w-12 h-12 rounded-2xl bg-[#fff1dc] text-[#c75e0a] flex items-center justify-center mx-auto">
-                <ShieldCheck className="w-6 h-6 text-[#FF9933]" />
-              </div>
-              <h4 className="text-sm font-extrabold text-slate-900">
-                Security Verification
-              </h4>
-              <p className="text-xs text-slate-600 leading-relaxed max-w-sm mx-auto">
-                Please complete this quick security verification to view landowner contact details.
-              </p>
-            </div>
-
-            {callLoading ? (
-              <div className="flex flex-col items-center justify-center py-6 space-y-2.5">
-                <Loader2 className="w-8 h-8 animate-spin text-[#FF9933]" />
-                <p className="text-xs font-bold text-slate-700">
-                  Retrieving landowner contact...
-                </p>
-              </div>
-            ) : onVerify ? (
-              <div className="flex justify-center py-2">
-                <CloudflareTurnstile
-                  action="call_seller"
-                  onSuccess={onVerify}
-                  onError={() => {}}
-                  onExpire={() => {}}
-                />
-              </div>
-            ) : null}
+          <div className="flex flex-col items-center justify-center py-8 space-y-3">
+            <Loader2 className="w-7 h-7 animate-spin text-[#FF9933]" />
+            <p className="text-xs font-bold text-slate-700">
+              Retrieving seller contact...
+            </p>
+            <p className="text-[10px] text-slate-500 text-center max-w-xs">
+              Contact access is protected by account checks and rate limits.
+            </p>
           </div>
         )}
       </div>
