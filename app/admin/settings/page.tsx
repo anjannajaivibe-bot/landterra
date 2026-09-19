@@ -178,7 +178,7 @@ export default function AdminSettingsPage() {
 
           <AdminToggle
             title="Phone OTP Verification Gate"
-            description="Require verified Indian mobile phone OTP before a landowner can create or publish land listings."
+            description="Require verified Indian mobile phone OTP before a seller can create or publish property listings."
             enabled={Boolean(settings.requirePhoneOtp)}
             onChange={() =>
               setSettings((prev) => ({
