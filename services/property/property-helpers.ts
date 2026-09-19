@@ -67,8 +67,8 @@ export function sanitizePropertyUpdates(
 
   /*
    * These are server-controlled lifecycle and verification fields.
-   * They should only be changed through dedicated payment /
-   * verification / admin workflows rather than generic client PATCH.
+   * Legacy payment/subscription values are also protected here so generic
+   * client PATCH requests cannot mutate historical billing metadata.
    */
   delete safe.paymentStatus;
   if (safe.listingStatus !== 'PAUSED' && safe.listingStatus !== 'PUBLISHED') {
