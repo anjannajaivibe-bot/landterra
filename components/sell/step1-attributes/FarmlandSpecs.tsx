@@ -30,8 +30,7 @@ export function FarmlandSpecs({ state, actions }: FarmlandSpecsProps) {
 
   const isFarmland =
     landType === 'AGRICULTURAL_LAND' ||
-    landType === 'FARMLAND_PLOT' ||
-    landType === 'FARM_HOUSE_LAND';
+    landType === 'FARMLAND_PLOT';
 
   if (!isFarmland) {
     return null;
