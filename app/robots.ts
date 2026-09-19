@@ -11,7 +11,6 @@ export default function robots(): MetadataRoute.Robots {
           '/',
           '/buy',
           '/sell',
-          '/pricing',
           '/about',
           '/contact',
           '/listing-rules',

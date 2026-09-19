@@ -3,18 +3,15 @@
 ================================================================ */
 
 /* ================================================================
-   LISTING SUBSCRIPTION
+   LEGACY LISTING-FEE COMPATIBILITY
 ================================================================ */
 
 /**
- * BhoomiMitra seller listing subscription:
- *
- * Flat listing publishing fee for 30 days.
- *
- * IMPORTANT:
- * This is NOT the seller's property asking price.
+ * New BhoomiMitra listings are currently free to publish.
+ * These exports are retained temporarily so older code and stored records
+ * can be migrated without reintroducing a paid-listing requirement.
  */
-export const LISTING_PRICE_PER_SQ_YARD_PER_MONTH = 10;
+export const LISTING_PRICE_PER_SQ_YARD_PER_MONTH = 0;
 
 export const LISTING_SUBSCRIPTION_DURATION_DAYS = 30;
 
@@ -39,7 +36,7 @@ export const SITE_CONFIG = {
   currencyLocale: 'en-IN',
 
   /* --------------------------------------------------------------
-     SELLER LISTING FEE
+     LEGACY LISTING-FEE COMPATIBILITY
   -------------------------------------------------------------- */
 
   listingPricePerSqYardPerMonth:
@@ -644,11 +641,11 @@ export const BUYER_SAFETY_MESSAGE =
   'Never send money, OTPs, passwords or sensitive account information directly to another user. Use the BhoomiMitra platform for property inquiries and verify the property independently before making any payment or commitment.';
 
 /* ================================================================
-   SELLER FEE EXPLANATION
+   LISTING FEE EXPLANATION
 ================================================================ */
 
 export const SELLER_LISTING_FEE_DESCRIPTION =
-  `BhoomiMitra charges sellers only a flat digital advertising and publishing fee for each 30-day property listing period. This fee is solely for publishing and maintaining the advertisement on BhoomiMitra. BhoomiMitra does not collect property purchase payments, booking amounts, token amounts, registration charges or sale consideration. The listing fee is completely separate from the seller's property asking price.`;
+  `BhoomiMitra currently allows property listings to be published without a platform listing fee. BhoomiMitra does not collect property purchase payments, booking amounts, token amounts, registration charges, rent, deposits or sale consideration through the marketplace.`;
 
 /* ================================================================
    VERIFICATION EXPLANATION

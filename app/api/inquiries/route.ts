@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/security/auth';
 import { checkRateLimit } from '@/lib/security/rate-limit';
-import { CreateInquirySchema } from '@/lib/validation/payment';
+import { CreateInquirySchema } from '@/lib/validation/actions';
 import { createInquiry, getInquiriesForSeller, getInquiriesForBuyer, updateInquiryStatus } from '@/services/inquiry.service';
 
 const USER_INQUIRY_LIMIT = 15;
@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       {
         error:
-          'Too many inquiries submitted. Please wait a few minutes before contacting more landowners.',
+          'Too many inquiries submitted. Please wait a few minutes before contacting more sellers.',
       },
       {
         status: 429,
@@ -112,7 +112,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'Inquiry sent directly to landowner. Check your buyer dashboard for updates.',
+      message: 'Inquiry sent directly to the seller. Check your buyer dashboard for updates.',
       inquiry,
     });
   } catch (err: unknown) {

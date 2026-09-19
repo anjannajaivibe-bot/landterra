@@ -31,10 +31,10 @@ export default function AboutPage() {
             <span>Our Mission &amp; Marketplace Model</span>
           </div>
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight">
-            India&apos;s Direct Land &amp; Plot Classifieds Marketplace
+            India&apos;s Property Marketplace for Sale, Rent &amp; Lease
           </h1>
           <p className="text-slate-300 text-sm sm:text-base mt-4 max-w-2xl leading-relaxed">
-            BhoomiMitra (भू-मित्र) connects land sellers directly with prospective buyers across India, eliminating middleman brokerages through transparent seller disclosures, satellite mapping, and a flat advertising model.
+            BhoomiMitra (भू-मित्र) connects property sellers with prospective buyers and tenants across India. Individuals, companies, and agents can advertise eligible properties while buyers can contact the listed seller directly.
           </p>
         </div>
       </div>
@@ -46,9 +46,9 @@ export default function AboutPage() {
             <div className="w-12 h-12 rounded-xl bg-[#fff1dc] border border-[#FF9933]/20 flex items-center justify-center text-[#c75e0a]">
               <LandPlot className="w-6 h-6 text-[#FF9933]" />
             </div>
-            <h3 className="font-bold text-slate-900 text-base">Direct to Owner</h3>
+            <h3 className="font-bold text-slate-900 text-base">Direct Seller Contact</h3>
             <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-              Zero broker commissions. Buyers communicate directly with genuine landowners and authorized representatives.
+              Buyers and tenants can contact the listed individual, company, or agent seller directly without a BhoomiMitra brokerage percentage.
             </p>
           </div>
 
@@ -79,10 +79,10 @@ export default function AboutPage() {
             <span>The Challenge</span>
           </div>
           <h2 className="text-xl sm:text-2xl font-bold text-slate-900">
-            The Problem with Traditional Indian Land Markets
+            Common Friction in Indian Property Discovery
           </h2>
           <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
-            For decades, buying and selling land in India has been a stressful and friction-filled financial experience:
+            Property discovery in India can involve duplicate advertisements, inconsistent information, fragmented measurements, and avoidable transaction friction:
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs sm:text-sm">
@@ -122,10 +122,10 @@ export default function AboutPage() {
             <span>The BhoomiMitra Advantage</span>
           </div>
           <h2 className="text-xl sm:text-2xl font-bold text-slate-900">
-            How We Are Transforming Land Classifieds
+            How BhoomiMitra Structures the Marketplace
           </h2>
           <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
-            BhoomiMitra re-engineers the land marketplace with direct connectivity, technology, and transparency:
+            BhoomiMitra combines direct seller contact, structured property data, moderation, and buyer due-diligence guidance:
           </p>
 
           <div className="space-y-3.5">
@@ -136,7 +136,7 @@ export default function AboutPage() {
               <div className="space-y-1">
                 <h4 className="font-bold text-sm text-slate-900">1. Direct Classifieds &amp; Seller Undertakings</h4>
                 <p className="text-xs text-slate-600 leading-relaxed">
-                  Sellers submit listings directly and accept formal legal declarations regarding ownership and accuracy. Listings publish instantly upon flat-fee payment without middleman interference.
+                  Sellers submit listings directly, disclose their seller type, and accept declarations regarding authority and accuracy. Submitted listings follow platform checks and review before approved listings become publicly visible.
                 </p>
               </div>
             </div>
@@ -146,9 +146,9 @@ export default function AboutPage() {
                 <HeartHandshake className="w-5 h-5 text-[#FF9933]" />
               </div>
               <div className="space-y-1">
-                <h4 className="font-bold text-sm text-slate-900">2. Flat Listing Fee • 0% Deal Commissions</h4>
+                <h4 className="font-bold text-sm text-slate-900">2. ₹0 Current Listing Fee • 0% Platform Brokerage</h4>
                 <p className="text-xs text-slate-600 leading-relaxed">
-                  Sellers pay a nominal flat listing fee (₹10–₹25 for 30 days) to host their advertisement. When your land sells, you keep 100% of the sale proceeds.
+                  BhoomiMitra currently charges no platform listing fee and does not take a brokerage percentage or success fee from the property transaction.
                 </p>
               </div>
             </div>
@@ -175,23 +175,23 @@ export default function AboutPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs sm:text-sm">
             <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
-              <strong className="text-slate-900 block font-bold">🌾 Agricultural Farmers &amp; Landowners</strong>
-              <p className="text-slate-600 text-xs">Reach serious buyers directly across India and avoid paying heavy middleman commissions.</p>
+              <strong className="text-slate-900 block font-bold">🏠 Individual Property Sellers</strong>
+              <p className="text-slate-600 text-xs">Advertise eligible property and communicate directly with prospective buyers or tenants.</p>
             </div>
 
             <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
-              <strong className="text-slate-900 block font-bold">🏡 Farmhouse &amp; Weekend Plot Enthusiasts</strong>
-              <p className="text-slate-600 text-xs">Discover farmland plots with road access, soil details, and direct seller contact.</p>
+              <strong className="text-slate-900 block font-bold">🏢 Companies &amp; Authorized Agents</strong>
+              <p className="text-slate-600 text-xs">List eligible inventory while clearly identifying the seller type and keeping property information current.</p>
             </div>
 
             <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
-              <strong className="text-slate-900 block font-bold">🏘️ Long-Term Land Investors &amp; NRIs</strong>
-              <p className="text-slate-600 text-xs">Explore direct landowner listings across high-growth highway corridors with full due diligence guidance.</p>
+              <strong className="text-slate-900 block font-bold">🔎 Buyers, Tenants &amp; Investors</strong>
+              <p className="text-slate-600 text-xs">Explore sale, rent, and lease listings and contact the listed seller directly while conducting independent due diligence.</p>
             </div>
 
             <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
-              <strong className="text-slate-900 block font-bold">🏢 Commercial &amp; Industrial Developers</strong>
-              <p className="text-slate-600 text-xs">Acquire commercial road-facing bits, warehouse acreage, and layout plots directly.</p>
+              <strong className="text-slate-900 block font-bold">🏬 Commercial &amp; Hospitality Users</strong>
+              <p className="text-slate-600 text-xs">Discover commercial spaces, industrial properties, hotels, resorts, serviced apartments, and related opportunities.</p>
             </div>
           </div>
         </div>
@@ -199,17 +199,17 @@ export default function AboutPage() {
         {/* Bottom CTA Banner */}
         <div className="p-8 rounded-3xl bg-slate-950 text-white text-center space-y-5 border border-slate-800">
           <h3 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
-            Ready to find or list your land?
+            Ready to find or list property?
           </h3>
           <p className="text-xs sm:text-sm text-slate-300 max-w-xl mx-auto leading-relaxed">
-            Join thousands of landowners and buyers across India experiencing a commission-free, transparent, and modern land marketplace.
+            Explore property listings or publish an eligible listing through a marketplace designed around direct seller contact, clear disclosures, and independent buyer due diligence.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
             <Link
               href="/buy"
               className="w-full sm:w-auto px-6 py-3 rounded-xl bg-white text-slate-950 hover:bg-slate-100 font-bold text-xs sm:text-sm transition-all"
             >
-              Explore Land Listings
+              Explore Properties
             </Link>
             <Link
               href="/sell"

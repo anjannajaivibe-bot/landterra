@@ -10,8 +10,6 @@ export async function GET() {
     const payload = {
       requireGoogleLogin: Boolean(settings.requireGoogleLogin),
       requirePhoneOtp: Boolean(settings.requirePhoneOtp),
-      listingFeeAmount: typeof settings.listingFeeAmount === 'number' ? settings.listingFeeAmount : 10,
-      listingFeeDurationDays: typeof settings.listingFeeDurationDays === 'number' ? settings.listingFeeDurationDays : 30,
     };
 
     return NextResponse.json(
@@ -31,8 +29,6 @@ export async function GET() {
     const fallback = {
       requireGoogleLogin: true,
       requirePhoneOtp: false, // Default to false on failure so sellers aren't blocked unexpectedly
-      listingFeeAmount: 10,
-      listingFeeDurationDays: 30,
     };
 
     return NextResponse.json(

@@ -1,21 +1,5 @@
 import { z } from 'zod';
 
-export const CreateOrderSchema = z.object({
-  propertyId: z.string().min(1, 'Property ID is required'),
-  landAreaYards: z.number().optional(),
-  purpose: z
-    .enum(['LISTING_SUBSCRIPTION', 'SUBSCRIPTION_RENEWAL'])
-    .optional()
-    .default('LISTING_SUBSCRIPTION'),
-});
-
-export const VerifyPaymentSchema = z.object({
-  propertyId: z.string().min(1, 'Property ID is required'),
-  razorpayOrderId: z.string().min(1, 'Razorpay order ID is required'),
-  razorpayPaymentId: z.string().min(1, 'Razorpay payment ID is required'),
-  razorpaySignature: z.string().min(1, 'Razorpay signature is required'),
-});
-
 export const CreateInquirySchema = z.object({
   propertyId: z.string().min(1, 'Property ID is required'),
   message: z.string().min(10, 'Inquiry message must be at least 10 characters').max(1000),

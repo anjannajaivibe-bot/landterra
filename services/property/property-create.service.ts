@@ -309,7 +309,7 @@ export async function createProperty(
 
     sellerName:
       data.sellerName ||
-      'Landowner',
+      'Seller',
 
     sellerPhone:
       data.sellerPhone,
@@ -349,7 +349,7 @@ export async function createProperty(
     monthlyListingFee,
 
     /*
-     * Subscription does not begin until payment.
+     * Legacy subscription timestamps remain unset for free listings.
      */
 
     subscriptionStartedAt:

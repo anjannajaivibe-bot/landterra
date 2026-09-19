@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireRole } from '@/lib/security/auth';
-import { VerifyPropertyActionSchema } from '@/lib/validation/payment';
+import { VerifyPropertyActionSchema } from '@/lib/validation/actions';
 import { executePropertyVerification } from '@/services/verification.service';
 
 export async function POST(

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/db/mongodb';
 import { ContactMessageModel } from '@/models/ContactMessage';
-import { CreateContactSchema } from '@/lib/validation/payment';
+import { CreateContactSchema } from '@/lib/validation/actions';
 import { notifySupportContactMessage } from '@/services/email.service';
 import { checkRateLimit } from '@/lib/security/rate-limit';
 

@@ -78,13 +78,13 @@ export default function PrivacyPage() {
               <span>Information We Collect</span>
             </h2>
             <p>
-              BhoomiMitra collects personal, geospatial, and property data strictly necessary for providing our land classifieds marketplace:
+              BhoomiMitra collects personal, geospatial, property, and service-usage data reasonably necessary to operate the property marketplace:
             </p>
             <ul className="list-disc pl-5 space-y-1.5 text-slate-600">
-              <li><strong>User Account Information:</strong> Name, verified Google OAuth email address, profile avatar, and verified mobile telephone number.</li>
+              <li><strong>User Account Information:</strong> Name, authenticated email address, profile information provided through sign-in, and mobile telephone number when provided or verified.</li>
               <li><strong>Property Listing Data:</strong> Geographic coordinates (latitude/longitude), village, tehsil, district, state, asking price, boundary descriptions, road width, and land classification.</li>
               <li><strong>Supporting Land Documents:</strong> Optional seller-uploaded scans of Registered Sale Deeds, 7/12 extracts, Pahani/Patta Passbooks, Encumbrance Certificates (EC), and Government Survey IDs.</li>
-              <li><strong>Transaction &amp; Payment Metadata:</strong> Order identifiers, payment timestamps, and subscription receipt records (financial payment card details are tokenized securely by authorized payment partners and never stored on our servers).</li>
+              <li><strong>Service &amp; Security Metadata:</strong> Authentication, moderation, inquiry, audit, and technical records needed to operate, secure, and troubleshoot the marketplace.</li>
             </ul>
           </section>
 
@@ -98,7 +98,7 @@ export default function PrivacyPage() {
             <ul className="list-disc pl-5 space-y-1.5 text-slate-600">
               <li>Authenticating your account via secure OTP verification and authenticated Google sign-in.</li>
               <li>Moderating listing complaints and preventing fraudulent, misleading, or infringing postings.</li>
-              <li>Displaying your land advertisement to potential buyers with accurate map filtering.</li>
+              <li>Displaying your property listing to prospective buyers or tenants with relevant search and map filtering.</li>
               <li>Routing buyer-to-seller inquiries via platform messaging and notifying you by email.</li>
               <li>Maintaining immutable compliance audit logs for platform trust and safety operations.</li>
             </ul>
@@ -117,7 +117,7 @@ export default function PrivacyPage() {
               <ul className="list-disc pl-5 space-y-1 text-slate-600">
                 <li>Uploaded deeds are stored in private encrypted cloud storage protected by secure authentication tokens.</li>
                 <li>Documents are <strong>never indexed by search engine crawlers</strong> (Google, Bing, etc.) and are stripped from public API responses.</li>
-                <li>Documents are restricted from public download and only accessible by the property owner or authorized admins handling takedown/complaint reviews.</li>
+                <li>Documents are restricted from public download and are accessible only through authorized seller or administrator workflows.</li>
               </ul>
             </div>
           </section>
@@ -133,8 +133,8 @@ export default function PrivacyPage() {
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
               <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
-                <strong className="text-slate-900 block mb-1">PCI-DSS Compliant Payment Gateways</strong>
-                <span className="text-slate-600">Bank-grade encrypted tokenization for processing classifieds publishing fees.</span>
+                <strong className="text-slate-900 block mb-1">Application &amp; Database Infrastructure</strong>
+                <span className="text-slate-600">Hosted application and database services used to operate accounts, listings, moderation, and marketplace workflows.</span>
               </div>
               <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
                 <strong className="text-slate-900 block mb-1">Encrypted Cloud Storage</strong>

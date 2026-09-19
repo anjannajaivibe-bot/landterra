@@ -10,7 +10,6 @@ import {
   XCircle,
   AlertTriangle,
   FileText,
-  CreditCard,
   MapPin,
   Lock,
   Building2,
@@ -35,7 +34,7 @@ export default function ListingRulesPage() {
             Listing Rules &amp; Seller Undertakings
           </h1>
           <p className="text-slate-300 text-sm sm:text-base mt-3 max-w-2xl leading-relaxed">
-            BhoomiMitra is built on direct peer-to-peer advertising, transparent seller disclosures, and buyer due diligence. Read our complete publishing rules and seller undertakings.
+            BhoomiMitra is built on seller-to-buyer property advertising, transparent disclosures, platform review, and buyer due diligence. Read our publishing rules and seller undertakings.
           </p>
         </div>
       </div>
@@ -47,9 +46,9 @@ export default function ListingRulesPage() {
             <div className="w-10 h-10 rounded-xl bg-[#fff1dc] border border-[#FF9933]/20 flex items-center justify-center text-[#c75e0a]">
               <LandPlot className="w-5 h-5 text-[#FF9933]" />
             </div>
-            <h3 className="font-bold text-slate-900 text-sm">Direct Landowners</h3>
+            <h3 className="font-bold text-slate-900 text-sm">Identified Sellers</h3>
             <p className="text-xs text-slate-600 leading-relaxed">
-              We host genuine owners or authorized Power of Attorney holders. Ghost listings and broker hoarding are strictly prohibited.
+              Individuals, companies, and agents may list property when they accurately disclose their seller type and authority to market the property.
             </p>
           </div>
 
@@ -69,38 +68,38 @@ export default function ListingRulesPage() {
             </div>
             <h3 className="font-bold text-slate-900 text-sm">0% Deal Commission</h3>
             <p className="text-xs text-slate-600 leading-relaxed">
-              Zero commission or brokerage percentage is charged on deal closure. You only pay a flat directory listing fee.
+              BhoomiMitra currently charges no platform listing fee and no brokerage percentage or success fee on a property transaction.
             </p>
           </div>
         </div>
 
-        {/* Section 1: Flat Classifieds Publishing Model */}
+        {/* Section 1: Free Classifieds Publishing Model */}
         <div className="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-xs space-y-5">
           <div className="flex items-center gap-3 pb-3 border-b border-slate-100">
             <div className="p-2 rounded-xl bg-[#fff1dc] text-[#c75e0a]">
-              <CreditCard className="w-5 h-5 text-[#FF9933]" />
+              <ShieldCheck className="w-5 h-5 text-[#FF9933]" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-slate-900">1. Digital Classifieds Listing Fee Model</h2>
-              <p className="text-xs text-slate-500">Flat advertisement fee with 30-day listing lifecycle</p>
+              <h2 className="text-lg font-bold text-slate-900">1. Free Property Listing &amp; Review Model</h2>
+              <p className="text-xs text-slate-500">No platform listing fee; submitted listings follow the review workflow</p>
             </div>
           </div>
 
           <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
-            To maintain listing hygiene, prevent automated spam, and eliminate unauthorized multi-broker duplicates, BhoomiMitra operates on a nominal <strong>flat digital classifieds publishing fee</strong> model:
+            BhoomiMitra currently allows sellers to submit property listings without a platform publishing fee. Listings remain subject to validation, anti-spam controls, moderation, and the applicable review workflow before public visibility.
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Standard Publishing Fee</span>
-              <p className="text-base font-extrabold text-[#c75e0a]">₹10 – ₹25 flat fee</p>
-              <p className="text-[11px] text-slate-600">Per property listing advertisement (configured platform-wide).</p>
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Platform Listing Fee</span>
+              <p className="text-base font-extrabold text-[#c75e0a]">₹0 Currently</p>
+              <p className="text-[11px] text-slate-600">No platform fee is currently required to submit or publish an approved property listing.</p>
             </div>
 
             <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Active Visibility Duration</span>
-              <p className="text-base font-extrabold text-blue-900">30 Days Active Hosting</p>
-              <p className="text-[11px] text-slate-600">Renewable seamlessly at any time from your Seller Dashboard.</p>
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Listing Visibility</span>
+              <p className="text-base font-extrabold text-blue-900">Lifecycle Based</p>
+              <p className="text-[11px] text-slate-600">Listings remain governed by review, pause, sold, rejection, deletion, and moderation states rather than a paid 30-day subscription.</p>
             </div>
           </div>
 
@@ -111,11 +110,11 @@ export default function ListingRulesPage() {
             </li>
             <li className="flex items-start gap-2">
               <CheckCircle2 className="w-4 h-4 text-[#FF9933] shrink-0 mt-0.5" />
-              <span><strong>Direct Live Publishing:</strong> Once the flat listing fee is paid, your ad goes live directly on the public marketplace.</span>
+              <span><strong>Review Before Publishing:</strong> Submitted listings enter the platform review flow, and approved listings can then appear on the public marketplace.</span>
             </li>
             <li className="flex items-start gap-2">
               <CheckCircle2 className="w-4 h-4 text-[#FF9933] shrink-0 mt-0.5" />
-              <span><strong>No Auto-Debits:</strong> Subscriptions do not auto-debit your bank card. When a 30-day listing expires, it simply pauses until you choose to renew it.</span>
+              <span><strong>No Listing Subscription:</strong> The current model does not require a paid 30-day listing subscription or renewal payment.</span>
             </li>
           </ul>
         </div>
@@ -226,7 +225,7 @@ export default function ListingRulesPage() {
               <li><strong>Litigation &amp; Encroached Parcels:</strong> Land parcels subject to active court stay orders, partition disputes, injunctions, or illegal physical encroachments.</li>
               <li><strong>Forest &amp; Eco-Sensitive Zones:</strong> Reserve forest boundary lands, CRZ (Coastal Regulation Zone) violations, and waterbody buffer zone encroachments (FTL/Bio-diversity zones).</li>
               <li><strong>Unauthorized Layouts:</strong> Unapproved layouts lacking master plan sanctions, layout approvals, or valid conversion certificates from revenue authorities.</li>
-              <li><strong>Broker Impersonations:</strong> Unregistered agents masquerading as sole owners without valid registered Power of Attorney (PoA).</li>
+              <li><strong>Seller Identity Misrepresentation:</strong> Individuals, companies, or agents falsely claiming ownership, authorization, or another seller identity they do not hold.</li>
             </ul>
           </div>
         </div>
@@ -260,7 +259,7 @@ export default function ListingRulesPage() {
         {/* Quick Links CTA */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-6 rounded-2xl bg-slate-900 text-white">
           <div>
-            <h4 className="font-bold text-sm sm:text-base">Have questions regarding listing your land?</h4>
+            <h4 className="font-bold text-sm sm:text-base">Have questions about listing a property?</h4>
             <p className="text-xs text-slate-400 mt-0.5">Our support team is here to assist with listing creation and rules.</p>
           </div>
           <div className="flex items-center gap-3 shrink-0">

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth, requireRole } from '@/lib/security/auth';
 import { checkRateLimit } from '@/lib/security/rate-limit';
-import { CreateReportSchema } from '@/lib/validation/payment';
+import { CreateReportSchema } from '@/lib/validation/actions';
 import { createReport, getAllReports, updateReportStatus } from '@/services/inquiry.service';
 import { z } from 'zod';
 
