@@ -38,10 +38,10 @@ export function HospitalitySpecs({ state, actions }: HospitalitySpecsProps) {
         </div>
         <div>
           <h3 className="text-sm font-extrabold text-slate-900">
-            Hospitality, Resort &amp; Retreat Infrastructure
+            Hospitality property details
           </h3>
           <p className="text-[11px] text-slate-500">
-            Room capacity, event lawns, guest recreation, and hospitality amenities.
+            Add room capacity, event facilities and guest amenities where applicable.
           </p>
         </div>
       </div>
@@ -50,7 +50,7 @@ export function HospitalitySpecs({ state, actions }: HospitalitySpecsProps) {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="block text-xs font-bold text-slate-700 mb-1.5">
-            Total Rooms / Cottages / Keys *
+            Total rooms / cottages / keys
           </label>
           <input
             type="text"
