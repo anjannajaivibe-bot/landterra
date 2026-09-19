@@ -677,3 +677,60 @@ export async function renewPropertySubscription(
     ? (updated as unknown as IProperty)
     : null;
 }
+
+/* ================================================================
+   SUBMIT PROPERTY FOR ADMIN REVIEW
+================================================================ */
+
+export async function submitPropertyForReview(
+  id: string,
+): Promise<IProperty | null> {
+  if (!id || !isValidObjectId(id)) {
+    return null;
+  }
+
+  const existing = await getPropertyById(id);
+
+  if (!existing) {
+    return null;
+  }
+
+  if (
+    existing.listingStatus === 'DELETED' ||
+    existing.listingStatus === 'SOLD'
+  ) {
+    throw new Error(
+      'This listing cannot be submitted for review in its current state.',
+    );
+  }
+
+  await connectToDatabase();
+
+  const nextVerificationStatus =
+    existing.verificationStatus === 'VERIFICATION_REQUIRED'
+      ? 'VERIFICATION_REQUIRED'
+      : 'PENDING';
+
+  const updated = await PropertyModel.findByIdAndUpdate(
+    id,
+    {
+      $set: {
+        listingStatus: 'PENDING_VERIFICATION',
+        verificationStatus: nextVerificationStatus,
+        updatedAt: new Date(),
+      },
+      $unset: {
+        rejectionReason: 1,
+        verificationReviewedAt: 1,
+        verificationReviewedBy: 1,
+      },
+    },
+    {
+      new: true,
+    },
+  ).lean();
+
+  invalidatePropertyCache();
+
+  return updated as unknown as IProperty | null;
+}

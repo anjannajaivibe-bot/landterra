@@ -164,7 +164,7 @@ const PropertySchema = new Schema<IProperty>(
         'REJECTED',
         'DELETED',
       ],
-      default: 'PAYMENT_PENDING',
+      default: 'DRAFT',
       index: true,
     },
     images: [PropertyImageSchema],

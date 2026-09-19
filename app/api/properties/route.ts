@@ -362,6 +362,11 @@ export async function POST(
     const body =
       await req.json();
 
+    const submissionIntent =
+      (body as { submissionIntent?: string })?.submissionIntent === 'SUBMIT'
+        ? 'SUBMIT'
+        : 'DRAFT';
+
     /*
      * Cloudflare Turnstile Human Verification Gate
      * Protects the marketplace from automated scrapers, bots and spam listings.
@@ -475,14 +480,20 @@ export async function POST(
         sellerType:
           authUser.sellerType ||
           'INDIVIDUAL',
-      });
+      },
+      submissionIntent === 'SUBMIT'
+        ? 'PENDING_VERIFICATION'
+        : 'DRAFT',
+      );
 
     return NextResponse.json(
       {
         success: true,
 
         message:
-          'Listing draft created. Please proceed to publishing fee payment.',
+          submissionIntent === 'SUBMIT'
+            ? 'Listing submitted successfully for platform review.'
+            : 'Listing draft saved successfully.',
 
         property,
       },

@@ -20,7 +20,7 @@ import {
   CheckCircle2,
   ArrowRight,
   ArrowLeft,
-  CreditCard,
+
   MapPin,
   AlertCircle,
   FileText,
@@ -357,7 +357,7 @@ function SellPageForm() {
     { step: 4, label: 'Govt Records' },
     { step: 5, label: 'Photos & Video' },
     { step: 6, label: 'Documents' },
-    { step: 7, label: 'Review & Pay' },
+    { step: 7, label: 'Review & Submit' },
   ];
 
   return (
@@ -379,7 +379,7 @@ function SellPageForm() {
                 </h1>
 
                 <p className="mt-1 text-xs sm:text-sm text-slate-500">
-                  Add your property details, upload supporting documents, and publish after flat-fee payment.
+                  Add your property details, upload supporting documents, and submit the listing for review.
                 </p>
               </div>
 
@@ -560,7 +560,7 @@ function SellPageForm() {
                     )}
                   </button>
 
-                  {/* Proceed to Pay Button (or Save & Update Property if already paid) */}
+                  {/* Submit Listing / Save Update */}
                   <button
                     type="button"
                     onClick={handleProceedToPayment}
@@ -573,19 +573,15 @@ function SellPageForm() {
                     }
                     className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-[#FF9933] hover:bg-[#f07d12] text-white text-xs font-bold transition-colors shadow-sm disabled:opacity-50 cursor-pointer"
                   >
-                    {existingPropertyId && existingPaymentStatus === 'PAID' ? (
-                      <CheckCircle2 className="w-4 h-4" />
-                    ) : (
-                      <CreditCard className="w-4 h-4" />
-                    )}
+                    <CheckCircle2 className="w-4 h-4" />
                     <span>
                       {isSubmitting
-                        ? 'Saving Changes...'
+                        ? 'Submitting...'
                         : isUpdateSuccess
-                          ? 'Listing Updated Successfully!'
-                          : existingPropertyId && existingPaymentStatus === 'PAID'
-                            ? 'Save & Update Property'
-                            : `Proceed to Pay ₹${listingFeeAmount.toLocaleString('en-IN')}`}
+                          ? 'Submitted Successfully!'
+                          : existingPropertyId
+                            ? 'Save & Submit for Review'
+                            : 'Submit Listing'}
                     </span>
                   </button>
                 </div>

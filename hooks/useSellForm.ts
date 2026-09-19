@@ -1553,7 +1553,7 @@ export function useSellForm(): UseSellFormReturn {
       setDraftSavedTime(timeStr);
       setDraftSavedSuccess(true);
       setDraftSavedMessage(
-        `Draft saved successfully at ${timeStr}! All property details, photos, and video are securely stored. You can safely refresh the page or proceed to pay anytime.`
+        `Draft saved successfully at ${timeStr}! All property details, photos, and video are securely stored. You can safely refresh the page or continue editing anytime.`
       );
 
       setTimeout(() => {
@@ -1567,7 +1567,7 @@ export function useSellForm(): UseSellFormReturn {
     }
   };
 
-  // Final Submit / Proceed to Payment
+  // Final Submit / Submit for Review
   const handleProceedToPayment = async () => {
     if (!termsAccepted) {
       setErrorMessage('You must accept the listing terms and publishing declaration.');
@@ -1653,16 +1653,39 @@ export function useSellForm(): UseSellFormReturn {
         localStorage.removeItem('bhoomimitra_sell_draft');
       } catch {}
 
-      if (existingPropertyId && existingPaymentStatus === 'PAID') {
-        setIsUpdateSuccess(true);
-        window.setTimeout(() => {
-          router.push('/dashboard/seller');
-        }, 1200);
-        return;
+      let submittedProperty = savedProperty;
+
+      if (existingPropertyId && savedProperty?._id) {
+        const submitResponse = await fetch(
+          `/api/properties/${savedProperty._id}/status`,
+          {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'SUBMIT_FOR_REVIEW',
+            }),
+          },
+        );
+
+        const submitData = await submitResponse.json();
+
+        if (!submitResponse.ok) {
+          throw new Error(
+            submitData.error ||
+              'Failed to submit listing for review',
+          );
+        }
+
+        submittedProperty =
+          submitData.property || savedProperty;
       }
 
-      setCreatedProperty(savedProperty);
-      setPaymentModalOpen(true);
+      setCreatedProperty(submittedProperty);
+      setIsUpdateSuccess(true);
+
+      window.setTimeout(() => {
+        router.push('/dashboard/seller');
+      }, 1200);
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Error submitting listing';
       setErrorMessage(message);

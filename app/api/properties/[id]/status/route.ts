@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getPropertyById, updateProperty, markPropertyAsSold } from '@/services/property.service';
+import {
+  getPropertyById,
+  updateProperty,
+  markPropertyAsSold,
+  submitPropertyForReview,
+} from '@/services/property.service';
 import { requireAuth } from '@/lib/security/auth';
 import { createAuditLog } from '@/services/audit.service';
 
@@ -22,9 +27,14 @@ export async function PATCH(
 
   try {
     const { action } = await req.json(); // 'PAUSE' | 'RESUME' | 'MARK_SOLD'
-    if (action !== 'PAUSE' && action !== 'RESUME' && action !== 'MARK_SOLD') {
+    if (
+      action !== 'PAUSE' &&
+      action !== 'RESUME' &&
+      action !== 'MARK_SOLD' &&
+      action !== 'SUBMIT_FOR_REVIEW'
+    ) {
       return NextResponse.json(
-        { error: 'Invalid action. Must be PAUSE, RESUME, or MARK_SOLD' },
+        { error: 'Invalid action. Must be PAUSE, RESUME, MARK_SOLD, or SUBMIT_FOR_REVIEW' },
         { status: 400 }
       );
     }
@@ -39,7 +49,10 @@ export async function PATCH(
     let updated = null;
     let newStatus = existing.listingStatus;
 
-    if (action === 'MARK_SOLD') {
+    if (action === 'SUBMIT_FOR_REVIEW') {
+      updated = await submitPropertyForReview(id);
+      newStatus = 'PENDING_VERIFICATION';
+    } else if (action === 'MARK_SOLD') {
       updated = await markPropertyAsSold(id);
       newStatus = 'SOLD';
     } else if (action === 'RESUME') {

@@ -46,8 +46,13 @@ export class DuplicatePropertyError extends Error {
  * Browser-provided totalPrice / publishingFee values
  * are ignored.
  */
+export type InitialListingStatus =
+  | 'DRAFT'
+  | 'PENDING_VERIFICATION';
+
 export async function createProperty(
   data: CreatePropertyInput,
+  initialListingStatus: InitialListingStatus = 'DRAFT',
 ): Promise<IProperty> {
   const area =
     Number(data.landAreaYards);
@@ -93,7 +98,7 @@ export async function createProperty(
    *    Different users listing properties in the same area/pincode
    *    are NEVER blocked.
    * 2. Limit: A seller may have at most 2 active listings
-   *    (DRAFT, PAYMENT_PENDING, PUBLISHED, or EXPIRING_SOON).
+   *    (DRAFT, legacy PAYMENT_PENDING, PENDING_VERIFICATION, PUBLISHED, or EXPIRING_SOON).
    * 3. Deep Duplicate Detection: If a seller lists the same property
    *    again, detect it by checking for identical documents, images,
    *    videos, or exact matching title + land area + pincode.
@@ -114,7 +119,7 @@ export async function createProperty(
 
     const existingSellerProperties = await PropertyModel.find({
       $or: sellerConditions,
-      listingStatus: { $in: ['DRAFT', 'PAYMENT_PENDING', 'PUBLISHED', 'EXPIRING_SOON'] },
+      listingStatus: { $in: ['DRAFT', 'PAYMENT_PENDING', 'PENDING_VERIFICATION', 'PUBLISHED', 'EXPIRING_SOON'] },
     }).lean();
 
     // Rule 1: Max 2 active/draft listings per seller
@@ -410,11 +415,11 @@ export async function createProperty(
       : undefined,
 
     /*
-     * Payment comes before publication.
+     * New listings remain private until explicitly submitted for review.
      */
 
     listingStatus:
-      'PAYMENT_PENDING' as const,
+      initialListingStatus,
 
     images:
       formattedImages,

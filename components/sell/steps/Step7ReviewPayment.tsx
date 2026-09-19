@@ -2,7 +2,6 @@
 
 import React from 'react';
 import {
-  CreditCard,
   CheckCircle2,
   ShieldCheck,
 } from 'lucide-react';
@@ -28,9 +27,6 @@ function formatArea(value: number, decimals = 2): string {
 export function Step7ReviewPayment({
   form,
   existingPropertyId = null,
-  existingPaymentStatus = null,
-  listingDurationDays = 30,
-  listingFeeAmount = 10,
 }: Step7ReviewPaymentProps) {
   const { state, actions } = form;
   const {
@@ -61,7 +57,7 @@ export function Step7ReviewPayment({
           Review &amp; Publish
         </h2>
         <p className="text-xs text-slate-500 mt-1">
-          Review your listing details before completing publishing fee payment.
+          Review your listing details before submitting the property for platform review.
         </p>
       </div>
 
@@ -188,68 +184,24 @@ export function Step7ReviewPayment({
         </div>
       </div>
 
-      {/* Flat Publishing Fee Card / Active Status */}
-      {existingPropertyId && existingPaymentStatus === 'PAID' ? (
-        <div className="rounded-2xl border border-[#FF9933]/30 bg-[#fff9f0] p-5 space-y-2">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#fff1dc] text-[#c75e0a] flex items-center justify-center shrink-0">
-              <CheckCircle2 className="w-5 h-5" />
-            </div>
-            <div>
-              <h3 className="text-sm font-extrabold text-slate-950">
-                Listing Publishing Fee Paid &amp; Active
-              </h3>
-              <p className="text-[11px] text-[#7a3705] mt-0.5 leading-relaxed">
-                Your listing subscription is active. Saving your changes will update the property details immediately without requiring another publishing fee.
-              </p>
-            </div>
+      {/* Platform Review Status */}
+      <div className="rounded-2xl border border-[#FF9933]/30 bg-[#fff9f0] p-5">
+        <div className="flex items-start gap-3">
+          <div className="w-10 h-10 rounded-xl bg-[#fff1dc] text-[#c75e0a] flex items-center justify-center shrink-0">
+            <CheckCircle2 className="w-5 h-5" />
+          </div>
+          <div>
+            <h3 className="text-sm font-extrabold text-slate-950">
+              {existingPropertyId
+                ? 'Ready to Submit Your Changes'
+                : 'Ready for Platform Review'}
+            </h3>
+            <p className="text-[11px] text-[#7a3705] mt-1 leading-relaxed">
+              Your listing will be submitted for review. Once approved, it can be published on the BhoomiMitra marketplace.
+            </p>
           </div>
         </div>
-      ) : (
-        <div className="rounded-2xl border border-[#FF9933]/30 bg-[#fff9f0] overflow-hidden">
-          <div className="p-5 border-b border-[#FF9933]/30">
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-xl bg-[#fff1dc] text-[#c75e0a] flex items-center justify-center shrink-0">
-                <CreditCard className="w-5 h-5" />
-              </div>
-              <div>
-                <h3 className="text-sm font-extrabold text-slate-950">
-                  Listing Publishing Fee
-                </h3>
-                <p className="text-[11px] text-[#7a3705] mt-1">
-                  Universal flat fee for the full {listingDurationDays}-day subscription period.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="p-5 space-y-3">
-            <div className="flex justify-between items-center text-xs">
-              <span className="text-slate-600">Listing validity</span>
-              <span className="font-bold text-slate-900">
-                {listingDurationDays} days
-              </span>
-            </div>
-
-            <div className="flex justify-between items-center text-xs">
-              <span className="text-slate-600">Publishing fee</span>
-              <span className="font-bold text-slate-900">
-                ₹{listingFeeAmount.toLocaleString('en-IN')}
-              </span>
-            </div>
-
-            <div className="pt-3 border-t border-[#FF9933]/30 flex justify-between items-center">
-              <span className="text-sm font-extrabold text-slate-950">
-                Amount Payable
-              </span>
-              <span className="text-xl font-black text-[#c75e0a]">
-                ₹{listingFeeAmount.toLocaleString('en-IN')}
-              </span>
-            </div>
-          </div>
-        </div>
-      )}
-
+      </div>
       {/* Seller Declaration & Marketplace Undertaking Card */}
       <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5 space-y-4">
         <div className="flex items-center gap-2">

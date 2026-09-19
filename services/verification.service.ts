@@ -137,14 +137,8 @@ async function approveProperty(
    * property publicly visible.
    */
 
-  const hasPaid =
-    property.paymentStatus === 'PAID' ||
-    property.isFeePaid === true;
-
   const newListingStatus: ListingStatus =
-    hasPaid
-      ? 'PUBLISHED'
-      : 'PAYMENT_PENDING';
+    'PUBLISHED';
 
   const updates: Record<string, unknown> = {
     verificationStatus: 'VERIFIED',
@@ -266,7 +260,7 @@ async function approveProperty(
         property.isFeePaid,
 
       published:
-        hasPaid,
+        true,
 
       adminNotes,
     },
