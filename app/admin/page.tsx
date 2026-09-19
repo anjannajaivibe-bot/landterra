@@ -6,7 +6,6 @@ import {
   Layers,
   FileCheck2,
   Users,
-  CreditCard,
   CheckCircle2,
   AlertCircle,
   Flag,
@@ -27,11 +26,11 @@ interface AdminStats {
   totalProperties?: number;
   publishedProperties?: number;
   pendingProperties?: number;
-  totalUsers?: number;
-  totalPublishingFees?: number;
+  verifiedProperties?: number;
   rejectedProperties?: number;
-  paidProperties?: number;
+  totalReportsCount?: number;
   pendingReports?: number;
+  totalUsers?: number;
 }
 
 interface IntegrationStatusItem {
@@ -98,7 +97,7 @@ export default function AdminDashboardPage() {
       <AdminSectionHeader
         eyebrow="Platform Overview"
         title="Admin Executive Dashboard"
-        description="Real-time monitoring of listings, verification queue, customer accounts, and revenue."
+        description="Real-time monitoring of listings, verification queue, customer accounts, reports and platform health."
         onRefresh={handleRefresh}
         isRefreshing={loading}
         lastRefreshedAt={lastRefreshedAt}
@@ -143,10 +142,10 @@ export default function AdminDashboardPage() {
         />
 
         <AdminMetricCard
-          label="Publishing Revenue"
-          value={`₹${(stats?.totalPublishingFees ?? 0).toLocaleString('en-IN')}`}
-          secondary="Classified listing fees collected"
-          icon={CreditCard}
+          label="Reports Pending"
+          value={stats?.pendingReports ?? 0}
+          secondary="Trust & safety items awaiting review"
+          icon={Flag}
           tone="emerald"
         />
       </div>
@@ -160,9 +159,9 @@ export default function AdminDashboardPage() {
         />
 
         <MiniMetric
-          label="Paid Orders"
-          value={stats?.paidProperties ?? 0}
-          icon={CreditCard}
+          label="Reviewed"
+          value={stats?.verifiedProperties ?? 0}
+          icon={ShieldCheck}
         />
 
         <MiniMetric
@@ -173,7 +172,7 @@ export default function AdminDashboardPage() {
 
         <MiniMetric
           label="User Reports"
-          value={stats?.pendingReports ?? 0}
+          value={stats?.totalReportsCount ?? 0}
           icon={Flag}
         />
       </div>
@@ -193,22 +192,6 @@ export default function AdminDashboardPage() {
           <h3 className="mt-4 text-sm font-black text-white">Moderate Listings</h3>
           <p className="mt-1 text-xs text-slate-400">
             {stats?.pendingProperties ?? 0} properties waiting for title, document, and fraud inspection.
-          </p>
-        </Link>
-
-        <Link
-          href="/admin/payments"
-          className="rounded-3xl border border-slate-800 bg-slate-900 p-5 hover:border-emerald-500/40 hover:bg-slate-800/60 transition-all group shadow-xs"
-        >
-          <div className="flex items-center justify-between">
-            <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center font-bold">
-              <CreditCard className="w-5 h-5" />
-            </div>
-            <ArrowRight className="w-4 h-4 text-slate-500 group-hover:text-emerald-400 group-hover:translate-x-1 transition-all" />
-          </div>
-          <h3 className="mt-4 text-sm font-black text-white">Payments & Revenue</h3>
-          <p className="mt-1 text-xs text-slate-400">
-            Track Razorpay orders, subscription invoices, and settlement status.
           </p>
         </Link>
 
@@ -277,7 +260,7 @@ export default function AdminDashboardPage() {
               <EmptyState
                 icon={Activity}
                 title="No recent activity"
-                description="Administrative actions and payments will appear here."
+                description="Administrative and moderation actions will appear here."
               />
             )}
           </div>
@@ -326,7 +309,7 @@ export default function AdminDashboardPage() {
           <div className="mt-6 pt-4 border-t border-slate-800 flex items-center justify-between text-xs text-slate-500">
             <span className="flex items-center gap-1.5">
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-              <span>BhoomiMitra Direct Classifieds Architecture</span>
+              <span>BhoomiMitra Property Marketplace</span>
             </span>
             <span className="font-mono text-[10px]">v2.4 Production</span>
           </div>
