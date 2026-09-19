@@ -24,11 +24,11 @@ export const metadata: Metadata = {
     process.env.NEXT_PUBLIC_APP_URL || 'https://bhoomimitra.com'
   ),
   title: {
-    default: "BhoomiMitra | India's Direct Real Estate & Property Marketplace",
+    default: "BhoomiMitra | Property Marketplace Across India",
     template: '%s | BhoomiMitra',
   },
   description:
-    'Explore residential plots, apartments, villas, commercial spaces, and agricultural land across India. Connect directly with genuine property owners with zero broker commissions.',
+    'Explore property for sale, rent and lease across India, including plots, homes, commercial spaces and hospitality properties. Contact the listed seller directly. BhoomiMitra charges no platform brokerage.',
   keywords: [
     'properties for sale in india',
     'real estate india',
@@ -62,23 +62,23 @@ export const metadata: Metadata = {
     locale: 'en_IN',
     url: process.env.NEXT_PUBLIC_APP_URL || 'https://bhoomimitra.com',
     siteName: 'BhoomiMitra',
-    title: 'BhoomiMitra | Direct Real Estate & Property Marketplace',
+    title: 'BhoomiMitra | Property Marketplace Across India',
     description:
-      'Explore residential plots, apartments, villas, commercial spaces, and agricultural land across India. Connect directly with genuine property owners with zero broker commissions.',
+      'Explore property for sale, rent and lease across India, including plots, homes, commercial spaces and hospitality properties. Contact the listed seller directly. BhoomiMitra charges no platform brokerage.',
     images: [
       {
         url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'BhoomiMitra - India Direct Property Marketplace',
+        alt: 'BhoomiMitra - India Property Marketplace',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'BhoomiMitra | Direct Real Estate & Property Marketplace',
+    title: 'BhoomiMitra | Property Marketplace Across India',
     description:
-      'Discover land and plots across India. Direct peer-to-peer listings, direct seller contact, and zero hidden commissions.',
+      'Discover property across India with direct seller contact and no BhoomiMitra platform brokerage.',
     images: ['/og-image.png'],
   },
   manifest: '/manifest.webmanifest',
@@ -106,10 +106,10 @@ const jsonLd = {
       '@id': 'https://bhoomimitra.com/#website',
       url: 'https://bhoomimitra.com',
       name: 'BhoomiMitra',
-      description: "India's Direct Peer-to-Peer Real Estate & Property Marketplace",
+      description: "India-focused property marketplace for sale, rent and lease",
       potentialAction: {
         '@type': 'SearchAction',
-        target: 'https://bhoomimitra.com/buy?q={search_term_string}',
+        target: 'https://bhoomimitra.com/buy?query={search_term_string}',
         'query-input': 'required name=search_term_string',
       },
       inLanguage: 'en-IN',
