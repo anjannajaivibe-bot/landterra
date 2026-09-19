@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { LandType, IProperty, IPropertyImage, IPropertyDocument } from '@/types/property';
+import { LandType, IProperty, IPropertyImage, IPropertyDocument, TransactionType } from '@/types/property';
 import { SellerType, IUser } from '@/types/user';
 import {
   LandAreaUnit,
@@ -76,6 +76,7 @@ export function useSellForm(): UseSellFormReturn {
   const [createdProperty, setCreatedProperty] = useState<IProperty | null>(null);
 
   // Step 1: Specs & Pricing
+  const [transactionType, setTransactionType] = useState<TransactionType>('SALE');
   const [title, setTitle] = useState<string>('');
   const [description, setDescription] = useState<string>('');
   const [landAreaYards, setLandAreaYards] = useState<number>(300);
@@ -309,9 +310,17 @@ export function useSellForm(): UseSellFormReturn {
         );
         return false;
       }
-      if (!Number.isFinite(numericPricePerYard) || numericPricePerYard <= 0) {
-        setErrorMessage('Price per sq. yard must be greater than zero.');
-        return false;
+      if (transactionType === 'SALE') {
+        if (!Number.isFinite(numericPricePerYard) || numericPricePerYard <= 0) {
+          setErrorMessage('Price per sq. yard must be greater than zero.');
+          return false;
+        }
+      } else {
+        const monthlyAmount = Number(String(monthlyRent).replace(/,/g, ''));
+        if (!Number.isFinite(monthlyAmount) || monthlyAmount <= 0) {
+          setErrorMessage(`Please enter the monthly ${transactionType === 'RENT' ? 'rent' : 'lease'} amount.`);
+          return false;
+        }
       }
     }
 
@@ -339,7 +348,7 @@ export function useSellForm(): UseSellFormReturn {
     }
 
     return true;
-  }, [title, landAreaYards, numericPricePerYard, address, city, state, pincode, sellerName, sellerPhone, sellerEmail, images.length]);
+  }, [title, landAreaYards, numericPricePerYard, transactionType, monthlyRent, address, city, state, pincode, sellerName, sellerPhone, sellerEmail, images.length]);
 
   const handleNext = useCallback(() => {
     if (validateCurrentStep(currentStep)) {
@@ -442,6 +451,7 @@ export function useSellForm(): UseSellFormReturn {
                 }
                 if (property.pricePerYard) setPricePerYard(String(property.pricePerYard));
                 if (property.priceNegotiable !== undefined) setPriceNegotiable(property.priceNegotiable);
+                if (property.transactionType) setTransactionType(property.transactionType);
                 if (property.landType) setLandType(property.landType);
                 if (property.bhk) setBhk(property.bhk);
                 if (property.facing) setFacing(property.facing);
@@ -587,6 +597,7 @@ export function useSellForm(): UseSellFormReturn {
                 if (localDraft.landAreaYards) setLandAreaYards(localDraft.landAreaYards);
                 if (localDraft.pricePerYard) setPricePerYard(String(localDraft.pricePerYard));
                 if (localDraft.priceNegotiable !== undefined) setPriceNegotiable(localDraft.priceNegotiable);
+                if (localDraft.transactionType) setTransactionType(localDraft.transactionType);
                 if (localDraft.landType) setLandType(localDraft.landType);
                 if (localDraft.bhk) setBhk(localDraft.bhk);
                 if (localDraft.facing) setFacing(localDraft.facing);
@@ -677,6 +688,7 @@ export function useSellForm(): UseSellFormReturn {
           landAreaYards,
           pricePerYard,
           priceNegotiable,
+          transactionType,
           landType,
           bhk,
           facing,
@@ -758,6 +770,7 @@ export function useSellForm(): UseSellFormReturn {
     landAreaYards,
     pricePerYard,
     priceNegotiable,
+    transactionType,
     landType,
     bhk,
     facing,
@@ -1325,8 +1338,12 @@ export function useSellForm(): UseSellFormReturn {
       landAreaYards: Number(landAreaYards.toFixed(4)),
       pricePerYard: Number(pricePerYard),
       priceNegotiable,
+      transactionType,
       landType,
       propertyType: landType,
+      monthlyRent: transactionType === 'SALE'
+        ? undefined
+        : Number(String(monthlyRent).replace(/,/g, '')) || undefined,
       bhk: [
         'FLAT',
         'INDEPENDENT_HOUSE',
@@ -1433,7 +1450,6 @@ export function useSellForm(): UseSellFormReturn {
       sellerEmail,
       sellerType,
       sellerDeclarationAccepted: Boolean(termsAccepted),
-      turnstileToken: turnstileToken || undefined,
       images: (() => {
         const hasPrimary = images.some((img) => img.isPrimary);
         return images.map((image, index) => ({
@@ -1706,6 +1722,7 @@ export function useSellForm(): UseSellFormReturn {
       testOtpNotice,
       title,
       description,
+      transactionType,
       landType,
       sellerCategoryTab,
       areaInput: landAreaInput,
@@ -1805,6 +1822,7 @@ export function useSellForm(): UseSellFormReturn {
       handleVerifyOtp,
       setTitle,
       setDescription,
+      setTransactionType,
       setLandType,
       setSellerCategoryTab,
       setAreaInput: handleAreaInputChange,
