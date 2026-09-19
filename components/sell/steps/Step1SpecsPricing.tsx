@@ -61,13 +61,13 @@ export function Step1SpecsPricing({ form }: Step1SpecsPricingProps) {
     <div className="p-5 sm:p-7 space-y-7 animate-in fade-in duration-150">
       <div>
         <p className="text-[11px] font-bold text-[#c75e0a]">
-          Step 1 of 7
+          Step 1 of 5
         </p>
         <h2 className="mt-1 text-xl font-extrabold text-slate-950">
           Start with the property basics
         </h2>
         <p className="text-sm text-slate-500 mt-1">
-          Choose what you want to do, the property type, area and asking price.
+          Tell us what you are offering. We will show only the fields relevant to that property and transaction.
         </p>
       </div>
 
