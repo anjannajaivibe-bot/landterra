@@ -50,10 +50,10 @@ export function CommercialSpecs({ state, actions }: CommercialSpecsProps) {
         </div>
         <div>
           <h3 className="text-sm font-extrabold text-slate-900">
-            Commercial Space Specifications
+            Commercial property details
           </h3>
           <p className="text-[11px] text-slate-500">
-            Fitout status, suitable businesses, and power/parking infrastructure.
+            Add fit-out, washroom, power and suitable-use details where applicable.
           </p>
         </div>
       </div>
@@ -96,7 +96,8 @@ export function CommercialSpecs({ state, actions }: CommercialSpecsProps) {
             onChange={(e) => setCommercialWashrooms(e.target.value)}
             className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#fff1dc] focus:border-[#FF9933] cursor-pointer"
           >
-            <option value="PRIVATE">Private Attached Washroom</option>
+            <option value="NOT_SPECIFIED">Not specified</option>
+            <option value="PRIVATE">Private attached washroom</option>
             <option value="COMMON">Common Floor Washrooms</option>
             <option value="BOTH">Both Private & Common</option>
           </select>
