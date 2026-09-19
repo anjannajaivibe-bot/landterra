@@ -39,17 +39,15 @@ export function HeroSearchSection() {
     residential: boolean;
     commercial: boolean;
     hospitality: boolean;
-    rentals: boolean;
   }>({
     landPlots: true,
     residential: true,
     commercial: false,
     hospitality: false,
-    rentals: false,
   });
 
   const toggleCategory = (
-    cat: 'landPlots' | 'residential' | 'commercial' | 'hospitality' | 'rentals',
+    cat: 'landPlots' | 'residential' | 'commercial' | 'hospitality',
   ) => {
     setExpandedCategories((prev) => ({
       ...prev,
@@ -168,7 +166,7 @@ export function HeroSearchSection() {
     );
     if (firstSelected) {
       if (
-        (firstSelected.id === 'FLAT' || firstSelected.id === 'HOUSE_VILLA') &&
+        residentialTypesSupportingBhk.includes(firstSelected.id) &&
         selectedBhks.length > 0
       ) {
         landTypeTriggerText = `${firstSelected.label} (${selectedBhks.join(', ')})`;
@@ -190,15 +188,15 @@ export function HeroSearchSection() {
             <div className="text-center max-w-3xl mx-auto space-y-4">
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-[#FF9933]/30 text-[#c75e0a] text-xs font-black shadow-xs">
                 <ShieldCheck className="w-4 h-4 text-[#FF9933]" />
-                <span>India&apos;s Direct Real Estate &amp; Property Portal • 0% Broker Commission</span>
+                <span>Property marketplace • 0% platform brokerage</span>
               </div>
 
               <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-slate-950 tracking-tight leading-[1.15]">
-                Direct Properties, Homes &amp; Plots Across India
+                Properties for Sale, Rent &amp; Lease Across India
               </h1>
 
               <p className="text-sm sm:text-base text-slate-600 font-medium max-w-2xl mx-auto leading-relaxed">
-                India&apos;s direct peer-to-peer property marketplace. Buy, sell, or rent plots, apartments, villas, commercial spaces, and farmlands directly with genuine owners — 0% broker commissions and transparent document disclosure.
+                Explore plots, homes, commercial spaces and hospitality properties across India. Contact the listed seller directly while BhoomiMitra charges no platform brokerage.
               </p>
             </div>
 
@@ -324,7 +322,7 @@ export function HeroSearchSection() {
                           )}
                         </div>
 
-                        {/* 2. Residential Units */}
+                        {/* 2. Residential */}
                         <div className="space-y-2 pt-2 border-t border-slate-100">
                           <button
                             type="button"
@@ -332,14 +330,14 @@ export function HeroSearchSection() {
                             className="w-full flex items-center justify-between py-1 text-[11px] font-black uppercase tracking-wider text-slate-700 hover:text-slate-900 cursor-pointer select-none"
                           >
                             <div className="flex items-center gap-2">
-                              <span>Residential Units</span>
+                              <span>Residential</span>
                               {HERO_LAND_TYPES.filter(
-                                (t) => t.category === 'Residential Units' && selectedLandTypes.includes(t.id)
+                                (t) => t.category === 'Residential' && selectedLandTypes.includes(t.id)
                               ).length > 0 && (
                                 <span className="px-1.5 py-0.5 rounded-full bg-[#fff1dc] text-[#c75e0a] text-[10px] font-bold">
                                   {
                                     HERO_LAND_TYPES.filter(
-                                      (t) => t.category === 'Residential Units' && selectedLandTypes.includes(t.id)
+                                      (t) => t.category === 'Residential' && selectedLandTypes.includes(t.id)
                                     ).length
                                   }
                                 </span>
@@ -355,7 +353,7 @@ export function HeroSearchSection() {
                           {expandedCategories.residential && (
                             <div className="space-y-2.5 pt-1 animate-in fade-in duration-150">
                               <div className="flex flex-wrap gap-1.5">
-                                {HERO_LAND_TYPES.filter((t) => t.category === 'Residential Units').map((t) => {
+                                {HERO_LAND_TYPES.filter((t) => t.category === 'Residential').map((t) => {
                                   const isSelected = selectedLandTypes.includes(t.id);
                                   return (
                                     <button
@@ -402,7 +400,7 @@ export function HeroSearchSection() {
                           )}
                         </div>
 
-                        {/* 3. Commercial & Retail */}
+                        {/* 3. Commercial */}
                         <div className="space-y-2 pt-2 border-t border-slate-100">
                           <button
                             type="button"
@@ -412,12 +410,12 @@ export function HeroSearchSection() {
                             <div className="flex items-center gap-2">
                               <span>Commercial &amp; Retail</span>
                               {HERO_LAND_TYPES.filter(
-                                (t) => t.category === 'Commercial & Retail' && selectedLandTypes.includes(t.id)
+                                (t) => t.category === 'Commercial' && selectedLandTypes.includes(t.id)
                               ).length > 0 && (
                                 <span className="px-1.5 py-0.5 rounded-full bg-[#fff1dc] text-[#c75e0a] text-[10px] font-bold">
                                   {
                                     HERO_LAND_TYPES.filter(
-                                      (t) => t.category === 'Commercial & Retail' && selectedLandTypes.includes(t.id)
+                                      (t) => t.category === 'Commercial' && selectedLandTypes.includes(t.id)
                                     ).length
                                   }
                                 </span>
@@ -432,7 +430,7 @@ export function HeroSearchSection() {
 
                           {expandedCategories.commercial && (
                             <div className="flex flex-wrap gap-1.5 pt-1 animate-in fade-in duration-150">
-                              {HERO_LAND_TYPES.filter((t) => t.category === 'Commercial & Retail').map((t) => {
+                              {HERO_LAND_TYPES.filter((t) => t.category === 'Commercial').map((t) => {
                                 const isSelected = selectedLandTypes.includes(t.id);
                                 return (
                                   <button
@@ -453,7 +451,7 @@ export function HeroSearchSection() {
                           )}
                         </div>
 
-                        {/* 4. Hospitality & Leisure */}
+                        {/* 4. Hospitality */}
                         <div className="space-y-2 pt-2 border-t border-slate-100">
                           <button
                             type="button"
@@ -463,12 +461,12 @@ export function HeroSearchSection() {
                             <div className="flex items-center gap-2">
                               <span>Hospitality &amp; Leisure</span>
                               {HERO_LAND_TYPES.filter(
-                                (t) => t.category === 'Hospitality & Leisure' && selectedLandTypes.includes(t.id)
+                                (t) => t.category === 'Hospitality' && selectedLandTypes.includes(t.id)
                               ).length > 0 && (
                                 <span className="px-1.5 py-0.5 rounded-full bg-[#fff1dc] text-[#c75e0a] text-[10px] font-bold">
                                   {
                                     HERO_LAND_TYPES.filter(
-                                      (t) => t.category === 'Hospitality & Leisure' && selectedLandTypes.includes(t.id)
+                                      (t) => t.category === 'Hospitality' && selectedLandTypes.includes(t.id)
                                     ).length
                                   }
                                 </span>
@@ -483,7 +481,7 @@ export function HeroSearchSection() {
 
                           {expandedCategories.hospitality && (
                             <div className="flex flex-wrap gap-1.5 pt-1 animate-in fade-in duration-150">
-                              {HERO_LAND_TYPES.filter((t) => t.category === 'Hospitality & Leisure').map((t) => {
+                              {HERO_LAND_TYPES.filter((t) => t.category === 'Hospitality').map((t) => {
                                 const isSelected = selectedLandTypes.includes(t.id);
                                 return (
                                   <button
@@ -504,56 +502,6 @@ export function HeroSearchSection() {
                           )}
                         </div>
 
-                        {/* 5. Income-Generating & Rentals */}
-                        <div className="space-y-2 pt-2 border-t border-slate-100">
-                          <button
-                            type="button"
-                            onClick={() => toggleCategory('rentals')}
-                            className="w-full flex items-center justify-between py-1 text-[11px] font-black uppercase tracking-wider text-slate-700 hover:text-slate-900 cursor-pointer select-none"
-                          >
-                            <div className="flex items-center gap-2">
-                              <span>Income-Generating &amp; Rentals</span>
-                              {HERO_LAND_TYPES.filter(
-                                (t) => t.category === 'Income-Generating & Rentals' && selectedLandTypes.includes(t.id)
-                              ).length > 0 && (
-                                <span className="px-1.5 py-0.5 rounded-full bg-[#fff1dc] text-[#c75e0a] text-[10px] font-bold">
-                                  {
-                                    HERO_LAND_TYPES.filter(
-                                      (t) => t.category === 'Income-Generating & Rentals' && selectedLandTypes.includes(t.id)
-                                    ).length
-                                  }
-                                </span>
-                              )}
-                            </div>
-                            <ChevronDown
-                              className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${
-                                expandedCategories.rentals ? 'rotate-180 text-[#FF9933]' : ''
-                              }`}
-                            />
-                          </button>
-
-                          {expandedCategories.rentals && (
-                            <div className="flex flex-wrap gap-1.5 pt-1 animate-in fade-in duration-150">
-                              {HERO_LAND_TYPES.filter((t) => t.category === 'Income-Generating & Rentals').map((t) => {
-                                const isSelected = selectedLandTypes.includes(t.id);
-                                return (
-                                  <button
-                                    key={t.id}
-                                    type="button"
-                                    onClick={() => handleToggleLandType(t.id)}
-                                    className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer border ${
-                                      isSelected
-                                        ? 'bg-[#fff1dc] text-[#c75e0a] border-[#FF9933] shadow-2xs ring-1 ring-[#FF9933]/30'
-                                        : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
-                                    }`}
-                                  >
-                                    {t.label}
-                                  </button>
-                                );
-                              })}
-                            </div>
-                          )}
-                        </div>
                       </div>
                     )}
                   </div>
