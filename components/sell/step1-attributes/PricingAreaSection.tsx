@@ -39,6 +39,7 @@ interface PricingAreaSectionProps {
 export function PricingAreaSection({ state, actions }: PricingAreaSectionProps) {
   const {
     transactionType,
+    landType,
     areaInput,
     selectedAreaUnit,
     areaConversions,
@@ -60,6 +61,51 @@ export function PricingAreaSection({ state, actions }: PricingAreaSectionProps) 
   const monthlyAmount = Number(String(monthlyRent).replace(/,/g, '')) || 0;
   const isSale = transactionType === 'SALE';
 
+  const landRateTypes = [
+    'RESIDENTIAL_PLOT',
+    'FARMLAND_PLOT',
+    'AGRICULTURAL_LAND',
+    'COMMERCIAL_LAND',
+    'INDUSTRIAL_PLOT',
+    'INSTITUTIONAL',
+    // Legacy compatibility
+    'OPEN_PLOT',
+    'GATED_COMMUNITY_PLOT',
+  ];
+
+  const apartmentAreaTypes = [
+    'FLAT',
+    'PENTHOUSE',
+    'SERVICE_APARTMENT',
+  ];
+
+  const landedResidentialTypes = [
+    'INDEPENDENT_HOUSE',
+    'VILLA',
+    'TOWNHOUSE',
+    'DUPLEX',
+    'FARMHOUSE',
+    // Legacy compatibility
+    'HOUSE_VILLA',
+    'FARM_HOUSE_LAND',
+  ];
+
+  const usesPerYardPricing = landRateTypes.includes(landType);
+
+  const areaLabel = apartmentAreaTypes.includes(landType)
+    ? 'Super built-up area'
+    : landedResidentialTypes.includes(landType)
+      ? 'Plot / land area'
+      : landRateTypes.includes(landType)
+        ? 'Land / plot area'
+        : ['HOTEL', 'RESORT', 'GUEST_HOUSE'].includes(landType)
+          ? 'Property / site area'
+          : 'Built-up / usable area';
+
+  const totalAskingPrice = Number(authoritativeFees.totalPrice || 0);
+  const approxRatePerSqFt =
+    Number(pricePerYard) > 0 ? Number(pricePerYard) / 9 : 0;
+
   return (
     <section className="space-y-5">
       <div className="border-t border-slate-200 pt-6">
@@ -80,7 +126,7 @@ export function PricingAreaSection({ state, actions }: PricingAreaSectionProps) 
         <div className="grid grid-cols-1 sm:grid-cols-[1fr_190px] gap-3">
           <div>
             <label className="block text-[11px] font-bold text-slate-700 mb-1.5">
-              Property area *
+              {areaLabel} *
             </label>
             <div className="relative">
               <input
@@ -147,30 +193,54 @@ export function PricingAreaSection({ state, actions }: PricingAreaSectionProps) 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-bold text-slate-700 mb-1.5">
-              Asking price per sq. yd *
+              {usesPerYardPricing ? 'Asking price per sq. yd' : 'Total asking price'} *
             </label>
             <div className="relative">
               <IndianRupee className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-              <input
-                type="number"
-                min={1}
-                value={pricePerYard}
-                onChange={(event) => setPricePerYard(event.target.value)}
-                placeholder="Price per sq. yd"
-                className="w-full pl-10 pr-4 py-3 rounded-lg border border-slate-300 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#fff1dc] focus:border-[#FF9933]"
-              />
+              {usesPerYardPricing ? (
+                <input
+                  type="number"
+                  min={1}
+                  value={pricePerYard}
+                  onChange={(event) => setPricePerYard(event.target.value)}
+                  placeholder="Price per sq. yd"
+                  className="w-full pl-10 pr-4 py-3 rounded-lg border border-slate-300 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#fff1dc] focus:border-[#FF9933]"
+                />
+              ) : (
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={totalAskingPrice > 0 ? String(Math.round(totalAskingPrice)) : ''}
+                  onChange={(event) => {
+                    const total = Number(event.target.value.replace(/[^0-9]/g, '')) || 0;
+                    setPricePerYard(
+                      total > 0 && landAreaYards > 0
+                        ? String(total / landAreaYards)
+                        : '',
+                    );
+                  }}
+                  placeholder="Example: 12500000"
+                  className="w-full pl-10 pr-4 py-3 rounded-lg border border-slate-300 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#fff1dc] focus:border-[#FF9933]"
+                />
+              )}
             </div>
           </div>
 
           <div className="rounded-lg bg-slate-50 border border-slate-200 px-4 py-3">
             <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
-              Estimated total asking price
+              {usesPerYardPricing ? 'Estimated total asking price' : 'Approximate area rate'}
             </p>
             <p className="text-xl font-extrabold text-slate-900 mt-1">
-              ₹{Number(authoritativeFees.totalPrice || 0).toLocaleString('en-IN')}
+              {usesPerYardPricing
+                ? `₹${totalAskingPrice.toLocaleString('en-IN')}`
+                : approxRatePerSqFt > 0
+                  ? `₹${Math.round(approxRatePerSqFt).toLocaleString('en-IN')} / sq. ft`
+                  : 'Add area and asking price'}
             </p>
             <p className="text-[10px] text-slate-500 mt-1">
-              Based on your area and price per sq. yd.
+              {usesPerYardPricing
+                ? 'Based on your area and price per sq. yd.'
+                : 'Calculated from the total asking price and entered area.'}
             </p>
           </div>
         </div>
