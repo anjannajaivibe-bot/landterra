@@ -73,15 +73,15 @@ export function Step5MediaUpload({ form }: Step5MediaUploadProps) {
             <span>Property Photos &amp; Video</span>
           </h2>
           <p className="text-xs text-slate-500 mt-0.5">
-            Upload clear photographs of the land and an optional drone/walkaround video.
+            Add clear photos that help people understand the property before they contact you.
           </p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/60">
-            Min 1 Photo Required
+            1 photo required
           </span>
           <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-slate-100 text-slate-600">
-            Video Optional
+            Video optional
           </span>
         </div>
       </div>
@@ -112,19 +112,19 @@ export function Step5MediaUpload({ form }: Step5MediaUploadProps) {
               ? 'Optimizing & uploading photos...'
               : isUploadingVideo
               ? 'Uploading video to cloud storage...'
-              : 'Upload property photos & video tour'}
+              : 'Add photos or an optional video'}
           </p>
           <p className="text-[11px] text-slate-500 mt-1">
-            Select JPG, PNG, WebP images and/or MP4, MOV, WebM video (up to 50 MB) • Multiple files supported
+            JPG, PNG or WebP photos. Optional MP4, MOV or WebM video up to 50 MB.
           </p>
           <div className="mt-3.5 flex flex-wrap items-center justify-center gap-2">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white border border-slate-200 text-[10px] text-slate-700 font-semibold shadow-2xs">
               <Sparkles className="w-3 h-3 text-[#FF9933]" />
-              Photos auto-compressed below 850 KB (WebP)
+              Photos are optimized automatically
             </span>
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#fff1dc]/60 border border-[#FF9933]/30 text-[10px] text-[#c75e0a] font-semibold">
               <Film className="w-3 h-3" />
-              Direct high-speed cloud video streaming
+              Video is optional
             </span>
           </div>
         </div>
@@ -161,7 +161,7 @@ export function Step5MediaUpload({ form }: Step5MediaUploadProps) {
               </span>
             </div>
             <span className="text-[10px] text-[#FF9933] font-semibold">
-              Optimized &amp; Ready
+              Ready to use
             </span>
           </div>
 
@@ -236,7 +236,7 @@ export function Step5MediaUpload({ form }: Step5MediaUploadProps) {
                 {videoUploadMessage || 'Uploading & optimizing video...'}
               </p>
               <p className="text-[10px] text-slate-500">
-                Bypasses server payload limits and automatically compresses to lightweight WebM.
+                Keep this page open while your video is processed.
               </p>
             </div>
           )}
@@ -293,10 +293,10 @@ export function Step5MediaUpload({ form }: Step5MediaUploadProps) {
           <Sparkles className="w-4 h-4 text-[#FF9933] shrink-0 mt-0.5" />
           <div className="text-[10px] text-slate-600 leading-relaxed">
             <p className="font-bold text-slate-800 mb-0.5">
-              Automatic media compression &amp; acceleration
+              Photos that help property seekers decide
             </p>
             <p>
-              Photographs are converted in your browser to lightweight WebP files (&lt;850 KB), and videos are transcoded on our backend to high-efficiency WebM for lightning-fast playback on any mobile device.
+              Aim for at least 5 useful photos: the front or approach, main property area, access road, surroundings and any important feature or amenity. Avoid screenshots, posters and heavily edited images.
             </p>
           </div>
         </div>
