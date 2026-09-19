@@ -21,7 +21,6 @@ import {
   Clock,
   ExternalLink,
 } from 'lucide-react';
-import { CloudflareTurnstile } from '@/components/security/CloudflareTurnstile';
 
 function NriContactContent() {
   const searchParams = useSearchParams();
@@ -30,7 +29,6 @@ function NriContactContent() {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -67,7 +65,6 @@ function NriContactContent() {
           phone: formData.phone?.trim() || undefined,
           subject: `[NRI Desk - ${formData.country || 'Global'}] ${formData.serviceInterest}`,
           message: fullMessage,
-          turnstileToken: turnstileToken || undefined,
         }),
       });
 
@@ -300,10 +297,6 @@ function NriContactContent() {
                     placeholder="Describe the state/city (e.g. Hyderabad, Bengaluru, Punjab), survey number if known, or your exact investment/sale query..."
                     className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-[#FF9933] focus:border-[#FF9933] bg-white resize-y"
                   />
-                </div>
-
-                <div className="py-1">
-                  <CloudflareTurnstile onSuccess={(token: string) => setTurnstileToken(token)} />
                 </div>
 
                 <button
