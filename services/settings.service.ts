@@ -6,15 +6,11 @@ import { createAuditLog } from '@/services/audit.service';
 let cachedSettings: {
   requireGoogleLogin: boolean;
   requirePhoneOtp: boolean;
-  listingFeeAmount: number;
-  listingFeeDurationDays: number;
   updatedBy: string;
   updatedAt: Date;
 } = {
   requireGoogleLogin: true,
   requirePhoneOtp: true,
-  listingFeeAmount: 10,
-  listingFeeDurationDays: 30,
   updatedBy: 'SYSTEM',
   updatedAt: new Date(),
 };
@@ -33,8 +29,6 @@ export async function getPlatformSettings(): Promise<IPlatformSettings> {
         const created = await PlatformSettingsModel.create({
           requireGoogleLogin: true,
           requirePhoneOtp: true,
-          listingFeeAmount: 10,
-          listingFeeDurationDays: 30,
           updatedBy: 'SYSTEM',
         });
         doc = created.toObject();
@@ -43,8 +37,6 @@ export async function getPlatformSettings(): Promise<IPlatformSettings> {
       cachedSettings = {
         requireGoogleLogin: Boolean(doc.requireGoogleLogin),
         requirePhoneOtp: Boolean(doc.requirePhoneOtp),
-        listingFeeAmount: typeof doc.listingFeeAmount === 'number' ? doc.listingFeeAmount : 10,
-        listingFeeDurationDays: typeof doc.listingFeeDurationDays === 'number' ? doc.listingFeeDurationDays : 30,
         updatedBy: doc.updatedBy || 'SYSTEM',
         updatedAt: doc.updatedAt ? new Date(doc.updatedAt) : new Date(),
       };
@@ -58,8 +50,6 @@ export async function getPlatformSettings(): Promise<IPlatformSettings> {
   return {
     requireGoogleLogin: cachedSettings.requireGoogleLogin,
     requirePhoneOtp: cachedSettings.requirePhoneOtp,
-    listingFeeAmount: cachedSettings.listingFeeAmount,
-    listingFeeDurationDays: cachedSettings.listingFeeDurationDays,
     updatedBy: cachedSettings.updatedBy,
     updatedAt: cachedSettings.updatedAt,
   };
@@ -72,8 +62,6 @@ export async function updatePlatformSettings(
   updates: {
     requireGoogleLogin?: boolean;
     requirePhoneOtp?: boolean;
-    listingFeeAmount?: number;
-    listingFeeDurationDays?: number;
   },
   adminUser: { id: string; name: string; email: string; role: string }
 ): Promise<IPlatformSettings> {
@@ -90,21 +78,7 @@ export async function updatePlatformSettings(
     updatePayload.requirePhoneOtp = updates.requirePhoneOtp;
   }
 
-  if (typeof updates.listingFeeAmount === 'number' && Number.isFinite(updates.listingFeeAmount)) {
-    const sanitizedFee = Math.round(updates.listingFeeAmount);
-    if (sanitizedFee < 1 || sanitizedFee > 100000) {
-      throw new Error('Listing fee must be between ₹1 and ₹1,00,000.');
-    }
-    updatePayload.listingFeeAmount = sanitizedFee;
-  }
 
-  if (typeof updates.listingFeeDurationDays === 'number' && Number.isFinite(updates.listingFeeDurationDays)) {
-    const sanitizedDuration = Math.round(updates.listingFeeDurationDays);
-    if (sanitizedDuration < 1 || sanitizedDuration > 365) {
-      throw new Error('Listing duration must be between 1 and 365 days.');
-    }
-    updatePayload.listingFeeDurationDays = sanitizedDuration;
-  }
 
   try {
     await connectToDatabase();
@@ -122,8 +96,6 @@ export async function updatePlatformSettings(
     cachedSettings = {
       requireGoogleLogin: Boolean(doc.requireGoogleLogin),
       requirePhoneOtp: Boolean(doc.requirePhoneOtp),
-      listingFeeAmount: typeof doc.listingFeeAmount === 'number' ? doc.listingFeeAmount : 10,
-      listingFeeDurationDays: typeof doc.listingFeeDurationDays === 'number' ? doc.listingFeeDurationDays : 30,
       updatedBy: doc.updatedBy || adminUser.email,
       updatedAt: new Date(),
     };
@@ -140,8 +112,6 @@ export async function updatePlatformSettings(
       metadata: {
         requireGoogleLogin: doc.requireGoogleLogin,
         requirePhoneOtp: doc.requirePhoneOtp,
-        listingFeeAmount: doc.listingFeeAmount,
-        listingFeeDurationDays: doc.listingFeeDurationDays,
         updatedBy: updatePayload.updatedBy,
       },
     }).catch((err) => {
