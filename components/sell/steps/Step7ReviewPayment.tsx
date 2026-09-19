@@ -2,9 +2,12 @@
 
 import React from 'react';
 import {
-  CreditCard,
   CheckCircle2,
   ShieldCheck,
+  MapPin,
+  Camera,
+  FileText,
+  PencilLine,
 } from 'lucide-react';
 import { LAND_TYPES } from '@/config/constants';
 import { UseSellFormReturn } from '@/types/sell-form';
@@ -12,13 +15,11 @@ import { UseSellFormReturn } from '@/types/sell-form';
 interface Step7ReviewPaymentProps {
   form: UseSellFormReturn;
   existingPropertyId?: string | null;
-  existingPaymentStatus?: string | null;
-  listingDurationDays?: number;
-  listingFeeAmount?: number;
 }
 
 function formatArea(value: number, decimals = 2): string {
   if (!Number.isFinite(value)) return '0';
+
   return value.toLocaleString('en-IN', {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,
@@ -28,286 +29,286 @@ function formatArea(value: number, decimals = 2): string {
 export function Step7ReviewPayment({
   form,
   existingPropertyId = null,
-  existingPaymentStatus = null,
-  listingDurationDays = 30,
-  listingFeeAmount = 10,
 }: Step7ReviewPaymentProps) {
   const { state, actions } = form;
+
   const {
+    transactionType,
     title,
+    description,
     city,
     state: propertyState,
+    pincode,
     landType,
     bhk,
     facing,
-    vastuCompliant,
-    totalRooms,
     monthlyRent,
-    villaPrivateFeatures,
-    additionalRooms,
     selectedAmenities,
     termsAccepted,
     authoritativeFees,
     areaConversions,
+    images,
+    video,
+    documents,
   } = state;
 
-  const { setTermsAccepted } = actions;
+  const {
+    setTermsAccepted,
+    setCurrentStep,
+    syncStepToUrl,
+  } = actions;
+
   const { landAreaYards, totalPrice } = authoritativeFees;
 
+  const typeLabel =
+    LAND_TYPES.find(
+      (type: any) => (type.value || type.id) === landType,
+    )?.label || landType.replace(/_/g, ' ');
+
+  const transactionLabel =
+    transactionType === 'SALE'
+      ? 'For sale'
+      : transactionType === 'RENT'
+        ? 'For rent'
+        : 'For lease';
+
+  const monthlyAmount =
+    Number(String(monthlyRent).replace(/,/g, '')) || 0;
+
+  const editStep = (step: number) => {
+    setCurrentStep(step);
+    syncStepToUrl(step);
+  };
+
   return (
-    <div className="p-5 sm:p-8 space-y-7 animate-in fade-in duration-150">
+    <div className="p-5 sm:p-7 space-y-7 animate-in fade-in duration-150">
       <div>
-        <h2 className="text-lg font-extrabold text-slate-950">
-          Review &amp; Publish
+        <p className="text-[11px] font-bold text-[#c75e0a]">
+          Step 7 of 7
+        </p>
+        <h2 className="mt-1 text-xl font-extrabold text-slate-950">
+          Review before you submit
         </h2>
-        <p className="text-xs text-slate-500 mt-1">
-          Review your listing details before completing publishing fee payment.
+        <p className="text-sm text-slate-500 mt-1">
+          Check the essentials below. Your listing will be reviewed before it becomes publicly visible.
         </p>
       </div>
 
-      {/* Property Summary */}
-      <div className="rounded-2xl border border-slate-200 overflow-hidden">
-        <div className="p-4 bg-slate-50 border-b border-slate-200">
-          <h3 className="text-sm font-extrabold text-slate-900">
-            Listing Summary
-          </h3>
+      <section className="rounded-xl border border-slate-200 overflow-hidden">
+        <div className="flex items-center justify-between gap-3 px-4 py-3 bg-slate-50 border-b border-slate-200">
+          <div>
+            <p className="text-sm font-extrabold text-slate-900">
+              Listing summary
+            </p>
+            <p className="text-[10px] text-slate-500 mt-0.5">
+              What property seekers will understand at a glance
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => editStep(1)}
+            className="inline-flex items-center gap-1.5 text-[11px] font-bold text-[#a84f08] hover:text-[#7a3705]"
+          >
+            <PencilLine className="w-3.5 h-3.5" />
+            Edit basics
+          </button>
         </div>
 
-        <div className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="p-4 sm:p-5 space-y-5">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
-              Property Title
-            </p>
-            <p className="text-sm font-bold text-slate-900 mt-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="px-2 py-1 rounded-md bg-[#fff8ef] text-[#8f4308] text-[10px] font-bold border border-[#FF9933]/25">
+                {transactionLabel}
+              </span>
+              <span className="text-[11px] font-semibold text-slate-500">
+                {typeLabel}
+              </span>
+            </div>
+            <h3 className="mt-2 text-base font-extrabold text-slate-950">
               {title || 'Untitled property'}
-            </p>
-          </div>
-
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
-              Location
-            </p>
-            <p className="text-sm font-bold text-slate-900 mt-1">
-              {city || '—'}, {propertyState || '—'}
-            </p>
-          </div>
-
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
-              Land Area
-            </p>
-            <p className="text-sm font-bold text-slate-900 mt-1">
-              {formatArea(landAreaYards, 2)} sq. yards
-            </p>
-            <p className="text-[10px] text-slate-500 mt-1">
-              {formatArea(areaConversions.acres, 4)} acres •{' '}
-              {formatArea(areaConversions.guntas, 2)} guntas
-            </p>
-          </div>
-
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
-              Property Type &amp; Configuration
-            </p>
-            <p className="text-sm font-bold text-slate-900 mt-1">
-              {LAND_TYPES.find((t: any) => (t.value || t.id) === landType)?.label || landType}
-              {[
-                'FLAT',
-                'INDEPENDENT_HOUSE',
-                'VILLA',
-                'HOUSE_VILLA',
-                'TOWNHOUSE',
-                'DUPLEX',
-                'PENTHOUSE',
-                'SERVICE_APARTMENT',
-                'RESIDENTIAL_RENTAL',
-                'COLIVING_PG',
-                'VACATION_RENTAL_AIRBNB',
-              ].includes(landType) && bhk && bhk !== 'NOT_SPECIFIED' ? ` • ${bhk}` : ''}
-              {facing && facing !== 'NOT_SPECIFIED' ? ` • ${facing} Facing` : ''}
-              {vastuCompliant && ['VILLA', 'INDEPENDENT_HOUSE', 'HOUSE_VILLA', 'TOWNHOUSE', 'DUPLEX'].includes(landType) ? ' • 100% Vastu' : ''}
-              {['RESORT', 'HOTEL', 'SERVICE_APARTMENT', 'GUEST_HOUSE'].includes(landType) && totalRooms ? ` • ${totalRooms}` : ''}
-              {['RESIDENTIAL_RENTAL', 'COMMERCIAL_LEASE', 'COLIVING_PG', 'VACATION_RENTAL_AIRBNB'].includes(landType) && monthlyRent ? ` • ₹${monthlyRent}/mo` : ''}
-            </p>
-          </div>
-
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
-              Total Valuation
-            </p>
-            <p className="text-sm font-bold text-slate-900 mt-1">
-              ₹{Number(totalPrice || 0).toLocaleString('en-IN')}
-            </p>
-          </div>
-
-          {/* Private Villa Features & Rooms if any */}
-          {(villaPrivateFeatures.length > 0 || additionalRooms.length > 0) &&
-            ['VILLA', 'INDEPENDENT_HOUSE', 'HOUSE_VILLA', 'TOWNHOUSE', 'DUPLEX'].includes(landType) && (
-              <div className="sm:col-span-2 pt-2 border-t border-slate-100">
-                <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400 mb-1.5">
-                  Private Grounds &amp; Rooms ({villaPrivateFeatures.length + additionalRooms.length})
-                </p>
-                <div className="flex flex-wrap gap-1.5">
-                  {villaPrivateFeatures.map((f) => (
-                    <span
-                      key={f}
-                      className="px-2 py-0.5 rounded-md bg-[#fff1dc] border border-[#FF9933]/30 text-[#7a3705] text-[10px] font-bold"
-                    >
-                      ★ {f}
-                    </span>
-                  ))}
-                  {additionalRooms.map((r) => (
-                    <span
-                      key={r}
-                      className="px-2 py-0.5 rounded-md bg-amber-50 border border-amber-200 text-amber-900 text-[10px] font-semibold"
-                    >
-                      + {r}
-                    </span>
-                  ))}
-                </div>
-              </div>
+            </h3>
+            {description && (
+              <p className="mt-1.5 text-xs text-slate-600 leading-relaxed line-clamp-3">
+                {description}
+              </p>
             )}
+          </div>
+
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            <div className="rounded-lg border border-slate-200 p-3">
+              <p className="text-[9px] font-bold uppercase tracking-wide text-slate-400">
+                Area
+              </p>
+              <p className="mt-1 text-sm font-extrabold text-slate-900">
+                {formatArea(landAreaYards, 2)} sq. yd
+              </p>
+              <p className="mt-0.5 text-[10px] text-slate-500">
+                {formatArea(areaConversions.sqFeet, 0)} sq. ft
+              </p>
+            </div>
+
+            <div className="rounded-lg border border-slate-200 p-3">
+              <p className="text-[9px] font-bold uppercase tracking-wide text-slate-400">
+                {transactionType === 'SALE' ? 'Asking price' : 'Monthly amount'}
+              </p>
+              <p className="mt-1 text-sm font-extrabold text-slate-900">
+                ₹{Number(
+                  transactionType === 'SALE'
+                    ? totalPrice
+                    : monthlyAmount,
+                ).toLocaleString('en-IN')}
+                {transactionType !== 'SALE' && (
+                  <span className="text-[10px] font-semibold text-slate-500"> / month</span>
+                )}
+              </p>
+            </div>
+
+            <div className="rounded-lg border border-slate-200 p-3">
+              <p className="text-[9px] font-bold uppercase tracking-wide text-slate-400">
+                Configuration
+              </p>
+              <p className="mt-1 text-sm font-extrabold text-slate-900">
+                {bhk && bhk !== 'NOT_SPECIFIED'
+                  ? bhk
+                  : facing && facing !== 'NOT_SPECIFIED'
+                    ? `${facing} facing`
+                    : 'Not specified'}
+              </p>
+            </div>
+
+            <div className="rounded-lg border border-slate-200 p-3">
+              <p className="text-[9px] font-bold uppercase tracking-wide text-slate-400">
+                Media
+              </p>
+              <p className="mt-1 text-sm font-extrabold text-slate-900">
+                {images.length} {images.length === 1 ? 'photo' : 'photos'}
+              </p>
+              <p className="mt-0.5 text-[10px] text-slate-500">
+                {video ? 'Video included' : 'No video'}
+              </p>
+            </div>
+          </div>
 
           {selectedAmenities.length > 0 && (
-            <div className="sm:col-span-2 pt-2 border-t border-slate-100">
-              <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400 mb-1.5">
-                Key Amenities &amp; Features ({selectedAmenities.length})
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
+                Key features
               </p>
-              <div className="flex flex-wrap gap-1.5">
-                {selectedAmenities.map((a) => (
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {selectedAmenities.slice(0, 8).map((amenity) => (
                   <span
-                    key={a}
-                    className="px-2 py-0.5 rounded-md bg-white border border-slate-200 text-slate-700 text-[10px] font-semibold"
+                    key={amenity}
+                    className="px-2 py-1 rounded-md bg-slate-50 border border-slate-200 text-[10px] font-semibold text-slate-700"
                   >
-                    ✓ {a}
+                    {amenity}
                   </span>
                 ))}
+                {selectedAmenities.length > 8 && (
+                  <span className="px-2 py-1 text-[10px] font-semibold text-slate-500">
+                    +{selectedAmenities.length - 8} more
+                  </span>
+                )}
               </div>
             </div>
           )}
         </div>
+      </section>
+
+      <div className="grid sm:grid-cols-3 gap-3">
+        <button
+          type="button"
+          onClick={() => editStep(2)}
+          className="rounded-xl border border-slate-200 bg-white p-4 text-left hover:border-slate-300 transition-colors"
+        >
+          <MapPin className="w-4 h-4 text-[#c75e0a]" />
+          <p className="mt-2 text-xs font-extrabold text-slate-900">Location</p>
+          <p className="mt-1 text-[10px] text-slate-500 leading-relaxed">
+            {[city, propertyState, pincode].filter(Boolean).join(', ') || 'Location details not complete'}
+          </p>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => editStep(5)}
+          className="rounded-xl border border-slate-200 bg-white p-4 text-left hover:border-slate-300 transition-colors"
+        >
+          <Camera className="w-4 h-4 text-[#c75e0a]" />
+          <p className="mt-2 text-xs font-extrabold text-slate-900">Photos & video</p>
+          <p className="mt-1 text-[10px] text-slate-500 leading-relaxed">
+            {images.length} photos{video ? ' + video walkthrough' : ''}
+          </p>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => editStep(6)}
+          className="rounded-xl border border-slate-200 bg-white p-4 text-left hover:border-slate-300 transition-colors"
+        >
+          <FileText className="w-4 h-4 text-[#c75e0a]" />
+          <p className="mt-2 text-xs font-extrabold text-slate-900">Documents</p>
+          <p className="mt-1 text-[10px] text-slate-500 leading-relaxed">
+            {documents.length > 0
+              ? `${documents.length} document${documents.length === 1 ? '' : 's'} attached`
+              : 'Optional. You can add documents later.'}
+          </p>
+        </button>
       </div>
 
-      {/* Flat Publishing Fee Card / Active Status */}
-      {existingPropertyId && existingPaymentStatus === 'PAID' ? (
-        <div className="rounded-2xl border border-[#FF9933]/30 bg-[#fff9f0] p-5 space-y-2">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#fff1dc] text-[#c75e0a] flex items-center justify-center shrink-0">
-              <CheckCircle2 className="w-5 h-5" />
-            </div>
-            <div>
-              <h3 className="text-sm font-extrabold text-slate-950">
-                Listing Publishing Fee Paid &amp; Active
-              </h3>
-              <p className="text-[11px] text-[#7a3705] mt-0.5 leading-relaxed">
-                Your listing subscription is active. Saving your changes will update the property details immediately without requiring another publishing fee.
+      <section className="rounded-xl border border-emerald-200 bg-emerald-50/60 p-4 sm:p-5">
+        <div className="flex items-start gap-3">
+          <div className="w-9 h-9 rounded-lg bg-white border border-emerald-200 text-emerald-700 flex items-center justify-center shrink-0">
+            <CheckCircle2 className="w-4 h-4" />
+          </div>
+          <div>
+            <h3 className="text-sm font-extrabold text-emerald-950">
+              Ready for platform review
+            </h3>
+            <p className="mt-1 text-[11px] text-emerald-800 leading-relaxed">
+              Submitting does not make the property instantly public. BhoomiMitra will review the listing information and supporting material first. You can manage the listing from your seller dashboard.
+            </p>
+            {existingPropertyId && (
+              <p className="mt-2 text-[10px] font-semibold text-emerald-800">
+                Your saved listing will be updated and re-submitted for review.
               </p>
-            </div>
+            )}
           </div>
         </div>
-      ) : (
-        <div className="rounded-2xl border border-[#FF9933]/30 bg-[#fff9f0] overflow-hidden">
-          <div className="p-5 border-b border-[#FF9933]/30">
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-xl bg-[#fff1dc] text-[#c75e0a] flex items-center justify-center shrink-0">
-                <CreditCard className="w-5 h-5" />
-              </div>
-              <div>
-                <h3 className="text-sm font-extrabold text-slate-950">
-                  Listing Publishing Fee
-                </h3>
-                <p className="text-[11px] text-[#7a3705] mt-1">
-                  Universal flat fee for the full {listingDurationDays}-day subscription period.
-                </p>
-              </div>
-            </div>
-          </div>
+      </section>
 
-          <div className="p-5 space-y-3">
-            <div className="flex justify-between items-center text-xs">
-              <span className="text-slate-600">Listing validity</span>
-              <span className="font-bold text-slate-900">
-                {listingDurationDays} days
-              </span>
-            </div>
-
-            <div className="flex justify-between items-center text-xs">
-              <span className="text-slate-600">Publishing fee</span>
-              <span className="font-bold text-slate-900">
-                ₹{listingFeeAmount.toLocaleString('en-IN')}
-              </span>
-            </div>
-
-            <div className="pt-3 border-t border-[#FF9933]/30 flex justify-between items-center">
-              <span className="text-sm font-extrabold text-slate-950">
-                Amount Payable
-              </span>
-              <span className="text-xl font-black text-[#c75e0a]">
-                ₹{listingFeeAmount.toLocaleString('en-IN')}
-              </span>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Seller Declaration & Marketplace Undertaking Card */}
-      <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5 space-y-4">
+      <section className="rounded-xl border border-slate-200 bg-slate-50 p-4 sm:p-5 space-y-4">
         <div className="flex items-center gap-2">
-          <ShieldCheck className="w-5 h-5 text-[#FF9933]" />
+          <ShieldCheck className="w-4 h-4 text-[#c75e0a]" />
           <h3 className="text-sm font-extrabold text-slate-950">
-            Seller Declaration &amp; Publishing Undertaking
+            Seller declaration
           </h3>
         </div>
 
-        <ul className="space-y-2 text-[11px] text-slate-600 leading-relaxed list-disc pl-4">
-          <li>
-            <strong>Authorization:</strong> I represent that I am the owner of this property or am otherwise lawfully authorized to advertise this listing.
-          </li>
-          <li>
-            <strong>Accuracy:</strong> The land extent, pricing, boundaries, and descriptions submitted are accurate and my sole responsibility.
-          </li>
-          <li>
-            <strong>Lawful Content:</strong> I undertake not to upload unlawful, fraudulent, misleading, or infringing content, or prohibited/disputed land parcels.
-          </li>
-          <li>
-            <strong>Marketplace Role:</strong> I understand that BhoomiMitra operates as an online classifieds marketplace and does not certify ownership, inspect titles, or guarantee properties.
-          </li>
-          <li>
-            <strong>Buyer Due Diligence:</strong> I acknowledge that prospective buyers must independently inspect revenue records, title deeds, and physical boundaries prior to transactions.
-          </li>
-          <li>
-            <strong>Statutory Compliance:</strong> I agree to comply with applicable laws, terms of service, and platform listing rules.
-          </li>
-        </ul>
+        <div className="text-[11px] text-slate-600 leading-relaxed space-y-2">
+          <p>
+            I confirm that I am authorized to advertise this property and that the details I have provided are accurate to the best of my knowledge.
+          </p>
+          <p>
+            I understand that BhoomiMitra is a property marketplace. Listing review does not certify ownership, title, legality, valuation or transaction safety. Buyers and tenants should complete their own due diligence.
+          </p>
+        </div>
 
         <label className="flex items-start gap-3 cursor-pointer pt-3 border-t border-slate-200">
           <input
             type="checkbox"
             checked={termsAccepted}
-            onChange={(event) =>
-              setTermsAccepted(event.target.checked)
-            }
+            onChange={(event) => setTermsAccepted(event.target.checked)}
             className="w-4 h-4 mt-0.5 accent-[#FF9933]"
           />
           <span className="text-xs font-semibold text-slate-900 leading-snug">
-            I have read, understood, and accept the above Seller Declaration, Marketplace Listing Rules, and Terms of Service.
+            I accept the Seller Declaration, Listing Rules and Terms of Service.
           </span>
         </label>
-      </div>
+      </section>
 
-      {/* Draft Preservation Notice */}
-      <div className="rounded-xl bg-blue-50 border border-blue-200 p-4">
-        <div className="flex items-start gap-3">
-          <ShieldCheck className="w-4 h-4 text-blue-700 shrink-0 mt-0.5" />
-          <div>
-            <p className="text-xs font-bold text-blue-950">
-              {existingPropertyId ? 'Draft Saved in Your Account' : 'Save Draft & Resume Anytime'}
-            </p>
-            <p className="text-[10px] text-blue-900/80 mt-1 leading-relaxed">
-              Use the <strong>Save Draft</strong> button below to save all your entered details, photographs, and video directly to your account. Your work will never be lost even if you refresh or leave the page.
-            </p>
-          </div>
-        </div>
+      <div className="rounded-lg border border-blue-200 bg-blue-50 p-3.5">
+        <p className="text-[11px] text-blue-900 leading-relaxed">
+          Not ready to submit? Use <strong>Save draft</strong>. Your work can be continued later without publishing the listing.
+        </p>
       </div>
     </div>
   );
