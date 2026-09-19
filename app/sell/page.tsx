@@ -25,20 +25,17 @@ import {
   Save,
   MapPin,
   Camera,
-  FileCheck2,
   UserRound,
   Home,
   ClipboardCheck,
 } from 'lucide-react';
 
 const STEPS = [
-  { step: 1, label: 'Basics', helper: 'Type, area & price', icon: Home },
+  { step: 1, label: 'Property', helper: 'Type, size & price', icon: Home },
   { step: 2, label: 'Location', helper: 'Address & map pin', icon: MapPin },
-  { step: 3, label: 'Contact', helper: 'Seller details', icon: UserRound },
-  { step: 4, label: 'Records', helper: 'Reference details', icon: FileCheck2 },
-  { step: 5, label: 'Photos', helper: 'Photos & video', icon: Camera },
-  { step: 6, label: 'Documents', helper: 'Optional documents', icon: ShieldCheck },
-  { step: 7, label: 'Review', helper: 'Check & submit', icon: ClipboardCheck },
+  { step: 3, label: 'Seller & records', helper: 'Contact + optional refs', icon: UserRound },
+  { step: 4, label: 'Media & documents', helper: 'Photos, video & files', icon: Camera },
+  { step: 5, label: 'Review', helper: 'Preview & submit', icon: ClipboardCheck },
 ];
 
 function SellPageForm() {
@@ -358,7 +355,7 @@ function SellPageForm() {
                 {existingPropertyId ? 'Complete your property listing' : 'List your property'}
               </h1>
               <p className="mt-1.5 text-sm text-slate-500">
-                Complete the essentials first. Optional details can be added later.
+                Five guided steps with only the fields that matter. Save a draft at any time.
               </p>
             </div>
 
@@ -477,11 +474,19 @@ function SellPageForm() {
               <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
                 {currentStep === 1 && <Step1SpecsPricing form={form} />}
                 {currentStep === 2 && <Step2Location form={form} />}
-                {currentStep === 3 && <Step3SellerContact form={form} />}
-                {currentStep === 4 && <Step4Records form={form} />}
-                {currentStep === 5 && <Step5MediaUpload form={form} />}
-                {currentStep === 6 && <Step6Documents form={form} />}
-                {currentStep === 7 && (
+                {currentStep === 3 && (
+                  <div className="divide-y divide-slate-100">
+                    <Step3SellerContact form={form} />
+                    <Step4Records form={form} />
+                  </div>
+                )}
+                {currentStep === 4 && (
+                  <div className="divide-y divide-slate-100">
+                    <Step5MediaUpload form={form} />
+                    <Step6Documents form={form} />
+                  </div>
+                )}
+                {currentStep === 5 && (
                   <Step7ReviewPayment
                     form={form}
                     existingPropertyId={existingPropertyId}
@@ -548,7 +553,7 @@ function SellPageForm() {
                       {isSavingDraft ? 'Saving...' : draftSaveSuccess ? 'Saved' : 'Save draft'}
                     </button>
 
-                    {currentStep < 7 ? (
+                    {currentStep < STEPS.length ? (
                       <button
                         type="button"
                         onClick={handleNext}
