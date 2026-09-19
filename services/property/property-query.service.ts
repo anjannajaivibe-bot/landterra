@@ -479,7 +479,7 @@ export async function getProperties(
 
     /*
      * ------------------------------------------------------------
-     * DIRECT LANDOWNER ONLY
+     * INDIVIDUAL SELLER FILTER
      * ------------------------------------------------------------
      */
 
