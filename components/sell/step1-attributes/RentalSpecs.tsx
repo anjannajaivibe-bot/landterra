@@ -11,7 +11,6 @@ interface RentalSpecsProps {
 export function RentalSpecs({ state, actions }: RentalSpecsProps) {
   const {
     transactionType,
-    landType,
     securityDepositMonths,
     leaseLockInPeriod,
     maintenanceCharges,
