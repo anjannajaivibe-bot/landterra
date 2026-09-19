@@ -185,7 +185,7 @@ export function AuthModal({
 
             <AuthBenefit
               title="Sell your property"
-              description="Create listings, manage subscriptions and track inquiries."
+              description="Create listings, manage their status and track inquiries."
             />
 
             <AuthBenefit
