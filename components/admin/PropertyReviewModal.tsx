@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import { IProperty } from '@/types/property';
+import { getPropertyTypeLabel } from '@/config/constants';
 import { VerificationBadge } from '@/components/properties/VerificationBadge';
 import { ShieldCheck, XCircle, AlertCircle, FileText, CheckCircle2, MapPin, X, ExternalLink, User } from 'lucide-react';
 import { useModalAccessibility } from '@/hooks/useModalAccessibility';
@@ -183,7 +184,7 @@ export function PropertyReviewModal({
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-500">Land Type:</span>
-                    <span className="font-medium text-slate-800">{property.landType}</span>
+                    <span className="font-medium text-slate-800">{getPropertyTypeLabel(property.landType)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-500">Road Access:</span>
