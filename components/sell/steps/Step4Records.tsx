@@ -17,16 +17,16 @@ export function Step4Records({ form }: Step4RecordsProps) {
     <div className="p-5 sm:p-8 space-y-7 animate-in fade-in duration-150">
       <div>
         <h2 className="text-lg font-extrabold text-slate-950">
-          Government / Survey Identifier
+          Property records
         </h2>
         <p className="text-xs text-slate-500 mt-1">
-          Provide the survey or registration number that helps our team verify the land parcel.
+          Add an official property reference if you have one. This step is optional.
         </p>
       </div>
 
       <div>
         <label className="block text-xs font-bold text-slate-700 mb-1.5">
-          Government Registration / Survey ID (Optional)
+          Survey / registration / khata reference
         </label>
         <input
           type="text"
@@ -35,7 +35,7 @@ export function Step4Records({ form }: Step4RecordsProps) {
             setGovernmentRegistrationId(event.target.value)
           }
           placeholder="Example: Survey No. 123/4A"
-          className="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#fff1dc] focus:border-[#FF9933]"
+          className="w-full px-4 py-3 rounded-lg border border-slate-300 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#fff1dc] focus:border-[#FF9933]"
         />
         <p className="text-[10px] text-slate-400 mt-1">
           Enter the survey number, registration number, khata number, or other official identifier.
@@ -47,10 +47,10 @@ export function Step4Records({ form }: Step4RecordsProps) {
           <ShieldCheck className="w-6 h-6 text-[#FF9933] shrink-0 mt-0.5" />
           <div>
             <h3 className="text-sm font-extrabold text-[#7a3705]">
-              Instant Direct Classifieds Publishing
+              Optional, but useful for review
             </h3>
             <p className="text-xs text-[#9c4c0b] mt-1 leading-relaxed">
-              Your land advertisement will be published immediately upon flat-fee payment without administrative delays. You are solely responsible for ensuring the survey numbers and ownership details you provide are accurate and lawful.
+              A survey, registration, khata or similar reference can help our review team understand the listing. Adding a reference does not mean BhoomiMitra has verified ownership or title.
             </p>
           </div>
         </div>
