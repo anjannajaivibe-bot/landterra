@@ -7,17 +7,17 @@ import { Footer } from '@/components/layout/Footer';
 
 export const metadata: Metadata = {
   title: {
-    absolute: "Direct Properties, Homes & Plots Across India | BhoomiMitra",
+    absolute: "Properties for Sale, Rent & Lease Across India | BhoomiMitra",
   },
   description:
-    "Explore residential plots, apartments, villas, commercial spaces, and agricultural land across India. Connect directly with genuine property owners with zero broker commissions.",
+    "Explore property for sale, rent and lease across India, including plots, homes, commercial spaces and hospitality properties. Contact the listed seller directly. BhoomiMitra charges no platform brokerage.",
   alternates: {
     canonical: '/',
   },
   openGraph: {
     title: "Direct Properties, Homes & Plots Across India | BhoomiMitra",
     description:
-      "Explore residential plots, apartments, villas, commercial spaces, and agricultural land across India. Connect directly with genuine property owners with zero broker commissions.",
+      "Explore property for sale, rent and lease across India, including plots, homes, commercial spaces and hospitality properties. Contact the listed seller directly. BhoomiMitra charges no platform brokerage.",
     type: 'website',
   },
 };
@@ -26,9 +26,6 @@ export const dynamic = 'force-dynamic';
 
 export default async function HomePage() {
   let initialProperties: IProperty[] = [];
-  const publicListingFee = 10;
-  const listingDurationDays = 30;
-
   try {
     const result = await getProperties({ limit: 12, cardOnly: true });
     if (result && Array.isArray(result.data)) {
@@ -41,8 +38,6 @@ export default async function HomePage() {
   return (
     <HomePageClient
       initialProperties={initialProperties}
-      initialListingFee={publicListingFee}
-      initialListingDurationDays={listingDurationDays}
       footer={<Footer />}
     />
   );
