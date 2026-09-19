@@ -8,8 +8,6 @@ import {
   Users,
   Layers,
   FileCheck2,
-  CreditCard,
-  Clock,
   Flag,
   MessageSquare,
   Activity,
@@ -52,16 +50,6 @@ export const ADMIN_NAV_ITEMS = [
     href: '/admin/moderation',
     label: 'Moderation',
     icon: FileCheck2,
-  },
-  {
-    href: '/admin/payments',
-    label: 'Payments',
-    icon: CreditCard,
-  },
-  {
-    href: '/admin/subscriptions',
-    label: 'Subscriptions',
-    icon: Clock,
   },
   {
     href: '/admin/reports',
@@ -408,7 +396,7 @@ export function AdminShell({ children }: AdminShellProps) {
           </div>
 
           {/* ============================================================
-              NAVIGATION TABS (ALL 9 INDEPENDENT FEATURES)
+              NAVIGATION TABS
               ============================================================ */}
           <nav className="flex gap-1.5 overflow-x-auto pb-3 pt-1 scrollbar-none">
             {ADMIN_NAV_ITEMS.map((item) => {
