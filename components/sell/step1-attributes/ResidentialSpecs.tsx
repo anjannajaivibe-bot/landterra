@@ -52,10 +52,10 @@ export function ResidentialSpecs({ state, actions }: ResidentialSpecsProps) {
         </div>
         <div>
           <h3 className="text-sm font-extrabold text-slate-900">
-            Apartment & Tower Specifications
+            Apartment details
           </h3>
           <p className="text-[11px] text-slate-500">
-            Configuration, floor details, areas, and society amenities for apartment buyers.
+            Add the configuration, floor, area, parking and amenity details that apply.
           </p>
         </div>
       </div>
@@ -63,7 +63,7 @@ export function ResidentialSpecs({ state, actions }: ResidentialSpecsProps) {
       {/* Bedroom Configuration (BHK) */}
       <div>
         <label className="block text-xs font-bold text-slate-800 mb-2">
-          Bedrooms Configuration (BHK) *
+          Bedroom configuration (BHK)
         </label>
         <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
           {['1 BHK', '2 BHK', '3 BHK', '4 BHK', '5+ BHK'].map((item) => (
@@ -87,7 +87,7 @@ export function ResidentialSpecs({ state, actions }: ResidentialSpecsProps) {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="block text-xs font-bold text-slate-700 mb-1.5">
-            Floor Number *
+            Floor number
           </label>
           <input
             type="text"
@@ -99,7 +99,7 @@ export function ResidentialSpecs({ state, actions }: ResidentialSpecsProps) {
         </div>
         <div>
           <label className="block text-xs font-bold text-slate-700 mb-1.5">
-            Total Floors in Tower *
+            Total floors in building
           </label>
           <input
             type="text"
