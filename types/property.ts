@@ -221,14 +221,12 @@ export interface IProperty {
    priceNegotiable?: boolean;
 
    /* --------------------------------------------------------------
-      BHOOMIMITRA SELLER LISTING FEE
+      LEGACY LISTING-FEE COMPATIBILITY
    -------------------------------------------------------------- */
 
    /**
-    * Monthly listing subscription amount.
-    *
-    * Business rule:
-    * landAreaYards × ₹10
+    * Legacy fee fields retained for backward-compatible reads.
+    * New BhoomiMitra listings currently use zero platform publishing fees.
     */
    publishingFee: number;
 
