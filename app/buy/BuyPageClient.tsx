@@ -597,18 +597,18 @@ function BuyPageContent({
 
             <div className="inline-flex items-center gap-1.5 rounded-full border border-[#FF9933]/30 bg-[#fff1dc] px-3 py-1 text-[11px] font-black text-[#c75e0a] shadow-2xs">
               <Sparkles className="h-3.5 w-3.5 text-[#FF9933]" />
-              <span>Direct From Owners • 0% Brokerage</span>
+              <span>Direct Seller Contact • 0% Platform Brokerage</span>
             </div>
           </div>
 
           {/* Heading */}
           <div className="max-w-3xl">
             <h1 className="text-2xl font-black tracking-tight text-slate-900 sm:text-4xl lg:text-4xl">
-              Direct Real Estate &amp; Properties{' '}
+              Real Estate &amp; Property{' '}
               <span className="text-[#FF9933]">Marketplace</span>
             </h1>
             <p className="mt-2 text-xs sm:text-sm leading-relaxed text-slate-600">
-              Browse direct owner properties — plots, apartments, houses, villas, commercial spaces, and farmlands across India with zero broker commissions.
+              Browse plots, homes, commercial spaces and hospitality properties across India. Contact the listed seller directly while BhoomiMitra charges no platform brokerage.
             </p>
           </div>
 
@@ -833,10 +833,10 @@ function BuyPageContent({
                 <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-[#FF9933]" />
                 <div>
                   <p className="text-xs font-bold text-[#c75e0a]">
-                    Classifieds Marketplace Notice (0% Brokerage)
+                    Property Marketplace Notice (0% Platform Brokerage)
                   </p>
                   <p className="mt-0.5 text-[11px] text-[#7a3705] leading-relaxed">
-                    LandTerra / BhoomiMitra is an open classifieds advertising portal connecting buyers and sellers directly. We do not verify property titles. Buyers are required to inspect original registered sale deeds, EC Form 15, revenue extracts, and survey maps before executing transactions.
+                    BhoomiMitra is a property classifieds marketplace connecting buyers with listed sellers. A listing or review status does not guarantee title or ownership. Buyers should independently verify registered deeds, encumbrance records, revenue records and survey details before entering into a transaction.
                   </p>
                 </div>
               </div>
