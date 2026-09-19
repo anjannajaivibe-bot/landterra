@@ -66,13 +66,11 @@ export function FilterBar({
     residential: boolean;
     commercial: boolean;
     hospitality: boolean;
-    rentals: boolean;
   }>({
     landPlots: true,
     residential: true,
     commercial: false,
     hospitality: false,
-    rentals: false,
   });
 
   const propertyTypeRef = useRef<HTMLDivElement>(null);
@@ -92,7 +90,7 @@ export function FilterBar({
   }, []);
 
   const toggleCategory = (
-    cat: 'landPlots' | 'residential' | 'commercial' | 'hospitality' | 'rentals',
+    cat: 'landPlots' | 'residential' | 'commercial' | 'hospitality',
   ) => {
     setExpandedCategories((prev) => ({
       ...prev,
@@ -288,7 +286,7 @@ export function FilterBar({
                     )}
                   </div>
 
-                  {/* 2. Residential Units */}
+                  {/* 2. Residential */}
                   <div className="space-y-2 pt-2 border-t border-slate-100">
                     <button
                       type="button"
@@ -296,15 +294,15 @@ export function FilterBar({
                       className="w-full flex items-center justify-between py-1 text-[11px] font-black uppercase tracking-wider text-slate-700 hover:text-slate-900 cursor-pointer select-none"
                     >
                       <div className="flex items-center gap-2">
-                        <span>Residential Units</span>
+                        <span>Residential</span>
                         {ALL_PROPERTY_TYPES.filter(
-                          (t) => t.category === 'Residential Units' && selectedPropertyTypes.includes(t.id),
+                          (t) => t.category === 'Residential' && selectedPropertyTypes.includes(t.id),
                         ).length > 0 && (
                           <span className="px-1.5 py-0.5 rounded-full bg-[#fff1dc] text-[#c75e0a] text-[10px] font-bold">
                             {
                               ALL_PROPERTY_TYPES.filter(
                                 (t) =>
-                                  t.category === 'Residential Units' &&
+                                  t.category === 'Residential' &&
                                   selectedPropertyTypes.includes(t.id),
                               ).length
                             }
@@ -321,7 +319,7 @@ export function FilterBar({
                     {expandedCategories.residential && (
                       <div className="space-y-2.5 pt-1">
                         <div className="flex flex-wrap gap-1.5">
-                          {ALL_PROPERTY_TYPES.filter((t) => t.category === 'Residential Units').map((t) => {
+                          {ALL_PROPERTY_TYPES.filter((t) => t.category === 'Residential').map((t) => {
                             const isSelected = selectedPropertyTypes.includes(t.id);
                             return (
                               <button
@@ -371,7 +369,7 @@ export function FilterBar({
                     )}
                   </div>
 
-                  {/* 3. Commercial & Retail */}
+                  {/* 3. Commercial */}
                   <div className="space-y-2 pt-2 border-t border-slate-100">
                     <button
                       type="button"
@@ -381,13 +379,13 @@ export function FilterBar({
                       <div className="flex items-center gap-2">
                         <span>Commercial &amp; Retail</span>
                         {ALL_PROPERTY_TYPES.filter(
-                          (t) => t.category === 'Commercial & Retail' && selectedPropertyTypes.includes(t.id),
+                          (t) => t.category === 'Commercial' && selectedPropertyTypes.includes(t.id),
                         ).length > 0 && (
                           <span className="px-1.5 py-0.5 rounded-full bg-[#fff1dc] text-[#c75e0a] text-[10px] font-bold">
                             {
                               ALL_PROPERTY_TYPES.filter(
                                 (t) =>
-                                  t.category === 'Commercial & Retail' &&
+                                  t.category === 'Commercial' &&
                                   selectedPropertyTypes.includes(t.id),
                               ).length
                             }
@@ -403,7 +401,7 @@ export function FilterBar({
 
                     {expandedCategories.commercial && (
                       <div className="flex flex-wrap gap-1.5 pt-1 animate-in fade-in duration-150">
-                        {ALL_PROPERTY_TYPES.filter((t) => t.category === 'Commercial & Retail').map((t) => {
+                        {ALL_PROPERTY_TYPES.filter((t) => t.category === 'Commercial').map((t) => {
                           const isSelected = selectedPropertyTypes.includes(t.id);
                           return (
                             <button
@@ -424,7 +422,7 @@ export function FilterBar({
                     )}
                   </div>
 
-                  {/* 4. Hospitality & Leisure */}
+                  {/* 4. Hospitality */}
                   <div className="space-y-2 pt-2 border-t border-slate-100">
                     <button
                       type="button"
@@ -435,14 +433,14 @@ export function FilterBar({
                         <span>Hospitality &amp; Leisure</span>
                         {ALL_PROPERTY_TYPES.filter(
                           (t) =>
-                            t.category === 'Hospitality & Leisure' &&
+                            t.category === 'Hospitality' &&
                             selectedPropertyTypes.includes(t.id),
                         ).length > 0 && (
                           <span className="px-1.5 py-0.5 rounded-full bg-[#fff1dc] text-[#c75e0a] text-[10px] font-bold">
                             {
                               ALL_PROPERTY_TYPES.filter(
                                 (t) =>
-                                  t.category === 'Hospitality & Leisure' &&
+                                  t.category === 'Hospitality' &&
                                   selectedPropertyTypes.includes(t.id),
                               ).length
                             }
@@ -458,7 +456,7 @@ export function FilterBar({
 
                     {expandedCategories.hospitality && (
                       <div className="flex flex-wrap gap-1.5 pt-1 animate-in fade-in duration-150">
-                        {ALL_PROPERTY_TYPES.filter((t) => t.category === 'Hospitality & Leisure').map((t) => {
+                        {ALL_PROPERTY_TYPES.filter((t) => t.category === 'Hospitality').map((t) => {
                           const isSelected = selectedPropertyTypes.includes(t.id);
                           return (
                             <button
@@ -479,60 +477,6 @@ export function FilterBar({
                     )}
                   </div>
 
-                  {/* 5. Income-Generating & Rentals */}
-                  <div className="space-y-2 pt-2 border-t border-slate-100">
-                    <button
-                      type="button"
-                      onClick={() => toggleCategory('rentals')}
-                      className="w-full flex items-center justify-between py-1 text-[11px] font-black uppercase tracking-wider text-slate-700 hover:text-slate-900 cursor-pointer select-none"
-                    >
-                      <div className="flex items-center gap-2">
-                        <span>Income-Generating &amp; Rentals</span>
-                        {ALL_PROPERTY_TYPES.filter(
-                          (t) =>
-                            t.category === 'Income-Generating & Rentals' &&
-                            selectedPropertyTypes.includes(t.id),
-                        ).length > 0 && (
-                          <span className="px-1.5 py-0.5 rounded-full bg-[#fff1dc] text-[#c75e0a] text-[10px] font-bold">
-                            {
-                              ALL_PROPERTY_TYPES.filter(
-                                (t) =>
-                                  t.category === 'Income-Generating & Rentals' &&
-                                  selectedPropertyTypes.includes(t.id),
-                              ).length
-                            }
-                          </span>
-                        )}
-                      </div>
-                      <ChevronDown
-                        className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${
-                          expandedCategories.rentals ? 'rotate-180 text-[#FF9933]' : ''
-                        }`}
-                      />
-                    </button>
-
-                    {expandedCategories.rentals && (
-                      <div className="flex flex-wrap gap-1.5 pt-1 animate-in fade-in duration-150">
-                        {ALL_PROPERTY_TYPES.filter((t) => t.category === 'Income-Generating & Rentals').map((t) => {
-                          const isSelected = selectedPropertyTypes.includes(t.id);
-                          return (
-                            <button
-                              key={t.id}
-                              type="button"
-                              onClick={() => onTogglePropertyType(t.id)}
-                              className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer border ${
-                                isSelected
-                                  ? 'bg-[#fff1dc] text-[#c75e0a] border-[#FF9933] shadow-2xs ring-1 ring-[#FF9933]/30'
-                                  : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
-                              }`}
-                            >
-                              {t.label}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
                 </div>
               )}
             </div>
