@@ -3,6 +3,7 @@
 import React from 'react';
 import { Home, SlidersHorizontal, Check } from 'lucide-react';
 import { SellFormState, SellFormActions } from '@/types/sell-form';
+import { getPropertyTypeLabel } from '@/config/constants';
 
 interface VillaSpecsProps {
   state: SellFormState;
@@ -89,14 +90,11 @@ export function VillaSpecs({ state, actions }: VillaSpecsProps) {
           <div>
             <div className="flex items-center gap-2">
               <h3 className="text-base font-black text-slate-900">
-                Villa &amp; Independent House Specifications
+                {getPropertyTypeLabel(landType)} details
               </h3>
-              <span className="px-2 py-0.5 rounded-md bg-[#fff1dc] text-[#c75e0a] text-[10px] font-extrabold">
-                Dynamic Studio
-              </span>
             </div>
             <p className="text-xs text-slate-500 mt-0.5">
-              Capture villa architecture, structure levels, private grounds, and exclusive amenities. Unselect any features you do not wish to specify.
+              Add only the details that apply to this property. Optional features can be skipped.
             </p>
           </div>
         </div>
@@ -173,7 +171,7 @@ export function VillaSpecs({ state, actions }: VillaSpecsProps) {
             <div>
               <div className="flex items-center justify-between mb-2">
                 <label className="text-xs font-bold text-slate-800">
-                  Bedroom Configuration (BHK) *
+                  Bedroom configuration (BHK)
                 </label>
                 {bhk !== 'NOT_SPECIFIED' && (
                   <button
@@ -415,14 +413,12 @@ export function VillaSpecs({ state, actions }: VillaSpecsProps) {
               <div>
                 <div className="flex items-center gap-1.5">
                   <span className="text-xs font-extrabold text-emerald-950">
-                    100% Vastu Compliant Layout
+                    Vastu compliant (seller-declared)
                   </span>
-                  <span className="px-1.5 py-0.5 rounded bg-emerald-200/80 text-emerald-900 text-[9px] font-bold">
-                    MagicBricks Highlight
-                  </span>
+
                 </div>
                 <p className="text-[11px] text-emerald-800 mt-0.5">
-                  Entrance, pooja room (North-East), kitchen (South-East) and master bedroom (South-West) adhere strictly to Indian Vedic Vastu principles.
+                  Select this only if you want to declare the property as Vastu compliant.
                 </p>
               </div>
             </label>
@@ -773,7 +769,7 @@ export function VillaSpecs({ state, actions }: VillaSpecsProps) {
             Optional villa specifications skipped for a minimal listing.
           </p>
           <p className="text-[11px] text-slate-500">
-            Your listing will publish with base plot area and pricing. Click &quot;Expand All Villa Features&quot; above at any time to add specific features.
+            Your listing can be submitted with the basic details. Expand the optional section at any time to add more features.
           </p>
         </div>
       )}
