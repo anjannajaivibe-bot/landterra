@@ -27,10 +27,10 @@ export function Footer() {
             </div>
             <div className="space-y-1">
               <h4 className="text-slate-950 font-black text-sm">
-                Direct Peer-to-Peer Classifieds
+                Direct Seller Marketplace
               </h4>
               <p className="text-xs text-slate-500 leading-relaxed">
-                Landowners list directly with self-declared property information and legal declarations. Zero middleman markup.
+                Individuals, companies and agents can list property with seller-provided information. Buyers can contact the listed seller directly.
               </p>
             </div>
           </div>
@@ -55,10 +55,10 @@ export function Footer() {
             </div>
             <div className="space-y-1">
               <h4 className="text-slate-950 font-black text-sm">
-                0% Deal Brokerage Commission
+                0% Platform Brokerage
               </h4>
               <p className="text-xs text-slate-500 leading-relaxed">
-                Flat listing fee of just ₹10 for 30 days. Zero broker commissions, percentages, or success fees on any transaction.
+                BhoomiMitra does not charge buyers or sellers a brokerage percentage or success fee on the property transaction.
               </p>
             </div>
           </div>
@@ -84,7 +84,7 @@ export function Footer() {
           </Link>
 
           <p className="text-xs text-slate-600 leading-relaxed max-w-sm">
-            India&apos;s direct-to-owner real estate and property classifieds platform. Connecting genuine property owners with serious buyers and tenants across plots, homes, commercial spaces, and rentals.
+            India-focused property marketplace for sale, rent and lease. Explore plots, homes, commercial spaces and hospitality properties and contact the listed seller directly.
           </p>
 
           <div className="space-y-2.5 pt-2 text-xs">
@@ -131,16 +131,16 @@ export function Footer() {
             </li>
             <li>
               <Link href="/buy?verifiedOnly=true" className="hover:text-[#FF9933] transition-colors">
-                Direct Landowner Listings
+                Reviewed Listings
               </Link>
             </li>
           </ul>
         </div>
 
-        {/* Col 3: For Property Owners */}
+        {/* Col 3: For Sellers */}
         <div className="space-y-3">
           <h4 className="text-sm font-bold text-slate-950">
-            For Property Owners
+            For Sellers
           </h4>
           <ul className="space-y-2.5 text-xs font-semibold text-slate-600">
             <li>
@@ -150,9 +150,6 @@ export function Footer() {
                 className="inline-flex items-center gap-1.5 text-[#c75e0a] font-black hover:text-[#FF9933] transition-colors"
               >
                 <span>+ List Your Property</span>
-                <span className="px-1.5 py-0.5 rounded-md bg-[#FF9933] text-white text-[10px] font-black">
-                  ₹10
-                </span>
               </Link>
             </li>
             <li>
@@ -161,8 +158,8 @@ export function Footer() {
               </Link>
             </li>
             <li>
-              <Link href="/pricing" className="hover:text-[#FF9933] transition-colors">
-                Pricing &amp; 30-Day Ad Plans
+              <Link href="/listing-rules" className="hover:text-[#FF9933] transition-colors">
+                Listing Information
               </Link>
             </li>
             <li>
@@ -219,14 +216,14 @@ export function Footer() {
           <div className="flex items-start gap-2 max-w-4xl">
             <Scale className="w-4 h-4 text-[#FF9933] shrink-0 mt-0.5" />
             <span>
-              <strong>Buyer Due Diligence Advisory:</strong> BhoomiMitra is an online classifieds platform connecting landowners and buyers. BhoomiMitra does not verify ownership, title, boundaries, measurements, encumbrances, approvals, land-use status, litigation status, or the authenticity of documents. Buyers should independently verify the property with independent legal counsel before entering into any transaction.
+              <strong>Buyer Due Diligence Advisory:</strong> BhoomiMitra is an online property marketplace connecting listed sellers with buyers and tenants. BhoomiMitra does not verify ownership, title, boundaries, measurements, encumbrances, approvals, land-use status, litigation status, or the authenticity of documents. Buyers should independently verify the property with independent legal counsel before entering into any transaction.
             </span>
           </div>
 
           <div className="flex items-center gap-4 text-slate-700 font-bold shrink-0">
-            <span>🇮🇳 Made for Indian Land</span>
+            <span>🇮🇳 Made for Indian Property</span>
             <span>•</span>
-            <span>0% Brokerage</span>
+            <span>0% Platform Brokerage</span>
           </div>
         </div>
       </div>
@@ -235,7 +232,7 @@ export function Footer() {
       <div className="border-t border-slate-200 bg-white py-6 px-4 sm:px-6 lg:px-8 text-xs text-slate-500">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div>
-            © {new Date().getFullYear()} BhoomiMitra Land Classifieds. All rights reserved.
+            © {new Date().getFullYear()} BhoomiMitra Property Marketplace. All rights reserved.
           </div>
 
           <div className="flex items-center gap-6 text-xs font-semibold">
