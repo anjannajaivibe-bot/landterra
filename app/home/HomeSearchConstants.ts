@@ -1,4 +1,4 @@
-export const BHK_OPTIONS = ['1 Bhk', '2 Bhk', '3 Bhk', '4 Bhk', '5 Bhk', '5+ Bhk'];
+export const BHK_OPTIONS = ['1 BHK', '2 BHK', '3 BHK', '4 BHK', '5+ BHK'];
 
 export const BUDGET_PRESETS = [
   { label: 'Any Budget', minPrice: 0, maxPrice: 0 },
@@ -24,14 +24,11 @@ export const residentialTypesSupportingBhk = [
   'FLAT',
   'INDEPENDENT_HOUSE',
   'VILLA',
-  'HOUSE_VILLA',
   'TOWNHOUSE',
   'DUPLEX',
   'PENTHOUSE',
+  'FARMHOUSE',
   'SERVICE_APARTMENT',
-  'RESIDENTIAL_RENTAL',
-  'COLIVING_PG',
-  'VACATION_RENTAL_AIRBNB',
 ];
 
 export const RESIDENTIAL_TYPES_SUPPORTING_BHK = residentialTypesSupportingBhk;
