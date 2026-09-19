@@ -46,41 +46,66 @@ export class DuplicatePropertyError extends Error {
  * Browser-provided totalPrice / publishingFee values
  * are ignored.
  */
+export type InitialListingStatus =
+  | 'DRAFT'
+  | 'PENDING_VERIFICATION';
+
 export async function createProperty(
   data: CreatePropertyInput,
+  initialListingStatus: InitialListingStatus = 'DRAFT',
 ): Promise<IProperty> {
-  const area =
-    Number(data.landAreaYards);
+  const area = Number(data.landAreaYards);
+  const transactionType = data.transactionType || 'SALE';
+  const monthlyAmount = Number(data.monthlyRent || 0);
 
-  const price =
-    Number(data.pricePerYard);
+  const normalizedPricePerYard =
+    transactionType === 'SALE'
+      ? Number(data.pricePerYard)
+      : Math.max(
+          1,
+          Math.round(
+            monthlyAmount /
+              Math.max(area, 1),
+          ),
+        );
 
   if (
     !Number.isFinite(area) ||
-    !Number.isFinite(price) ||
     area <= 0 ||
-    price <= 0
+    !Number.isFinite(normalizedPricePerYard) ||
+    normalizedPricePerYard <= 0 ||
+    (transactionType !== 'SALE' &&
+      (!Number.isFinite(monthlyAmount) || monthlyAmount <= 0))
   ) {
     throw new Error(
-      'Invalid land area or price per yard.',
+      transactionType === 'SALE'
+        ? 'Invalid property area or asking price.'
+        : 'Invalid property area or monthly rent / lease amount.',
     );
   }
 
   /*
-   * Authoritative server calculation.
+   * Keep the legacy normalized price fields for search compatibility.
+   * BhoomiMitra no longer charges a listing publishing fee.
    */
 
   const {
     landAreaYards,
     pricePerYard,
-    totalPrice,
-    publishingFee,
-    monthlyListingFee,
-  } =
-    calculateAuthoritativeFees(
-      area,
-      price,
-    );
+    totalPrice: calculatedTotalPrice,
+  } = calculateAuthoritativeFees(
+    area,
+    normalizedPricePerYard,
+    0,
+  );
+
+  const totalPrice =
+    transactionType === 'SALE'
+      ? calculatedTotalPrice
+      : monthlyAmount;
+
+  const publishingFee = 0;
+  const monthlyListingFee = 0;
 
   await connectToDatabase();
 
@@ -93,7 +118,7 @@ export async function createProperty(
    *    Different users listing properties in the same area/pincode
    *    are NEVER blocked.
    * 2. Limit: A seller may have at most 2 active listings
-   *    (DRAFT, PAYMENT_PENDING, PUBLISHED, or EXPIRING_SOON).
+   *    (DRAFT, legacy PAYMENT_PENDING, PENDING_VERIFICATION, PUBLISHED, or EXPIRING_SOON).
    * 3. Deep Duplicate Detection: If a seller lists the same property
    *    again, detect it by checking for identical documents, images,
    *    videos, or exact matching title + land area + pincode.
@@ -114,7 +139,7 @@ export async function createProperty(
 
     const existingSellerProperties = await PropertyModel.find({
       $or: sellerConditions,
-      listingStatus: { $in: ['DRAFT', 'PAYMENT_PENDING', 'PUBLISHED', 'EXPIRING_SOON'] },
+      listingStatus: { $in: ['DRAFT', 'PAYMENT_PENDING', 'PENDING_VERIFICATION', 'PUBLISHED', 'EXPIRING_SOON'] },
     }).lean();
 
     // Rule 1: Max 2 active/draft listings per seller
@@ -317,6 +342,8 @@ export async function createProperty(
         data.priceNegotiable,
       ),
 
+    transactionType,
+
     publishingFee,
 
     monthlyListingFee,
@@ -357,7 +384,13 @@ export async function createProperty(
     waterSource: data.waterSource || [],
     electricityPhase: data.electricityPhase,
     soilType: data.soilType,
-    propertyAttributes: data.propertyAttributes || {},
+    propertyAttributes: {
+      ...(data.propertyAttributes || {}),
+      monthlyRent:
+        transactionType === 'SALE'
+          ? undefined
+          : monthlyAmount,
+    },
 
     roadAccess:
       data.roadAccess ||
@@ -410,11 +443,11 @@ export async function createProperty(
       : undefined,
 
     /*
-     * Payment comes before publication.
+     * Drafts stay private. Submitted listings wait for platform review.
      */
 
     listingStatus:
-      'PAYMENT_PENDING' as const,
+      initialListingStatus,
 
     images:
       formattedImages,
