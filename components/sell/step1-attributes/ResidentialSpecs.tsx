@@ -40,7 +40,7 @@ export function ResidentialSpecs({ state, actions }: ResidentialSpecsProps) {
     toggleItem,
   } = actions;
 
-  if (landType !== 'FLAT' && landType !== 'PENTHOUSE' && landType !== 'DUPLEX') {
+  if (!['FLAT', 'PENTHOUSE', 'SERVICE_APARTMENT'].includes(landType)) {
     return null;
   }
 
