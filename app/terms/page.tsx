@@ -5,11 +5,7 @@ import { Footer } from '@/components/layout/Footer';
 import { LEGAL_DISCLAIMER } from '@/config/constants';
 import {
   Scale,
-  ShieldCheck,
-  FileText,
   AlertTriangle,
-  Building2,
-  Mail,
 } from 'lucide-react';
 
 export default function TermsPage() {
