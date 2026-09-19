@@ -78,7 +78,7 @@ export function Step5MediaUpload({ form }: Step5MediaUploadProps) {
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/60">
-            1 photo required
+            1 required · 5+ recommended
           </span>
           <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-slate-100 text-slate-600">
             Video optional
@@ -296,7 +296,7 @@ export function Step5MediaUpload({ form }: Step5MediaUploadProps) {
               Photos that help property seekers decide
             </p>
             <p>
-              Aim for at least 5 useful photos: the front or approach, main property area, access road, surroundings and any important feature or amenity. Avoid screenshots, posters and heavily edited images.
+              Aim for 5 to 9 useful photos: front or approach, main property area, access road, surroundings and important features. Choose the clearest image as Primary. Avoid screenshots, posters, repeated angles and heavily edited images.
             </p>
           </div>
         </div>
