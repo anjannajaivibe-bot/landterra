@@ -144,10 +144,11 @@ const PropertySchema = new Schema<IProperty>(
     },
     verificationReviewedAt: { type: Date },
     verificationReviewedBy: { type: String },
+    // Legacy payment state retained only for historical records.
+    // New free listings do not receive a payment status.
     paymentStatus: {
       type: String,
       enum: ['UNPAID', 'PENDING', 'PAID', 'FAILED'],
-      default: 'PENDING',
       index: true,
     },
     listingStatus: {
