@@ -134,7 +134,7 @@ export function ActiveFilterBadges({
 
       {verifiedOnly && (
         <FilterChip
-          label="Direct Landowner Only"
+          label="Individual Seller"
           onRemove={() => onToggleVerified(false)}
         />
       )}
