@@ -84,7 +84,7 @@ export function Step7ReviewPayment({
     <div className="p-5 sm:p-7 space-y-7 animate-in fade-in duration-150">
       <div>
         <p className="text-[11px] font-bold text-[#c75e0a]">
-          Step 7 of 7
+          Step 5 of 5
         </p>
         <h2 className="mt-1 text-xl font-extrabold text-slate-950">
           Review before you submit
@@ -229,11 +229,11 @@ export function Step7ReviewPayment({
 
         <button
           type="button"
-          onClick={() => editStep(5)}
+          onClick={() => editStep(4)}
           className="rounded-xl border border-slate-200 bg-white p-4 text-left hover:border-slate-300 transition-colors"
         >
           <Camera className="w-4 h-4 text-[#c75e0a]" />
-          <p className="mt-2 text-xs font-extrabold text-slate-900">Photos & video</p>
+          <p className="mt-2 text-xs font-extrabold text-slate-900">Media</p>
           <p className="mt-1 text-[10px] text-slate-500 leading-relaxed">
             {images.length} photos{video ? ' + video walkthrough' : ''}
           </p>
@@ -241,11 +241,11 @@ export function Step7ReviewPayment({
 
         <button
           type="button"
-          onClick={() => editStep(6)}
+          onClick={() => editStep(4)}
           className="rounded-xl border border-slate-200 bg-white p-4 text-left hover:border-slate-300 transition-colors"
         >
           <FileText className="w-4 h-4 text-[#c75e0a]" />
-          <p className="mt-2 text-xs font-extrabold text-slate-900">Documents</p>
+          <p className="mt-2 text-xs font-extrabold text-slate-900">Supporting documents</p>
           <p className="mt-1 text-[10px] text-slate-500 leading-relaxed">
             {documents.length > 0
               ? `${documents.length} document${documents.length === 1 ? '' : 's'} attached`
