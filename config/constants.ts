@@ -28,7 +28,7 @@ export const SITE_CONFIG = {
   tagline: 'Find Property With More Confidence',
 
   description:
-    'Explore residential plots, apartments, villas, commercial spaces, and agricultural land across India. Connect directly with genuine property owners with zero broker commissions.',
+    'Explore properties for sale, rent and lease across India, including plots, homes, commercial spaces and hospitality properties. Contact the listed seller directly while BhoomiMitra charges no platform brokerage.',
 
   url:
     process.env.NEXT_PUBLIC_APP_URL ||
@@ -81,274 +81,290 @@ export const SITE_CONFIG = {
 } as const;
 
 /* ================================================================
-   LAND TYPES
+   PROPERTY TAXONOMY
 ================================================================ */
 
+/**
+ * Canonical property types shown to users.
+ *
+ * Transaction type (SALE / RENT / LEASE) is deliberately separate
+ * from property type. Legacy IDs remain supported in validation and
+ * search for backward compatibility, but are not shown as choices.
+ */
 export const LAND_TYPES = [
   // 1. Land & Plots
   {
-    value: 'OPEN_PLOT',
+    value: 'RESIDENTIAL_PLOT',
     category: 'Land & Plots',
-    label: 'Open Plots',
-    shortLabel: 'Open Plot',
-    description: 'Open plots and layouts for individual home or boundary development.',
+    label: 'Residential Plots',
+    shortLabel: 'Residential Plot',
+    description: 'Residential plots intended for houses, villas and approved layouts.',
   },
   {
     value: 'FARMLAND_PLOT',
     category: 'Land & Plots',
-    label: 'Farmland Plots',
-    shortLabel: 'Farmland Plot',
-    description: 'Managed farmland plots, managed agro-communities and plantation plots.',
-  },
-  {
-    value: 'GATED_COMMUNITY_PLOT',
-    category: 'Land & Plots',
-    label: 'Gated Community Plots',
-    shortLabel: 'Gated Plot',
-    description: 'Plots inside sanctioned, secured gated community developments.',
+    label: 'Farm Plots',
+    shortLabel: 'Farm Plot',
+    description: 'Managed farm plots, plantation plots and agro-community plots.',
   },
   {
     value: 'AGRICULTURAL_LAND',
     category: 'Land & Plots',
     label: 'Agricultural Land',
-    shortLabel: 'Agricultural',
-    description: 'Cultivable farmland, plantations, orchards and agricultural acreage.',
-  },
-  {
-    value: 'RESIDENTIAL_PLOT',
-    category: 'Land & Plots',
-    label: 'Residential Plot',
-    shortLabel: 'Residential Plot',
-    description: 'Plots intended for homes, villas, layouts and residential development.',
+    shortLabel: 'Agricultural Land',
+    description: 'Cultivable farmland, orchards, plantations and agricultural acreage.',
   },
   {
     value: 'COMMERCIAL_LAND',
     category: 'Land & Plots',
     label: 'Commercial Land',
     shortLabel: 'Commercial Land',
-    description: 'Land suitable for commercial complexes, retail and mixed-use development.',
+    description: 'Land intended for commercial, retail or mixed-use development.',
   },
   {
     value: 'INDUSTRIAL_PLOT',
     category: 'Land & Plots',
-    label: 'Industrial Plot',
+    label: 'Industrial Plots',
     shortLabel: 'Industrial Plot',
-    description: 'Land suitable for factories, workshops, and industrial development.',
+    description: 'Plots intended for factories, workshops and industrial development.',
+  },
+  {
+    value: 'INSTITUTIONAL',
+    category: 'Land & Plots',
+    label: 'Institutional Land',
+    shortLabel: 'Institutional Land',
+    description: 'Land intended for schools, hospitals, institutions and similar uses.',
   },
 
-  // 2. Residential Units
+  // 2. Residential
   {
     value: 'FLAT',
-    category: 'Residential Units',
+    category: 'Residential',
     label: 'Flats / Apartments',
-    shortLabel: 'Flat',
-    description: 'Residential apartments, builder floors and multi-storey flats.',
+    shortLabel: 'Flat / Apartment',
+    description: 'Apartments, flats and multi-storey residential units.',
   },
   {
     value: 'INDEPENDENT_HOUSE',
-    category: 'Residential Units',
+    category: 'Residential',
     label: 'Independent Houses',
-    shortLabel: 'House',
-    description: 'Standalone houses and independent residential bungalows.',
+    shortLabel: 'Independent House',
+    description: 'Standalone houses and independent residential homes.',
   },
   {
     value: 'VILLA',
-    category: 'Residential Units',
+    category: 'Residential',
     label: 'Villas',
     shortLabel: 'Villa',
-    description: 'Luxury standalone and gated community villas.',
-  },
-  {
-    value: 'HOUSE_VILLA',
-    category: 'Residential Units',
-    label: 'House / Villa',
-    shortLabel: 'House/Villa',
-    description: 'Independent houses, gated community villas and duplex homes.',
+    description: 'Standalone and gated-community villas.',
   },
   {
     value: 'TOWNHOUSE',
-    category: 'Residential Units',
+    category: 'Residential',
     label: 'Townhouses',
     shortLabel: 'Townhouse',
-    description: 'Multi-floor attached townhouses and row houses.',
+    description: 'Attached multi-floor townhouses and row houses.',
   },
   {
     value: 'DUPLEX',
-    category: 'Residential Units',
+    category: 'Residential',
     label: 'Duplexes',
     shortLabel: 'Duplex',
-    description: 'Two-floor duplex homes and pent-duplex units.',
+    description: 'Two-level residential homes with internal connectivity.',
   },
   {
     value: 'PENTHOUSE',
-    category: 'Residential Units',
+    category: 'Residential',
     label: 'Penthouses',
     shortLabel: 'Penthouse',
-    description: 'Top-floor luxury penthouses with private terraces.',
+    description: 'Top-floor premium residences, often with private terraces.',
+  },
+  {
+    value: 'FARMHOUSE',
+    category: 'Residential',
+    label: 'Farmhouses',
+    shortLabel: 'Farmhouse',
+    description: 'Residential farmhouses, countryside homes and retreat residences.',
   },
 
-  // 3. Commercial & Retail
+  // 3. Commercial
   {
     value: 'RETAIL_SHOP',
-    category: 'Commercial & Retail',
+    category: 'Commercial',
     label: 'Retail Shops',
     shortLabel: 'Retail Shop',
-    description: 'High-street retail stores, market shops, and commercial units.',
+    description: 'High-street shops, market shops and retail units.',
   },
   {
     value: 'SHOWROOM',
-    category: 'Commercial & Retail',
+    category: 'Commercial',
     label: 'Showrooms',
     shortLabel: 'Showroom',
-    description: 'Large frontage retail showrooms for brands, automobiles, and luxury.',
-  },
-  {
-    value: 'SHOP_SHOWROOM',
-    category: 'Commercial & Retail',
-    label: 'Shop / Showroom',
-    shortLabel: 'Shop/Showroom',
-    description: 'Retail shops, commercial stores, showrooms and kiosks.',
+    description: 'Large-frontage retail and display spaces.',
   },
   {
     value: 'OFFICE_SPACE',
-    category: 'Commercial & Retail',
+    category: 'Commercial',
     label: 'Office Spaces',
     shortLabel: 'Office Space',
-    description: 'Commercial office spaces, tech parks, and corporate centres.',
+    description: 'Commercial offices, corporate workspaces and business centres.',
   },
   {
     value: 'COWORKING_SPACE',
-    category: 'Commercial & Retail',
+    category: 'Commercial',
     label: 'Co-working Spaces',
-    shortLabel: 'Co-working',
-    description: 'Shared flexible workspaces, hot desks, and managed offices.',
+    shortLabel: 'Co-working Space',
+    description: 'Shared flexible workspaces, hot desks and managed offices.',
   },
   {
     value: 'SHOPPING_MALL',
-    category: 'Commercial & Retail',
+    category: 'Commercial',
     label: 'Shopping Malls',
-    shortLabel: 'Mall Unit',
-    description: 'Anchor stores, vanity outlets, and retail spaces inside shopping malls.',
+    shortLabel: 'Shopping Mall',
+    description: 'Shopping malls and larger retail complexes.',
   },
   {
     value: 'WAREHOUSE_LAND',
-    category: 'Commercial & Retail',
+    category: 'Commercial',
     label: 'Warehouses / Godowns',
-    shortLabel: 'Warehouse',
-    description: 'Logistics warehouses, storage units, supply hubs, and godowns.',
+    shortLabel: 'Warehouse / Godown',
+    description: 'Warehouses, godowns, logistics hubs and storage facilities.',
   },
   {
     value: 'INDUSTRIAL_BUILDING',
-    category: 'Commercial & Retail',
-    label: 'Industrial Building',
+    category: 'Commercial',
+    label: 'Industrial Buildings',
     shortLabel: 'Industrial Building',
     description: 'Manufacturing facilities and industrial structures.',
   },
   {
     value: 'INDUSTRIAL_SHED',
-    category: 'Commercial & Retail',
-    label: 'Industrial Shed',
+    category: 'Commercial',
+    label: 'Industrial Sheds',
     shortLabel: 'Industrial Shed',
-    description: 'Covered industrial sheds and work areas.',
-  },
-  {
-    value: 'INSTITUTIONAL',
-    category: 'Commercial & Retail',
-    label: 'Institutional Land',
-    shortLabel: 'Institutional',
-    description: 'Land intended for schools, hospitals, institutions and similar uses.',
+    description: 'Covered industrial sheds, workshops and production spaces.',
   },
 
-  // 4. Hospitality & Leisure
-  {
-    value: 'RESORT',
-    category: 'Hospitality & Leisure',
-    label: 'Resorts',
-    shortLabel: 'Resort',
-    description: 'Eco-resorts, leisure destinations, and wellness retreats.',
-  },
+  // 4. Hospitality
   {
     value: 'HOTEL',
-    category: 'Hospitality & Leisure',
+    category: 'Hospitality',
     label: 'Hotels',
     shortLabel: 'Hotel',
-    description: 'Commercial hotel properties, boutique stays, and lodges.',
+    description: 'Hotels, boutique hotels and lodging properties.',
+  },
+  {
+    value: 'RESORT',
+    category: 'Hospitality',
+    label: 'Resorts',
+    shortLabel: 'Resort',
+    description: 'Leisure resorts, wellness retreats and destination properties.',
   },
   {
     value: 'SERVICE_APARTMENT',
-    category: 'Hospitality & Leisure',
-    label: 'Service Apartments',
-    shortLabel: 'Service Apt',
-    description: 'Fully furnished serviced apartments for short and long-term stays.',
+    category: 'Hospitality',
+    label: 'Serviced Apartments',
+    shortLabel: 'Serviced Apartment',
+    description: 'Furnished serviced apartments for short or extended stays.',
   },
   {
     value: 'GUEST_HOUSE',
-    category: 'Hospitality & Leisure',
+    category: 'Hospitality',
     label: 'Guest Houses',
     shortLabel: 'Guest House',
-    description: 'Heritage bungalows, corporate guest houses, and homestays.',
-  },
-  {
-    value: 'FARM_HOUSE_LAND',
-    category: 'Hospitality & Leisure',
-    label: 'Farmhouses',
-    shortLabel: 'Farmhouse',
-    description: 'Weekend villas, retreat farmhouses, and countryside estates.',
-  },
-
-  // 5. Income-Generating & Rental Formats
-  {
-    value: 'RESIDENTIAL_RENTAL',
-    category: 'Income-Generating & Rentals',
-    label: 'Residential Rentals',
-    shortLabel: 'Rental',
-    description: 'Rental homes, apartments, and houses with steady rental yield.',
-  },
-  {
-    value: 'COMMERCIAL_LEASE',
-    category: 'Income-Generating & Rentals',
-    label: 'Commercial Leases',
-    shortLabel: 'Comm. Lease',
-    description: 'Pre-leased commercial offices, retail outlets, and leasehold investments.',
-  },
-  {
-    value: 'COLIVING_PG',
-    category: 'Income-Generating & Rentals',
-    label: 'Co-living Spaces / PGs',
-    shortLabel: 'Co-living/PG',
-    description: 'Shared student and professional housing, paying guest accommodation.',
-  },
-  {
-    value: 'VACATION_RENTAL_AIRBNB',
-    category: 'Income-Generating & Rentals',
-    label: 'Vacation Rentals / Airbnbs',
-    shortLabel: 'Vacation Rental',
-    description: 'High-yield holiday homes, Airbnb villas, and tourist chalets.',
+    description: 'Guest houses, corporate stays and similar lodging properties.',
   },
 ] as const;
+
+export type CanonicalPropertyCategory =
+  | 'Land & Plots'
+  | 'Residential'
+  | 'Commercial'
+  | 'Hospitality';
 
 export interface CanonicalPropertyType {
   id: string;
   value: string;
   label: string;
   shortLabel: string;
-  category:
-    | 'Land & Plots'
-    | 'Residential Units'
-    | 'Commercial & Retail'
-    | 'Hospitality & Leisure'
-    | 'Income-Generating & Rentals';
+  category: CanonicalPropertyCategory;
   description: string;
 }
 
-export const CANONICAL_PROPERTY_TYPES: CanonicalPropertyType[] = LAND_TYPES.map((t) => ({
-  id: t.value,
-  value: t.value,
-  label: t.label,
-  shortLabel: t.shortLabel,
-  category: t.category,
-  description: t.description,
+export const CANONICAL_PROPERTY_TYPES: CanonicalPropertyType[] = LAND_TYPES.map((type) => ({
+  id: type.value,
+  value: type.value,
+  label: type.label,
+  shortLabel: type.shortLabel,
+  category: type.category,
+  description: type.description,
 }));
+
+export const CANONICAL_PROPERTY_TYPE_IDS =
+  CANONICAL_PROPERTY_TYPES.map((type) => type.id);
+
+/**
+ * Legacy IDs are accepted only so older listings and old links remain usable.
+ * They must never be shown as duplicate choices in the current listing UI.
+ */
+export const LEGACY_PROPERTY_TYPE_MAP: Record<string, string> = {
+  OPEN_PLOT: 'RESIDENTIAL_PLOT',
+  GATED_COMMUNITY_PLOT: 'RESIDENTIAL_PLOT',
+  HOUSE_VILLA: 'VILLA',
+  SHOP_SHOWROOM: 'SHOWROOM',
+  FARM_HOUSE_LAND: 'FARMHOUSE',
+  RESIDENTIAL_RENTAL: 'FLAT',
+  COMMERCIAL_LEASE: 'OFFICE_SPACE',
+  COLIVING_PG: 'FLAT',
+  VACATION_RENTAL_AIRBNB: 'RESORT',
+};
+
+export function normalizePropertyTypeId(value?: string | null): string {
+  if (!value) return '';
+  const normalized = value.trim().toUpperCase();
+  return LEGACY_PROPERTY_TYPE_MAP[normalized] || normalized;
+}
+
+const PROPERTY_TYPE_LABELS: Record<string, string> = {
+  ...Object.fromEntries(
+    CANONICAL_PROPERTY_TYPES.map((type) => [type.id, type.shortLabel]),
+  ),
+  OPEN_PLOT: 'Residential Plot',
+  GATED_COMMUNITY_PLOT: 'Residential Plot',
+  HOUSE_VILLA: 'Villa / Independent House',
+  SHOP_SHOWROOM: 'Shop / Showroom',
+  FARM_HOUSE_LAND: 'Farmhouse',
+  RESIDENTIAL_RENTAL: 'Residential Property',
+  COMMERCIAL_LEASE: 'Commercial Property',
+  COLIVING_PG: 'Flat / Apartment',
+  VACATION_RENTAL_AIRBNB: 'Resort / Holiday Property',
+};
+
+export function getPropertyTypeLabel(value?: string | null): string {
+  if (!value) return 'Property';
+  return PROPERTY_TYPE_LABELS[value.trim().toUpperCase()] || 'Property';
+}
+
+/**
+ * Canonical filters also match historical duplicate IDs so old listings
+ * remain discoverable after the UI taxonomy is cleaned up.
+ */
+const PROPERTY_TYPE_FILTER_ALIASES: Record<string, string[]> = {
+  RESIDENTIAL_PLOT: ['RESIDENTIAL_PLOT', 'OPEN_PLOT', 'GATED_COMMUNITY_PLOT'],
+  VILLA: ['VILLA', 'HOUSE_VILLA'],
+  INDEPENDENT_HOUSE: ['INDEPENDENT_HOUSE', 'HOUSE_VILLA'],
+  RETAIL_SHOP: ['RETAIL_SHOP', 'SHOP_SHOWROOM'],
+  SHOWROOM: ['SHOWROOM', 'SHOP_SHOWROOM'],
+  FARMHOUSE: ['FARMHOUSE', 'FARM_HOUSE_LAND'],
+  FLAT: ['FLAT', 'RESIDENTIAL_RENTAL', 'COLIVING_PG'],
+  OFFICE_SPACE: ['OFFICE_SPACE', 'COMMERCIAL_LEASE'],
+  RESORT: ['RESORT', 'VACATION_RENTAL_AIRBNB'],
+};
+
+export function expandPropertyTypeFilter(value: string): string[] {
+  const normalized = value.trim().toUpperCase();
+  return PROPERTY_TYPE_FILTER_ALIASES[normalized] || [normalized];
+}
 
 /* ================================================================
    DOCUMENT TYPES
@@ -398,7 +414,7 @@ export const DOCUMENT_TYPES = [
 
 export const VERIFICATION_BADGES = {
   VERIFIED: {
-    label: 'Direct Owner Listed',
+    label: 'Reviewed',
 
     color: 'saffron',
 
@@ -406,11 +422,11 @@ export const VERIFICATION_BADGES = {
       'bg-[#fff1dc] text-[#c75e0a] border-[#FF9933]/40',
 
     description:
-      'Direct peer-to-peer listing published directly by the landowner.',
+      'This listing has completed BhoomiMitra’s internal review process.',
   },
 
   PENDING: {
-    label: 'Draft',
+    label: 'Under Review',
 
     color: 'amber',
 
@@ -418,7 +434,7 @@ export const VERIFICATION_BADGES = {
       'bg-amber-50 text-amber-700 border-amber-200',
 
     description:
-      'Listing draft awaiting publishing fee completion.',
+      'This listing has been submitted and is awaiting platform review.',
   },
 
   VERIFICATION_REQUIRED: {
