@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { LAND_TYPES } from '@/config/constants';
+import { LAND_TYPES, normalizePropertyTypeId } from '@/config/constants';
 import { LandType } from '@/types/property';
 import { SellFormState, SellFormActions } from '@/types/sell-form';
 
@@ -12,18 +12,28 @@ interface CategorySelectorProps {
 
 const CATEGORY_TABS = [
   { id: 'Land & Plots', label: 'Land & Plots' },
-  { id: 'Residential Units', label: 'Residential' },
-  { id: 'Commercial & Retail', label: 'Commercial' },
-  { id: 'Hospitality & Leisure', label: 'Hospitality' },
-  { id: 'Income-Generating & Rentals', label: 'Other / Legacy' },
-];
+  { id: 'Residential', label: 'Residential' },
+  { id: 'Commercial', label: 'Commercial' },
+  { id: 'Hospitality', label: 'Hospitality' },
+] as const;
+
+function normalizeCategory(value: string) {
+  if (value === 'Residential Units') return 'Residential';
+  if (value === 'Commercial & Retail') return 'Commercial';
+  if (value === 'Hospitality & Leisure') return 'Hospitality';
+  if (value === 'Income-Generating & Rentals') return 'Residential';
+  return value;
+}
 
 export function CategorySelector({ state, actions }: CategorySelectorProps) {
   const { landType, sellerCategoryTab } = state;
   const { setLandType, setSellerCategoryTab } = actions;
 
+  const activeCategory = normalizeCategory(sellerCategoryTab);
+  const normalizedLandType = normalizePropertyTypeId(landType);
+
   const visibleTypes = LAND_TYPES.filter(
-    (type: any) => type.category === sellerCategoryTab,
+    (type) => type.category === activeCategory,
   );
 
   return (
@@ -39,7 +49,7 @@ export function CategorySelector({ state, actions }: CategorySelectorProps) {
 
       <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
         {CATEGORY_TABS.map((tab) => {
-          const active = sellerCategoryTab === tab.id;
+          const active = activeCategory === tab.id;
 
           return (
             <button
@@ -62,7 +72,7 @@ export function CategorySelector({ state, actions }: CategorySelectorProps) {
         {visibleTypes.map((type: any) => {
           const value = type.value || type.id || type;
           const label = type.label || type.name || value;
-          const isSelected = landType === value;
+          const isSelected = normalizedLandType === value;
 
           return (
             <button
