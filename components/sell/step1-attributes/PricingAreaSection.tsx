@@ -1,12 +1,12 @@
 'use client';
 
 import React from 'react';
-import { Ruler, IndianRupee, CheckCircle2 } from 'lucide-react';
+import { Ruler, IndianRupee } from 'lucide-react';
 import { LandAreaUnit, SellFormState, SellFormActions } from '@/types/sell-form';
 
 const LAND_AREA_UNIT_LABELS: Record<LandAreaUnit, string> = {
   SQUARE_YARDS: 'Square Yards',
-  SQUARE_FEET: 'Square Feet (sq. ft)',
+  SQUARE_FEET: 'Square Feet',
   GUNTAS: 'Guntas',
   CENTS: 'Cents',
   ACRES: 'Acres',
@@ -24,6 +24,7 @@ const LAND_AREA_UNIT_SHORT_LABELS: Record<LandAreaUnit, string> = {
 
 function formatArea(value: number, decimals = 2): string {
   if (!Number.isFinite(value)) return '0';
+
   return value.toLocaleString('en-IN', {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,
@@ -37,12 +38,14 @@ interface PricingAreaSectionProps {
 
 export function PricingAreaSection({ state, actions }: PricingAreaSectionProps) {
   const {
+    transactionType,
     areaInput,
     selectedAreaUnit,
     areaConversions,
     pricePerYard,
     priceNegotiable,
     authoritativeFees,
+    monthlyRent,
   } = state;
 
   const {
@@ -50,191 +53,174 @@ export function PricingAreaSection({ state, actions }: PricingAreaSectionProps) 
     setSelectedAreaUnit,
     setPricePerYard,
     setPriceNegotiable,
+    setMonthlyRent,
   } = actions;
 
   const landAreaYards = authoritativeFees.landAreaYards;
+  const monthlyAmount = Number(String(monthlyRent).replace(/,/g, '')) || 0;
+  const isSale = transactionType === 'SALE';
 
   return (
-    <div className="space-y-5">
-      {/* Multi-Unit Land Area Section */}
-      <div className="rounded-2xl border border-[#FF9933]/30 bg-[#fff9f0] p-4 sm:p-5">
-        <div className="flex items-start gap-3 mb-5">
-          <div className="w-9 h-9 rounded-xl bg-[#fff1dc] text-[#c75e0a] flex items-center justify-center shrink-0">
+    <section className="space-y-5">
+      <div className="border-t border-slate-200 pt-6">
+        <div className="flex items-start gap-3 mb-4">
+          <div className="w-9 h-9 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center shrink-0">
             <Ruler className="w-4 h-4" />
           </div>
           <div>
-            <h3 className="text-sm font-extrabold text-slate-900">Land Area</h3>
-            <p className="text-[11px] text-slate-600 mt-0.5">
-              Enter the measurement in the unit you normally use. BhoomiMitra
-              automatically converts it into square yards.
+            <h3 className="text-sm font-extrabold text-slate-900">
+              Area and asking {isSale ? 'price' : transactionType === 'RENT' ? 'rent' : 'lease amount'}
+            </h3>
+            <p className="text-[11px] text-slate-500 mt-0.5">
+              Enter the area in the unit you normally use. BhoomiMitra normalizes it automatically.
             </p>
           </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-[1fr_190px] gap-3">
-          {/* Area Input */}
           <div>
             <label className="block text-[11px] font-bold text-slate-700 mb-1.5">
-              Land Area Value *
+              Property area *
             </label>
             <div className="relative">
               <input
                 type="text"
                 inputMode="decimal"
                 value={areaInput}
-                onChange={(e) => setAreaInput(e.target.value)}
-                placeholder="Enter land area"
-                className="w-full px-4 py-3 pr-20 rounded-xl border border-slate-300 bg-white text-base font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#fff1dc] focus:border-[#FF9933]"
+                onChange={(event) => setAreaInput(event.target.value)}
+                placeholder="Enter area"
+                className="w-full px-4 py-3 pr-20 rounded-lg border border-slate-300 bg-white text-base font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#fff1dc] focus:border-[#FF9933]"
               />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400">
+              <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400">
                 {LAND_AREA_UNIT_SHORT_LABELS[selectedAreaUnit]}
               </span>
             </div>
           </div>
 
-          {/* Unit Selector */}
           <div>
             <label className="block text-[11px] font-bold text-slate-700 mb-1.5">
-              Unit
+              Area unit
             </label>
             <select
               value={selectedAreaUnit}
-              onChange={(e) =>
-                setSelectedAreaUnit(e.target.value as LandAreaUnit)
+              onChange={(event) =>
+                setSelectedAreaUnit(event.target.value as LandAreaUnit)
               }
-              className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#fff1dc] focus:border-[#FF9933] cursor-pointer"
+              className="w-full px-4 py-3 rounded-lg border border-slate-300 bg-white text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#fff1dc] focus:border-[#FF9933]"
             >
               {(Object.keys(LAND_AREA_UNIT_LABELS) as LandAreaUnit[]).map(
                 (unit) => (
                   <option key={unit} value={unit}>
                     {LAND_AREA_UNIT_LABELS[unit]}
                   </option>
-                )
+                ),
               )}
             </select>
           </div>
         </div>
 
-        {/* Conversion Multi-View Grid */}
-        <div className="mt-4 grid grid-cols-2 sm:grid-cols-6 gap-2">
-          <div className="bg-white border border-[#FF9933]/30 rounded-xl p-3">
-            <p className="text-[9px] uppercase tracking-wide font-bold text-slate-400">
-              Sq. Yards
-            </p>
-            <p className="text-sm font-extrabold text-slate-900 mt-1">
-              {formatArea(areaConversions.sqYards, 2)}
-            </p>
+        {landAreaYards > 0 && (
+          <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[10px] text-slate-500">
+            <span>
+              {formatArea(areaConversions.sqYards, 2)} sq. yd
+            </span>
+            <span>
+              {formatArea(areaConversions.sqFeet, 0)} sq. ft
+            </span>
+            <span>
+              {formatArea(areaConversions.guntas, 2)} guntas
+            </span>
+            <span>
+              {formatArea(areaConversions.acres, 4)} acres
+            </span>
           </div>
-
-          <div className="bg-white border border-[#FF9933]/30 rounded-xl p-3">
-            <p className="text-[9px] uppercase tracking-wide font-bold text-slate-400">
-              Sq. Feet
-            </p>
-            <p className="text-sm font-extrabold text-slate-900 mt-1">
-              {formatArea(areaConversions.sqFeet, 0)}
-            </p>
-          </div>
-
-          <div className="bg-white border border-[#FF9933]/30 rounded-xl p-3">
-            <p className="text-[9px] uppercase tracking-wide font-bold text-slate-400">
-              Guntas
-            </p>
-            <p className="text-sm font-extrabold text-slate-900 mt-1">
-              {formatArea(areaConversions.guntas, 2)}
-            </p>
-          </div>
-
-          <div className="bg-white border border-[#FF9933]/30 rounded-xl p-3">
-            <p className="text-[9px] uppercase tracking-wide font-bold text-slate-400">
-              Cents
-            </p>
-            <p className="text-sm font-extrabold text-slate-900 mt-1">
-              {formatArea(areaConversions.cents, 2)}
-            </p>
-          </div>
-
-          <div className="bg-white border border-[#FF9933]/30 rounded-xl p-3">
-            <p className="text-[9px] uppercase tracking-wide font-bold text-slate-400">
-              Acres
-            </p>
-            <p className="text-sm font-extrabold text-slate-900 mt-1">
-              {formatArea(areaConversions.acres, 4)}
-            </p>
-          </div>
-
-          <div className="bg-white border border-[#FF9933]/30 rounded-xl p-3">
-            <p className="text-[9px] uppercase tracking-wide font-bold text-slate-400">
-              Hectares
-            </p>
-            <p className="text-sm font-extrabold text-slate-900 mt-1">
-              {formatArea(areaConversions.hectares, 4)}
-            </p>
-          </div>
-        </div>
-
-        <div className="mt-3 flex items-start gap-2 text-[10px] text-[#c75e0a]">
-          <CheckCircle2 className="w-3.5 h-3.5 shrink-0 mt-0.5" />
-          <p>
-            Your entered measurement is automatically converted to{' '}
-            <strong>{formatArea(landAreaYards, 2)} square yards</strong> for
-            BhoomiMitra&apos;s property records.
-          </p>
-        </div>
+        )}
 
         {landAreaYards > 100000000 && (
-          <div className="mt-3 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold">
-            ⚠️ Entered area exceeds maximum allowable limit of 100,000,000 sq.
-            yards (~20,660 acres). Please check your entered value and selected
-            unit.
+          <div className="mt-3 p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold">
+            Entered area exceeds the supported maximum. Please check the value and unit.
           </div>
         )}
       </div>
 
-      {/* Price & Valuation */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-        <div>
-          <label className="block text-xs font-bold text-slate-700 mb-1.5">
-            Price per Square Yard *
-          </label>
-          <div className="relative">
-            <IndianRupee className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <input
-              type="number"
-              min={1}
-              value={pricePerYard}
-              onChange={(e) => setPricePerYard(e.target.value)}
-              placeholder="Enter price per sq. yd"
-              className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-300 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#fff1dc] focus:border-[#FF9933]"
-            />
+      {isSale ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-1.5">
+              Asking price per sq. yd *
+            </label>
+            <div className="relative">
+              <IndianRupee className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <input
+                type="number"
+                min={1}
+                value={pricePerYard}
+                onChange={(event) => setPricePerYard(event.target.value)}
+                placeholder="Price per sq. yd"
+                className="w-full pl-10 pr-4 py-3 rounded-lg border border-slate-300 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#fff1dc] focus:border-[#FF9933]"
+              />
+            </div>
+          </div>
+
+          <div className="rounded-lg bg-slate-50 border border-slate-200 px-4 py-3">
+            <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
+              Estimated total asking price
+            </p>
+            <p className="text-xl font-extrabold text-slate-900 mt-1">
+              ₹{Number(authoritativeFees.totalPrice || 0).toLocaleString('en-IN')}
+            </p>
+            <p className="text-[10px] text-slate-500 mt-1">
+              Based on your area and price per sq. yd.
+            </p>
           </div>
         </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-1.5">
+              {transactionType === 'RENT' ? 'Expected monthly rent' : 'Expected monthly lease amount'} *
+            </label>
+            <div className="relative">
+              <IndianRupee className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <input
+                type="text"
+                inputMode="numeric"
+                value={monthlyRent}
+                onChange={(event) =>
+                  setMonthlyRent(event.target.value.replace(/[^0-9]/g, ''))
+                }
+                placeholder="Example: 45000"
+                className="w-full pl-10 pr-4 py-3 rounded-lg border border-slate-300 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#fff1dc] focus:border-[#FF9933]"
+              />
+            </div>
+          </div>
 
-        <div className="rounded-xl bg-slate-50 border border-slate-200 px-4 py-3">
-          <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
-            Estimated Property Value
-          </p>
-          <p className="text-xl font-extrabold text-slate-900 mt-1">
-            ₹{Number(authoritativeFees.totalPrice || 0).toLocaleString('en-IN')}
-          </p>
-          <p className="text-[10px] text-slate-500 mt-1">
-            {formatArea(landAreaYards, 2)} sq. yards × ₹
-            {Number(pricePerYard || 0).toLocaleString('en-IN')}
-          </p>
+          <div className="rounded-lg bg-slate-50 border border-slate-200 px-4 py-3">
+            <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
+              Asking amount
+            </p>
+            <p className="text-xl font-extrabold text-slate-900 mt-1">
+              ₹{monthlyAmount.toLocaleString('en-IN')}
+              <span className="text-xs font-semibold text-slate-500"> / month</span>
+            </p>
+            <p className="text-[10px] text-slate-500 mt-1">
+              You can add deposit, lock-in and maintenance details below.
+            </p>
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* Negotiable Checkbox */}
       <label className="flex items-center gap-3 cursor-pointer">
         <input
           type="checkbox"
           checked={priceNegotiable}
-          onChange={(e) => setPriceNegotiable(e.target.checked)}
+          onChange={(event) => setPriceNegotiable(event.target.checked)}
           className="w-4 h-4 accent-[#FF9933]"
         />
         <span className="text-xs font-semibold text-slate-700">
-          Price is negotiable with serious buyers
+          Asking amount is negotiable
         </span>
       </label>
-    </div>
+    </section>
   );
 }
