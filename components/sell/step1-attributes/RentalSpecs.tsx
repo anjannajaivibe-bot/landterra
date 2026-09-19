@@ -27,13 +27,7 @@ export function RentalSpecs({ state, actions }: RentalSpecsProps) {
 
   const isRentalOrLease =
     transactionType === 'RENT' ||
-    transactionType === 'LEASE' ||
-    [
-      'RESIDENTIAL_RENTAL',
-      'COMMERCIAL_LEASE',
-      'COLIVING_PG',
-      'VACATION_RENTAL_AIRBNB',
-    ].includes(landType);
+    transactionType === 'LEASE';
 
   if (!isRentalOrLease) {
     return null;
