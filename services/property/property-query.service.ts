@@ -19,6 +19,7 @@ import {
   toPublicPropertyListItem,
 } from "./property-projections";
 import { escapeRegex, isValidObjectId } from "./property-helpers";
+import { expandPropertyTypeFilter } from "@/config/constants";
 
 /* ================================================================
    GET PROPERTIES
@@ -191,8 +192,9 @@ export async function getProperties(
         const typeOrConditions: Record<string, any>[] = [];
 
         for (const t of types) {
-          typeOrConditions.push({ landType: t });
-          typeOrConditions.push({ propertyType: t });
+          const compatibleTypes = expandPropertyTypeFilter(t);
+          typeOrConditions.push({ landType: { $in: compatibleTypes } });
+          typeOrConditions.push({ propertyType: { $in: compatibleTypes } });
 
           // Also match descriptive titles so existing or custom listings match correctly
           if (t === 'FLAT') {
@@ -220,6 +222,8 @@ export async function getProperties(
             typeOrConditions.push({ title: /\bgated\s*(?:community\s*)?plot\b/i });
           } else if (t === 'COMMERCIAL_LAND') {
             typeOrConditions.push({ title: /\bcommercial\s*land\b/i });
+          } else if (t === 'INSTITUTIONAL') {
+            typeOrConditions.push({ title: /\binstitutional\s*land\b/i });
           } else if (t === 'OFFICE_SPACE') {
             typeOrConditions.push({ title: /\boffice\b/i });
           } else if (t === 'RETAIL_SHOP') {
@@ -232,14 +236,14 @@ export async function getProperties(
             typeOrConditions.push({ title: /\b(mall|shopping mall)\b/i });
           } else if (t === 'AGRICULTURAL_LAND') {
             typeOrConditions.push({ title: /\b(farmland|agriculture|agricultural)\b/i });
-          } else if (t === 'FARM_HOUSE_LAND') {
+          } else if (t === 'FARMHOUSE' || t === 'FARM_HOUSE_LAND') {
             typeOrConditions.push({ title: /\bfarm\s*house\b/i });
           } else if (t === 'RESORT') {
             typeOrConditions.push({ title: /\bresort\b/i });
           } else if (t === 'HOTEL') {
             typeOrConditions.push({ title: /\bhotel\b/i });
           } else if (t === 'SERVICE_APARTMENT') {
-            typeOrConditions.push({ title: /\bservice\s*apartment\b/i });
+            typeOrConditions.push({ title: /\bserviced?\s*apartment\b/i });
           } else if (t === 'GUEST_HOUSE') {
             typeOrConditions.push({ title: /\bguest\s*house\b/i });
           } else if (t === 'RESIDENTIAL_RENTAL') {
