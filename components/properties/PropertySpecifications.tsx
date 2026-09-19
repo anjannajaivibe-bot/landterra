@@ -51,7 +51,7 @@ export function PropertySpecifications({ property }: PropertySpecificationsProps
             </h2>
           </div>
           <span className="text-[10px] font-bold text-[#c75e0a] bg-[#fff1dc] px-2.5 py-1 rounded-full">
-            Direct Owner Verified
+            Listing Reviewed
           </span>
         </div>
 
@@ -64,12 +64,12 @@ export function PropertySpecifications({ property }: PropertySpecificationsProps
           {property.propertyAttributes?.villaType &&
             property.propertyAttributes.villaType !== 'NOT_SPECIFIED' && (
               <Fact
-                label="Villa Architecture"
+                label="Home Type"
                 value={
                   property.propertyAttributes.villaType === 'GATED_VILLA'
-                    ? 'Gated Luxury Villa'
+                    ? 'Gated Community Villa'
                     : property.propertyAttributes.villaType === 'INDEPENDENT_HOUSE'
-                    ? 'Independent Bungalow'
+                    ? 'Independent House / Bungalow'
                     : property.propertyAttributes.villaType === 'DUPLEX_VILLA'
                     ? 'Duplex Villa'
                     : property.propertyAttributes.villaType === 'TRIPLEX_VILLA'
@@ -77,7 +77,7 @@ export function PropertySpecifications({ property }: PropertySpecificationsProps
                     : property.propertyAttributes.villaType === 'ROW_HOUSE'
                     ? 'Row House / Townhouse'
                     : property.propertyAttributes.villaType === 'FARMHOUSE_VILLA'
-                    ? 'Farmhouse Villa'
+                    ? 'Farmhouse'
                     : property.propertyAttributes.villaType.replace(/_/g, ' ')
                 }
               />
