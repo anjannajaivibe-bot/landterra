@@ -36,7 +36,6 @@ export function CommercialSpecs({ state, actions }: CommercialSpecsProps) {
     'WAREHOUSE_LAND',
     'INDUSTRIAL_BUILDING',
     'INDUSTRIAL_SHED',
-    'INSTITUTIONAL',
   ].includes(landType);
 
   if (!isCommercialType) {
