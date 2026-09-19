@@ -545,7 +545,7 @@ export function FilterBar({
               </select>
             </div>
 
-            {/* 5. Direct Landowner Only Toggle */}
+            {/* 5. Individual Seller Toggle */}
             <div className="flex flex-col justify-end">
               <span className="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1">
                 Ownership
@@ -561,7 +561,7 @@ export function FilterBar({
               >
                 <div className="flex items-center gap-1.5 truncate">
                   <ShieldCheck className={`w-3.5 h-3.5 ${verifiedOnly ? 'text-[#FF9933]' : 'text-slate-400'}`} />
-                  <span className="truncate">Direct Landowner</span>
+                  <span className="truncate">Individual Seller</span>
                 </div>
                 <div
                   className={`w-4 h-4 rounded-md flex items-center justify-center border transition-colors ${
