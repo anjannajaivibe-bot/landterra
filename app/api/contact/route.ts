@@ -4,7 +4,6 @@ import { ContactMessageModel } from '@/models/ContactMessage';
 import { CreateContactSchema } from '@/lib/validation/payment';
 import { notifySupportContactMessage } from '@/services/email.service';
 import { checkRateLimit } from '@/lib/security/rate-limit';
-import { verifyCloudflareTurnstile } from '@/lib/security/cloudflare-turnstile';
 
 export async function POST(req: NextRequest) {
   try {
@@ -27,25 +26,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { error: 'Too many messages sent. Please wait a few minutes before trying again.' },
         { status: 429, headers: { 'Retry-After': '600' } }
-      );
-    }
-
-    // 2. Cloudflare Turnstile Human Verification
-    const turnstileToken =
-      body.turnstileToken ||
-      req.headers.get('x-turnstile-token') ||
-      req.headers.get('cf-turnstile-token');
-
-    const turnstileResult = await verifyCloudflareTurnstile(turnstileToken, ipAddress);
-    if (!turnstileResult.success) {
-      return NextResponse.json(
-        {
-          error:
-            turnstileResult.error ||
-            'Human verification failed. Please complete the security check.',
-          code: 'TURNSTILE_REQUIRED',
-        },
-        { status: 403 }
       );
     }
 
