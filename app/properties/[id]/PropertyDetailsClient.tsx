@@ -46,6 +46,7 @@ import { PropertySpecifications } from '@/components/properties/PropertySpecific
 import { DueDiligenceCard } from '@/components/properties/DueDiligenceCard';
 
 import { IProperty } from '@/types/property';
+import { getPropertyTypeLabel } from '@/config/constants';
 
 /* ================================================================
    HELPERS
@@ -75,11 +76,6 @@ function formatCompactCurrency(value: number) {
 function formatArea(value: number) {
   if (!Number.isFinite(value)) return 'Area on request';
   return `${value.toLocaleString('en-IN')} sq. yards`;
-}
-
-function formatLandType(value?: string) {
-  if (!value) return 'Land';
-  return value.replace(/_/g, ' ');
 }
 
 function formatDate(value?: string | Date) {
@@ -600,7 +596,7 @@ function PropertyDetailsContent({
             <div className="min-w-0">
               <div className="mb-3 flex flex-wrap items-center gap-2">
                 <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold text-slate-600">
-                  {formatLandType(property.landType)}
+                  {getPropertyTypeLabel(property.landType)}
                 </span>
 
                 {isDraft && (
@@ -747,7 +743,7 @@ function PropertyDetailsContent({
               {/* Core Facts */}
               <div className="grid grid-cols-2 gap-3 border-b border-slate-100 py-5">
                 <Fact label="Land area" value={formatArea(property.landAreaYards)} />
-                <Fact label="Land type" value={formatLandType(property.landType)} />
+                <Fact label="Land type" value={getPropertyTypeLabel(property.landType)} />
                 <Fact label="Road access" value={property.roadAccess || 'Not specified'} />
                 <Fact
                   label="Location"
