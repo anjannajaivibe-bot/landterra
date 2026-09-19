@@ -63,7 +63,16 @@ export function VillaSpecs({ state, actions }: VillaSpecsProps) {
     setSelectedAmenities,
   } = actions;
 
-  if (!['HOUSE_VILLA', 'VILLA', 'INDEPENDENT_HOUSE', 'TOWNHOUSE', 'DUPLEX'].includes(landType)) {
+  if (![
+    'VILLA',
+    'INDEPENDENT_HOUSE',
+    'TOWNHOUSE',
+    'DUPLEX',
+    'FARMHOUSE',
+    // Legacy compatibility
+    'HOUSE_VILLA',
+    'FARM_HOUSE_LAND',
+  ].includes(landType)) {
     return null;
   }
 
