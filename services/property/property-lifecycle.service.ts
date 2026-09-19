@@ -132,6 +132,7 @@ export async function updateProperty(
       calculateAuthoritativeFees(
         area,
         price,
+        0,
       );
 
     propertyUpdates.landAreaYards =
@@ -155,7 +156,7 @@ export async function updateProperty(
    * DIRECT CLASSIFIEDS MODEL — IN-PLACE PROPERTY UPDATES
    * ------------------------------------------------------------
    * In the direct classifieds marketplace model, an update to property
-   * details by an authenticated landowner preserves its current published
+   * details by an authenticated seller preserves its current published
    * status without moving the listing to an admin verification queue.
    */
   if (existing.listingStatus === 'PUBLISHED') {
