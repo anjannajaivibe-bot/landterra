@@ -539,20 +539,18 @@ export const PROPERTY_SORT_OPTIONS = [
 
 export const PUBLIC_LISTING_STATUSES = [
   'PUBLISHED',
-  'EXPIRING_SOON',
 ] as const;
 
 /**
  * Only these states should normally appear in the public
  * marketplace.
  *
- * DRAFT, PAYMENT_PENDING, PENDING_VERIFICATION, PAUSED,
- * EXPIRED, SOLD, REJECTED and DELETED should not appear
- * as normal purchasable listings.
+ * DRAFT, legacy PAYMENT_PENDING, PENDING_VERIFICATION, PAUSED,
+ * legacy EXPIRING_SOON, EXPIRED, SOLD, REJECTED and DELETED should not
+ * appear as normal marketplace-visible listings.
  */
 export const MARKETPLACE_LISTING_STATUSES = [
   'PUBLISHED',
-  'EXPIRING_SOON',
 ] as const;
 
 /* ================================================================
