@@ -10,12 +10,13 @@ interface PlotSpecsProps {
 }
 
 const PLOT_LAND_TYPES = [
-  'OPEN_PLOT',
-  'FARMLAND_PLOT',
-  'GATED_COMMUNITY_PLOT',
   'RESIDENTIAL_PLOT',
   'COMMERCIAL_LAND',
   'INDUSTRIAL_PLOT',
+  'INSTITUTIONAL',
+  // Legacy compatibility
+  'OPEN_PLOT',
+  'GATED_COMMUNITY_PLOT',
 ];
 
 export function PlotSpecs({ state, actions }: PlotSpecsProps) {
