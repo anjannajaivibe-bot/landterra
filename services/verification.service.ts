@@ -129,22 +129,12 @@ async function approveProperty(
   const now = new Date();
 
   /*
-   * IMPORTANT:
-   *
-   * Verification and payment are separate.
-   *
-   * Admin approval alone must NEVER make an unpaid
-   * property publicly visible.
+   * Admin approval publishes a listing that has completed
+   * the platform review workflow. Payment is not required.
    */
 
-  const hasPaid =
-    property.paymentStatus === 'PAID' ||
-    property.isFeePaid === true;
-
   const newListingStatus: ListingStatus =
-    hasPaid
-      ? 'PUBLISHED'
-      : 'PAYMENT_PENDING';
+    'PUBLISHED';
 
   const updates: Record<string, unknown> = {
     verificationStatus: 'VERIFIED',
@@ -162,9 +152,7 @@ async function approveProperty(
       undefined,
 
     publishedAt:
-      hasPaid
-        ? property.publishedAt || now
-        : property.publishedAt,
+      property.publishedAt || now,
 
     updatedAt: now,
   };
@@ -259,14 +247,8 @@ async function approveProperty(
 
       newListingStatus,
 
-      paymentStatus:
-        property.paymentStatus,
-
-      isFeePaid:
-        property.isFeePaid,
-
       published:
-        hasPaid,
+        true,
 
       adminNotes,
     },
