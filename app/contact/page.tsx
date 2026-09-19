@@ -18,14 +18,12 @@ import {
   FileText,
 } from 'lucide-react';
 import { SITE_CONFIG } from '@/config/constants';
-import { CloudflareTurnstile } from '@/components/security/CloudflareTurnstile';
 
 export default function ContactPage() {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [formData, setFormData] = useState({ name: '', email: '', phone: '', message: '' });
-  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,7 +43,6 @@ export default function ContactPage() {
           email: formData.email.trim(),
           phone: formData.phone?.trim() || undefined,
           message: formData.message.trim(),
-          turnstileToken: turnstileToken || undefined,
         }),
       });
 
@@ -92,7 +89,7 @@ export default function ContactPage() {
             <div className="space-y-6">
               <div>
                 <h2 className="text-lg font-bold text-slate-900">Customer Support Desk</h2>
-                <p className="text-xs text-slate-500 mt-1">Available for buyer questions, seller listing help, and billing queries</p>
+                <p className="text-xs text-slate-500 mt-1">Available for buyer questions, seller listing help, and platform questions</p>
               </div>
 
               <div className="space-y-4 text-xs sm:text-sm text-slate-700">
@@ -101,7 +98,7 @@ export default function ContactPage() {
                     <Mail className="w-5 h-5 text-[#FF9933]" />
                   </div>
                   <div>
-                    <span className="font-bold text-slate-900 block">General &amp; Billing Support</span>
+                    <span className="font-bold text-slate-900 block">General Support</span>
                     <span className="font-mono text-[#c75e0a]">{SITE_CONFIG.supportEmail}</span>
                   </div>
                 </div>
@@ -142,7 +139,7 @@ export default function ContactPage() {
           <div className="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-xs space-y-4">
             <div>
               <h2 className="text-lg font-bold text-slate-900">Send an Inquiry</h2>
-              <p className="text-xs text-slate-500 mt-1">Submit your listing questions, billing queries, or platform feedback</p>
+              <p className="text-xs text-slate-500 mt-1">Submit a listing question, support request, or platform feedback</p>
             </div>
 
             {submitted ? (
@@ -220,16 +217,6 @@ export default function ContactPage() {
                     onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                     placeholder="Describe your query, property ID, or listing question..."
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#FF9933] focus:border-[#FF9933] disabled:bg-slate-100 disabled:text-slate-400"
-                  />
-                </div>
-
-                {/* Cloudflare Turnstile Human Verification */}
-                <div className="py-1">
-                  <CloudflareTurnstile
-                    action="contact_form"
-                    onSuccess={(token) => setTurnstileToken(token)}
-                    onExpire={() => setTurnstileToken(null)}
-                    onError={() => setTurnstileToken(null)}
                   />
                 </div>
 
