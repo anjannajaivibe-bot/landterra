@@ -44,10 +44,10 @@ export function FarmlandSpecs({ state, actions }: FarmlandSpecsProps) {
         </div>
         <div>
           <h3 className="text-sm font-extrabold text-slate-900">
-            Farmland, Soil &amp; Water Infrastructure
+            Farm / agricultural details
           </h3>
           <p className="text-[11px] text-slate-500">
-            Agricultural attributes, soil quality, irrigation sources, and existing plantations.
+            Add soil, water, power, fencing and plantation details where applicable.
           </p>
         </div>
       </div>
@@ -59,7 +59,8 @@ export function FarmlandSpecs({ state, actions }: FarmlandSpecsProps) {
         </label>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
           {[
-            { id: 'RED_SOIL', label: 'Red Soil (Fertile)' },
+            { id: 'NOT_SPECIFIED', label: 'Not specified' },
+            { id: 'RED_SOIL', label: 'Red Soil' },
             { id: 'BLACK_COTTON', label: 'Black Cotton' },
             { id: 'ALLUVIAL', label: 'Alluvial Soil' },
             { id: 'LOAMY', label: 'Loamy / Sandy' },
@@ -123,7 +124,8 @@ export function FarmlandSpecs({ state, actions }: FarmlandSpecsProps) {
             onChange={(e) => setElectricityPhase(e.target.value)}
             className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#fff1dc] focus:border-[#FF9933] cursor-pointer"
           >
-            <option value="3_PHASE">3-Phase Agricultural Power</option>
+            <option value="NOT_SPECIFIED">Not specified</option>
+            <option value="3_PHASE">3-phase agricultural power</option>
             <option value="SINGLE_PHASE">Single Phase Power</option>
             <option value="SOLAR">Solar Power Installed</option>
             <option value="NONE">No Direct Connection</option>
@@ -139,7 +141,8 @@ export function FarmlandSpecs({ state, actions }: FarmlandSpecsProps) {
             onChange={(e) => setFarmFencing(e.target.value)}
             className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#fff1dc] focus:border-[#FF9933] cursor-pointer"
           >
-            <option value="CHAINLINK">Fully Fenced (Chainlink / Barbed Wire)</option>
+            <option value="NOT_SPECIFIED">Not specified</option>
+            <option value="CHAINLINK">Fully fenced (chainlink / barbed wire)</option>
             <option value="PARTIAL">Partially Fenced</option>
             <option value="UNFENCED">Open / Unfenced</option>
           </select>
