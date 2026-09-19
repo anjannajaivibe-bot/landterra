@@ -19,6 +19,7 @@ import {
 
 import { IProperty } from '@/types/property';
 import { SHIMMER_BLUR_DATA_URL } from '@/lib/utils';
+import { getPropertyTypeLabel } from '@/config/constants';
 
 interface PropertyCardProps {
   property: IProperty;
@@ -68,61 +69,6 @@ function formatArea(amount: number): string {
     return '—';
   }
   return amount.toLocaleString('en-IN');
-}
-
-/* ================================================================
-   LAND TYPE LABEL
-================================================================ */
-
-function formatLandType(
-  landType: IProperty['landType'],
-): string {
-  const labels: Record<string, string> = {
-    // Land & Plots
-    OPEN_PLOT: 'Open Plot',
-    FARMLAND_PLOT: 'Farmland Plot',
-    GATED_COMMUNITY_PLOT: 'Gated Community Plot',
-    AGRICULTURAL_LAND: 'Agricultural Land',
-    RESIDENTIAL_PLOT: 'Residential Plot',
-    COMMERCIAL_LAND: 'Commercial Land',
-    INDUSTRIAL_PLOT: 'Industrial Land',
-
-    // Residential Units
-    FLAT: 'Flat / Apartment',
-    INDEPENDENT_HOUSE: 'Independent House',
-    VILLA: 'Villa',
-    HOUSE_VILLA: 'House / Villa',
-    TOWNHOUSE: 'Townhouse',
-    DUPLEX: 'Duplex',
-    PENTHOUSE: 'Penthouse',
-
-    // Commercial & Retail
-    RETAIL_SHOP: 'Retail Shop',
-    SHOWROOM: 'Showroom',
-    OFFICE_SPACE: 'Office Space',
-    COWORKING_SPACE: 'Co-working Space',
-    SHOPPING_MALL: 'Shopping Mall',
-    WAREHOUSE_LAND: 'Warehouse / Godown',
-    SHOP_SHOWROOM: 'Shop / Showroom',
-    INDUSTRIAL_BUILDING: 'Industrial Building',
-    INDUSTRIAL_SHED: 'Industrial Shed',
-    INSTITUTIONAL: 'Institutional Land',
-
-    // Hospitality & Leisure
-    RESORT: 'Resort',
-    HOTEL: 'Hotel',
-    SERVICE_APARTMENT: 'Service Apartment',
-    GUEST_HOUSE: 'Guest House',
-    FARM_HOUSE_LAND: 'Farmhouse',
-
-    // Income-Generating & Rentals
-    RESIDENTIAL_RENTAL: 'Residential Rental',
-    COMMERCIAL_LEASE: 'Commercial Lease',
-    COLIVING_PG: 'Co-living / PG',
-    VACATION_RENTAL_AIRBNB: 'Vacation Rental / Airbnb',
-  };
-
-  return labels[landType] || 'Property';
 }
 
 /* ================================================================
@@ -317,7 +263,7 @@ export function PropertyCard({
         <div className="absolute bottom-3 left-3 right-3 z-10 flex items-end justify-between gap-2 pointer-events-none">
           <span className="inline-flex items-center gap-1.5 rounded-lg bg-black/60 px-2.5 py-1 text-[10px] font-bold text-white backdrop-blur">
             <Tag className="h-3 w-3 text-[#FF9933]" />
-            {formatLandType(property.landType)}
+            {getPropertyTypeLabel(property.landType)}
           </span>
 
           <div className="flex items-center gap-1.5">
@@ -347,7 +293,7 @@ export function PropertyCard({
             <div className="flex flex-wrap items-center gap-2">
               <span className="inline-flex items-center gap-1 rounded-full bg-[#fff9f0] border border-[#FF9933]/30 px-2.5 py-0.5 text-[10px] font-extrabold text-[#c75e0a]">
                 <Sparkles className="h-3 w-3 text-[#FF9933]" />
-                Direct Owner • 0% Brokerage
+                Listed Seller • 0% Platform Brokerage
               </span>
               {listedDate && (
                 <span
@@ -423,10 +369,10 @@ export function PropertyCard({
                 <UserCheck className="h-3.5 w-3.5 text-[#FF9933]" />
                 <p className="truncate text-xs font-black text-slate-900">
                   {property.sellerType === 'COMPANY'
-                    ? 'Company Direct'
+                    ? 'Company Seller'
                     : property.sellerType === 'AGENT'
-                      ? 'Authorized Agent'
-                      : 'Individual Landowner'}
+                      ? 'Agent'
+                      : 'Individual Seller'}
                 </p>
               </div>
             </div>
