@@ -67,5 +67,4 @@ export const CreateContactSchema = z.object({
     .trim()
     .min(10, 'Message must be at least 10 characters')
     .max(3000, 'Message cannot exceed 3000 characters'),
-  turnstileToken: z.string().optional(),
 });
