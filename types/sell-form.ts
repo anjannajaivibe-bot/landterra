@@ -1,4 +1,4 @@
-import { LandType, IProperty } from '@/types/property';
+import { LandType, IProperty, TransactionType } from '@/types/property';
 import { SellerType, IUser } from '@/types/user';
 
 export interface UploadedImagePreview {
@@ -97,6 +97,7 @@ export interface SellFormState {
   // Step 1: Specifications & Pricing
   title: string;
   description: string;
+  transactionType: TransactionType;
   landType: LandType;
   sellerCategoryTab: string;
   areaInput: string;
@@ -234,6 +235,7 @@ export interface SellFormActions {
   // Step 1 Setters
   setTitle: (val: string) => void;
   setDescription: (val: string) => void;
+  setTransactionType: (val: TransactionType) => void;
   setLandType: (val: LandType) => void;
   setSellerCategoryTab: (val: string) => void;
   setAreaInput: (val: string) => void;
