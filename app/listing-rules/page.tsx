@@ -15,7 +15,6 @@ import {
   Building2,
   Scale,
   ArrowRight,
-  Eye,
 } from 'lucide-react';
 
 export default function ListingRulesPage() {
