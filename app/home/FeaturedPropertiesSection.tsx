@@ -9,16 +9,12 @@ import { PropertyCard } from "@/components/properties/PropertyCard";
 export interface FeaturedPropertiesSectionProps {
   properties: IProperty[];
   loading: boolean;
-  publicListingFee: number;
-  listingDurationDays: number;
   onRequireLogin: () => void;
 }
 
 export function FeaturedPropertiesSection({
   properties,
   loading,
-  publicListingFee,
-  listingDurationDays,
   onRequireLogin,
 }: FeaturedPropertiesSectionProps) {
   return (
@@ -31,11 +27,11 @@ export function FeaturedPropertiesSection({
             </h2>
             <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#fff1dc] text-[#c75e0a] text-xs font-bold">
               <Sparkles className="w-3.5 h-3.5 text-[#FF9933]" />
-              <span>Direct Classifieds • 0% Brokerage</span>
+              <span>Direct Seller Contact • 0% Platform Brokerage</span>
             </span>
           </div>
           <p className="text-xs text-slate-500 mt-0.5">
-            Real published properties from direct owners with verified phone contact
+            Published listings from individual, company, and agent sellers
           </p>
         </div>
 
@@ -73,7 +69,7 @@ export function FeaturedPropertiesSection({
               No Active Property Listings Published Yet
             </h3>
             <p className="text-xs text-slate-500 max-w-md mx-auto leading-relaxed">
-              Be the first owner to list your plot, home, or commercial space. Reach thousands of serious buyers and tenants across India with zero brokerage.
+              Be the first seller to list your plot, home, commercial space, or other eligible property. Reach buyers and tenants across India through direct seller contact.
             </p>
           </div>
           <div className="pt-2">
@@ -82,7 +78,7 @@ export function FeaturedPropertiesSection({
               prefetch={false}
               className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-[#FF9933] text-white text-xs font-extrabold shadow-md hover:bg-[#f07d12] transition-colors"
             >
-              <span>Post Your Property Listing — Flat ₹{publicListingFee} for {listingDurationDays} Days</span>
+              <span>Post Your Property Listing Free</span>
               <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
