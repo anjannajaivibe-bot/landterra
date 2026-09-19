@@ -1,42 +1,43 @@
 export type LandType =
-   // Land & Plots
-   | 'OPEN_PLOT'
-   | 'FARMLAND_PLOT'
-   | 'GATED_COMMUNITY_PLOT'
-   | 'AGRICULTURAL_LAND'
+   // Canonical: Land & Plots
    | 'RESIDENTIAL_PLOT'
+   | 'FARMLAND_PLOT'
+   | 'AGRICULTURAL_LAND'
    | 'COMMERCIAL_LAND'
    | 'INDUSTRIAL_PLOT'
+   | 'INSTITUTIONAL'
 
-   // Residential Units
+   // Canonical: Residential
    | 'FLAT'
    | 'INDEPENDENT_HOUSE'
    | 'VILLA'
-   | 'HOUSE_VILLA'
    | 'TOWNHOUSE'
    | 'DUPLEX'
    | 'PENTHOUSE'
+   | 'FARMHOUSE'
 
-   // Commercial & Retail
+   // Canonical: Commercial
    | 'RETAIL_SHOP'
    | 'SHOWROOM'
    | 'OFFICE_SPACE'
    | 'COWORKING_SPACE'
    | 'SHOPPING_MALL'
    | 'WAREHOUSE_LAND'
-   | 'SHOP_SHOWROOM'
    | 'INDUSTRIAL_BUILDING'
    | 'INDUSTRIAL_SHED'
-   | 'INSTITUTIONAL'
 
-   // Hospitality & Leisure
-   | 'RESORT'
+   // Canonical: Hospitality
    | 'HOTEL'
+   | 'RESORT'
    | 'SERVICE_APARTMENT'
    | 'GUEST_HOUSE'
-   | 'FARM_HOUSE_LAND'
 
-   // Income-Generating & Rental Formats
+   // Legacy IDs retained for backward-compatible reads/edits only.
+   | 'OPEN_PLOT'
+   | 'GATED_COMMUNITY_PLOT'
+   | 'HOUSE_VILLA'
+   | 'SHOP_SHOWROOM'
+   | 'FARM_HOUSE_LAND'
    | 'RESIDENTIAL_RENTAL'
    | 'COMMERCIAL_LEASE'
    | 'COLIVING_PG'
