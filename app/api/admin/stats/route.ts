@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireRole } from '@/lib/security/auth';
 import { connectToDatabase } from '@/lib/db/mongodb';
 import { PropertyModel } from '@/models/Property';
-import { PaymentModel } from '@/models/Payment';
 import { ReportModel } from '@/models/Inquiry';
 import { UserModel } from '@/models/User';
 
@@ -28,7 +27,6 @@ export async function GET(req: NextRequest) {
 
     const [
       propertyStatsResult,
-      paymentStatsResult,
       totalReportsCount,
       pendingReportsCount,
       totalUsersResult,
@@ -60,24 +58,11 @@ export async function GET(req: NextRequest) {
         },
       ]),
 
-      // 2. Financial totals calculated across ALL payments
-      PaymentModel.aggregate([
-        {
-          $facet: {
-            totalCount: [{ $count: 'count' }],
-            paidTotal: [
-              { $match: { paymentStatus: 'PAID' } },
-              { $group: { _id: null, totalAmount: { $sum: '$amount' } } },
-            ],
-          },
-        },
-      ]),
-
-      // 3. Reports count
+      // 2. Reports count
       ReportModel.countDocuments({}),
       ReportModel.countDocuments({ status: 'PENDING' }),
 
-      // 4. User counts by dynamic listing criteria
+      // 3. User counts by dynamic listing criteria
       UserModel.countDocuments({}),
       PropertyModel.distinct('sellerId'),
       UserModel.countDocuments({ role: 'ADMIN' }),
@@ -97,10 +82,6 @@ export async function GET(req: NextRequest) {
     const verifiedProperties = propStats?.verified?.[0]?.count || 0;
     const rejectedProperties = propStats?.rejected?.[0]?.count || 0;
 
-    const payStats = paymentStatsResult?.[0];
-    const totalPaymentsCount = payStats?.totalCount?.[0]?.count || 0;
-    const totalPublishingFees = payStats?.paidTotal?.[0]?.totalAmount || 0;
-
     return NextResponse.json({
       metrics: {
         totalProperties,
@@ -108,8 +89,6 @@ export async function GET(req: NextRequest) {
         pendingProperties,
         verifiedProperties,
         rejectedProperties,
-        totalPublishingFees,
-        totalPaymentsCount,
         totalReportsCount,
         pendingReportsCount,
         totalUsers,
