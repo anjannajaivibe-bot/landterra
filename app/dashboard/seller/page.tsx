@@ -444,9 +444,6 @@ export default function SellerDashboardPage() {
                                 {prop.location.city}, {prop.location.state} • {prop.landAreaYards} sq.yds • ₹
                                 {prop.totalPrice.toLocaleString('en-IN')}
                               </p>
-                                  </span>
-                                </p>
-                              )}
 
                               {/* Listing Performance Analytics Bar */}
                               <div className="flex flex-wrap items-center gap-2 pt-1.5">
