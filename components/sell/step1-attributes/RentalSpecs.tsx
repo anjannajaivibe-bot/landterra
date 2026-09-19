@@ -53,6 +53,7 @@ export function RentalSpecs({ state, actions }: RentalSpecsProps) {
             onChange={(event) => setSecurityDepositMonths(event.target.value)}
             className="w-full px-4 py-2.5 rounded-lg border border-slate-300 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#fff1dc] focus:border-[#FF9933]"
           >
+            <option value="NOT_SPECIFIED">Not specified</option>
             <option value="1 Month">1 month rent</option>
             <option value="2 Months">2 months rent</option>
             <option value="3 Months">3 months rent</option>
@@ -70,6 +71,7 @@ export function RentalSpecs({ state, actions }: RentalSpecsProps) {
             onChange={(event) => setLeaseLockInPeriod(event.target.value)}
             className="w-full px-4 py-2.5 rounded-lg border border-slate-300 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#fff1dc] focus:border-[#FF9933]"
           >
+            <option value="NOT_SPECIFIED">Not specified</option>
             <option value="11 Months">11 months</option>
             <option value="1 Year">1 year</option>
             <option value="2 Years">2 years</option>
