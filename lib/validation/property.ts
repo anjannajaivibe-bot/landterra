@@ -71,6 +71,7 @@ export const CreatePropertySchema = z.object({
     'TOWNHOUSE',
     'DUPLEX',
     'PENTHOUSE',
+    'FARMHOUSE',
     'RETAIL_SHOP',
     'SHOWROOM',
     'OFFICE_SPACE',
