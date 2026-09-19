@@ -32,10 +32,10 @@ export function Step3SellerContact({ form }: Step3SellerContactProps) {
     <div className="p-5 sm:p-8 space-y-7 animate-in fade-in duration-150">
       <div>
         <h2 className="text-lg font-extrabold text-slate-950">
-          Seller Profile &amp; Ownership
+          Seller contact
         </h2>
         <p className="text-xs text-slate-500 mt-1">
-          This contact information is used for buyer inquiries and document verification.
+          Confirm how interested buyers or tenants can reach you. Verified account details are reused where available.
         </p>
       </div>
 
@@ -48,7 +48,7 @@ export function Step3SellerContact({ form }: Step3SellerContactProps) {
             type="text"
             value={sellerName}
             onChange={(event) => setSellerName(event.target.value)}
-            className="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#fff1dc] focus:border-[#FF9933]"
+            className="w-full px-4 py-3 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#fff1dc] focus:border-[#FF9933]"
           />
         </div>
 
@@ -60,7 +60,7 @@ export function Step3SellerContact({ form }: Step3SellerContactProps) {
             type="email"
             value={sellerEmail}
             onChange={(event) => setSellerEmail(event.target.value)}
-            className="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#fff1dc] focus:border-[#FF9933]"
+            className="w-full px-4 py-3 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#fff1dc] focus:border-[#FF9933]"
           />
         </div>
       </div>
@@ -78,7 +78,7 @@ export function Step3SellerContact({ form }: Step3SellerContactProps) {
             onChange={(event) =>
               setSellerPhone(event.target.value.replace(/\D/g, ''))
             }
-            className="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm bg-slate-50 font-semibold text-slate-800"
+            className="w-full px-4 py-3 rounded-lg border border-slate-300 text-sm bg-slate-50 font-semibold text-slate-800"
           />
           {currentUser?.isPhoneVerified && (
             <p className="flex items-center gap-1 text-[10px] text-[#FF9933] font-semibold mt-1.5">
@@ -97,9 +97,9 @@ export function Step3SellerContact({ form }: Step3SellerContactProps) {
             onChange={(event) =>
               setSellerType(event.target.value as SellerType)
             }
-            className="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#fff1dc] focus:border-[#FF9933] cursor-pointer"
+            className="w-full px-4 py-3 rounded-lg border border-slate-300 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#fff1dc] focus:border-[#FF9933] cursor-pointer"
           >
-            <option value="INDIVIDUAL">Individual Owner</option>
+            <option value="INDIVIDUAL">Individual Seller</option>
             <option value="COMPANY">Company / Builder</option>
             <option value="AGENT">Authorized Agent</option>
           </select>
@@ -108,14 +108,14 @@ export function Step3SellerContact({ form }: Step3SellerContactProps) {
 
       <div>
         <label className="block text-xs font-bold text-slate-700 mb-1.5">
-          Seller Correspondence Address
+          Correspondence address
         </label>
         <textarea
           rows={3}
           value={sellerAddress}
           onChange={(event) => setSellerAddress(event.target.value)}
-          placeholder="Your correspondence or office address"
-          className="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#fff1dc] focus:border-[#FF9933]"
+          placeholder="Optional correspondence or office address"
+          className="w-full px-4 py-3 rounded-lg border border-slate-300 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#fff1dc] focus:border-[#FF9933]"
         />
       </div>
     </div>
