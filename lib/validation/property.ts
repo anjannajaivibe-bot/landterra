@@ -149,7 +149,7 @@ export type UpdatePropertyInput = z.infer<typeof UpdatePropertySchema> & {
 export function calculateAuthoritativeFees(
   landAreaYards: number,
   pricePerYard: number,
-  flatListingFee: number = 10,
+  flatListingFee: number = 0,
 ) {
   const sanitizedArea = Math.max(0, Math.round(landAreaYards));
   const sanitizedPricePerYard = Math.max(0, Math.round(pricePerYard));
