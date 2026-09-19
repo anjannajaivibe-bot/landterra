@@ -53,10 +53,10 @@ export function PlotSpecs({ state, actions }: PlotSpecsProps) {
         </div>
         <div>
           <h3 className="text-sm font-extrabold text-slate-900">
-            Plot Measurements, Facing &amp; Boundary Details
+            Plot details
           </h3>
           <p className="text-[11px] text-slate-500">
-            Specify dimensions, facing direction, boundary walls, and layout sanctions.
+            Add dimensions, facing, boundary status and approvals only where they apply.
           </p>
         </div>
       </div>
@@ -64,7 +64,7 @@ export function PlotSpecs({ state, actions }: PlotSpecsProps) {
       {/* Plot Facing */}
       <div>
         <label className="block text-xs font-bold text-slate-800 mb-2">
-          Plot Facing Direction *
+          Plot facing
         </label>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
           {[
@@ -138,7 +138,7 @@ export function PlotSpecs({ state, actions }: PlotSpecsProps) {
       {/* Boundary & Enclosure Details */}
       <div>
         <label className="block text-xs font-bold text-slate-800 mb-2">
-          Boundary &amp; Enclosure Status *
+          Boundary / enclosure status
         </label>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {[
@@ -205,7 +205,7 @@ export function PlotSpecs({ state, actions }: PlotSpecsProps) {
             'RERA Registered',
             'BDA Approved',
             'Panchayat Approved',
-            'Clear Title / Revenue Patta',
+            'Revenue / Patta Record Available',
           ].map((appr) => {
             const selected = approvals.includes(appr);
             return (
