@@ -21,13 +21,11 @@ export async function PATCH(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { requireGoogleLogin, requirePhoneOtp, listingFeeAmount, listingFeeDurationDays } = body;
+    const { requireGoogleLogin, requirePhoneOtp } = body;
 
     const updates: {
       requireGoogleLogin?: boolean;
       requirePhoneOtp?: boolean;
-      listingFeeAmount?: number;
-      listingFeeDurationDays?: number;
     } = {};
 
     if (typeof requireGoogleLogin === 'boolean') {
@@ -35,12 +33,6 @@ export async function PATCH(req: NextRequest) {
     }
     if (typeof requirePhoneOtp === 'boolean') {
       updates.requirePhoneOtp = requirePhoneOtp;
-    }
-    if (typeof listingFeeAmount === 'number') {
-      updates.listingFeeAmount = listingFeeAmount;
-    }
-    if (typeof listingFeeDurationDays === 'number') {
-      updates.listingFeeDurationDays = listingFeeDurationDays;
     }
 
     const updatedSettings = await updatePlatformSettings(updates, adminUser);
