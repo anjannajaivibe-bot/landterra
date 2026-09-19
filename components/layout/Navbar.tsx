@@ -190,15 +190,12 @@ export function Navbar() {
             <div className="flex min-w-0 items-center gap-2 text-xs font-semibold text-slate-800">
               <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-[#FF9933]" />
               <span className="truncate">
-                Direct-to-owner property marketplace • 0% Broker Commission • Direct Peer-to-Peer Listings
+                Property marketplace • Direct seller contact • 0% platform brokerage
               </span>
             </div>
 
             <div className="hidden shrink-0 items-center gap-3 text-xs text-slate-600 sm:flex">
-              <span>Classifieds Publishing:</span>
-              <span className="font-bold text-[#c75e0a]">
-                Flat ₹10 for 30 Days
-              </span>
+              <span className="font-bold text-[#c75e0a]">Sale • Rent • Lease</span>
             </div>
           </div>
         </div>
@@ -357,7 +354,7 @@ export function Navbar() {
                         icon={
                           <Heart className="h-4 w-4 text-rose-500" />
                         }
-                        title="Saved Lands & Inquiries"
+                        title="Saved Properties & Inquiries"
                         description="Your watchlist and seller inquiries"
                         onClick={closeAllMenus}
                       />
@@ -367,8 +364,8 @@ export function Navbar() {
                         icon={
                           <LayoutDashboard className="h-4 w-4 text-[#FF9933]" />
                         }
-                        title="My Land Listings"
-                        description="Manage listings and subscriptions"
+                        title="My Property Listings"
+                        description="Manage listings and enquiries"
                         onClick={closeAllMenus}
                       />
 
@@ -425,9 +422,6 @@ export function Navbar() {
             >
               <Plus className="h-4 w-4" />
               <span>Post Property</span>
-              <span className="ml-0.5 rounded-md bg-white text-[#9e490f] px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider shadow-2xs">
-                ₹10
-              </span>
             </Link>
           </div>
 
@@ -497,7 +491,7 @@ export function Navbar() {
                     </p>
 
                     <p className="mt-0.5 text-xs text-slate-600">
-                      Browse agricultural land, residential plots, and commercial corridors directly from landowners.
+                      Browse plots, homes, commercial spaces and hospitality properties from listed sellers.
                     </p>
                   </div>
                 </div>
@@ -567,7 +561,7 @@ export function Navbar() {
                       }
                       onClick={closeAllMenus}
                     >
-                      Saved Lands & Inquiries
+                      Saved Properties & Inquiries
                     </MobileAccountLink>
 
                     <MobileAccountLink
@@ -615,7 +609,7 @@ export function Navbar() {
 
               {/* Mobile bottom pricing note */}
               <div className="pt-2 text-center text-[11px] font-semibold text-slate-500">
-                Direct Landowner Classifieds • Flat ₹10 for 30 Days
+                Property Marketplace • Direct Seller Contact
               </div>
             </div>
           </div>
