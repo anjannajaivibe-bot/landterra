@@ -145,11 +145,11 @@ export async function getProperties(
       /*
        * Public marketplace:
        * NEVER allow arbitrary lifecycle states.
-       * Also filter out listings whose subscription has expired.
+       * Published listings remain visible until they are paused,
+       * sold, rejected, deleted or otherwise changed by lifecycle rules.
        */
       query.listingStatus =
         'PUBLISHED';
-      query.subscriptionExpiresAt = { $gt: new Date() };
     }
 
     /*
@@ -692,25 +692,7 @@ export async function getPropertyById(
       return null;
     }
 
-    /*
-     * Proactive subscription expiration handling on deep-link fetch (B-5).
-     * When a PUBLISHED or EXPIRING_SOON property has passed its subscription expiry date,
-     * immediately transition its state to EXPIRED in the database and in the returned object.
-     */
-    if (
-      (doc.listingStatus === 'PUBLISHED' || doc.listingStatus === 'EXPIRING_SOON') &&
-      doc.subscriptionExpiresAt &&
-      new Date(doc.subscriptionExpiresAt).getTime() <= Date.now()
-    ) {
-      await PropertyModel.findByIdAndUpdate(id, {
-        $set: {
-          listingStatus: 'EXPIRED',
-          updatedAt: new Date(),
-        },
-      });
-      (doc as any).listingStatus = 'EXPIRED';
-    }
-
+    /* Published listings are not subscription-expired in the current marketplace model. */
     return doc as unknown as IProperty;
   } catch (error) {
     console.error(
