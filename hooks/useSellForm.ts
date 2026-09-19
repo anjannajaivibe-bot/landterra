@@ -340,15 +340,15 @@ export function useSellForm(): UseSellFormReturn {
       }
     }
 
-    if (step === 4) {
+    if (step === 4 && currentUser) {
       if (images.length === 0) {
-        setErrorMessage('Please upload at least 1 photo of the land parcel.');
+        setErrorMessage('Please upload at least 1 clear property photo before submitting.');
         return false;
       }
     }
 
     return true;
-  }, [title, landAreaYards, numericPricePerYard, transactionType, monthlyRent, address, city, state, pincode, sellerName, sellerPhone, sellerEmail, images.length]);
+  }, [title, landAreaYards, numericPricePerYard, transactionType, monthlyRent, address, city, state, pincode, sellerName, sellerPhone, sellerEmail, images.length, currentUser]);
 
   const handleNext = useCallback(() => {
     if (validateCurrentStep(currentStep)) {
@@ -990,6 +990,13 @@ export function useSellForm(): UseSellFormReturn {
 
   // Image Upload
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (!currentUser) {
+      event.target.value = '';
+      setErrorMessage('Sign in to upload property photos. Your entered details are saved on this device.');
+      setAuthModalOpen(true);
+      return;
+    }
+
     const files = event.target.files;
     if (!files || files.length === 0) return;
 
@@ -1104,6 +1111,12 @@ export function useSellForm(): UseSellFormReturn {
 
   // Video Upload
   const uploadVideoFile = async (file: File) => {
+    if (!currentUser) {
+      setErrorMessage('Sign in to upload a property video. Your entered details are saved on this device.');
+      setAuthModalOpen(true);
+      return;
+    }
+
     if (file.size > 50 * 1024 * 1024) {
       setErrorMessage('Video exceeds the maximum allowed size of 50 MB. Please choose a shorter clip.');
       return;
@@ -1272,6 +1285,13 @@ export function useSellForm(): UseSellFormReturn {
     event: React.ChangeEvent<HTMLInputElement>,
     docType: UploadedDocPreview['documentType'] = 'TITLE_DEED'
   ) => {
+    if (!currentUser) {
+      event.target.value = '';
+      setErrorMessage('Sign in to upload supporting documents. Your entered details are saved on this device.');
+      setAuthModalOpen(true);
+      return;
+    }
+
     const files = event.target.files;
     if (!files || files.length === 0) return;
 
@@ -1513,9 +1533,21 @@ export function useSellForm(): UseSellFormReturn {
       return;
     }
 
-    setIsSavingDraft(true);
     setErrorMessage('');
     setDraftSavedMessage(null);
+
+    if (!currentUser) {
+      const timeStr = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+      setDraftSavedTime(timeStr);
+      setDraftSavedSuccess(true);
+      setDraftSavedMessage(
+        `Saved on this device at ${timeStr}. Sign in later to save the listing to your BhoomiMitra account and submit it.`
+      );
+      window.setTimeout(() => setDraftSavedSuccess(false), 5000);
+      return;
+    }
+
+    setIsSavingDraft(true);
 
     try {
       const payload = constructPropertyPayload();
@@ -1591,6 +1623,12 @@ export function useSellForm(): UseSellFormReturn {
 
   // Final Submit / Submit for Review
   const handleProceedToPayment = async () => {
+    if (!currentUser) {
+      setErrorMessage('Sign in to submit this listing for review. Your entered details are saved on this device.');
+      setAuthModalOpen(true);
+      return;
+    }
+
     if (!termsAccepted) {
       setErrorMessage('You must accept the listing terms and publishing declaration.');
       return;
