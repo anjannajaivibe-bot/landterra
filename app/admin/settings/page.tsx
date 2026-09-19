@@ -2,15 +2,12 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import {
-  Settings,
   Server,
   Save,
   CheckCircle2,
   AlertCircle,
   Loader2,
-  ShieldCheck,
   Lock,
-  Phone,
 } from 'lucide-react';
 
 import { IPlatformSettings } from '@/models/PlatformSettings';
