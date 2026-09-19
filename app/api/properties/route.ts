@@ -345,7 +345,7 @@ export async function POST(
       return NextResponse.json(
         {
           error:
-            'Phone verification is required before listing land. Please verify your mobile number with OTP.',
+            'Phone verification is required before listing property. Please verify your mobile number with OTP.',
           code:
             'PHONE_VERIFICATION_REQUIRED',
         },
