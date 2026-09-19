@@ -31,10 +31,6 @@ import {
   getPlatformSettings,
 } from '@/services/settings.service';
 
-import {
-  verifyCloudflareTurnstile,
-} from '@/lib/security/cloudflare-turnstile';
-
 /* ================================================================
    HELPERS
 ================================================================ */
@@ -362,30 +358,10 @@ export async function POST(
     const body =
       await req.json();
 
-    /*
-     * Cloudflare Turnstile Human Verification Gate
-     * Protects the marketplace from automated scrapers, bots and spam listings.
-     */
-    const forwardedFor = req.headers.get('x-forwarded-for');
-    const ip = forwardedFor?.split(',')[0]?.trim() || req.headers.get('x-real-ip') || '127.0.0.1';
-    const turnstileToken = (body as { turnstileToken?: string })?.turnstileToken || req.headers.get('x-turnstile-token') || req.headers.get('cf-turnstile-token');
-
-    const turnstileResult = await verifyCloudflareTurnstile(turnstileToken, ip);
-    // Allow if verified successfully, or if the initial entry-gate token timed out while the authenticated seller spent time filling out the detailed multi-step form.
-    const isTimeoutFromFormSession = !turnstileResult.success && turnstileResult.codes?.includes('timeout-or-duplicate') && Boolean(authUser.id);
-    if (!turnstileResult.success && !isTimeoutFromFormSession) {
-      return NextResponse.json(
-        {
-          error:
-            turnstileResult.error ||
-            'Human verification required to list a property. Please complete the security check.',
-          code: 'TURNSTILE_REQUIRED',
-        },
-        {
-          status: 403,
-        },
-      );
-    }
+    const submissionIntent =
+      (body as { submissionIntent?: string })?.submissionIntent === 'SUBMIT'
+        ? 'SUBMIT'
+        : 'DRAFT';
 
     const validatedData =
       CreatePropertySchema.parse(
@@ -475,14 +451,20 @@ export async function POST(
         sellerType:
           authUser.sellerType ||
           'INDIVIDUAL',
-      });
+      },
+      submissionIntent === 'SUBMIT'
+        ? 'PENDING_VERIFICATION'
+        : 'DRAFT',
+      );
 
     return NextResponse.json(
       {
         success: true,
 
         message:
-          'Listing draft created. Please proceed to publishing fee payment.',
+          submissionIntent === 'SUBMIT'
+            ? 'Listing submitted successfully for platform review.'
+            : 'Listing draft saved successfully.',
 
         property,
       },
