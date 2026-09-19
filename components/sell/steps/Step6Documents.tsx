@@ -25,10 +25,10 @@ export function Step6Documents({ form }: Step6DocumentsProps) {
     <div className="p-5 sm:p-8 space-y-7 animate-in fade-in duration-150">
       <div>
         <h2 className="text-lg font-extrabold text-slate-950">
-          Title &amp; Supporting Documents (Optional)
+          Supporting documents
         </h2>
         <p className="text-xs text-slate-500 mt-1">
-          Upload documents to assist prospective buyers during their independent due diligence (Sale deed scan, EC Form 15, Pahani / 7-12 extract, or FMB sketch). Document upload is optional.
+          Optional. Add title, EC, tax, survey or other supporting records if you have them. You can submit the listing without documents and add them later.
         </p>
       </div>
 
@@ -52,10 +52,10 @@ export function Step6Documents({ form }: Step6DocumentsProps) {
           <p className="text-sm font-extrabold text-slate-900">
             {isUploadingDoc
               ? 'Uploading document...'
-              : 'Upload title documents'}
+              : 'Add documents'}
           </p>
           <p className="text-[11px] text-slate-500 mt-1">
-            PDF, JPG, PNG or WebP
+            PDF, JPG, PNG or WebP. Documents are not required to submit.
           </p>
         </div>
       </label>
