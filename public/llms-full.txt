@@ -1,10 +1,10 @@
-# BhoomiMitra (भू-मित्र) — Direct Land & Plot Marketplace (Full Specification)
+# BhoomiMitra (भू-मित्र) - Property Marketplace Across India (Full Specification)
 
-> BhoomiMitra is India's direct-to-owner land and agricultural plot classifieds platform, facilitating direct connection between landowners and prospective buyers with 0% brokerage commissions, transparent document disclosure, interactive satellite maps, and a flat advertising fee model.
+> BhoomiMitra is an India-focused property marketplace connecting listed sellers with prospective buyers and tenants. Sellers may be individuals, companies, or agents. The marketplace supports properties offered for sale, rent, or lease.
 
-BhoomiMitra operates a direct peer-to-peer classifieds marketplace covering Indian landowners, agricultural buyers, residential plot buyers, and commercial land investors across all 28 states and 8 union territories (including Telangana, Andhra Pradesh, Maharashtra, Karnataka, Tamil Nadu, Uttar Pradesh, and Gujarat).
+BhoomiMitra currently charges no platform listing fee and does not take a brokerage percentage or success fee from a property transaction. Property information is supplied by sellers. Platform review does not constitute legal, title, ownership, valuation, approval, or survey verification.
 
-Core Value Propositions: 0% Broker Commission, Direct landowner listings, Transparent seller-provided document disclosure, Direct Phone contact with registered sellers, and Interactive Google Satellite property boundary viewing.
+Supported property groups include land and plots, residential property, commercial and industrial property, and hospitality property. Buyers and tenants can use structured search and location filters and contact the listed seller directly.
 
 Indian Land Measurement Conversions:
 - 1 Square Yard = 1 sq. yd (9 sq. ft)
@@ -12,21 +12,48 @@ Indian Land Measurement Conversions:
 - 1 Cent = 48.4 sq. yds
 - 1 Acre = 4,840 sq. yds (40 Guntas / 100 Cents)
 - 1 Hectare = 11,959.9 sq. yds (2.471 Acres)
-- 1 Bigha (Standard) = 1,600 to 3,025 sq. yds (region-dependent)
+- Bigha varies by region and should not be treated as a single national conversion.
 
 ## Key Public Routes
 
-- [Marketplace Homepage](https://bhoomimitra.com/): Marketplace homepage with multi-attribute search and featured land classifieds.
-- [Buy Properties](https://bhoomimitra.com/buy): Interactive land explorer with price sliders, unit conversions, and location filters.
-- [Sell Property](https://bhoomimitra.com/sell): Multi-step land listing creator with seller legal declarations and instant publishing upon payment.
-- [Pricing](https://bhoomimitra.com/pricing): Platform advertising pricing (Flat ₹10-₹25 for 30-day listing subscriptions).
-- [About BhoomiMitra](https://bhoomimitra.com/about): BhoomiMitra mission, transparency policies, and zero-brokerage classifieds model.
-- [Customer Support](https://bhoomimitra.com/contact): Customer support desk and listing grievance redressal team.
-- [Listing Rules](https://bhoomimitra.com/listing-rules): Standards for seller submissions, legal declarations, and prohibited listings.
-- [Terms of Service](https://bhoomimitra.com/terms): Platform user terms, listing conditions, and liability disclaimers.
-- [Privacy Policy](https://bhoomimitra.com/privacy): Data security, private document vault protection, and cookie rules.
+- [Marketplace Homepage](https://bhoomimitra.com/): Property discovery, search, and featured listings.
+- [Find Property](https://bhoomimitra.com/buy): Search sale, rent, and lease listings by property type, location, area, price, and related filters.
+- [Post Property](https://bhoomimitra.com/sell): Create or edit a listing and submit it for the applicable platform review workflow.
+- [About BhoomiMitra](https://bhoomimitra.com/about): Marketplace model and platform information.
+- [Customer Support](https://bhoomimitra.com/contact): Customer support and grievance contact.
+- [Listing Rules](https://bhoomimitra.com/listing-rules): Seller requirements, content standards, and prohibited listings.
+- [Terms of Service](https://bhoomimitra.com/terms): Platform terms, seller responsibilities, buyer due diligence, and liability limitations.
+- [Privacy Policy](https://bhoomimitra.com/privacy): Account, listing, private-document, and service-data practices.
+- [Refund and Cancellation Policy](https://bhoomimitra.com/refund-policy): Current policy for marketplace services.
 
-## Core Features & Tools
+## Marketplace Workflow
 
-- [Land Area Converter](https://bhoomimitra.com/#converter): Live Indian land unit converter across Guntas, Cents, Acres, Sq. Yards, and Hectares.
-- [Buyer Due Diligence](https://bhoomimitra.com/listing-rules): Checklist for inspecting 30-year deed chains, EC Form 15, and survey sketches.
+1. A seller signs in and completes required account verification.
+2. The seller creates a draft with property, location, pricing, media, and seller information.
+3. The seller submits the listing for the applicable platform review workflow.
+4. An approved listing can become publicly visible as PUBLISHED.
+5. The seller can manage, pause, edit, mark sold, or delete the listing through supported dashboard actions.
+
+## Seller Types
+
+- Individual
+- Company
+- Agent
+
+Seller type identifies how the advertiser is acting. It is not a BhoomiMitra guarantee of ownership or legal authority.
+
+## Buyer and Tenant Safety
+
+BhoomiMitra does not guarantee ownership, title, boundaries, measurements, encumbrances, approvals, land-use status, litigation status, valuation, or document authenticity. Users should independently verify the property with appropriate legal, registration, revenue, survey, planning, and other authorities before making a payment or commitment.
+
+## Private Documents
+
+Optional seller-uploaded supporting documents are intended for authorized workflows and are not part of the public listing payload. Public marketplace users should rely on independent verification rather than treating platform document review as a title guarantee.
+
+## Tools
+
+- Land area conversion for commonly used Indian land units.
+- Property search and filters.
+- Seller dashboard and listing management.
+- Buyer inquiries and direct listed-seller contact.
+- Reporting and moderation workflows.
