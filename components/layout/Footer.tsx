@@ -2,15 +2,12 @@ import React from 'react';
 import Link from 'next/link';
 import {
   Compass,
-  ShieldCheck,
   Lock,
   PhoneCall,
   Mail,
   MapPin,
   HeartHandshake,
-  ArrowRight,
   Sparkles,
-  ExternalLink,
   Scale,
 } from 'lucide-react';
 import { SITE_CONFIG } from '@/config/constants';
