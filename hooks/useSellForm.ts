@@ -1336,7 +1336,16 @@ export function useSellForm(): UseSellFormReturn {
       title,
       description,
       landAreaYards: Number(landAreaYards.toFixed(4)),
-      pricePerYard: Number(pricePerYard),
+      pricePerYard:
+        transactionType === 'SALE'
+          ? Number(pricePerYard)
+          : Math.max(
+              1,
+              Math.round(
+                (Number(String(monthlyRent).replace(/,/g, '')) || 0) /
+                  Math.max(landAreaYards, 1)
+              )
+            ),
       priceNegotiable,
       transactionType,
       landType,
