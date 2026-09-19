@@ -126,7 +126,7 @@ export const CreatePropertySchema = z.object({
   ),
   sellerEmail: z.string().email().optional().or(z.literal('')),
   sellerType: z.enum(['INDIVIDUAL', 'COMPANY', 'AGENT']).default('INDIVIDUAL'),
-  images: z.array(PropertyImageInputSchema).min(1, 'At least one property image is required'),
+  images: z.array(PropertyImageInputSchema).default([]),
   video: PropertyVideoInputSchema.optional().nullable(),
   documents: z.array(PropertyDocumentInputSchema).optional().default([]),
   sellerDeclarationAccepted: z.preprocess((val) => val === true || val === 'true' || val === 1, z.boolean()).default(true),
