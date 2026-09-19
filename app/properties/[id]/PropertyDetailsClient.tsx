@@ -399,6 +399,10 @@ function PropertyDetailsContent({
     setCallError('');
     setCallModalOpen(true);
 
+    if (!sellerCallData?.sellerPhone) {
+      void fetchSellerContact();
+    }
+
     if (
       sellerCallData?.sellerPhone &&
       typeof window !== 'undefined' &&
@@ -408,7 +412,7 @@ function PropertyDetailsContent({
     }
   };
 
-  const verifyAndFetchCallData = async (turnstileToken: string) => {
+  const fetchSellerContact = async () => {
     if (!property) return;
 
     setCallLoading(true);
@@ -418,12 +422,12 @@ function PropertyDetailsContent({
       const response = await fetch(`/api/properties/${encodeURIComponent(property._id)}/call`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ turnstileToken }),
+        body: JSON.stringify({ channel: 'PHONE' }),
       });
 
       const data = await response.json();
       if (!response.ok) {
-        throw new Error(data.error || 'Human verification failed or contact limit reached.');
+        throw new Error(data.error || 'Unable to retrieve seller contact or contact limit reached.');
       }
 
       const phone = data.sellerPhone || property.sellerPhone;
@@ -432,7 +436,7 @@ function PropertyDetailsContent({
       }
 
       const contactDetails = {
-        sellerName: data.sellerName || property.sellerName || 'Landowner',
+        sellerName: data.sellerName || property.sellerName || 'Seller',
         sellerPhone: phone,
         sellerEmail: data.sellerEmail || property.sellerEmail,
       };
@@ -443,7 +447,7 @@ function PropertyDetailsContent({
         window.location.href = `tel:${contactDetails.sellerPhone}`;
       }
     } catch (err: unknown) {
-      setCallError(err instanceof Error ? err.message : 'Failed to retrieve landowner phone number');
+      setCallError(err instanceof Error ? err.message : 'Failed to retrieve seller phone number');
     } finally {
       setCallLoading(false);
     }
@@ -1061,7 +1065,6 @@ function PropertyDetailsContent({
         propertyId={property._id}
         callLoading={callLoading}
         callError={callError}
-        onVerify={verifyAndFetchCallData}
         onRetry={() => setCallError('')}
         onOpenInquiry={openInquiry}
         onTrackWhatsApp={handleTrackWhatsApp}
