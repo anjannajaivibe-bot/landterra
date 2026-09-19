@@ -250,7 +250,7 @@ export function useSellForm(): UseSellFormReturn {
     };
   }, [landAreaYards, numericPricePerYard, totalValuation, listingFeeAmount]);
 
-  const progressPercent = (currentStep / 7) * 100;
+  const progressPercent = (currentStep / 5) * 100;
 
   // Handle land area input changes
   const handleAreaInputChange = (value: string) => {
@@ -340,7 +340,7 @@ export function useSellForm(): UseSellFormReturn {
       }
     }
 
-    if (step === 5) {
+    if (step === 4) {
       if (images.length === 0) {
         setErrorMessage('Please upload at least 1 photo of the land parcel.');
         return false;
@@ -352,7 +352,7 @@ export function useSellForm(): UseSellFormReturn {
 
   const handleNext = useCallback(() => {
     if (validateCurrentStep(currentStep)) {
-      const next = Math.min(currentStep + 1, 7);
+      const next = Math.min(currentStep + 1, 5);
       setCurrentStep(next);
       syncStepToUrl(next);
     }
@@ -564,10 +564,10 @@ export function useSellForm(): UseSellFormReturn {
 
                 const stepParam = searchParams.get('step');
                 if (stepParam && !isNaN(Number(stepParam))) {
-                  const parsed = Math.min(Math.max(1, parseInt(stepParam, 10)), 7);
+                  const parsed = Math.min(Math.max(1, parseInt(stepParam, 10)), 5);
                   setCurrentStep(parsed);
                 } else if (property.paymentStatus === 'PENDING') {
-                  setCurrentStep(7);
+                  setCurrentStep(5);
                 }
               } else {
                 setErrorMessage('You do not have permission to edit this listing. Users can only manage their own properties.');
@@ -653,8 +653,16 @@ export function useSellForm(): UseSellFormReturn {
                 if (localDraft.video) setVideo(localDraft.video);
                 if (Array.isArray(localDraft.documents) && localDraft.documents.length > 0) setDocuments(localDraft.documents);
                 if (localDraft.termsAccepted !== undefined) setTermsAccepted(localDraft.termsAccepted);
-                if (typeof localDraft.currentStep === 'number' && localDraft.currentStep >= 1 && localDraft.currentStep <= 7) {
-                  setCurrentStep(localDraft.currentStep);
+                if (typeof localDraft.currentStep === 'number' && localDraft.currentStep >= 1) {
+                  const isFiveStepWizard = localDraft.wizardVersion === 2;
+                  const restoredStep = isFiveStepWizard
+                    ? Math.min(localDraft.currentStep, 5)
+                    : localDraft.currentStep >= 7
+                      ? 5
+                      : localDraft.currentStep >= 5
+                        ? 4
+                        : Math.min(localDraft.currentStep, 4);
+                  setCurrentStep(restoredStep);
                 }
               }
             }
@@ -749,6 +757,7 @@ export function useSellForm(): UseSellFormReturn {
           video,
           documents,
           currentStep,
+          wizardVersion: 2,
           termsAccepted,
           savedAt: Date.now(),
         };
