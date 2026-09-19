@@ -1504,12 +1504,6 @@ export function useSellForm(): UseSellFormReturn {
       return;
     }
 
-    if (images.length === 0) {
-      setErrorMessage('Please upload at least 1 property photograph before saving draft.');
-      setCurrentStep(5);
-      return;
-    }
-
     setIsSavingDraft(true);
     setErrorMessage('');
     setDraftSavedMessage(null);
@@ -1528,7 +1522,7 @@ export function useSellForm(): UseSellFormReturn {
         response = await fetch('/api/properties', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
+          body: JSON.stringify({ ...payload, submissionIntent: 'DRAFT' }),
         });
       }
 
@@ -1537,8 +1531,6 @@ export function useSellForm(): UseSellFormReturn {
       if (!response.ok) {
         if (data.code === 'PHONE_VERIFICATION_REQUIRED') {
           setErrorMessage('Phone verification is required before listing. Please verify your mobile number.');
-        } else if (data.code === 'TURNSTILE_REQUIRED') {
-          setErrorMessage(data.error || 'Security verification required to list property.');
         } else {
           const detailMsg = Array.isArray(data.details)
             ? data.details.map((d: { path?: (string | number)[]; message?: string }) => `${d.path?.join('.') || 'field'}: ${d.message || 'invalid'}`).join('; ')
@@ -1555,10 +1547,6 @@ export function useSellForm(): UseSellFormReturn {
       if (savedProperty?._id) {
         setExistingPropertyId(savedProperty._id);
         setCreatedProperty(savedProperty);
-        if (savedProperty.paymentStatus) {
-          setExistingPaymentStatus(savedProperty.paymentStatus);
-        }
-
         setTimeout(() => {
           try {
             const newUrl = new URL(window.location.href);
@@ -1578,7 +1566,7 @@ export function useSellForm(): UseSellFormReturn {
       setDraftSavedTime(timeStr);
       setDraftSavedSuccess(true);
       setDraftSavedMessage(
-        `Draft saved successfully at ${timeStr}! All property details, photos, and video are securely stored. You can safely refresh the page or proceed to pay anytime.`
+        `Draft saved successfully at ${timeStr}. You can leave this page and continue editing later from your seller dashboard.`
       );
 
       setTimeout(() => {
@@ -1592,14 +1580,12 @@ export function useSellForm(): UseSellFormReturn {
     }
   };
 
-  // Final Submit / Proceed to Payment
+  // Final Submit / Submit for Review
   const handleProceedToPayment = async () => {
     if (!termsAccepted) {
       setErrorMessage('You must accept the listing terms and publishing declaration.');
       return;
     }
-
-    // (Human verification is done at page entry — no re-check needed here)
 
     if (!Number.isFinite(landAreaYards) || landAreaYards < 1) {
       setErrorMessage('Please enter a valid land area (minimum 1 sq. yard).');
@@ -1632,7 +1618,7 @@ export function useSellForm(): UseSellFormReturn {
         response = await fetch('/api/properties', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
+          body: JSON.stringify({ ...payload, submissionIntent: 'SUBMIT' }),
         });
       }
 
@@ -1641,8 +1627,6 @@ export function useSellForm(): UseSellFormReturn {
       if (!response.ok) {
         if (data.code === 'PHONE_VERIFICATION_REQUIRED') {
           setErrorMessage('Phone verification is required before listing. Please verify your phone number.');
-        } else if (data.code === 'TURNSTILE_REQUIRED') {
-          setErrorMessage(data.error || 'Security verification required to list property.');
         } else {
           const detailMsg = Array.isArray(data.details)
             ? data.details.map((d: { path?: (string | number)[]; message?: string }) => `${d.path?.join('.') || 'field'}: ${d.message || 'invalid'}`).join('; ')
@@ -1659,10 +1643,6 @@ export function useSellForm(): UseSellFormReturn {
 
       if (savedProperty?._id) {
         setExistingPropertyId(savedProperty._id);
-        if (savedProperty.paymentStatus) {
-          setExistingPaymentStatus(savedProperty.paymentStatus);
-        }
-
         setTimeout(() => {
           try {
             const newUrl = new URL(window.location.href);
@@ -1678,16 +1658,39 @@ export function useSellForm(): UseSellFormReturn {
         localStorage.removeItem('bhoomimitra_sell_draft');
       } catch {}
 
-      if (existingPropertyId && existingPaymentStatus === 'PAID') {
-        setIsUpdateSuccess(true);
-        window.setTimeout(() => {
-          router.push('/dashboard/seller');
-        }, 1200);
-        return;
+      let submittedProperty = savedProperty;
+
+      if (existingPropertyId && savedProperty?._id) {
+        const submitResponse = await fetch(
+          `/api/properties/${savedProperty._id}/status`,
+          {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'SUBMIT_FOR_REVIEW',
+            }),
+          },
+        );
+
+        const submitData = await submitResponse.json();
+
+        if (!submitResponse.ok) {
+          throw new Error(
+            submitData.error ||
+              'Failed to submit listing for review',
+          );
+        }
+
+        submittedProperty =
+          submitData.property || savedProperty;
       }
 
-      setCreatedProperty(savedProperty);
-      setPaymentModalOpen(true);
+      setCreatedProperty(submittedProperty);
+      setIsUpdateSuccess(true);
+
+      window.setTimeout(() => {
+        router.push('/dashboard/seller');
+      }, 1200);
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Error submitting listing';
       setErrorMessage(message);
