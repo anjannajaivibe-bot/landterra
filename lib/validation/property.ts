@@ -92,6 +92,7 @@ export const CreatePropertySchema = z.object({
     'VACATION_RENTAL_AIRBNB',
   ]),
   transactionType: z.enum(['SALE', 'RENT', 'LEASE']).default('SALE'),
+  monthlyRent: z.number().positive('Monthly rent or lease amount must be greater than zero').optional(),
   propertyType: z.string().optional(),
   bhk: z.string().optional(),
   facing: z.string().optional(),
@@ -129,7 +130,6 @@ export const CreatePropertySchema = z.object({
   video: PropertyVideoInputSchema.optional().nullable(),
   documents: z.array(PropertyDocumentInputSchema).optional().default([]),
   sellerDeclarationAccepted: z.preprocess((val) => val === true || val === 'true' || val === 1, z.boolean()).default(true),
-  turnstileToken: z.string().optional(),
 });
 
 export const UpdatePropertySchema = CreatePropertySchema.partial();
