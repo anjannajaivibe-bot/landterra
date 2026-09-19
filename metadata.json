@@ -1,6 +1,6 @@
 {
-  "name": "BhoomiMitra - Real Estate Land Marketplace",
-  "description": "Production-ready direct land & plot classifieds marketplace with instant publishing, seller workflows, Razorpay advertising subscriptions, Cloudflare R2 storage, and content moderation.",
+  "name": "BhoomiMitra - Property Marketplace",
+  "description": "India-focused property marketplace for sale, rent, and lease with individual, company, and agent seller workflows, Cloudflare R2 media storage, listing review, direct seller contact, and content moderation.",
   "requestFramePermissions": ["geolocation"],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
