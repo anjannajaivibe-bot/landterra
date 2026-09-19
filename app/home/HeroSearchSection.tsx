@@ -581,7 +581,7 @@ export function HeroSearchSection() {
                 </form>
               </div>
 
-              {/* ── Popular Search Chips & Verified Toggle Beneath ── */}
+              {/* Popular search chips and individual-seller filter */}
               <div className="flex flex-wrap items-center justify-between gap-3 px-1 text-xs">
                 <label htmlFor="hero-verified-only" className="inline-flex items-center gap-2 text-slate-700 font-semibold cursor-pointer select-none">
                   <input
@@ -595,7 +595,7 @@ export function HeroSearchSection() {
                   <span className="flex items-center gap-1.5">
                     <Sparkles className="w-4 h-4 text-[#FF9933]" />
                     <span className="text-xs font-bold text-slate-700">
-                      Direct Owner Listings Only (0% Brokerage)
+                      Individual Seller listings
                     </span>
                   </span>
                 </label>
