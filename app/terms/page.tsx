@@ -8,7 +8,6 @@ import {
   ShieldCheck,
   FileText,
   AlertTriangle,
-  CreditCard,
   Building2,
   Mail,
 } from 'lucide-react';
@@ -29,7 +28,7 @@ export default function TermsPage() {
             Terms of Service
           </h1>
           <p className="text-xs sm:text-sm text-slate-400 mt-2">
-            Last Updated: August 2026 • Effective Immediately
+            Last Updated: September 19, 2026 • Effective Immediately
           </p>
         </div>
       </div>
@@ -68,7 +67,7 @@ export default function TermsPage() {
               <span>Platform Role: Online Classifieds Marketplace</span>
             </h2>
             <p>
-              BhoomiMitra operates as an online classifieds and marketplace platform. The Platform provides listing and advertising infrastructure, property discovery, and direct communication functionality for property owners or authorized representatives (&quot;Sellers&quot;) to showcase land parcels and for prospective purchasers (&quot;Buyers&quot;) to discover and directly contact such sellers. Users are responsible for complying with applicable laws and conducting their own independent due diligence.
+              BhoomiMitra operates as an online property classifieds and marketplace platform. The Platform provides listing and advertising infrastructure, property discovery, and direct communication functionality for individual, company, and agent sellers (&quot;Sellers&quot;) to advertise properties for sale, rent, or lease and for prospective buyers or tenants to discover and contact those sellers. Users are responsible for complying with applicable laws and conducting their own independent due diligence.
             </p>
             <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2 text-xs">
               <strong className="text-slate-900 block">Clarification of Platform Scope:</strong>
@@ -91,7 +90,7 @@ export default function TermsPage() {
               Any user creating a listing on BhoomiMitra represents and agrees that:
             </p>
             <ul className="list-disc pl-5 space-y-1.5 text-slate-600">
-              <li>They are the owner of the advertised property or hold valid, lawful authority or Power of Attorney (PoA) to market the property.</li>
+              <li>They accurately disclose whether they are acting as an individual, company, or agent and have lawful authority to advertise or market the property.</li>
               <li>All information, land area measurements, government survey numbers, state portal identifiers, and optional uploaded document scans are accurate and truthful to the best of their knowledge.</li>
               <li>They must not upload unlawful, fraudulent, misleading, or infringing content, or prohibited/disputed land parcels.</li>
               <li>They agree to keep listing details updated and mark properties as &quot;PAUSED&quot; or delete the listing when no longer available.</li>
@@ -102,13 +101,13 @@ export default function TermsPage() {
           <section className="space-y-3 pb-6 border-b border-slate-100">
             <h2 className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
               <span className="text-[#c75e0a] font-mono">4.</span>
-              <span>Classifieds Publishing Fee &amp; Direct Listing Policy</span>
+              <span>Free Listing &amp; Publishing Policy</span>
             </h2>
             <p>
-              BhoomiMitra charges a nominal flat digital publishing fee (e.g. ₹10 to ₹25 as configured on the platform) to host and display seller land advertisements for a 30-day active visibility period. Once payment is completed, the listing is directly published onto the marketplace without administrative delays.
+              BhoomiMitra currently does not charge a platform fee to submit or publish an approved property listing. Submitted listings may be subject to automated checks, moderation, and platform review before becoming publicly visible.
             </p>
             <p>
-              <strong>No-Refund Policy:</strong> Once an advertisement submission is paid for and published live, publishing fees are <strong>strictly non-refundable</strong>, as the digital hosting and broadcasting service commences immediately upon payment.
+              <strong>Payments:</strong> BhoomiMitra currently does not collect marketplace listing fees, brokerage, booking amounts, rent, deposits, or property sale consideration through the Platform. Any property transaction payment is arranged directly between the relevant users and is outside BhoomiMitra&apos;s custody.
             </p>
           </section>
 
@@ -173,7 +172,7 @@ export default function TermsPage() {
             <ul className="list-disc pl-5 space-y-1 text-slate-600">
               <li>Any transaction, agreement, financial deal, or dispute entered into between Buyers and Sellers.</li>
               <li>Any defect in title, boundary disputes, or fraudulent representations made by listing authors.</li>
-              <li>Temporary platform downtime, payment gateway outages, or network interruptions.</li>
+              <li>Temporary platform downtime, third-party infrastructure outages, or network interruptions.</li>
             </ul>
           </section>
 
