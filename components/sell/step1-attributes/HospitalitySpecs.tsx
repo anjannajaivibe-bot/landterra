@@ -24,7 +24,7 @@ export function HospitalitySpecs({ state, actions }: HospitalitySpecsProps) {
     toggleItem,
   } = actions;
 
-  const isHospitality = ['RESORT', 'HOTEL', 'SERVICE_APARTMENT', 'GUEST_HOUSE'].includes(landType);
+  const isHospitality = ['RESORT', 'HOTEL', 'GUEST_HOUSE'].includes(landType);
 
   if (!isHospitality) {
     return null;
