@@ -7,12 +7,6 @@ import {
   ShieldCheck,
   EyeOff,
   Database,
-  FileText,
-  Key,
-  Server,
-  UserCheck,
-  Mail,
-  Scale,
 } from 'lucide-react';
 
 export default function PrivacyPage() {
