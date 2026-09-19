@@ -79,89 +79,72 @@ export function useSellForm(): UseSellFormReturn {
   const [transactionType, setTransactionType] = useState<TransactionType>('SALE');
   const [title, setTitle] = useState<string>('');
   const [description, setDescription] = useState<string>('');
-  const [landAreaYards, setLandAreaYards] = useState<number>(300);
-  const [landAreaInput, setLandAreaInput] = useState<string>('300');
+  const [landAreaYards, setLandAreaYards] = useState<number>(0);
+  const [landAreaInput, setLandAreaInput] = useState<string>('');
   const [landAreaUnit, setLandAreaUnit] = useState<LandAreaUnit>('SQUARE_YARDS');
-  const [pricePerYard, setPricePerYard] = useState<string>('25000');
-  const [priceNegotiable, setPriceNegotiable] = useState<boolean>(true);
+  const [pricePerYard, setPricePerYard] = useState<string>('');
+  const [priceNegotiable, setPriceNegotiable] = useState<boolean>(false);
   const [landType, setLandType] = useState<LandType>('RESIDENTIAL_PLOT');
   const [sellerCategoryTab, setSellerCategoryTab] = useState<string>('Land & Plots');
 
   // Residential Attributes
-  const [bhk, setBhk] = useState<string>('3 BHK');
+  const [bhk, setBhk] = useState<string>('NOT_SPECIFIED');
   const [floorNumber, setFloorNumber] = useState<string>('');
   const [totalFloors, setTotalFloors] = useState<string>('');
-  const [furnishingStatus, setFurnishingStatus] = useState<string>('SEMI_FURNISHED');
-  const [bathrooms, setBathrooms] = useState<number>(2);
-  const [balconies, setBalconies] = useState<number>(1);
+  const [furnishingStatus, setFurnishingStatus] = useState<string>('NOT_SPECIFIED');
+  const [bathrooms, setBathrooms] = useState<number>(0);
+  const [balconies, setBalconies] = useState<number>(-1);
   const [carpetAreaSqFt, setCarpetAreaSqFt] = useState<string>('');
   const [superBuiltUpAreaSqFt, setSuperBuiltUpAreaSqFt] = useState<string>('');
-  const [parkingSlots, setParkingSlots] = useState<string>('1_COVERED');
+  const [parkingSlots, setParkingSlots] = useState<string>('NOT_SPECIFIED');
 
   // Facing & Boundaries
-  const [facing, setFacing] = useState<string>('EAST');
+  const [facing, setFacing] = useState<string>('NOT_SPECIFIED');
   const [plotLengthFt, setPlotLengthFt] = useState<string>('');
   const [plotWidthFt, setPlotWidthFt] = useState<string>('');
-  const [boundaryWall, setBoundaryWall] = useState<string>('FULL_WALL');
+  const [boundaryWall, setBoundaryWall] = useState<string>('NOT_SPECIFIED');
   const [cornerPlot, setCornerPlot] = useState<boolean>(false);
-  const [gatedCommunity, setGatedCommunity] = useState<boolean>(true);
-  const [approvals, setApprovals] = useState<string[]>(['HMDA Approved']);
+  const [gatedCommunity, setGatedCommunity] = useState<boolean>(false);
+  const [approvals, setApprovals] = useState<string[]>([]);
 
   // Villa Specific
-  const [villaType, setVillaType] = useState<string>('INDEPENDENT_HOUSE');
-  const [villaFloors, setVillaFloors] = useState<string>('G_PLUS_1');
-  const [vastuCompliant, setVastuCompliant] = useState<boolean>(true);
+  const [villaType, setVillaType] = useState<string>('NOT_SPECIFIED');
+  const [villaFloors, setVillaFloors] = useState<string>('NOT_SPECIFIED');
+  const [vastuCompliant, setVastuCompliant] = useState<boolean>(false);
   const [additionalRooms, setAdditionalRooms] = useState<string[]>([]);
-  const [villaPrivateFeatures, setVillaPrivateFeatures] = useState<string[]>([
-    'Private Garden / Lawn',
-    'Covered Car Porch (2+ Cars)',
-    'Private Terrace / Roof Rights',
-  ]);
+  const [villaPrivateFeatures, setVillaPrivateFeatures] = useState<string[]>([]);
   const [furnishingDetails, setFurnishingDetails] = useState<string[]>([]);
-  const [possessionStatus, setPossessionStatus] = useState<string>('READY_TO_MOVE');
-  const [ageOfProperty, setAgeOfProperty] = useState<string>('NEW');
+  const [possessionStatus, setPossessionStatus] = useState<string>('NOT_SPECIFIED');
+  const [ageOfProperty, setAgeOfProperty] = useState<string>('NOT_SPECIFIED');
   const [skipOptionalFeatures, setSkipOptionalFeatures] = useState<boolean>(false);
 
   // Commercial Specific
-  const [commercialFitout, setCommercialFitout] = useState<string>('WARM_SHELL');
-  const [commercialWashrooms, setCommercialWashrooms] = useState<string>('PRIVATE');
+  const [commercialFitout, setCommercialFitout] = useState<string>('NOT_SPECIFIED');
+  const [commercialWashrooms, setCommercialWashrooms] = useState<string>('NOT_SPECIFIED');
   const [powerLoadKva, setPowerLoadKva] = useState<string>('');
-  const [suitableBusinesses, setSuitableBusinesses] = useState<string[]>([
-    'IT / Software Company',
-    'Corporate Office',
-  ]);
+  const [suitableBusinesses, setSuitableBusinesses] = useState<string[]>([]);
 
   // Farmland Specific
-  const [soilType, setSoilType] = useState<string>('RED_SOIL');
-  const [waterSources, setWaterSources] = useState<string[]>(['Dedicated Borewell']);
-  const [electricityPhase, setElectricityPhase] = useState<string>('3_PHASE');
-  const [farmFencing, setFarmFencing] = useState<string>('CHAINLINK');
+  const [soilType, setSoilType] = useState<string>('NOT_SPECIFIED');
+  const [waterSources, setWaterSources] = useState<string[]>([]);
+  const [electricityPhase, setElectricityPhase] = useState<string>('NOT_SPECIFIED');
+  const [farmFencing, setFarmFencing] = useState<string>('NOT_SPECIFIED');
   const [plantations, setPlantations] = useState<string>('');
 
   // Hospitality Specific
-  const [totalRooms, setTotalRooms] = useState<string>('20 Rooms');
-  const [eventLawnCapacity, setEventLawnCapacity] = useState<string>('500 Guests');
-  const [hospitalityFeatures, setHospitalityFeatures] = useState<string[]>([
-    'Swimming Pool',
-    'Restaurant / Kitchen Setup',
-    'Banquet / Event Lawn',
-    'Guest Parking',
-  ]);
+  const [totalRooms, setTotalRooms] = useState<string>('');
+  const [eventLawnCapacity, setEventLawnCapacity] = useState<string>('');
+  const [hospitalityFeatures, setHospitalityFeatures] = useState<string[]>([]);
 
   // Rental Specific
   const [monthlyRent, setMonthlyRent] = useState<string>('');
-  const [securityDepositMonths, setSecurityDepositMonths] = useState<string>('2 Months');
-  const [leaseLockInPeriod, setLeaseLockInPeriod] = useState<string>('11 Months');
+  const [securityDepositMonths, setSecurityDepositMonths] = useState<string>('NOT_SPECIFIED');
+  const [leaseLockInPeriod, setLeaseLockInPeriod] = useState<string>('NOT_SPECIFIED');
   const [maintenanceCharges, setMaintenanceCharges] = useState<string>('');
 
   // Amenities & Road Access
-  const [selectedAmenities, setSelectedAmenities] = useState<string[]>([
-    'Lift / Elevator',
-    '24/7 Security & CCTV',
-    '100% Power Backup',
-    'Covered Car Parking',
-  ]);
-  const [roadAccess, setRoadAccess] = useState<string>('30_FT_PLUS');
+  const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
+  const [roadAccess, setRoadAccess] = useState<string>('NOT_SPECIFIED');
   const [landmarks, setLandmarks] = useState<string>('');
 
   // Step 2: Location
@@ -1390,6 +1373,7 @@ export function useSellForm(): UseSellFormReturn {
         'TOWNHOUSE',
         'DUPLEX',
         'PENTHOUSE',
+        'FARMHOUSE',
         'SERVICE_APARTMENT',
         'RESIDENTIAL_RENTAL',
         'COLIVING_PG',
@@ -1401,7 +1385,6 @@ export function useSellForm(): UseSellFormReturn {
       floorNumber: [
         'FLAT',
         'PENTHOUSE',
-        'DUPLEX',
         'OFFICE_SPACE',
         'COWORKING_SPACE',
         'SERVICE_APARTMENT',
@@ -1410,14 +1393,14 @@ export function useSellForm(): UseSellFormReturn {
         : undefined,
       totalFloors: totalFloors ? Number(totalFloors) : undefined,
       furnishingStatus,
-      bathrooms: Number(bathrooms),
-      balconies: Number(balconies),
+      bathrooms: bathrooms > 0 ? Number(bathrooms) : undefined,
+      balconies: balconies >= 0 ? Number(balconies) : undefined,
       carpetAreaSqFt: carpetAreaSqFt ? Number(carpetAreaSqFt) : undefined,
       superBuiltUpAreaSqFt: superBuiltUpAreaSqFt ? Number(superBuiltUpAreaSqFt) : undefined,
       boundaryWall,
       cornerPlot: Boolean(cornerPlot),
       gatedCommunity: Boolean(gatedCommunity),
-      amenities: Array.from(new Set([...selectedAmenities, ...villaPrivateFeatures, ...additionalRooms])),
+      amenities: Array.from(new Set(selectedAmenities)),
       approvals,
       waterSource: waterSources,
       electricityPhase,
@@ -1463,7 +1446,7 @@ export function useSellForm(): UseSellFormReturn {
         securityDepositMonths,
         leaseLockInPeriod,
         maintenanceCharges,
-        amenities: Array.from(new Set([...selectedAmenities, ...villaPrivateFeatures, ...additionalRooms])),
+        amenities: Array.from(new Set(selectedAmenities)),
       },
       roadAccess,
       nearbyLandmarks: landmarks
