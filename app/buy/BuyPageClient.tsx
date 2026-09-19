@@ -70,6 +70,59 @@ function BuyPageContent({
   );
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(searchQuery);
 
+  /* Multi-select Property Types */
+  const initialPropertyTypes = useMemo(() => {
+    const param = searchParams.get('landType');
+    if (!param || param === 'ALL') return [];
+    return param.split(',').map((p) => p.trim()).filter(Boolean);
+  }, [searchParams]);
+
+  const [selectedPropertyTypes, setSelectedPropertyTypes] =
+    useState<string[]>(initialPropertyTypes);
+
+  const [selectedBhks, setSelectedBhks] = useState<string[]>(() => {
+    const bhkParam = searchParams.get('bhk');
+    return bhkParam ? bhkParam.split(',').map((b) => b.trim()).filter(Boolean) : [];
+  });
+
+  const [selectedState, setSelectedState] = useState(
+    searchParams.get('state') || 'ALL',
+  );
+
+  const [transactionType, setTransactionType] = useState<string>(() => {
+    const tx = searchParams.get('transactionType');
+    return tx && ['SALE', 'RENT', 'LEASE'].includes(tx.toUpperCase()) ? tx.toUpperCase() : 'ALL';
+  });
+
+  const [verifiedOnly, setVerifiedOnly] = useState(
+    searchParams.get('verifiedOnly') === 'true',
+  );
+
+  const [minPrice, setMinPrice] = useState(
+    Number(searchParams.get('minPrice')) || 0,
+  );
+
+  const [maxPrice, setMaxPrice] = useState(
+    Number(searchParams.get('maxPrice')) || DEFAULT_MAX_PRICE,
+  );
+
+  const [minArea, setMinArea] = useState(
+    Number(searchParams.get('minArea')) || 0,
+  );
+
+  const [maxArea, setMaxArea] = useState(
+    Number(searchParams.get('maxArea')) || DEFAULT_MAX_AREA,
+  );
+
+  const [sortBy, setSortBy] = useState(
+    searchParams.get('sortBy') || 'newest',
+  );
+
+  const [page, setPage] = useState(
+    Number(searchParams.get('page')) || 1,
+  );
+
+
   // 350ms search input debouncing to prevent network spam while typing
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -162,58 +215,6 @@ function BuyPageContent({
   const clientCacheRef = useRef<
     Map<string, { data: IProperty[]; total: number; totalPages: number }>
   >(new Map());
-
-  /* Multi-select Property Types */
-  const initialPropertyTypes = useMemo(() => {
-    const param = searchParams.get('landType');
-    if (!param || param === 'ALL') return [];
-    return param.split(',').map((p) => p.trim()).filter(Boolean);
-  }, [searchParams]);
-
-  const [selectedPropertyTypes, setSelectedPropertyTypes] =
-    useState<string[]>(initialPropertyTypes);
-
-  const [selectedBhks, setSelectedBhks] = useState<string[]>(() => {
-    const bhkParam = searchParams.get('bhk');
-    return bhkParam ? bhkParam.split(',').map((b) => b.trim()).filter(Boolean) : [];
-  });
-
-  const [selectedState, setSelectedState] = useState(
-    searchParams.get('state') || 'ALL',
-  );
-
-  const [transactionType, setTransactionType] = useState<string>(() => {
-    const tx = searchParams.get('transactionType');
-    return tx && ['SALE', 'RENT', 'LEASE'].includes(tx.toUpperCase()) ? tx.toUpperCase() : 'ALL';
-  });
-
-  const [verifiedOnly, setVerifiedOnly] = useState(
-    searchParams.get('verifiedOnly') === 'true',
-  );
-
-  const [minPrice, setMinPrice] = useState(
-    Number(searchParams.get('minPrice')) || 0,
-  );
-
-  const [maxPrice, setMaxPrice] = useState(
-    Number(searchParams.get('maxPrice')) || DEFAULT_MAX_PRICE,
-  );
-
-  const [minArea, setMinArea] = useState(
-    Number(searchParams.get('minArea')) || 0,
-  );
-
-  const [maxArea, setMaxArea] = useState(
-    Number(searchParams.get('maxArea')) || DEFAULT_MAX_AREA,
-  );
-
-  const [sortBy, setSortBy] = useState(
-    searchParams.get('sortBy') || 'newest',
-  );
-
-  const [page, setPage] = useState(
-    Number(searchParams.get('page')) || 1,
-  );
 
   const handleTogglePropertyType = (id: string) => {
     setSelectedPropertyTypes((prev) => {
@@ -898,3 +899,4 @@ export function BuyPageClient({
 }
 
 export default BuyPageClient;
+
