@@ -29,7 +29,7 @@ interface AdminStats {
   verifiedProperties?: number;
   rejectedProperties?: number;
   totalReportsCount?: number;
-  pendingReports?: number;
+  pendingReportsCount?: number;
   totalUsers?: number;
 }
 
@@ -143,7 +143,7 @@ export default function AdminDashboardPage() {
 
         <AdminMetricCard
           label="Reports Pending"
-          value={stats?.pendingReports ?? 0}
+          value={stats?.pendingReportsCount ?? 0}
           secondary="Trust & safety items awaiting review"
           icon={Flag}
           tone="emerald"
