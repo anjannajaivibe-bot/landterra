@@ -1,10 +1,18 @@
-# BhoomiMitra (भू-मित्र) — Direct Land & Plot Marketplace (Full Specification)
+# BhoomiMitra (भू-मित्र) — Property Marketplace Across India (Full Specification)
 
-> BhoomiMitra is India's direct-to-owner land and agricultural plot classifieds platform, facilitating direct connection between landowners and prospective buyers with 0% brokerage commissions, transparent document disclosure, interactive satellite maps, and a flat advertising fee model.
+> BhoomiMitra is an India-focused property marketplace for sale, rent, and lease. Individuals, companies, and agents can submit eligible property listings, while buyers and tenants can contact the listed seller directly. BhoomiMitra currently charges no platform listing fee and 0% platform brokerage.
 
-BhoomiMitra operates a direct peer-to-peer classifieds marketplace covering Indian landowners, agricultural buyers, residential plot buyers, and commercial land investors across all 28 states and 8 union territories (including Telangana, Andhra Pradesh, Maharashtra, Karnataka, Tamil Nadu, Uttar Pradesh, and Gujarat).
+BhoomiMitra supports property discovery across India, including residential plots, apartments, houses, villas, commercial spaces, industrial properties, hospitality properties, agricultural land, farm plots, and related categories.
 
-Core Value Propositions: 0% Broker Commission, Direct landowner listings, Transparent seller-provided document disclosure, Direct Phone contact with registered sellers, and Interactive Google Satellite property boundary viewing.
+Core marketplace principles:
+- Seller types: Individual, Company, or Agent.
+- Direct contact: buyers and tenants can contact the listed seller directly.
+- Current platform listing fee: ₹0.
+- Platform brokerage: BhoomiMitra charges 0% platform brokerage and no transaction success fee.
+- Review model: submitted listings follow validation, anti-spam, moderation, and review workflows before approved listings become publicly visible.
+- Verification limitation: a BhoomiMitra review or listing status does not guarantee title, ownership, legality, approvals, boundaries, encumbrance status, valuation, or suitability.
+- Payments: BhoomiMitra currently does not collect property purchase payments, booking amounts, rent, deposits, sale consideration, brokerage, or marketplace listing fees through the property transaction flow.
+- Due diligence: buyers should independently verify legal title, registration records, approvals, physical boundaries, measurements, access, and other property details before entering into a transaction.
 
 Indian Land Measurement Conversions:
 - 1 Square Yard = 1 sq. yd (9 sq. ft)
@@ -12,21 +20,22 @@ Indian Land Measurement Conversions:
 - 1 Cent = 48.4 sq. yds
 - 1 Acre = 4,840 sq. yds (40 Guntas / 100 Cents)
 - 1 Hectare = 11,959.9 sq. yds (2.471 Acres)
-- 1 Bigha (Standard) = 1,600 to 3,025 sq. yds (region-dependent)
+- 1 Bigha varies by region and should not be treated as a single national standard.
 
 ## Key Public Routes
 
-- [Marketplace Homepage](https://bhoomimitra.com/): Marketplace homepage with multi-attribute search and featured land classifieds.
-- [Buy Properties](https://bhoomimitra.com/buy): Interactive land explorer with price sliders, unit conversions, and location filters.
-- [Sell Property](https://bhoomimitra.com/sell): Multi-step land listing creator with seller legal declarations and instant publishing upon payment.
-- [Pricing](https://bhoomimitra.com/pricing): Platform advertising pricing (Flat ₹10-₹25 for 30-day listing subscriptions).
-- [About BhoomiMitra](https://bhoomimitra.com/about): BhoomiMitra mission, transparency policies, and zero-brokerage classifieds model.
-- [Customer Support](https://bhoomimitra.com/contact): Customer support desk and listing grievance redressal team.
-- [Listing Rules](https://bhoomimitra.com/listing-rules): Standards for seller submissions, legal declarations, and prohibited listings.
-- [Terms of Service](https://bhoomimitra.com/terms): Platform user terms, listing conditions, and liability disclaimers.
-- [Privacy Policy](https://bhoomimitra.com/privacy): Data security, private document vault protection, and cookie rules.
+- [Marketplace Homepage](https://bhoomimitra.com/): Property search, marketplace highlights, featured listings, land-area tools, and buyer due-diligence guidance.
+- [Find Property](https://bhoomimitra.com/buy): Property explorer with category, transaction, location, price, and area filters.
+- [Post Property](https://bhoomimitra.com/sell): Multi-step listing creator for eligible Individual, Company, and Agent sellers. Current platform listing fee is ₹0; submitted listings follow the platform review workflow.
+- [About BhoomiMitra](https://bhoomimitra.com/about): Marketplace mission, seller model, direct seller contact, and fee approach.
+- [Customer Support](https://bhoomimitra.com/contact): Customer support and grievance redressal.
+- [Listing Rules](https://bhoomimitra.com/listing-rules): Seller standards, declarations, moderation, prohibited listings, and buyer due-diligence notices.
+- [Terms of Service](https://bhoomimitra.com/terms): Platform terms, payment limitations, user obligations, and liability disclaimers.
+- [Privacy Policy](https://bhoomimitra.com/privacy): Data handling, privacy, account information, and user rights.
+- [Refund Policy](https://bhoomimitra.com/refund-policy): Current policy for a marketplace that does not collect listing or property transaction payments.
 
 ## Core Features & Tools
 
-- [Land Area Converter](https://bhoomimitra.com/#converter): Live Indian land unit converter across Guntas, Cents, Acres, Sq. Yards, and Hectares.
-- [Buyer Due Diligence](https://bhoomimitra.com/listing-rules): Checklist for inspecting 30-year deed chains, EC Form 15, and survey sketches.
+- [Land Area Converter](https://bhoomimitra.com/#converter): Indian land unit converter across Guntas, Cents, Acres, Square Yards, and Hectares.
+- [Buyer Due Diligence](https://bhoomimitra.com/listing-rules): Guidance for reviewing deeds, encumbrance records, revenue records, survey information, approvals, and physical property details.
+- [Interactive Property Search](https://bhoomimitra.com/buy): Search and filtering across supported property categories and transaction types.
