@@ -210,7 +210,7 @@ Examples of active marketplace API areas include:
 /api/admin
 ```
 
-Obsolete Razorpay payment-order, payment-verification, paid-subscription, and subscription-expiry routes have been removed from the current architecture.
+Obsolete payment-order, payment-verification, paid-subscription, and subscription-expiry routes have been removed from the current architecture.
 
 ## Environment
 
@@ -286,14 +286,11 @@ Use:
 
 Avoid broad claims such as:
 
-- Direct Owner
-- Owner Only
-- Direct Landowner
-- 0% Broker Commission
-- ownership verified
-- title guaranteed
-- ₹10 / 30-day listing fee
-- paid listing subscription
+- owner-only or landowner-only marketplace claims
+- unqualified claims that no broker or agent fee can ever apply
+- ownership-verified or title-guaranteed claims
+- obsolete fixed-fee or time-limited paid-listing claims
+- paid listing subscription claims
 
 ## License
 
