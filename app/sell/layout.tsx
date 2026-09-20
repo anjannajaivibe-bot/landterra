@@ -1,9 +1,9 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Sell Your Property Direct to Buyers | BhoomiMitra',
+  title: 'List Your Property Across India | BhoomiMitra',
   description:
-    'List residential, commercial, or agricultural land and connect directly with genuine buyers across India with zero broker commissions.',
+    'Individuals, companies, and agents can submit eligible property listings across India. BhoomiMitra currently charges ₹0 platform listing fee, and submitted listings follow the platform review workflow.',
 };
 
 export default function SellLayout({ children }: { children: React.ReactNode }) {
