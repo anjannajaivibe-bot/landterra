@@ -1,8 +1,8 @@
-# BhoomiMitra (भू-मित्र) — Direct Land & Plot Marketplace
+# BhoomiMitra (भू-मित्र) — Property Marketplace Across India
 
-> BhoomiMitra is India's direct-to-owner land and agricultural plot classifieds platform, facilitating direct connection between landowners and prospective buyers with 0% brokerage commissions, transparent document disclosure, interactive satellite maps, and a flat advertising fee model.
+> BhoomiMitra is an India-focused property marketplace for sale, rent, and lease. Individuals, companies, and agents can submit eligible property listings, while buyers and tenants can contact the listed seller directly. BhoomiMitra currently charges no platform listing fee and 0% platform brokerage.
 
-BhoomiMitra operates a direct peer-to-peer classifieds marketplace covering Indian landowners, agricultural buyers, residential plot buyers, and commercial land investors across all 28 states and 8 union territories. Core value propositions include 0% broker commission, direct landowner listings, transparent seller-provided document disclosure, and interactive Google Satellite property boundary viewing.
+BhoomiMitra supports plots, homes, commercial spaces, industrial properties, hospitality properties, agricultural land, and related real-estate categories across India. Submitted listings follow platform validation, moderation, and review workflows before approved listings become publicly visible. A listing or review status does not guarantee title, ownership, legality, valuation, or suitability, and buyers should complete independent legal and physical due diligence.
 
 Indian Land Measurement Conversions:
 - 1 Square Yard = 1 sq. yd (9 sq. ft)
@@ -13,14 +13,15 @@ Indian Land Measurement Conversions:
 
 ## Key Public Routes
 
-- [Marketplace Homepage](https://bhoomimitra.com/): Multi-attribute search and featured land classifieds.
-- [Find Property](https://bhoomimitra.com/buy): Interactive real estate and property explorer with price sliders, unit conversions, and location filters.
-- [Post Property](https://bhoomimitra.com/sell): Multi-step property listing creator with seller legal declarations and instant publishing upon payment.
-- [Advertising Pricing](https://bhoomimitra.com/pricing): Platform advertising pricing (Flat ₹10-₹25 for 30-day listing subscriptions).
-- [About BhoomiMitra](https://bhoomimitra.com/about): Mission, transparency policies, and zero-brokerage classifieds model.
-- [Customer Support](https://bhoomimitra.com/contact): Customer support desk and listing grievance redressal team.
-- [Listing Rules](https://bhoomimitra.com/listing-rules): Standards for seller submissions, legal declarations, and prohibited listings.
+- [Marketplace Homepage](https://bhoomimitra.com/): Property search, marketplace highlights, featured listings, land-area tools, and buyer due-diligence guidance.
+- [Find Property](https://bhoomimitra.com/buy): Property explorer with category, transaction, location, price, and area filters.
+- [Post Property](https://bhoomimitra.com/sell): Property listing creator for eligible Individual, Company, and Agent sellers. Current platform listing fee is ₹0; submitted listings follow the review workflow.
+- [About BhoomiMitra](https://bhoomimitra.com/about): Marketplace model, seller types, direct seller contact, and platform fee approach.
+- [Customer Support](https://bhoomimitra.com/contact): Customer support and grievance redressal.
+- [Listing Rules](https://bhoomimitra.com/listing-rules): Seller submission standards, declarations, moderation rules, and prohibited listings.
+- [Terms of Service](https://bhoomimitra.com/terms): Platform terms, transaction limitations, and liability disclaimers.
+- [Privacy Policy](https://bhoomimitra.com/privacy): Data handling, privacy, and account-related information.
 
 ## Optional
 
-- [Full Site Specification](https://bhoomimitra.com/llms-full.txt): Extended documentation on platform architecture, security, and statutory due diligence advisory.
+- [Full Site Specification](https://bhoomimitra.com/llms-full.txt): Extended description of the marketplace model, public routes, tools, and due-diligence approach.
