@@ -84,14 +84,14 @@ export default function AboutPage() {
             <div className="p-4 rounded-xl bg-rose-50/60 border border-rose-100 space-y-1.5">
               <strong className="text-rose-950 font-bold block">Ghost &amp; Duplicate Listings</strong>
               <p className="text-rose-900/80 leading-relaxed text-xs">
-                Unregulated portals allow brokers to copy photos, invent fake prices, and advertise plots they do not represent.
+                Property portals can accumulate duplicate, outdated, or misleading advertisements when seller identity, authority, or listing information is unclear.
               </p>
             </div>
 
             <div className="p-4 rounded-xl bg-rose-50/60 border border-rose-100 space-y-1.5">
-              <strong className="text-rose-950 font-bold block">Heavy Brokerage Commissions</strong>
+              <strong className="text-rose-950 font-bold block">Unclear Intermediary Costs</strong>
               <p className="text-rose-900/80 leading-relaxed text-xs">
-                Traditional brokers routinely demand 2% to 4% commission from both sides, siphoning lakhs from transactions.
+                Buyers and sellers may encounter third-party brokerage or intermediary fees outside the platform. BhoomiMitra itself does not add a platform brokerage percentage.
               </p>
             </div>
 
