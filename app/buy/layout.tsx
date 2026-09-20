@@ -2,17 +2,17 @@ import { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: {
-    absolute: 'Direct Real Estate & Properties Marketplace | BhoomiMitra',
+    absolute: 'Properties for Sale, Rent & Lease Across India | BhoomiMitra',
   },
   description:
-    'Browse direct owner properties — plots, apartments, houses, villas, commercial spaces, and farmlands across India with zero broker commissions.',
+    'Browse plots, apartments, houses, villas, commercial spaces, hospitality properties, and farmlands across India. Contact the listed seller directly while BhoomiMitra charges no platform brokerage.',
   alternates: {
     canonical: '/buy',
   },
   openGraph: {
-    title: 'Direct Real Estate & Properties Marketplace | BhoomiMitra',
+    title: 'Properties for Sale, Rent & Lease Across India | BhoomiMitra',
     description:
-      'Browse direct owner properties — plots, apartments, houses, villas, commercial spaces, and farmlands across India with zero broker commissions.',
+      'Browse property across India and contact the listed individual, company, or agent seller directly. BhoomiMitra charges no platform brokerage.',
   },
 };
 
