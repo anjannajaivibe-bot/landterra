@@ -38,25 +38,17 @@ const AuthModal = dynamic(
 
 export interface HomePageClientProps {
   initialProperties?: IProperty[];
-  initialListingFee?: number;
-  initialListingDurationDays?: number;
-  footer?: React.ReactNode;
+   footer?: React.ReactNode;
 }
 
 export function HomePageClient({
   initialProperties = [],
-  initialListingFee = 10,
-  initialListingDurationDays = 30,
-  footer,
+   footer,
 }: HomePageClientProps) {
   const [properties, setProperties] = useState<IProperty[]>(initialProperties);
   const [loading, setLoading] = useState(!initialProperties || initialProperties.length === 0);
 
-  /* Platform settings */
-  const [publicListingFee, setPublicListingFee] = useState(initialListingFee);
-  const [listingDurationDays, setListingDurationDays] = useState(initialListingDurationDays);
-
-  /* User & Auth */
+   /* User & Auth */
   const [user, setUser] = useState<Partial<IUser> | null>(null);
   const [authModalOpen, setAuthModalOpen] = useState(false);
 
@@ -70,23 +62,14 @@ export function HomePageClient({
     async function loadData() {
       try {
         const needsProperties = !initialProperties || initialProperties.length === 0;
-        const [propsRes, settingsRes] = await Promise.all([
-          needsProperties ? fetch('/api/properties?limit=12&cardOnly=true') : Promise.resolve(null),
-          fetch('/api/settings/public').catch(() => null),
-        ]);
+        if (needsProperties) {
+          const propsRes = await fetch('/api/properties?limit=12&cardOnly=true');
 
-        if (settingsRes && 'ok' in settingsRes && settingsRes.ok) {
-          const s = await settingsRes.json();
-          if (!cancelled) {
-            if (typeof s.listingFeeAmount === 'number') setPublicListingFee(s.listingFeeAmount);
-            if (typeof s.listingFeeDurationDays === 'number') setListingDurationDays(s.listingFeeDurationDays);
-          }
-        }
-
-        if (propsRes && 'ok' in propsRes && propsRes.ok) {
-          const result = await propsRes.json();
-          if (!cancelled && Array.isArray(result?.data)) {
-            setProperties(result.data);
+          if (propsRes.ok) {
+            const result = await propsRes.json();
+            if (!cancelled && Array.isArray(result?.data)) {
+              setProperties(result.data);
+            }
           }
         }
       } catch (error) {
@@ -121,9 +104,9 @@ export function HomePageClient({
               <div className="w-11 h-11 rounded-2xl bg-[#fff1dc] text-[#c75e0a] flex items-center justify-center font-bold">
                 <HeartHandshake className="w-5 h-5 text-[#FF9933]" />
               </div>
-              <h3 className="text-sm font-extrabold text-slate-950">0% Broker Commission</h3>
+              <h3 className="text-sm font-extrabold text-slate-950">0% Platform Brokerage</h3>
               <p className="text-xs text-slate-500 leading-relaxed">
-                Deal directly with genuine property owners. No middleman cuts, broker markups, or success commissions.
+                Contact the listed seller directly while BhoomiMitra takes no platform brokerage percentage or success fee.
               </p>
             </div>
 
@@ -141,9 +124,9 @@ export function HomePageClient({
               <div className="w-11 h-11 rounded-2xl bg-[#fff1dc] text-[#c75e0a] flex items-center justify-center font-bold">
                 <Phone className="w-5 h-5 text-[#FF9933]" />
               </div>
-              <h3 className="text-sm font-extrabold text-slate-950">Direct &quot;Call Owner&quot;</h3>
+              <h3 className="text-sm font-extrabold text-slate-950">Direct &quot;Contact Seller&quot;</h3>
               <p className="text-xs text-slate-500 leading-relaxed">
-                Call verified property owners directly. Inquiries are safely logged in your dashboard for total transparency.
+                Contact the listed individual, company, or agent seller directly. Inquiries are logged in your dashboard for transparency.
               </p>
             </div>
 
@@ -151,9 +134,9 @@ export function HomePageClient({
               <div className="w-11 h-11 rounded-2xl bg-[#fff1dc] text-[#c75e0a] flex items-center justify-center font-bold">
                 <Tag className="w-5 h-5 text-[#FF9933]" />
               </div>
-              <h3 className="text-sm font-extrabold text-slate-950">Flat ₹{publicListingFee} for {listingDurationDays} Days</h3>
+              <h3 className="text-sm font-extrabold text-slate-950">₹0 Current Platform Listing Fee</h3>
               <p className="text-xs text-slate-500 leading-relaxed">
-                Transparent and affordable classifieds publishing fee for sellers with zero commission upon sale.
+                Eligible listings can currently be submitted without a platform listing fee. Public visibility follows the review and listing lifecycle.
               </p>
             </div>
           </div>
@@ -163,9 +146,7 @@ export function HomePageClient({
         <FeaturedPropertiesSection
           properties={properties}
           loading={loading}
-          publicListingFee={publicListingFee}
-          listingDurationDays={listingDurationDays}
-          onRequireLogin={() => setAuthModalOpen(true)}
+           onRequireLogin={() => setAuthModalOpen(true)}
         />
 
         {/* 4. LAND BUYER'S DUE DILIGENCE CHECKLIST */}
@@ -186,19 +167,19 @@ export function HomePageClient({
             <div className="relative z-10 max-w-2xl space-y-4">
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 text-[#ffe1b8] text-[11px] font-bold border border-white/20">
                 <Sparkles className="w-3.5 h-3.5 text-[#FF9933]" />
-                <span>For Direct Property Owners</span>
+                <span>For Individuals, Companies &amp; Agents</span>
               </div>
 
               <h2 className="text-2xl sm:text-4xl font-black tracking-tight leading-tight">
-                Are You a Property Owner? Sell or Rent in 3 Simple Steps
+                Ready to List a Property? Publish in 3 Simple Steps
               </h2>
 
               <p className="text-xs sm:text-sm text-slate-200 leading-relaxed">
-                Publish your plot, flat, villa, or commercial property for a flat advertisement fee of just{' '}
+                Publish your plot, flat, villa, commercial space, or other eligible property with a{' '}
                 <strong className="text-[#FF9933] font-extrabold">
-                  ₹{publicListingFee} for {listingDurationDays} Days
+                  ₹0 current platform listing fee
                 </strong>
-                . Zero broker commission upon sale or lease. Reach thousands of serious buyers &amp; tenants across India.
+                . BhoomiMitra charges 0% platform brokerage. Reach prospective buyers and tenants across India.
               </p>
 
               {/* 3 Step indicators */}
@@ -221,7 +202,7 @@ export function HomePageClient({
                   <div className="w-6 h-6 rounded-full bg-[#FF9933] text-white font-black text-xs flex items-center justify-center shrink-0">
                     3
                   </div>
-                  <span className="font-semibold text-white">Pay ₹{publicListingFee} &amp; Go Live</span>
+                  <span className="font-semibold text-white">Submit for Review &amp; Go Live</span>
                 </div>
               </div>
 
@@ -352,8 +333,8 @@ export function HomePageClient({
                 <div className="font-bold text-slate-900">Help &amp; Legal Guides</div>
                 <ul className="space-y-1.5 text-slate-500">
                   <li>
-                    <Link href="/pricing" className="hover:text-[#FF9933]">
-                      Listing Pricing &amp; Plans
+                    <Link href="/about" className="hover:text-[#FF9933]">
+                      How BhoomiMitra Works
                     </Link>
                   </li>
                   <li>
