@@ -65,7 +65,7 @@ export default function ListingRulesPage() {
             <div className="w-10 h-10 rounded-xl bg-purple-50 border border-purple-100 flex items-center justify-center text-purple-800">
               <Scale className="w-5 h-5 text-purple-600" />
             </div>
-            <h3 className="font-bold text-slate-900 text-sm">0% Deal Commission</h3>
+            <h3 className="font-bold text-slate-900 text-sm">0% Platform Brokerage</h3>
             <p className="text-xs text-slate-600 leading-relaxed">
               BhoomiMitra currently charges no platform listing fee and no brokerage percentage or success fee on a property transaction.
             </p>
@@ -105,7 +105,7 @@ export default function ListingRulesPage() {
           <ul className="space-y-2 text-xs text-slate-600">
             <li className="flex items-start gap-2">
               <CheckCircle2 className="w-4 h-4 text-[#FF9933] shrink-0 mt-0.5" />
-              <span><strong>Zero Sale Commission:</strong> Sellers retain 100% of their land deal value. We charge zero brokerage, success fees, or commission percentage.</span>
+              <span><strong>No BhoomiMitra Transaction Percentage:</strong> BhoomiMitra does not charge a brokerage percentage or success fee on the property transaction. Any third-party agent or intermediary fees are separate arrangements between the relevant users.</span>
             </li>
             <li className="flex items-start gap-2">
               <CheckCircle2 className="w-4 h-4 text-[#FF9933] shrink-0 mt-0.5" />
@@ -154,7 +154,7 @@ export default function ListingRulesPage() {
               <div className="space-y-1">
                 <h4 className="font-bold text-xs sm:text-sm text-slate-900">Title Deed &amp; Revenue Record Extracts (Optional)</h4>
                 <p className="text-xs text-slate-600 leading-relaxed">
-                  Sellers can upload supporting copies of registered sale deeds, Pattadar Passbook / 7/12 extract / Khata certificate, or Encumbrance Certificate (EC). <em>Uploaded revenue documents are stored in private encrypted storage and are never made publicly downloadable.</em>
+                  Sellers can upload supporting copies of registered sale deeds, Pattadar Passbook / 7/12 extract / Khata certificate, or Encumbrance Certificate (EC). <em>Uploaded supporting documents are stored privately and are not made publicly downloadable.</em>
                 </p>
               </div>
             </div>
