@@ -23,8 +23,8 @@ export default function RefundPolicyPage() {
             BhoomiMitra does not currently collect marketplace payments
           </h1>
           <p className="mt-4 text-sm leading-7 text-slate-600">
-            BhoomiMitra currently does not charge a listing fee, brokerage percentage,
-            booking amount, token amount, property sale consideration, rent, security
+            BhoomiMitra currently does not charge a platform listing fee or platform brokerage percentage,
+            and does not collect any booking amount, token amount, property sale consideration, rent, security
             deposit or lease payment through this website.
           </p>
 

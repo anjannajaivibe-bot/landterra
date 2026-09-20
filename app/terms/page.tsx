@@ -24,7 +24,7 @@ export default function TermsPage() {
             Terms of Service
           </h1>
           <p className="text-xs sm:text-sm text-slate-400 mt-2">
-            Last Updated: September 19, 2026 • Effective Immediately
+            Last Updated: September 20, 2026 • Effective Immediately
           </p>
         </div>
       </div>
@@ -69,7 +69,7 @@ export default function TermsPage() {
               <strong className="text-slate-900 block">Clarification of Platform Scope:</strong>
               <ul className="list-disc pl-5 space-y-1 text-slate-600">
                 <li>BhoomiMitra is <strong>not a licensed real estate broker, agent, or property dealer</strong>.</li>
-                <li>BhoomiMitra does <strong>not charge any brokerage commission, success fees, or percentage</strong> on transaction completion.</li>
+                <li>BhoomiMitra does <strong>not charge any platform brokerage percentage, platform success fee, or transaction percentage</strong> on transaction completion. Any third-party agent or intermediary fee is a separate arrangement between the relevant users.</li>
                 <li>BhoomiMitra is not a party to any contract of sale, agreement of sale, or conveyance executed between Buyers and Sellers.</li>
                 <li>BhoomiMitra does not guarantee legal title, ownership validity, encumbrance-free status, or boundary measurements of listed land parcels.</li>
               </ul>
@@ -103,7 +103,7 @@ export default function TermsPage() {
               BhoomiMitra currently does not charge a platform fee to submit or publish an approved property listing. Submitted listings may be subject to automated checks, moderation, and platform review before becoming publicly visible.
             </p>
             <p>
-              <strong>Payments:</strong> BhoomiMitra currently does not collect marketplace listing fees, brokerage, booking amounts, rent, deposits, or property sale consideration through the Platform. Any property transaction payment is arranged directly between the relevant users and is outside BhoomiMitra&apos;s custody.
+              <strong>Payments:</strong> BhoomiMitra currently does not collect platform listing fees, platform brokerage, booking amounts, rent, deposits, or property sale consideration through the Platform. Any third-party agent fee or property transaction payment is arranged directly between the relevant users and is outside BhoomiMitra&apos;s custody.
             </p>
           </section>
 
