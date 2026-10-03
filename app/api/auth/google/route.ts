@@ -2,14 +2,18 @@ import { NextRequest, NextResponse } from 'next/server';
 
 import crypto from 'crypto';
 
+import {
+  getGoogleCallbackUrl,
+  getGoogleClientId,
+  isGoogleOAuthConfigured,
+} from '@/lib/auth/google-oauth';
+
 /* ================================================================
    CONSTANTS
 ================================================================ */
 
 const GOOGLE_AUTH_ENDPOINT =
   'https://accounts.google.com/o/oauth2/v2/auth';
-
-const SESSION_COOKIE = 'landterra_session';
 
 const OAUTH_STATE_COOKIE =
   'landterra_google_oauth_state';
@@ -25,26 +29,26 @@ const OAUTH_REDIRECT_COOKIE =
 export async function GET(req: NextRequest) {
   try {
     const clientId =
-      process.env.GOOGLE_CLIENT_ID;
+      getGoogleClientId();
 
-    const appUrl =
-      process.env.NEXT_PUBLIC_APP_URL;
-
-    if (!clientId) {
-      return NextResponse.json(
-        {
-          error:
-            'Google authentication is not configured. Missing GOOGLE_CLIENT_ID.',
-        },
-        { status: 503 },
+    /*
+     * Do not start an OAuth flow that cannot complete.
+     * The callback requires both the client ID and client secret.
+     */
+    if (
+      !clientId ||
+      !isGoogleOAuthConfigured()
+    ) {
+      console.error(
+        'Google OAuth is not fully configured for this deployment.',
       );
-    }
 
-    if (!appUrl) {
       return NextResponse.json(
         {
+          code:
+            'GOOGLE_OAUTH_NOT_CONFIGURED',
           error:
-            'NEXT_PUBLIC_APP_URL is not configured.',
+            'Google sign-in is temporarily unavailable. Please try again later.',
         },
         { status: 503 },
       );
@@ -80,9 +84,13 @@ export async function GET(req: NextRequest) {
     const state =
       crypto.randomBytes(32).toString('hex');
 
+    /*
+     * Prefer APP_URL / NEXT_PUBLIC_APP_URL when configured.
+     * Otherwise use the current request origin so production does not
+     * fail solely because an application URL variable is missing.
+     */
     const callbackUrl =
-      `${appUrl.replace(/\/$/, '')}` +
-      '/api/auth/google/callback';
+      getGoogleCallbackUrl(req);
 
     const params =
       new URLSearchParams({
