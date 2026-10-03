@@ -1,4 +1,5 @@
 import React from 'react';
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
@@ -12,6 +13,22 @@ import {
   MapPin,
   FileText,
 } from 'lucide-react';
+
+export const metadata: Metadata = {
+  title: {
+    absolute: 'About BhoomiMitra | Property Marketplace in India',
+  },
+  description:
+    'Learn how BhoomiMitra connects property sellers, buyers and tenants across India with direct seller contact, transparent disclosures and buyer due-diligence guidance.',
+  alternates: {
+    canonical: '/about',
+  },
+  openGraph: {
+    title: 'About BhoomiMitra | Property Marketplace in India',
+    description:
+      'Learn how BhoomiMitra connects property sellers, buyers and tenants across India with direct seller contact, transparent disclosures and buyer due-diligence guidance.',
+  },
+};
 
 export default function AboutPage() {
   return (
