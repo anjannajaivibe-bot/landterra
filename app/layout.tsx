@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import Script from 'next/script';
 import { Plus_Jakarta_Sans } from 'next/font/google';
 import './globals.css';
+import { PwaInstallBanner } from '@/components/pwa/PwaInstallBanner';
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ['latin'],
@@ -145,6 +146,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
         {children}
+        <PwaInstallBanner />
         <Script id="register-sw" strategy="afterInteractive">
           {`
             if ('serviceWorker' in navigator && window.location.protocol === 'https:') {
