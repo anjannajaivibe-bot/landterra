@@ -1,89 +1,178 @@
-import { NextRequest, NextResponse } from 'next/server';
+import crypto from 'crypto';
 
-import { UserModel } from '@/models/User';
-import { connectToDatabase } from '@/lib/db/mongodb';
-import { setSessionCookie } from '@/lib/security/auth';
+import {
+  NextRequest,
+  NextResponse,
+} from 'next/server';
 
-export async function POST(req: NextRequest) {
+import {
+  getAuthUser,
+  setSessionCookie,
+} from '@/lib/security/auth';
+
+import {
+  checkRateLimit,
+} from '@/lib/security/rate-limit';
+
+import {
+  connectToDatabase,
+} from '@/lib/db/mongodb';
+
+import {
+  UserModel,
+} from '@/models/User';
+
+const ADMIN_LOGIN_LIMIT =
+  5;
+
+const ADMIN_LOGIN_WINDOW_MS =
+  15 * 60 * 1000;
+
+function timingSafeStringEqual(
+  left: string,
+  right: string,
+): boolean {
+  const leftBuffer =
+    Buffer.from(left);
+
+  const rightBuffer =
+    Buffer.from(right);
+
+  if (
+    leftBuffer.length !==
+    rightBuffer.length
+  ) {
+    return false;
+  }
+
+  return crypto.timingSafeEqual(
+    leftBuffer,
+    rightBuffer,
+  );
+}
+
+function getClientIp(
+  req: NextRequest,
+): string {
+  return (
+    req.headers
+      .get('x-forwarded-for')
+      ?.split(',')[0]
+      ?.trim() ||
+    req.headers.get(
+      'x-real-ip',
+    ) ||
+    'unknown'
+  );
+}
+
+export async function POST(
+  req: NextRequest,
+) {
   try {
-    const body = await req.json();
+    const ipAddress =
+      getClientIp(req);
+
+    const ipRateLimit =
+      await checkRateLimit(
+        `admin-login-ip:${ipAddress}`,
+        ADMIN_LOGIN_LIMIT,
+        ADMIN_LOGIN_WINDOW_MS,
+      );
+
+    if (
+      !ipRateLimit.allowed
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            'Too many admin sign-in attempts. Please wait before trying again.',
+        },
+        {
+          status: 429,
+          headers: {
+            'Retry-After':
+              String(
+                Math.ceil(
+                  ADMIN_LOGIN_WINDOW_MS /
+                    1000,
+                ),
+              ),
+          },
+        },
+      );
+    }
+
+    const body =
+      await req.json().catch(
+        () => null,
+      );
 
     const passcode =
-      typeof body?.passcode === 'string'
-        ? body.passcode
+      typeof body?.passcode ===
+      'string'
+        ? body.passcode.trim()
         : '';
 
     if (!passcode) {
       return NextResponse.json(
         {
-          error: 'SuperAdmin passcode is required.',
+          error:
+            'SuperAdmin passcode is required.',
         },
-        { status: 400 },
+        {
+          status: 400,
+        },
       );
     }
 
     const serverAdminKey =
-      process.env.ADMIN_SECRET_KEY;
+      process.env.ADMIN_SECRET_KEY
+        ?.trim();
 
     if (!serverAdminKey) {
       return NextResponse.json(
         {
           error:
-            'ADMIN_SECRET_KEY is not configured in .env.local.',
+            'Admin authentication is not configured.',
         },
-        { status: 500 },
+        {
+          status: 503,
+        },
       );
     }
 
-    /*
-     * Verify SuperAdmin passcode.
-     */
+    const adminEmails = (
+      process.env.ADMIN_EMAILS ||
+      ''
+    )
+      .split(',')
+      .map((email) =>
+        email
+          .trim()
+          .toLowerCase(),
+      )
+      .filter(Boolean);
+
     if (
-      passcode.trim() !==
-      serverAdminKey.trim()
+      adminEmails.length === 0
     ) {
       return NextResponse.json(
         {
           error:
-            'Invalid SuperAdmin passcode. Access denied.',
+            'Admin authentication is not configured.',
         },
-        { status: 401 },
-      );
-    }
-
-    /*
-     * Admin identity should come from a configured
-     * admin email, NOT from arbitrary browser input.
-     */
-    const adminEmails = (
-      process.env.ADMIN_EMAILS || ''
-    )
-      .split(',')
-      .map((email) =>
-        email.trim().toLowerCase(),
-      )
-      .filter(Boolean);
-
-    if (adminEmails.length === 0) {
-      return NextResponse.json(
         {
-          error:
-            'ADMIN_EMAILS is not configured.',
+          status: 503,
         },
-        { status: 500 },
       );
     }
 
     /*
-     * Get the currently authenticated Google user.
-     *
-     * IMPORTANT:
-     * We cannot trust email/name sent from the browser.
+     * Authenticate the Google account before evaluating the
+     * SuperAdmin passcode. This avoids exposing a passcode
+     * correctness oracle to unauthenticated callers.
      */
-    const { getAuthUser } = await import(
-      '@/lib/security/auth'
-    );
-
     const currentUser =
       await getAuthUser(req);
 
@@ -92,9 +181,12 @@ export async function POST(req: NextRequest) {
         {
           error:
             'Please sign in with your authorized Google account before entering the SuperAdmin passcode.',
-          code: 'GOOGLE_LOGIN_REQUIRED',
+          code:
+            'GOOGLE_LOGIN_REQUIRED',
         },
-        { status: 401 },
+        {
+          status: 401,
+        },
       );
     }
 
@@ -103,12 +195,6 @@ export async function POST(req: NextRequest) {
         .trim()
         .toLowerCase();
 
-    /*
-     * Require BOTH:
-     *
-     * 1. Authorized Google account
-     * 2. SuperAdmin passcode
-     */
     if (
       !adminEmails.includes(
         normalizedEmail,
@@ -118,9 +204,59 @@ export async function POST(req: NextRequest) {
         {
           error:
             'This Google account is not authorized to access the SuperAdmin console.',
-          code: 'ADMIN_ACCOUNT_REQUIRED',
+          code:
+            'ADMIN_ACCOUNT_REQUIRED',
         },
-        { status: 403 },
+        {
+          status: 403,
+        },
+      );
+    }
+
+    const userRateLimit =
+      await checkRateLimit(
+        `admin-login-user:${currentUser.id}`,
+        ADMIN_LOGIN_LIMIT,
+        ADMIN_LOGIN_WINDOW_MS,
+      );
+
+    if (
+      !userRateLimit.allowed
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            'Too many admin sign-in attempts. Please wait before trying again.',
+        },
+        {
+          status: 429,
+          headers: {
+            'Retry-After':
+              String(
+                Math.ceil(
+                  ADMIN_LOGIN_WINDOW_MS /
+                    1000,
+                ),
+              ),
+          },
+        },
+      );
+    }
+
+    if (
+      !timingSafeStringEqual(
+        passcode,
+        serverAdminKey,
+      )
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            'Invalid SuperAdmin passcode. Access denied.',
+        },
+        {
+          status: 401,
+        },
       );
     }
 
@@ -131,77 +267,85 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         {
           error:
-            'Database is not connected. Please check MONGODB_URI.',
+            'Admin account storage is unavailable.',
         },
-        { status: 503 },
+        {
+          status: 503,
+        },
       );
     }
 
-    /*
-     * Find the EXISTING Google account.
-     *
-     * Never create a fake "admin_xxx" Google ID here.
-     */
     const adminUser =
       await UserModel.findOne({
-        email: normalizedEmail,
+        email:
+          normalizedEmail,
       });
 
     if (!adminUser) {
       return NextResponse.json(
         {
           error:
-            'Authorized admin account was not found in MongoDB.',
+            'Authorized admin account was not found.',
         },
-        { status: 404 },
+        {
+          status: 404,
+        },
       );
     }
 
-    if (adminUser.isActive === false) {
+    if (
+      adminUser.isActive ===
+      false
+    ) {
       return NextResponse.json(
         {
           error:
             'This admin account has been disabled.',
         },
-        { status: 403 },
+        {
+          status: 403,
+        },
       );
     }
 
-    /*
-     * Ensure the authorized account has ADMIN role.
-     */
-    if (adminUser.role !== 'ADMIN') {
-      adminUser.role = 'ADMIN';
+    if (
+      adminUser.role !==
+      'ADMIN'
+    ) {
+      adminUser.role =
+        'ADMIN';
+
       await adminUser.save();
     }
 
-    /*
-     * IMPORTANT:
-     *
-     * Use the SAME signed session mechanism as Google OAuth.
-     *
-     * Do NOT manually create a raw cookie.
-     */
     const response =
       NextResponse.json({
         success: true,
         message:
           'SuperAdmin authenticated successfully.',
         user: {
-          id: adminUser._id.toString(),
-          name: adminUser.name,
-          email: adminUser.email,
-          role: adminUser.role,
+          id:
+            adminUser._id.toString(),
+          name:
+            adminUser.name,
+          email:
+            adminUser.email,
+          role:
+            adminUser.role,
         },
       });
 
     setSessionCookie(
       response,
       {
-        id: adminUser._id.toString(),
-        name: adminUser.name,
-        email: adminUser.email,
-        role: 'ADMIN',
+        id:
+          adminUser._id.toString(),
+        name:
+          adminUser.name,
+        email:
+          adminUser.email,
+        role:
+          'ADMIN',
       },
     );
 
@@ -215,11 +359,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       {
         error:
-          error instanceof Error
-            ? error.message
-            : 'Admin authentication failed.',
+          'Admin authentication failed.',
       },
-      { status: 500 },
+      {
+        status: 500,
+      },
     );
   }
 }
