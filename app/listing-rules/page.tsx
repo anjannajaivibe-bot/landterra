@@ -1,4 +1,5 @@
 import React from 'react';
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
@@ -16,6 +17,22 @@ import {
   Scale,
   ArrowRight,
 } from 'lucide-react';
+
+export const metadata: Metadata = {
+  title: {
+    absolute: 'Property Listing Rules | BhoomiMitra',
+  },
+  description:
+    'Review BhoomiMitra property listing rules, seller undertakings, disclosure requirements, moderation standards and prohibited listing categories.',
+  alternates: {
+    canonical: '/listing-rules',
+  },
+  openGraph: {
+    title: 'Property Listing Rules | BhoomiMitra',
+    description:
+      'Review BhoomiMitra property listing rules, seller undertakings, disclosure requirements, moderation standards and prohibited listing categories.',
+  },
+};
 
 export default function ListingRulesPage() {
   return (
