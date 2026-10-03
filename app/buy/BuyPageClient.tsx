@@ -709,7 +709,7 @@ function BuyPageContent({
               <p className="mt-0.5 text-xs text-slate-500 font-medium">
                 {activeFilterCount > 0
                   ? `${activeFilterCount} active filter${activeFilterCount === 1 ? '' : 's'} applied`
-                  : 'Showing direct-from-owner property records'}
+                  : 'Showing available property listings from individuals, companies and authorised agents'}
               </p>
             </div>
 
