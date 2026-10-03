@@ -208,9 +208,12 @@ Examples of active marketplace API areas include:
 /api/reports
 /api/auth
 /api/admin
+/api/health
 ```
 
 Obsolete payment-order, payment-verification, paid-subscription, and subscription-expiry routes have been removed from the current architecture.
+
+`/api/integrations/status` is restricted to authenticated administrators and should not be used as a public health endpoint.
 
 ## Environment
 
@@ -267,9 +270,11 @@ Before treating a deployment as production-ready:
 1. Confirm the exact `main` commit reaches Vercel `READY`.
 2. Verify homepage and property-search routes.
 3. Verify `/api/properties`.
-4. Verify legal pages, sitemap, and robots.
-5. Check production runtime errors.
-6. Confirm no obsolete paid-listing or owner-only claims were reintroduced.
+4. Verify `/api/health` returns the expected deployment health status.
+5. Verify Google sign-in and the configured OAuth callback URL.
+6. Verify legal pages, sitemap, robots, manifest, and service-worker registration.
+7. Check production runtime errors.
+8. Confirm no obsolete paid-listing, subscription, Turnstile, or owner-only claims were reintroduced.
 
 ## Marketplace Language Rules
 

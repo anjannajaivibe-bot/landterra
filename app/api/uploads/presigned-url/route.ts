@@ -99,10 +99,15 @@ export async function POST(req: NextRequest) {
         ? MAX_IMAGE_BYTES
         : MAX_DOCUMENT_BYTES;
 
-    const folder =
-      typeof body.folder === 'string' && body.folder.trim()
-        ? body.folder.trim()
-        : 'properties';
+    /*
+     * Storage namespaces are server-authoritative.
+     * Never allow the browser to choose an arbitrary R2 key prefix.
+     */
+    const folder = isVideo
+      ? `temp/raw-videos/${authUser.id}`
+      : isPrivate
+        ? `properties/documents/${authUser.id}`
+        : `properties/images/${authUser.id}`;
 
     const ticket = await generateUploadTicket(
       fileName,

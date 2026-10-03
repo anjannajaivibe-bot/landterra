@@ -2,6 +2,7 @@ import { connectToDatabase } from '@/lib/db/mongodb';
 import { FeedbackModel } from '@/models/Feedback';
 import { IFeedback, FeedbackReason, FEEDBACK_REASON_LABELS } from '@/types/feedback';
 import { createAuditLog } from '@/services/audit.service';
+import { escapeRegex } from '@/services/property/property-helpers';
 
 export interface CreateFeedbackParams {
   feedbackType?: IFeedback['feedbackType'];
@@ -83,8 +84,8 @@ export async function getAllFeedbacks(params?: {
     query.reason = params.reason;
   }
 
-  if (params?.search) {
-    const searchRegex = new RegExp(params.search.trim(), 'i');
+  if (params?.search?.trim()) {
+    const searchRegex = new RegExp(escapeRegex(params.search.trim()), 'i');
     query.$or = [
       { propertyTitle: searchRegex },
       { propertyLocation: searchRegex },
