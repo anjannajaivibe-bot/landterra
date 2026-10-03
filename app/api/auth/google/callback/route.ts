@@ -8,6 +8,11 @@ import crypto from 'crypto';
 import { UserModel } from '@/models/User';
 import { connectToDatabase } from '@/lib/db/mongodb';
 import { setSessionCookie } from '@/lib/security/auth';
+import {
+    getGoogleCallbackUrl,
+    getGoogleClientId,
+    getGoogleClientSecret,
+} from '@/lib/auth/google-oauth';
 
 /* ================================================================
    CONSTANTS
@@ -58,10 +63,10 @@ async function exchangeCodeForToken(
     redirectUri: string,
 ) {
     const clientId =
-        process.env.GOOGLE_CLIENT_ID;
+        getGoogleClientId();
 
     const clientSecret =
-        process.env.GOOGLE_CLIENT_SECRET;
+        getGoogleClientSecret();
 
     if (!clientId || !clientSecret) {
         throw new Error(
@@ -474,18 +479,8 @@ export async function GET(
            CONFIG
         ------------------------------------------------------------- */
 
-        const appUrl =
-            process.env.NEXT_PUBLIC_APP_URL;
-
-        if (!appUrl) {
-            throw new Error(
-                'NEXT_PUBLIC_APP_URL is not configured.',
-            );
-        }
-
         const callbackUrl =
-            `${appUrl.replace(/\/$/, '')}` +
-            '/api/auth/google/callback';
+            getGoogleCallbackUrl(req);
 
         /* ------------------------------------------------------------
            EXCHANGE CODE
