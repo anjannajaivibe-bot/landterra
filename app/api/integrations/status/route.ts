@@ -3,6 +3,7 @@ import { isMongoConfigured } from '@/lib/db/mongodb';
 import { isR2Configured } from '@/lib/r2/client';
 import { isGoogleMapsConfigured } from '@/lib/maps/client';
 import { isResendConfigured } from '@/lib/email/client';
+import { isGoogleOAuthConfigured } from '@/lib/auth/google-oauth';
 
 export async function GET() {
   const status = {
@@ -17,6 +18,12 @@ export async function GET() {
       configured: isR2Configured(),
       envVar: 'R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY',
       description: 'S3-compatible object storage for property images and private verification documents',
+    },
+    googleOAuth: {
+      name: 'Google OAuth',
+      configured: isGoogleOAuthConfigured(),
+      envVar: 'GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET',
+      description: 'Secure Google sign-in for buyer and seller accounts',
     },
     googleMaps: {
       name: 'Google Maps Platform',
