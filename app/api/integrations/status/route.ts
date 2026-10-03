@@ -1,46 +1,114 @@
-import { NextResponse } from 'next/server';
-import { isMongoConfigured } from '@/lib/db/mongodb';
-import { isR2Configured } from '@/lib/r2/client';
-import { isGoogleMapsConfigured } from '@/lib/maps/client';
-import { isResendConfigured } from '@/lib/email/client';
-import { isGoogleOAuthConfigured } from '@/lib/auth/google-oauth';
+import {
+  NextRequest,
+  NextResponse,
+} from 'next/server';
 
-export async function GET() {
+import {
+  isGoogleOAuthConfigured,
+} from '@/lib/auth/google-oauth';
+
+import {
+  isMongoConfigured,
+} from '@/lib/db/mongodb';
+
+import {
+  isResendConfigured,
+} from '@/lib/email/client';
+
+import {
+  isGoogleMapsConfigured,
+} from '@/lib/maps/client';
+
+import {
+  isR2Configured,
+} from '@/lib/r2/client';
+
+import {
+  requireRole,
+} from '@/lib/security/auth';
+
+export const dynamic =
+  'force-dynamic';
+
+export async function GET(
+  req: NextRequest,
+) {
+  const adminUser =
+    await requireRole(
+      req,
+      ['ADMIN'],
+    );
+
+  if (
+    adminUser instanceof
+    NextResponse
+  ) {
+    return adminUser;
+  }
+
   const status = {
     mongodb: {
-      name: 'MongoDB Atlas',
-      configured: isMongoConfigured(),
-      envVar: 'MONGODB_URI',
-      description: 'Persistent document database for users, listings, enquiries and audit logs',
+      name:
+        'MongoDB Atlas',
+      configured:
+        isMongoConfigured(),
+      description:
+        'Persistent database for users, listings, enquiries and audit logs',
     },
+
     r2: {
-      name: 'Cloudflare R2 Storage',
-      configured: isR2Configured(),
-      envVar: 'R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY',
-      description: 'S3-compatible object storage for property images and private verification documents',
+      name:
+        'Cloudflare R2 Storage',
+      configured:
+        isR2Configured(),
+      description:
+        'Object storage for property media and private verification documents',
     },
+
     googleOAuth: {
-      name: 'Google OAuth',
-      configured: isGoogleOAuthConfigured(),
-      envVar: 'GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET',
-      description: 'Secure Google sign-in for buyer and seller accounts',
+      name:
+        'Google OAuth',
+      configured:
+        isGoogleOAuthConfigured(),
+      description:
+        'Secure Google sign-in for buyer and seller accounts',
     },
+
     googleMaps: {
-      name: 'Google Maps Platform',
-      configured: isGoogleMapsConfigured(),
-      envVar: 'NEXT_PUBLIC_GOOGLE_MAPS_API_KEY',
-      description: 'Interactive location picker, pin drop, and radius privacy maps',
+      name:
+        'Google Maps Platform',
+      configured:
+        isGoogleMapsConfigured(),
+      description:
+        'Interactive property location and map features',
     },
+
     resend: {
-      name: 'Resend Email Service',
-      configured: isResendConfigured(),
-      envVar: 'RESEND_API_KEY',
-      description: 'Transactional emails for verification approvals and seller enquiries',
+      name:
+        'Resend Email Service',
+      configured:
+        isResendConfigured(),
+      description:
+        'Transactional email delivery',
     },
   };
 
-  return NextResponse.json({
-    status,
-    allConfigured: Object.values(status).every((s) => s.configured),
-  });
+  return NextResponse.json(
+    {
+      status,
+      allConfigured:
+        Object.values(
+          status,
+        ).every(
+          (service) =>
+            service.configured,
+        ),
+    },
+    {
+      headers: {
+        'Cache-Control':
+          'no-store, no-cache, must-revalidate',
+      },
+    },
+  );
 }
