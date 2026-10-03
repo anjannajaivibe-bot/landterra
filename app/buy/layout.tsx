@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Property Marketplace for Buy, Rent & Lease | BhoomiMitra',
     description:
-      'Browse direct owner properties — plots, apartments, houses, villas, commercial spaces, and farmlands across India with zero broker commissions.',
+      'Browse property listings for sale, rent and lease across India, including plots, apartments, houses, villas, commercial spaces and farmlands. Contact the listed seller directly while BhoomiMitra charges no platform brokerage.',
   },
 };
 
